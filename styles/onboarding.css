@@ -1,0 +1,70 @@
+.onboarding-spotlight {
+  position: absolute;
+  pointer-events: none;
+  transition: left 220ms ease, top 220ms ease, width 220ms ease,
+    height 220ms ease, border-radius 220ms ease, opacity 220ms ease;
+  z-index: 99998;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.64),
+    0 0 0 2px rgba(79, 201, 255, 0.9) inset;
+  outline: 2px solid rgba(79, 201, 255, 0.08);
+  will-change: left, top, width, height;
+}
+
+.shepherd-theme-default .shepherd-header {
+  display: none;
+}
+.shepherd-theme-default .shepherd-footer .shepherd-button {
+  background: #0891b2;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: none;
+}
+.shepherd-theme-default .shepherd-tooltip {
+  border-radius: 10px;
+  background: linear-gradient(180deg, #0f172a, #071129);
+  color: #dffaff;
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+  z-index: 10000010;
+  max-width: 420px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  padding: 12px 14px;
+}
+
+.shepherd-theme-default .shepherd-content {
+  color: #dffaff;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.shepherd-theme-default .shepherd-header h3 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  color: #aef6ff;
+  font-weight: 700;
+}
+.shepherd-theme-default .shepherd-tooltip .shepherd-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.shepherd-theme-default .shepherd-button.shepherd-button-secondary {
+  background: transparent;
+  color: #a8f0ff;
+  border: 1px solid rgba(168, 240, 255, 0.08);
+}
+
+@media (max-width: 640px) {
+  .onboarding-spotlight {
+    box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.52);
+  }
+  .shepherd-theme-default .shepherd-tooltip {
+    max-width: 92vw;
+  }
+}

@@ -1,0 +1,28 @@
+export const DRONE_SPEED = {
+  LINEAR_PX_PER_SEC: 180,
+  ANGULAR_DEG_PER_SEC: 150,
+};
+
+export const ANIMATION_DURATION = {
+  MIN_MS: 120,
+  DEFAULT_MS: 300,
+};
+
+export const SIMULATION_CANVAS = {
+  WIDTH: 4000,
+  HEIGHT: 4000,
+  PADDING: 50,
+};
+
+export const WORLD_SCALE = {
+  POSITION: 0.1,
+  ALTITUDE: 0.1,
+};
+
+export const DEFAULT_DRONE_STATE = {
+  X: SIMULATION_CANVAS.WIDTH / 2,
+  Y: SIMULATION_CANVAS.HEIGHT / 2,
+  HEADING_DEG: 0,
+  ALTITUDE: 0,
+};
+

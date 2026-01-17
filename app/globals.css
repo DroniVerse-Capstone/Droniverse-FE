@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+body {
+	color: #0b1220;
+	background: #f8fafc;
+}
+
+/* Blockly UX tweaks (Scratch-like) */
+.blocklyToolboxDiv {
+	width: 220px;
+}
+.blocklyFlyoutBackground {
+	fill: #f3f4f6 !important;
+	fill-opacity: 1 !important;
+}
+.blocklyTreeLabel {
+	font-size: 13px !important;
+}
+.blocklyZoom>image, .blocklyTrash>image {
+	opacity: 0.9;
+}
+
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+
+/* Override background/foreground to dark theme */
+:root {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1220;
+    --foreground: #e2e8f0;
+  }
+}
+
+/* Ensure Settings Modal is always on top */
+[class*="SettingsModal"] {
+  z-index: 9999 !important;
+}
+
+/* Custom scrollbar for Settings Modal */
+.settings-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.settings-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
+
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}

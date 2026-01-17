@@ -1,0 +1,375 @@
+:root {
+  --toolbox-width: 180px;
+  --flyout-offset: 180px;
+  --flyout-gap: 20px;
+  --flyout-width: 240px;
+}
+
+.blocklyToolboxDiv {
+  width: var(--toolbox-width) !important;
+  background: linear-gradient(
+    180deg,
+    #2f3e4e 0%,
+    #1f2a38 100%
+  ) !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  color: #e0e7ff !important;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --toolbox-width: 140px;
+    --flyout-offset: 140px;
+    --flyout-width: 200px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  :root {
+    --toolbox-width: 160px;
+    --flyout-offset: 160px;
+    --flyout-width: 220px;
+  }
+}
+.blocklyTreeRow {
+  height: 44px !important;
+  line-height: 44px !important;
+  padding: 0 16px !important;
+  margin: 4px 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: rgba(63, 81, 101, 0.5) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+}
+
+@media (max-width: 640px) {
+  .blocklyTreeRow {
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 10px !important;
+    margin: 3px 6px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+  }
+
+  .blocklyTreeLabel {
+    font-size: 11px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .blocklyTreeRow {
+    height: 40px !important;
+    line-height: 40px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+  }
+
+  .blocklyTreeLabel {
+    font-size: 12px !important;
+  }
+}
+.blocklyTreeRow:hover {
+  background-color: rgba(97, 116, 138, 0.6) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  transform: translateX(2px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.blocklyTreeRow.blocklyTreeSelected {
+  background: linear-gradient(
+    135deg,
+    rgba(79, 163, 255, 0.35),
+    rgba(99, 146, 255, 0.25)
+  ) !important;
+  border: 2px solid rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15),
+    0 4px 12px rgba(59, 130, 246, 0.25) !important;
+  pointer-events: none !important;
+}
+
+.blocklyTreeRow.blocklyTreeSelected .blocklyTreeLabel {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+.blocklyTreeRow input[type="checkbox"],
+.blocklyTreeIcon {
+  display: none !important;
+}
+
+.blocklyFlyout {
+  transition: transform 0.25s ease, opacity 0.2s ease !important;
+  background: linear-gradient(
+    180deg,
+    #0f172a 0%,
+    #0c1224 55%,
+    #0b1220 100%
+  ) !important;
+  transform: translate(var(--flyout-offset), 0px) !important;
+  z-index: 10 !important;
+  border-right: 1px solid rgba(148, 163, 184, 0.15) !important;
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25),
+    inset -2px 0 8px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: blur(6px) !important;
+  padding-top: 6px !important;
+  pointer-events: auto !important;
+}
+
+@media (max-width: 640px) {
+  .blocklyFlyout {
+    padding-top: 4px !important;
+  }
+
+  .blocklyFlyout .blocklyDraggable {
+    min-width: 160px !important;
+    margin: 4px 2px !important;
+  }
+
+  .blocklyFlyout .blocklyBlockCanvas > g {
+    min-width: 160px !important;
+  }
+
+  .blocklyFlyout .blocklyPath {
+    min-width: 160px !important;
+  }
+
+  .blocklyFlyout .blocklyPathLight,
+  .blocklyFlyout .blocklyPathDark {
+    min-width: 160px !important;
+  }
+
+  .blocklyFlyout .blocklyText {
+    min-width: 120px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .blocklyFlyout .blocklyDraggable {
+    min-width: 180px !important;
+  }
+
+  .blocklyFlyout .blocklyBlockCanvas > g {
+    min-width: 180px !important;
+  }
+
+  .blocklyFlyout .blocklyPath {
+    min-width: 180px !important;
+  }
+
+  .blocklyFlyout .blocklyPathLight,
+  .blocklyFlyout .blocklyPathDark {
+    min-width: 180px !important;
+  }
+
+  .blocklyFlyout .blocklyText {
+    min-width: 140px !important;
+  }
+}
+.blocklyScrollbarVertical,
+.blocklyScrollbarHorizontal {
+  z-index: 20 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  pointer-events: none !important;
+}
+
+.blocklyScrollbarVertical:hover,
+.blocklyScrollbarHorizontal:hover {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.blocklyToggleBtn {
+  position: absolute;
+  top: 10px;
+  left: calc(var(--toolbox-width) + var(--flyout-width) - 50px);
+  z-index: 30;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.15s ease, box-shadow 0.2s ease,
+    left 0.25s ease;
+}
+
+@media (max-width: 640px) {
+  .blocklyToggleBtn {
+    top: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .blocklyToggleBtn {
+    top: 9px;
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+}
+
+.blocklyToggleBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+}
+
+.blockly-panels-collapsed .blocklyToolboxDiv {
+  transform: translateX(calc(-1 * (var(--toolbox-width) + 10px))) !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.blockly-panels-collapsed .blocklyFlyout {
+  transform: translate(calc(-1 * (var(--flyout-offset) + var(--flyout-gap))), 0) !important;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.blockly-panels-collapsed .blocklyFlyoutBackground {
+  visibility: hidden;
+}
+
+.blockly-panels-collapsed .blocklyToggleBtn {
+  left: 12px;
+}
+
+.blockly-panels-collapsed .blocklyFlyout .blocklyScrollbarVertical,
+.blockly-panels-collapsed .blocklyFlyout .blocklyScrollbarHorizontal,
+.blockly-panels-collapsed .blocklyFlyoutScrollbarVertical,
+.blockly-panels-collapsed .blocklyFlyoutScrollbarHorizontal,
+.blockly-panels-collapsed .blocklyFlyoutScrollbar {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.blockly-panels-collapsed .blocklyFlyout {
+  overflow: hidden !important;
+}
+.blocklyFlyoutBackground {
+  fill: rgba(15, 23, 42, 0.85) !important;
+  stroke: rgba(148, 163, 184, 0.15) !important;
+  stroke-width: 1px !important;
+}
+
+.blocklyFlyout .blocklyDraggable {
+  min-width: 200px !important;
+  margin: 6px 4px !important;
+  transition: filter 0.15s ease !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22)) !important;
+}
+
+.blocklyFlyout .blocklyDraggable:hover {
+  filter: brightness(1.03) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.26)) !important;
+}
+
+.blocklyFlyout .blocklyBlockCanvas > g {
+  min-width: 200px !important;
+}
+
+.blocklyFlyout .blocklyPath {
+  min-width: 200px !important;
+}
+
+.blocklyFlyout .blocklyPathLight,
+.blocklyFlyout .blocklyPathDark {
+  min-width: 200px !important;
+}
+
+.blocklyFlyout .blocklyText {
+  min-width: 150px !important;
+}
+.blocklyDraggable:hover {
+  filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+  cursor: grab !important;
+}
+
+.blocklyDragging {
+  filter: brightness(1.1) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25)) !important;
+  cursor: grabbing !important;
+  opacity: 0.9 !important;
+}
+
+.blocklySelected > .blocklyPath {
+  stroke: #3b82f6 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5)) !important;
+}
+
+.blocklyInsertionMarker > .blocklyPath {
+  fill: rgba(59, 130, 246, 0.2) !important;
+  stroke: #3b82f6 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 5, 5 !important;
+  animation: dash 0.5s linear infinite !important;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10 !important;
+  }
+}
+
+.blocklyText {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 500 !important;
+}
+.blocklyScrollbarHandle {
+  rx: 4px !important;
+  transition: fill 0.2s ease, opacity 0.2s ease !important;
+  fill: #94a3b8 !important;
+  opacity: 0 !important;
+}
+
+.blocklyScrollbarVertical:hover .blocklyScrollbarHandle,
+.blocklyScrollbarHorizontal:hover .blocklyScrollbarHandle {
+  opacity: 1 !important;
+}
+
+.blocklyScrollbarHandle:hover {
+  fill: #e2e8f0 !important;
+}
+
+.blocklyFlyoutButton {
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+.blocklyFlyoutButton:hover {
+  filter: brightness(1.1) !important;
+  transform: scale(1.02) !important;
+}
+
+.blocklySeparator {
+  opacity: 0.15 !important;
+}
+
+.blocklyMainBackground {
+  stroke: none !important;
+}
+
+.blocklyTrash {
+  opacity: 0.7 !important;
+  transition: opacity 0.15s ease !important;
+}
+.blocklyTrash:hover {
+  opacity: 1 !important;
+}
+.blocklyGridPattern line {
+  stroke: #e2e8f0 !important;
+  stroke-opacity: 0.5 !important;
+}
