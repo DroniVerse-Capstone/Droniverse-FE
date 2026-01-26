@@ -9,17 +9,27 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@radix-ui/react-slot": "^1.2.4",
 		"@react-three/drei": "^9.105.5",
 		"@react-three/fiber": "^8.15.15",
 		"@tanstack/react-query": "^5.90.16",
+		"axios": "^1.13.3",
 		"blockly": "^11.1.0",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-react": "^0.563.0",
 		"next": "14.2.5",
 		"ngrok": "^5.0.0-beta.2",
 		"react": "18.3.1",
 		"react-dnd": "^16.0.1",
 		"react-dnd-html5-backend": "^16.0.1",
 		"react-dom": "18.3.1",
-		"three": "^0.162.0"
+		"react-hot-toast": "^2.6.0",
+		"react-icons": "^5.5.0",
+		"tailwind-merge": "^3.4.0",
+		"tailwindcss-animate": "^1.0.7",
+		"three": "^0.162.0",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4.0.0",
