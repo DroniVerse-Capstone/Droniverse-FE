@@ -1,19 +1,106 @@
 @import "tailwindcss";
 
-html {
-	height: 100%;
-}
+@plugin "tailwindcss-animate";
 
-body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	position: relative;
-}
+@custom-variant dark (&:is(.dark *));
 
-body {
-	color: #0b1220;
-	background: #f8fafc;
+@theme {
+  /* === DRONIVERSE DESIGN SYSTEM COLORS === */
+
+  /* Primary Color System (Red) */
+  --color-primary-0: #E98D88;
+  --color-primary-25: #E57A74;
+  --color-primary-50: #E26660;
+  --color-primary-100: #DE544C;
+  --color-primary-200: #DB4139;
+  --color-primary-300: #C53A33;
+  --color-primary: #DB4139;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary Color System (Teal) */
+  --color-secondary-0: #96E9DF;
+  --color-secondary-25: #6CE0D2;
+  --color-secondary-50: #56DCCB;
+  --color-secondary-100: #42D8C5;
+  --color-secondary-200: #2DD4BF;
+  --color-secondary-300: #24A998;
+  --color-secondary: #2DD4BF;
+
+   /* Tertiary Color System (Blue) */
+  --color-tertiary-0: #89B4F9;
+  --color-tertiary-25: #75A7F8;
+  --color-tertiary-50: #629BF7;
+  --color-tertiary-100: #4E8EF6;
+  --color-tertiary-200: #3B82F6;
+  --color-tertiary-300: #3575DD;
+  --color-tertiary: #3B82F6;
+
+  /* Greyscale System */
+  --color-greyscale-0: #ffffff;
+  --color-greyscale-25: #E6E7E8;
+  --color-greyscale-50: #CECFD2;
+  --color-greyscale-100: #B6B8BB;
+  --color-greyscale-200: #9EA0A5;
+  --color-greyscale-300: #86898E;
+  --color-greyscale-400: #6E7178;
+  --color-greyscale-500: #565961;
+  --color-greyscale-600: #3E424A;
+  --color-greyscale-700: #262A34;
+  --color-greyscale-800: #0E131E;
+  --color-greyscale-900: #0B0F18;
+
+  /* Success/Green System */
+  --color-success-0: #ecffee;
+  --color-success-25: #bdebc2;
+  --color-success-50: #7cd785;
+  --color-success-100: #3ac348;
+  --color-success-200: #278231;
+  --color-success-300: #134118;
+  --color-success: #3ac348;
+
+  /* Warning/Yellow System */
+  --color-warning-0: #FCD87B;
+  --color-warning-25: #FCD265;
+  --color-warning-50: #FBCB4F;
+  --color-warning-100: #FBC539;
+  --color-warning-200: #FBBF24;
+  --color-warning-300: #E1AB20;
+  --color-warning: #FBBF24;
+
+  /* Error/Red System */
+  --color-error-0: #fff0f3;
+  --color-error-25: #fadbe1;
+  --color-error-50: #ed8296;
+  --color-error-100: #d73e3d;
+  --color-error-200: #8f2929;
+  --color-error-300: #6c1f1f;
+  --color-error: #d73e3d;
+
+  /* Semantic Colors for UI Components */
+  --color-background: #0E131E;
+  --color-border: #262A34;
+  --color-foreground: #ffffff;
+
+  /* === DRONIVERSE TYPOGRAPHY SYSTEM === */
+
+  /* Font Families */
+  --font-family-primary: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-family-display: 'Inter Display V', 'Inter', system-ui, sans-serif;
+  --font-family-body: 'Inter Tight', system-ui, sans-serif;
+  --font-family-sans: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-family-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* === DRONIVERSE DESIGN TOKENS === */
+
+  /* Border Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius: 8px; /* Default radius */
 }
 
 /* Blockly UX tweaks (Scratch-like) */
@@ -31,46 +118,10 @@ body {
 	opacity: 0.9;
 }
 
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-
-
-/* Override background/foreground to dark theme */
-:root {
-  --background: #0f172a;
-  --foreground: #e2e8f0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1220;
-    --foreground: #e2e8f0;
-  }
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-family-primary);
 }
 
 /* Ensure Settings Modal is always on top */
@@ -101,8 +152,6 @@ body {
 .settings-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(148, 163, 184, 0.5);
 }
-
-
 
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
