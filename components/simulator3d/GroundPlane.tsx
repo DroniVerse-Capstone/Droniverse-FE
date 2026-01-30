@@ -1,6 +1,5 @@
-"use client";
 import { useMemo } from "react";
-import { useGLTF, Grid } from "@react-three/drei";
+import { useGLTF, Grid, useTexture } from "@react-three/drei";
 import { Line } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
@@ -19,14 +18,20 @@ type Props = {
     grid?: string;
     border?: string;
   };
+  bgOpacity?: number;
 };
+
+const LOGO_OFFSET_X = 13;
+const LOGO_OFFSET_Z = 2;
 
 export default function GroundPlane({
   size,
   onPointerMove,
   onPointerOut,
   colorConfig,
+  bgOpacity = 1,
 }: Props) {
+  console.log("size", size);
   const [width, height] = size;
 
   const halfW = width / 2;
@@ -85,7 +90,7 @@ export default function GroundPlane({
         for (let x = -halfW; x <= halfW; x += cell) {
           const isSection =
             Math.round((x + halfW) / cell) %
-              Math.max(1, Math.round(section / cell)) ===
+            Math.max(1, Math.round(section / cell)) ===
             0;
           const verts = isSection ? vertsSection : vertsCell;
           verts.push(x, GRID_CONFIG.position[1] ?? 0, -halfH);
@@ -95,7 +100,7 @@ export default function GroundPlane({
         for (let z = -halfH; z <= halfH; z += cell) {
           const isSection =
             Math.round((z + halfH) / cell) %
-              Math.max(1, Math.round(section / cell)) ===
+            Math.max(1, Math.round(section / cell)) ===
             0;
           const verts = isSection ? vertsSection : vertsCell;
           verts.push(-halfW, GRID_CONFIG.position[1] ?? 0, z);
@@ -107,23 +112,6 @@ export default function GroundPlane({
 
         return (
           <group key={`grid-${width}x${height}`}>
-            {geomCell.length > 0 && (
-              <lineSegments>
-                <bufferGeometry>
-                  <bufferAttribute
-                    attach="attributes-position"
-                    array={geomCell}
-                    itemSize={3}
-                    count={geomCell.length / 3}
-                  />
-                </bufferGeometry>
-                <lineBasicMaterial
-                  color={MAP_COLORS.GRID.cellColor}
-                  transparent
-                  opacity={0.9}
-                />
-              </lineSegments>
-            )}
             {geomSection.length > 0 && (
               <lineSegments>
                 <bufferGeometry>
@@ -137,7 +125,7 @@ export default function GroundPlane({
                 <lineBasicMaterial
                   color={colorConfig?.grid ?? MAP_COLORS.GRID.sectionColor}
                   transparent
-                  opacity={0.95}
+                  opacity={0.65}
                 />
               </lineSegments>
             )}
@@ -151,6 +139,30 @@ export default function GroundPlane({
         opacity={MAP_COLORS.BORDER.opacity}
         transparent={MAP_COLORS.BORDER.transparent}
       />
+
+      {/* Copyright Logo Image */}
+      <GroundLogo size={size} />
     </group>
+  );
+}
+
+function GroundLogo({ size }: { size: [number, number] }) {
+  const texture = useTexture("/logo_ground.png");
+
+  const offsetTexture = useMemo(() => {
+    const t = texture.clone();
+    const [width, height] = size;
+
+    t.offset.set(-LOGO_OFFSET_X / width, -LOGO_OFFSET_Z / height);
+
+    t.needsUpdate = true;
+    return t;
+  }, [texture, size]);
+
+  return (
+    <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={size} />
+      <meshBasicMaterial map={offsetTexture} transparent opacity={0.15} depthWrite={false} />
+    </mesh>
   );
 }

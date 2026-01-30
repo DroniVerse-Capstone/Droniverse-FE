@@ -1,6 +1,6 @@
 
 import { useRef, useEffect, useCallback } from "react";
-import { DroneController, type DroneState } from "@/lib/droneSimulator";
+import { DroneController, type DroneState } from "@/lib/simulator/droneSimulator";
 
 type UseDroneControllerProps = {
   initialState: DroneState;

@@ -4,13 +4,13 @@ import { useState, useEffect, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import type { SandboxColorConfig } from "@/hooks/useSandboxColors";
-import { DEFAULT_DISPLAY_CONFIG, DisplayConfig } from "@/lib/displayDefaults";
+import { DEFAULT_DISPLAY_CONFIG, DisplayConfig } from "@/lib/config3D/displayDefaults";
 import { DRONE_COLORS } from "@/lib/models3d/droneConfig";
 import { MAP_COLORS, AMBIENT_COLOR } from "@/lib/models3d/mapConfig";
-import DroneBody from "./simulator3d/DroneBody";
-import GroundPlane from "./simulator3d/GroundPlane";
-import { CAMERA_CONFIG, ORBIT_CONTROLS_CONFIG } from "@/lib/cameraConfig";
-import { SIM_CANVAS, WORLD_SCALE_VALUE } from "@/lib/simConfig";
+import DroneBody from "../simulator3d/DroneBody";
+import GroundPlane from "../simulator3d/GroundPlane";
+import { CAMERA_CONFIG, ORBIT_CONTROLS_CONFIG } from "@/lib/config3D/cameraConfig";
+import { SIM_CANVAS, WORLD_SCALE_VALUE } from "@/lib/config3D/simConfig";
 
 const DEFAULT_CONFIG: SandboxColorConfig = {
   drone: {
@@ -31,7 +31,7 @@ const DEFAULT_CONFIG: SandboxColorConfig = {
   ambient: AMBIENT_COLOR,
 };
 
-type TabId = "general" | "colors" | "simulation" | "display" | "camera"; 
+type TabId = "general" | "colors" | "simulation" | "display" | "camera";
 
 type Props = {
   isOpen: boolean;
@@ -63,7 +63,7 @@ export default function SettingsModal({
   useEffect(() => {
     if (isOpen) {
       setLocalConfig(config);
-      setActiveTab("general"); 
+      setActiveTab("general");
       setLocalDisplayConfig(displayConfig ?? localDisplayConfig);
     }
   }, [isOpen, config]);
@@ -154,8 +154,8 @@ export default function SettingsModal({
   };
 
   const tabs: Array<{ id: TabId; label: string; icon?: string }> = [
-    { id: "general", label: "Tổng quan"},
-    { id: "colors", label: "Màu sắc"},
+    { id: "general", label: "Tổng quan" },
+    { id: "colors", label: "Màu sắc" },
     { id: "simulation", label: "Mô phỏng" },
     { id: "display", label: "Hiển thị" },
     { id: "camera", label: "Camera" },
@@ -203,11 +203,10 @@ export default function SettingsModal({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeTab === tab.id
-                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                  : "text-slate-400 hover:text-slate-300 hover:bg-slate-700/30"
-              }`}
+              className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === tab.id
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                : "text-slate-400 hover:text-slate-300 hover:bg-slate-700/30"
+                }`}
             >
               <span className="mr-1.5">{tab.icon}</span>
               {tab.label}
@@ -217,14 +216,12 @@ export default function SettingsModal({
 
         {/* Main Content */}
         <div
-          className={`flex-1 flex overflow-hidden min-h-0 ${
-            isColorsTab ? "flex-col md:flex-row" : "flex-col"
-          }`}
+          className={`flex-1 flex overflow-hidden min-h-0 ${isColorsTab ? "flex-col md:flex-row" : "flex-col"
+            }`}
         >
           <div
-            className={`w-full ${
-              isColorsTab ? "md:w-1/2 border-r border-slate-700/40" : ""
-            } overflow-y-auto settings-scrollbar bg-slate-900/40`}
+            className={`w-full ${isColorsTab ? "md:w-1/2 border-r border-slate-700/40" : ""
+              } overflow-y-auto settings-scrollbar bg-slate-900/40`}
           >
             <div className="p-2.5 md:p-5">
               {activeTab === "general" && <GeneralTab />}
