@@ -16,9 +16,6 @@ export default function HomePage() {
             <Link href="/sandbox" className="hover:text-white transition">
               Sandbox
             </Link>
-            <Link href="/labs" className="hover:text-white transition">
-              Module Lab
-            </Link>
             <Link href="/map-editor" className="hover:text-white transition">
               Map Editor
             </Link>

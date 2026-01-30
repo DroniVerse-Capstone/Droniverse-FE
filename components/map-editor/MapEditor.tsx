@@ -10,22 +10,22 @@ import {
   memo,
 } from "react";
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
-import GroundPlane from "./simulator3d/GroundPlane";
+import GroundPlane from "../simulator3d/GroundPlane";
 import { MAP_COLORS } from "@/lib/models3d/mapConfig";
-import { CAMERA_CONFIG } from "@/lib/cameraConfig";
-import { WORLD_SCALE } from "@/lib/constants";
-import { SIM_CANVAS, WORLD_SCALE_VALUE } from "@/lib/simConfig";
+import { CAMERA_CONFIG } from "@/lib/config3D/cameraConfig";
+import { WORLD_SCALE } from "@/lib/config3D/constants";
+import { SIM_CANVAS, WORLD_SCALE_VALUE } from "@/lib/config3D/simConfig";
 import { OrbitControls, TransformControls, useGLTF } from "@react-three/drei";
 import { Box3, Vector3, Quaternion, Euler } from "three";
-import DroneBody from "./simulator3d/DroneBody";
-import BoxObstacle from "./simulator3d/obstacles/BoxObstacle";
-import PreviewModel from "./map-editor/PreviewModel";
-import Tree from "./simulator3d/decor/Tree";
+import DroneBody from "../simulator3d/DroneBody";
+import BoxObstacle from "../simulator3d/obstacles/BoxObstacle";
+import PreviewModel from "./PreviewModel";
+import Tree from "../simulator3d/decor/Tree";
 import {
   PREDEFINED_MODELS,
   buildModelCategories,
   PredefinedModel,
-} from "@/lib/editorModels";
+} from "@/lib/map-editor/editorModels";
 // @ts-ignore - FBXLoader typing may not be present in this project
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
@@ -385,8 +385,7 @@ function ModelObjectFBX(props: {
       const center = new Vector3();
       box.getCenter(center);
       c.position.sub(center);
-    } catch (e) {
-    }
+    } catch (e) { }
     return c;
   }, [scene]);
 
@@ -667,6 +666,7 @@ function Scene({
                 grid: MAP_COLORS.GRID.sectionColor,
                 border: MAP_COLORS.BORDER.color,
               }}
+              bgOpacity={0}
             />
             <mesh
               rotation-x={-Math.PI / 2}
@@ -718,7 +718,6 @@ function MapEditorContent() {
   const [droneAddMode, setDroneAddMode] = useState<"replace" | "prevent">(
     "replace",
   );
-
 
   const handleObjectTransform = useCallback(
     (id: string, transform: TransformPayload) => {
@@ -776,7 +775,6 @@ function MapEditorContent() {
               const clampedZ = Math.max(minZ, Math.min(maxZ, incomingPos[2]));
               const clampedY = Math.max(groundY, incomingPos[1]);
               merged.position = [clampedX, clampedY, clampedZ];
-       
             }
           }
           return merged;
@@ -830,7 +828,6 @@ function MapEditorContent() {
             }
           }
         }
-
 
         const obj: MapObject = {
           id: `object-${Date.now()}-${Math.random()}`,
@@ -919,14 +916,13 @@ function MapEditorContent() {
                 onClick={() => setSelectedCategory(cat.id)}
                 title={cat.name}
                 className={`
-            relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl
+            relative w-10 h-10 sm:w-12 sm:h-12 rounded  
             flex items-center justify-center
             transition-all duration-250
-            ${
-              active
-                ? "bg-linear-to-br from-sky-400 to-blue-600 text-white shadow-lg"
-                : "bg-white/4 text-gray-400 hover:bg-white/8 hover:text-white"
-            }
+            ${active
+                    ? "bg-linear-to-br from-sky-400 to-blue-600 text-white shadow-lg"
+                    : "bg-white/4 text-gray-400 hover:bg-white/8 hover:text-white"
+                  }
           `}
               >
                 <span className="text-lg">{cat.icon}</span>
@@ -967,6 +963,7 @@ function MapEditorContent() {
                       <directionalLight position={[6, 6, 4]} intensity={0.9} />
                       <PreviewModel model={m} />
                       <OrbitControls enablePan={false} enableZoom />
+
                     </Canvas>
                   </Suspense>
                 </div>
@@ -1020,31 +1017,28 @@ function MapEditorContent() {
             <div className="flex items-center border rounded overflow-hidden bg-gray-800">
               <button
                 onClick={() => setTransformMode("translate")}
-                className={`px-3 py-1 text-sm ${
-                  transformMode === "translate"
-                    ? "bg-gray-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
+                className={`px-3 py-1 text-sm ${transformMode === "translate"
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-800 text-gray-300"
+                  }`}
               >
                 Translate
               </button>
               <button
                 onClick={() => setTransformMode("rotate")}
-                className={`px-3 py-1 text-sm ${
-                  transformMode === "rotate"
-                    ? "bg-gray-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
+                className={`px-3 py-1 text-sm ${transformMode === "rotate"
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-800 text-gray-300"
+                  }`}
               >
                 Rotate
               </button>
               <button
                 onClick={() => setTransformMode("scale")}
-                className={`px-3 py-1 text-sm ${
-                  transformMode === "scale"
-                    ? "bg-gray-700 text-white"
-                    : "bg-gray-800 text-gray-300"
-                }`}
+                className={`px-3 py-1 text-sm ${transformMode === "scale"
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-800 text-gray-300"
+                  }`}
               >
                 Scale
               </button>
@@ -1099,7 +1093,7 @@ function MapEditorContent() {
           {selectedObject &&
             transformMode === "scale" &&
             selectedObject.modelUrl?.startsWith?.("primitive:drone") !==
-              true && (
+            true && (
               <div className="absolute right-6 top-24 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48">
                 <div className="text-sm font-medium mb-2">Obstacle</div>
                 <label className="text-xs">Color</label>
@@ -1241,7 +1235,6 @@ function MapEditorContent() {
               onTransformEnd={handleTransformEnd}
             />
           </Canvas>
-
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-import { SIMULATION_CANVAS, WORLD_SCALE } from "../constants";
+import { SIMULATION_CANVAS, WORLD_SCALE } from "../config3D/constants";
 
 export const HEMISPHERE_LIGHT_CONFIG = {
   skyColor: "#e0f2fe",

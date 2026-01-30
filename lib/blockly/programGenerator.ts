@@ -1,6 +1,6 @@
 
 import type * as BlocklyType from "blockly/core";
-import type { Command } from "../droneSimulator";
+import type { Command } from "../simulator/droneSimulator";
 
 export type GeneratedProgram = Command[];
 
@@ -18,6 +18,9 @@ export function generateProgram(
 		const tam = 200;
 		while (currentBlock) {
 			switch (currentBlock.type) {
+				case "drone_take_off":
+					result.push({ type: "take_off" });
+					break;
 				case "drone_up":
 					result.push({ type: "up", amount: (Number(currentBlock.getFieldValue("AMOUNT")) * tam) || 0 });
 					break;

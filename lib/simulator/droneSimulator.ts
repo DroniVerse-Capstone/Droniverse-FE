@@ -1,8 +1,8 @@
 
 
 import { normalizeAngle } from "@/helpers/angle";
-import { DRONE_SPEED, ANIMATION_DURATION } from "./constants";
-import { clampWithinCanvas } from "./simConfig";
+import { DRONE_SPEED, ANIMATION_DURATION } from "../config3D/constants";
+import { clampWithinCanvas } from "../config3D/simConfig";
 
 export type DroneState = {
 	x: number;
@@ -22,6 +22,7 @@ export type Command =
 	| { type: 'turn_right'; degrees: number }
 	| { type: 'turn_left'; degrees: number }
 	| { type: 'land' }
+	| { type: 'take_off' }
 	| { type: 'repeat'; count: number; actions: Command[] };
 
 
@@ -175,7 +176,8 @@ export class DroneController {
 				cmd.type === 'up' ||
 				cmd.type === 'down' ||
 				cmd.type === 'left' ||
-				cmd.type === 'right';
+				cmd.type === 'right' ||
+				cmd.type === 'take_off';
 
 			if (isAbsoluteMove) {
 				this.state = { ...this.state, headingDeg: endState.headingDeg };
@@ -288,10 +290,14 @@ export class DroneController {
 	 */
 	private previewCommand(state: DroneState, cmd: Command): DroneState[] {
 		const s = { ...state };
-		// Nếu drone đang ở mặt đất (altitude = 0) và không phải lệnh up
-		// → không thể di chuyển, trả về state hiện tại
-		if (cmd.type !== "up" && s.altitude === 0) return [s];
+		// Nếu drone đang ở mặt đất (altitude <= 0.1) và không phải lệnh take_off
+		// → không thể di chuyển, trả về state hiện tại (Bắt buộc phải dùng block Cất cánh)
+		if (cmd.type !== "take_off" && s.altitude <= 0.1) return [s];
+
 		switch (cmd.type) {
+			case "take_off":
+				s.altitude = 200; // 1m
+				return [s];
 
 			case "repeat": {
 				let tempState = { ...s };
