@@ -11,8 +11,8 @@ export const MAP_COLORS = {
 
   // Màu grid 
   GRID: {
-    sectionColor: "#0ea5e9",
-    cellColor: "black",
+    sectionColor: "#0170A7",
+    cellColor: "#86134dff",
   },
 
   // Màu border 

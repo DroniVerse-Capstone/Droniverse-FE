@@ -1,4 +1,4 @@
-
+import { t } from "@/lib/translations-fakeeeee/sandbox";
 
 export type ToolboxCategory =
 	| "motion"
@@ -17,58 +17,62 @@ type CategoryDefinition = {
 	blocks?: string[];
 };
 
-const CATEGORY_DEFINITIONS: Record<ToolboxCategory, CategoryDefinition> = {
-	motion: {
-		name: "📍 Di chuyển",
-		colour: "#3b82f6",
-		blocks: [
-			"drone_up",
-			"drone_down",
-			"drone_forward",
-			"drone_back",
-			"drone_left",
-			"drone_right",
-			"drone_turn_right",
-			"drone_turn_left",
-			"drone_land",
-		],
-	},
-	loops: {
-		name: "🔄 Vòng lặp",
-		colour: "#10b981",
-		blocks: ["drone_repeat"],
-	},
-	logic: {
-		name: "🧠 Điều kiện",
-		colour: "#f59e0b",
-		blocks: ["drone_if", "drone_if_else"],
-	},
-	sensors: {
-		name: "📡 Cảm biến",
-		colour: "#ef4444",
-		blocks: ["drone_is_obstacle_ahead"],
-	},
-	math: {
-		name: "➗ Toán học",
-		colour: "#a855f7",
-		blocks: ["drone_amount_value", "drone_math_operation"],
-	},
-	effects: {
-		name: "🎵 Hiệu ứng",
-		colour: "#ec4899",
-		blocks: ["drone_play_sound"],
-	},
-	input: {
-		name: "⌨️ Input",
-		colour: "#0ea5e9",
-		blocks: ["drone_input_number"],
-	},
-	variables: {
-		name: "📦 Biến",
-		colour: "#ec4899",
-		custom: "VARIABLE",
-	},
-};
+function getCategoryDefinitions(): Record<ToolboxCategory, CategoryDefinition> {
+	const translations = t();
+	return {
+		motion: {
+			name: translations.blockly.categories.motion,
+			colour: "#3b82f6",
+			blocks: [
+				"drone_take_off",
+				"drone_up",
+				"drone_down",
+				"drone_forward",
+				"drone_back",
+				"drone_left",
+				"drone_right",
+				"drone_turn_right",
+				"drone_turn_left",
+				"drone_land",
+			],
+		},
+		loops: {
+			name: translations.blockly.categories.loops,
+			colour: "#10b981",
+			blocks: ["drone_repeat"],
+		},
+		logic: {
+			name: translations.blockly.categories.logic,
+			colour: "#f59e0b",
+			blocks: ["drone_if", "drone_if_else"],
+		},
+		sensors: {
+			name: translations.blockly.categories.sensors,
+			colour: "#ef4444",
+			blocks: ["drone_is_obstacle_ahead"],
+		},
+		math: {
+			name: translations.blockly.categories.math,
+			colour: "#a855f7",
+			blocks: ["drone_amount_value", "drone_math_operation"],
+		},
+		effects: {
+			name: translations.blockly.categories.effects,
+			colour: "#ec4899",
+			blocks: ["drone_play_sound"],
+		},
+		input: {
+			name: translations.blockly.categories.input,
+			colour: "#0ea5e9",
+			blocks: ["drone_input_number"],
+		},
+		variables: {
+			name: translations.blockly.categories.variables,
+			colour: "#ec4899",
+			custom: "VARIABLE",
+		},
+	};
+}
 
 export const SANDBOX_TOOLBOX_CATEGORIES: ToolboxCategory[] = [
 	"motion",
@@ -85,6 +89,7 @@ export const DEFAULT_LAB_TOOLBOX: ToolboxCategory[] = [...SANDBOX_TOOLBOX_CATEGO
 
 
 export function buildToolboxXml(categories: ToolboxCategory[] = DEFAULT_LAB_TOOLBOX): string {
+	const CATEGORY_DEFINITIONS = getCategoryDefinitions();
 	const seen = new Set<ToolboxCategory>();
 	const xmlCategories = categories
 		.filter((cat) => {
@@ -109,4 +114,3 @@ ${blocks}
 ${xmlCategories}
 </xml>`;
 }
-
