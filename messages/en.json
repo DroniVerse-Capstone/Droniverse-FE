@@ -1,0 +1,11 @@
+{
+  "Auth": {
+    "loginBanner": {
+      "welcome": "Welcome",
+      "to": "To",
+      "slogan1": "Where technology",
+      "slogan2": "takes flight",
+      "description": "A drone learning platform that helps you master flight technology, providing comprehensive foundational knowledge, core techniques, and safe hands-on skills through a structured learning path."
+    }
+  }
+}
