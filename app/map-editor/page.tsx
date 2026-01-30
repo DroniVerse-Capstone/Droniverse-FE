@@ -1,6 +1,6 @@
 "use client";
 
-import MapEditor from "@/components/MapEditor";
+import MapEditor from "@/components/map-editor/MapEditor";
 
 export default function MapEditorPage() {
   return (

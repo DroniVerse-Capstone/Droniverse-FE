@@ -18,8 +18,8 @@ import {
   Line,
 } from "@react-three/drei";
 import { CatmullRomCurve3, Vector3 } from "three";
-import type { DroneState } from "@/lib/droneSimulator";
-import { DEFAULT_DISPLAY_CONFIG } from "@/lib/displayDefaults";
+import type { DroneState } from "@/lib/simulator/droneSimulator";
+import { DEFAULT_DISPLAY_CONFIG } from "@/lib/config3D/displayDefaults";
 import {
   CANVAS_CENTER,
   projectToWorld,
@@ -28,13 +28,13 @@ import {
   WORLD_SCALE_VALUE,
   ALTITUDE_SCALE,
   worldToCanvas,
-} from "@/lib/simConfig";
-import { CAMERA_CONFIG, ORBIT_CONTROLS_CONFIG } from "@/lib/cameraConfig";
-import DroneBody from "./simulator3d/DroneBody";
-import GroundPlane from "./simulator3d/GroundPlane";
-import GoalMarker from "./simulator3d/GoalMarker";
-import ObstacleField from "./simulator3d/ObstacleField";
-import SceneLights from "./simulator3d/SceneLights";
+} from "@/lib/config3D/simConfig";
+import { CAMERA_CONFIG, ORBIT_CONTROLS_CONFIG } from "@/lib/config3D/cameraConfig";
+import DroneBody from "../simulator3d/DroneBody";
+import GroundPlane from "../simulator3d/GroundPlane";
+import GoalMarker from "../simulator3d/GoalMarker";
+import ObstacleField from "../simulator3d/ObstacleField";
+import SceneLights from "../simulator3d/SceneLights";
 import DroneHUD from "./DroneHUD";
 // import { CONTACT_SHADOWS_CONFIG, SHOW_CONTACT_SHADOWS } from "@/lib/models3d/lightsConfig";
 import { AMBIENT_COLOR } from "@/lib/models3d";
@@ -82,10 +82,10 @@ type Props = {
   displayConfig?: {
     trailEnabled?: boolean;
     trailColor?: string;
-    trailMaxLength?: number; 
+    trailMaxLength?: number;
     smoothing?: boolean;
     fade?: boolean;
-    sampleDistance?: number; 
+    sampleDistance?: number;
     lineWidth?: number;
   };
 };
@@ -167,9 +167,9 @@ function Simulator3D(
     const sizeWorld: [number, number] | undefined =
       goal.shape === "square" && goal.size
         ? [
-            (goal.size[0] ?? 0) * WORLD_SCALE_VALUE,
-            (goal.size[1] ?? 0) * WORLD_SCALE_VALUE,
-          ]
+          (goal.size[0] ?? 0) * WORLD_SCALE_VALUE,
+          (goal.size[1] ?? 0) * WORLD_SCALE_VALUE,
+        ]
         : undefined;
     return {
       position: worldPos,
@@ -307,10 +307,11 @@ function Simulator3D(
             far: CAMERA_CONFIG.FAR,
           }}
         >
-          <color
-            attach="background"
-            args={[colorConfig?.ambient ?? AMBIENT_COLOR]}
-          />
+          {/* {colorConfig?.ambient && (
+            <color attach="background" args={[colorConfig.ambient]} />
+          )} */}
+          <color attach="background" args={["#071427"]} />
+
           <ambientLight intensity={1.2} />
           <SceneLights />
           <Suspense fallback={null}>

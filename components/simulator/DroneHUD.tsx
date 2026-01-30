@@ -1,5 +1,5 @@
 import { normalizeAngle } from "@/helpers/angle";
-import { DroneState } from "@/lib/droneSimulator";
+import { DroneState } from "@/lib/simulator/droneSimulator";
 
 type Vector3 = { x: number; y: number; z: number };
 
@@ -59,8 +59,8 @@ export default function DroneHUD({
           </div>
         ))}
       </div>
-      {axisHints.length > 0 && (  
-        
+      {axisHints.length > 0 && (
+
         <div className="flex flex-wrap  gap-4 sm:gap-2 text-[12px] md:text-[1] sm:text-[8px] text-slate-400">
           {axisHints.map((hint) => (
             <span
