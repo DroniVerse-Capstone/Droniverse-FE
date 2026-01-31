@@ -6,6 +6,10 @@ import { AppProvider } from "@/providers/app-provider";
 export const metadata: Metadata = {
   title: "Droniverse",
   description: "Mô phỏng drone 3D và học lập trình điều khiển bằng Blockly",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/images/Logo.png",
+  },
 };
 
 const geistSans = Inter({
