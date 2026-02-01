@@ -1,0 +1,30 @@
+{
+    "Auth": {
+        "loginBanner": {
+            "welcome": "Chào mừng bạn",
+            "to": "Đến với",
+            "slogan1": "Nơi công nghệ",
+            "slogan2": "cất cánh",
+            "description": "Nền tảng học tập Drone giúp bạn làm chủ công nghệ bay, cung cấp đầy đủ kiến thức nền tảng, kỹ thuật cốt lõi và kỹ năng thực hành an toàn theo lộ trình bài bản."
+        },
+        "authForm": {
+            "home": "Trang chủ",
+            "login": "Đăng nhập",
+            "register": "Đăng ký",
+            "loginSub": "Để có những trải nghiệm tốt nhất",
+            "registerSub": "Để bắt đầu hành trình của riêng bạn",
+            "google": "Đăng nhập với Google",
+            "facebook": "Đăng nhập với Facebook",
+            "or": "Hoặc tiếp tục với",
+            "name": "Họ và tên",
+            "email": "Email",
+            "password": "Mật khẩu",
+            "confirmPassword": "Xác nhận mật khẩu",
+            "forgotPassword": "Quên mật khẩu?",
+            "noAccount": "Chưa có tài khoản?",
+            "createAccount": "Tạo tài khoản",
+            "haveAccount": "Đã có tài khoản?",
+            "backToLogin": "Đăng nhập ngay"
+        }
+    }
+}

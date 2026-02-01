@@ -8,46 +8,46 @@
   /* === DRONIVERSE DESIGN SYSTEM COLORS === */
 
   /* Primary Color System (Red) */
-  --color-primary-0: #E98D88;
-  --color-primary-25: #E57A74;
-  --color-primary-50: #E26660;
-  --color-primary-100: #DE544C;
-  --color-primary-200: #DB4139;
-  --color-primary-300: #C53A33;
-  --color-primary: #DB4139;
+  --color-primary-0: #e98d88;
+  --color-primary-25: #e57a74;
+  --color-primary-50: #e26660;
+  --color-primary-100: #de544c;
+  --color-primary-200: #db4139;
+  --color-primary-300: #c53a33;
+  --color-primary: #db4139;
   --color-primary-foreground: #ffffff;
 
   /* Secondary Color System (Teal) */
-  --color-secondary-0: #96E9DF;
-  --color-secondary-25: #6CE0D2;
-  --color-secondary-50: #56DCCB;
-  --color-secondary-100: #42D8C5;
-  --color-secondary-200: #2DD4BF;
-  --color-secondary-300: #24A998;
-  --color-secondary: #2DD4BF;
+  --color-secondary-0: #96e9df;
+  --color-secondary-25: #6ce0d2;
+  --color-secondary-50: #56dccb;
+  --color-secondary-100: #42d8c5;
+  --color-secondary-200: #2dd4bf;
+  --color-secondary-300: #24a998;
+  --color-secondary: #2dd4bf;
 
-   /* Tertiary Color System (Blue) */
-  --color-tertiary-0: #89B4F9;
-  --color-tertiary-25: #75A7F8;
-  --color-tertiary-50: #629BF7;
-  --color-tertiary-100: #4E8EF6;
-  --color-tertiary-200: #3B82F6;
-  --color-tertiary-300: #3575DD;
-  --color-tertiary: #3B82F6;
+  /* Tertiary Color System (Blue) */
+  --color-tertiary-0: #89b4f9;
+  --color-tertiary-25: #75a7f8;
+  --color-tertiary-50: #629bf7;
+  --color-tertiary-100: #4e8ef6;
+  --color-tertiary-200: #3b82f6;
+  --color-tertiary-300: #3575dd;
+  --color-tertiary: #3b82f6;
 
   /* Greyscale System */
   --color-greyscale-0: #ffffff;
-  --color-greyscale-25: #E6E7E8;
-  --color-greyscale-50: #CECFD2;
-  --color-greyscale-100: #B6B8BB;
-  --color-greyscale-200: #9EA0A5;
-  --color-greyscale-300: #86898E;
-  --color-greyscale-400: #6E7178;
+  --color-greyscale-25: #e6e7e8;
+  --color-greyscale-50: #cecfd2;
+  --color-greyscale-100: #b6b8bb;
+  --color-greyscale-200: #9ea0a5;
+  --color-greyscale-300: #86898e;
+  --color-greyscale-400: #6e7178;
   --color-greyscale-500: #565961;
-  --color-greyscale-600: #3E424A;
-  --color-greyscale-700: #262A34;
-  --color-greyscale-800: #0E131E;
-  --color-greyscale-900: #0B0F18;
+  --color-greyscale-600: #3e424a;
+  --color-greyscale-700: #262a34;
+  --color-greyscale-800: #0e131e;
+  --color-greyscale-900: #0b0f18;
 
   /* Success/Green System */
   --color-success-0: #ecffee;
@@ -59,13 +59,13 @@
   --color-success: #3ac348;
 
   /* Warning/Yellow System */
-  --color-warning-0: #FCD87B;
-  --color-warning-25: #FCD265;
-  --color-warning-50: #FBCB4F;
-  --color-warning-100: #FBC539;
-  --color-warning-200: #FBBF24;
-  --color-warning-300: #E1AB20;
-  --color-warning: #FBBF24;
+  --color-warning-0: #fcd87b;
+  --color-warning-25: #fcd265;
+  --color-warning-50: #fbcb4f;
+  --color-warning-100: #fbc539;
+  --color-warning-200: #fbbf24;
+  --color-warning-300: #e1ab20;
+  --color-warning: #fbbf24;
 
   /* Error/Red System */
   --color-error-0: #fff0f3;
@@ -77,19 +77,21 @@
   --color-error: #d73e3d;
 
   /* Semantic Colors for UI Components */
-  --color-background: #0E131E;
-  --color-border: #262A34;
+  --color-background: #0e131e;
+  --color-border: #262a34;
   --color-foreground: #ffffff;
+  --bg-pattern-grid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52' viewBox='0 0 52 52'%3E%3Cpath fill='%230b0f18' fill-opacity='1' d='M0 17.83V0h17.83a3 3 0 0 1-5.66 2H5.9A5 5 0 0 1 2 5.9v6.27a3 3 0 0 1-2 5.66zm0 18.34a3 3 0 0 1 2 5.66v6.27A5 5 0 0 1 5.9 52h6.27a3 3 0 0 1 5.66 0H0V36.17zM36.17 52a3 3 0 0 1 5.66 0h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 0 1 0-5.66V52H36.17zM0 31.93v-9.78a5 5 0 0 1 3.8.72l4.43-4.43a3 3 0 1 1 1.42 1.41L5.2 24.28a5 5 0 0 1 0 5.52l4.44 4.43a3 3 0 1 1-1.42 1.42L3.8 31.2a5 5 0 0 1-3.8.72zm52-14.1a3 3 0 0 1 0-5.66V5.9A5 5 0 0 1 48.1 2h-6.27a3 3 0 0 1-5.66-2H52v17.83zm0 14.1a4.97 4.97 0 0 1-1.72-.72l-4.43 4.44a3 3 0 1 1-1.41-1.42l4.43-4.43a5 5 0 0 1 0-5.52l-4.43-4.43a3 3 0 1 1 1.41-1.41l4.43 4.43c.53-.35 1.12-.6 1.72-.72v9.78zM22.15 0h9.78a5 5 0 0 1-.72 3.8l4.44 4.43a3 3 0 1 1-1.42 1.42L29.8 5.2a5 5 0 0 1-5.52 0l-4.43 4.44a3 3 0 1 1-1.41-1.42l4.43-4.43a5 5 0 0 1-.72-3.8zm0 52c.13-.6.37-1.19.72-1.72l-4.43-4.43a3 3 0 1 1 1.41-1.41l4.43 4.43a5 5 0 0 1 5.52 0l4.43-4.43a3 3 0 1 1 1.42 1.41l-4.44 4.43c.36.53.6 1.12.72 1.72h-9.78zm9.75-24a5 5 0 0 1-3.9 3.9v6.27a3 3 0 1 1-2 0V31.9a5 5 0 0 1-3.9-3.9h-6.27a3 3 0 1 1 0-2h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 1 1 2 0v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 1 1 0 2H31.9z'%3E%3C/path%3E%3C/svg%3E");
 
   /* === DRONIVERSE TYPOGRAPHY SYSTEM === */
 
   /* Font Families */
-  --font-family-primary: 'Inter Tight', 'Inter', system-ui, sans-serif;
-  --font-family-display: 'Inter Display V', 'Inter', system-ui, sans-serif;
-  --font-family-body: 'Inter Tight', system-ui, sans-serif;
-  --font-family-sans: 'Inter Tight', 'Inter', system-ui, sans-serif;
+  --font-family-primary: "Inter Tight", "Inter", system-ui, sans-serif;
+  --font-family-display: "Inter Display V", "Inter", system-ui, sans-serif;
+  --font-family-body: "Inter Tight", system-ui, sans-serif;
+  --font-family-sans: "Inter Tight", "Inter", system-ui, sans-serif;
   --font-family-mono:
-    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 
   /* === DRONIVERSE DESIGN TOKENS === */
 
@@ -105,17 +107,18 @@
 
 /* Blockly UX tweaks (Scratch-like) */
 .blocklyToolboxDiv {
-	width: 220px;
+  width: 220px;
 }
 .blocklyFlyoutBackground {
-	fill: #f3f4f6 !important;
-	fill-opacity: 1 !important;
+  fill: #f3f4f6 !important;
+  fill-opacity: 1 !important;
 }
 .blocklyTreeLabel {
-	font-size: 13px !important;
+  font-size: 13px !important;
 }
-.blocklyZoom>image, .blocklyTrash>image {
-	opacity: 0.9;
+.blocklyZoom > image,
+.blocklyTrash > image {
+  opacity: 0.9;
 }
 
 body {
@@ -157,9 +160,9 @@ body {
   width: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
 }

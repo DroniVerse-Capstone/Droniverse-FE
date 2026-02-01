@@ -1,0 +1,30 @@
+{
+  "Auth": {
+    "loginBanner": {
+      "welcome": "Welcome",
+      "to": "To",
+      "slogan1": "Where technology",
+      "slogan2": "takes flight",
+      "description": "A drone learning platform that helps you master flight technology, providing comprehensive foundational knowledge, core techniques, and safe hands-on skills through a structured learning path."
+    },
+    "authForm": {
+      "home": "Home",
+      "login": "Login",
+      "register": "Register",
+      "loginSub": "For the best experience",
+      "registerSub": "To start your own journey",
+      "google": "Sign in with Google",
+      "facebook": "Sign in with Facebook",
+      "or": "Or continue with",
+      "name": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "haveAccount": "Already have an account?",
+      "backToLogin": "Login now"
+    }
+  }
+}
