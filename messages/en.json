@@ -26,5 +26,150 @@
       "haveAccount": "Already have an account?",
       "backToLogin": "Login now"
     }
+  },
+  "Sandbox": {
+    "toolbar": {
+      "title": "SANDBOX DRONE",
+      "run": "Run",
+      "debug": "Debug",
+      "reset": "Reset",
+      "settings": "Settings",
+      "backToHome": "Home"
+    },
+    "status": {
+      "ready": "Ready",
+      "running": "Running…",
+      "finished": "Finished",
+      "idle": "Idle"
+    },
+    "simulator": {
+      "title": "Simulator 3D"
+    },
+    "blockly": {
+      "title": "Blockly Editor",
+      "categories": {
+        "motion": "📍 Motion",
+        "loops": "🔄 Loops",
+        "logic": "🧠 Logic",
+        "sensors": "📡 Sensors",
+        "math": "➗ Math",
+        "effects": "🎵 Effects",
+        "input": "⌨️ Input",
+        "variables": "📦 Variables"
+      },
+      "simulator": {
+        "title": "Simulator 3D"
+      },
+      "blocks": {
+        "title": "Blockly Editor",
+        "takeOff": {
+          "message": "Take off",
+          "tooltip": "Activate drone takeoff from ground"
+        },
+        "up": {
+          "message": "Fly up %1 m",
+          "tooltip": "Increase drone altitude in meters"
+        },
+        "down": {
+          "message": "Fly down %1 m",
+          "tooltip": "Decrease drone altitude in meters"
+        },
+        "left": {
+          "message": "Move left %1 m",
+          "tooltip": "Move drone left along X axis"
+        },
+        "right": {
+          "message": "Move right %1 m",
+          "tooltip": "Move drone right along X axis"
+        },
+        "forward": {
+          "message": "Forward %1 m",
+          "tooltip": "Move drone forward"
+        },
+        "backward": {
+          "message": "Backward %1 m",
+          "tooltip": "Move drone backward"
+        },
+        "turnRight": {
+          "message": "Turn right %1°",
+          "tooltip": "Turn drone right by degrees"
+        },
+        "turnLeft": {
+          "message": "Turn left %1°",
+          "tooltip": "Turn drone left by degrees"
+        },
+        "land": {
+          "message": "Land",
+          "tooltip": "Land drone on ground"
+        },
+        "repeat": {
+          "message": "Repeat %1 times",
+          "tooltip": "Repeat inner commands N times"
+        },
+        "if": {
+          "message": "If %1",
+          "tooltip": "Execute if condition is true"
+        },
+        "ifElse": {
+          "message": "If %1",
+          "tooltip": "Execute based on condition",
+          "elseMessage": "Else %1"
+        },
+        "isObstacleAhead": {
+          "message": "has obstacle ahead?",
+          "tooltip": "Check if there's an obstacle ahead of drone"
+        },
+        "amountValue": {
+          "tooltip": "Number value for inline connection"
+        },
+        "mathOperation": {
+          "tooltip": "Math operation between two numbers"
+        },
+        "playSound": {
+          "message": "Play sound %1",
+          "tooltip": "Play sound for drone"
+        },
+        "inputNumber": {
+          "message": "Input number %1",
+          "tooltip": "Input a number from user"
+        }
+      }
+    }
+  },
+  "MapEditor": {
+    "toolbar": {
+      "mode": "Mode",
+      "translate": "Translate",
+      "rotate": "Rotate",
+      "scale": "Scale"
+    },
+    "loading": "Loading…",
+    "alerts": {
+      "droneAlreadyExists": "There is already a drone in the scene."
+    },
+    "panels": {
+      "rotate": {
+        "title": "Rotate (Y)",
+        "rotate90": "Rotate +90°"
+      },
+      "obstacle": {
+        "title": "Obstacle",
+        "color": "Color",
+        "width": "Width (X)",
+        "height": "Height (Y)",
+        "depth": "Depth (Z)",
+        "dimensions": "Dimensions ≈ W×H×D:",
+        "rotate90": "Rotate +90°"
+      }
+    },
+    "buttons": {
+      "add": "Add"
+    },
+    "categories": {
+      "all": "All",
+      "drone": "Drone",
+      "obstacle": "Obstacle",
+      "decor": "Decor"
+    }
   }
 }

@@ -1,5 +1,3 @@
-import { t } from "@/lib/translations-fakeeeee/sandbox";
-
 export type ToolboxCategory =
 	| "motion"
 	| "loops"
@@ -17,11 +15,23 @@ type CategoryDefinition = {
 	blocks?: string[];
 };
 
-function getCategoryDefinitions(): Record<ToolboxCategory, CategoryDefinition> {
-	const translations = t();
+type Translations = {
+	categories: {
+		motion: string;
+		loops: string;
+		logic: string;
+		sensors: string;
+		math: string;
+		effects: string;
+		input: string;
+		variables: string;
+	};
+};
+
+function getCategoryDefinitions(translations: Translations): Record<ToolboxCategory, CategoryDefinition> {
 	return {
 		motion: {
-			name: translations.blockly.categories.motion,
+			name: translations.categories.motion,
 			colour: "#3b82f6",
 			blocks: [
 				"drone_take_off",
@@ -37,37 +47,37 @@ function getCategoryDefinitions(): Record<ToolboxCategory, CategoryDefinition> {
 			],
 		},
 		loops: {
-			name: translations.blockly.categories.loops,
+			name: translations.categories.loops,
 			colour: "#10b981",
 			blocks: ["drone_repeat"],
 		},
 		logic: {
-			name: translations.blockly.categories.logic,
+			name: translations.categories.logic,
 			colour: "#f59e0b",
 			blocks: ["drone_if", "drone_if_else"],
 		},
 		sensors: {
-			name: translations.blockly.categories.sensors,
+			name: translations.categories.sensors,
 			colour: "#ef4444",
 			blocks: ["drone_is_obstacle_ahead"],
 		},
 		math: {
-			name: translations.blockly.categories.math,
+			name: translations.categories.math,
 			colour: "#a855f7",
 			blocks: ["drone_amount_value", "drone_math_operation"],
 		},
 		effects: {
-			name: translations.blockly.categories.effects,
+			name: translations.categories.effects,
 			colour: "#ec4899",
 			blocks: ["drone_play_sound"],
 		},
 		input: {
-			name: translations.blockly.categories.input,
+			name: translations.categories.input,
 			colour: "#0ea5e9",
 			blocks: ["drone_input_number"],
 		},
 		variables: {
-			name: translations.blockly.categories.variables,
+			name: translations.categories.variables,
 			colour: "#ec4899",
 			custom: "VARIABLE",
 		},
@@ -88,8 +98,23 @@ export const SANDBOX_TOOLBOX_CATEGORIES: ToolboxCategory[] = [
 export const DEFAULT_LAB_TOOLBOX: ToolboxCategory[] = [...SANDBOX_TOOLBOX_CATEGORIES];
 
 
-export function buildToolboxXml(categories: ToolboxCategory[] = DEFAULT_LAB_TOOLBOX): string {
-	const CATEGORY_DEFINITIONS = getCategoryDefinitions();
+export function buildToolboxXml(
+	categories: ToolboxCategory[] = DEFAULT_LAB_TOOLBOX,
+	translations?: Translations
+): string {
+	const defaultTranslations: Translations = {
+		categories: {
+			motion: "📍 Motion",
+			loops: "🔄 Loops",
+			logic: "🧠 Logic",
+			sensors: "📡 Sensors",
+			math: "➗ Math",
+			effects: "🎵 Effects",
+			input: "⌨️ Input",
+			variables: "📦 Variables",
+		},
+	};
+	const CATEGORY_DEFINITIONS = getCategoryDefinitions(translations || defaultTranslations);
 	const seen = new Set<ToolboxCategory>();
 	const xmlCategories = categories
 		.filter((cat) => {

@@ -43,9 +43,8 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={lang.code}
             onClick={() => changeLang(lang.code as "vi" | "en")}
-            className={`cursor-pointer ${
-              currentLocale === lang.code ? "bg-greyscale-700" : ""
-            }`}
+            className={`cursor-pointer ${currentLocale === lang.code ? "bg-greyscale-700" : ""
+              }`}
           >
             <div
               className="w-10 h-10 mr-2 rounded-full bg-cover bg-center"

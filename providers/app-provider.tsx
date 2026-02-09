@@ -5,9 +5,15 @@ import { QueryProvider } from "./query-provider";
 import { Toaster } from "react-hot-toast";
 import { I18nProvider } from "./i18n-provider";
 
-export function AppProvider({ children }: { children: ReactNode }) {
+export function AppProvider({
+  children,
+  initialLocale
+}: {
+  children: ReactNode;
+  initialLocale: string;
+}) {
   return (
-    <I18nProvider>
+    <I18nProvider initialLocale={initialLocale}>
       <QueryProvider>
         {children}
         <Toaster
