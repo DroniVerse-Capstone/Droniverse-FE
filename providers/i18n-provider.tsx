@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { getCookie } from "cookies-next";
+
+import viMessages from "@/messages/vi.json";
+import enMessages from "@/messages/en.json";
 
 type Messages = Record<string, any>;
 
@@ -14,41 +16,38 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState("vi");
-  const [messages, setMessages] = useState<Messages>({});
+const messagesMap: Record<string, Messages> = {
+  vi: viMessages,
+  en: enMessages,
+};
 
-  const loadMessages = async (currentLocale: string) => {
-    try {
-      const mod = await import(`@/messages/${currentLocale}.json`);
-      setMessages(mod.default);
-    } catch {
-      const mod = await import(`@/messages/vi.json`);
-      setMessages(mod.default);
-    }
-  };
 
-  useEffect(() => {
-    const cookieLocale = getCookie("locale") as string;
-    const currentLocale = cookieLocale || "vi";
-    setLocale(currentLocale);
-    loadMessages(currentLocale);
-  }, []);
 
-  const changeLocale = async (newLocale: string) => {
+interface I18nProviderProps {
+  children: React.ReactNode;
+  initialLocale: string;
+}
+
+export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
+  // Use server-provided locale for hydration safety
+  const [locale, setLocale] = useState(initialLocale);
+  const [messages, setMessages] = useState<Messages>(messagesMap[initialLocale] || viMessages);
+
+  const changeLocale = (newLocale: string) => {
     setLocale(newLocale);
-    await loadMessages(newLocale);
+    setMessages(messagesMap[newLocale] || viMessages);
+    // Note: Cookie setting is handled in LanguageSwitcher or via explicit call
   };
 
   const t = (key: string): string => {
     const keys = key.split(".");
     let value: any = messages;
-    
+
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) return key;
     }
-    
+
     return value || key;
   };
 

@@ -1,30 +1,135 @@
 {
-    "Auth": {
-        "loginBanner": {
-            "welcome": "Chào mừng bạn",
-            "to": "Đến với",
-            "slogan1": "Nơi công nghệ",
-            "slogan2": "cất cánh",
-            "description": "Nền tảng học tập Drone giúp bạn làm chủ công nghệ bay, cung cấp đầy đủ kiến thức nền tảng, kỹ thuật cốt lõi và kỹ năng thực hành an toàn theo lộ trình bài bản."
-        },
-        "authForm": {
-            "home": "Trang chủ",
-            "login": "Đăng nhập",
-            "register": "Đăng ký",
-            "loginSub": "Để có những trải nghiệm tốt nhất",
-            "registerSub": "Để bắt đầu hành trình của riêng bạn",
-            "google": "Đăng nhập với Google",
-            "facebook": "Đăng nhập với Facebook",
-            "or": "Hoặc tiếp tục với",
-            "name": "Họ và tên",
-            "email": "Email",
-            "password": "Mật khẩu",
-            "confirmPassword": "Xác nhận mật khẩu",
-            "forgotPassword": "Quên mật khẩu?",
-            "noAccount": "Chưa có tài khoản?",
-            "createAccount": "Tạo tài khoản",
-            "haveAccount": "Đã có tài khoản?",
-            "backToLogin": "Đăng nhập ngay"
-        }
+  "Auth": {
+    "loginBanner": {
+      "welcome": "Chào mừng bạn",
+      "to": "Đến với",
+      "slogan1": "Nơi công nghệ",
+      "slogan2": "cất cánh",
+      "description": "Nền tảng học tập Drone giúp bạn làm chủ công nghệ bay, cung cấp đầy đủ kiến thức nền tảng, kỹ thuật cốt lõi và kỹ năng thực hành an toàn theo lộ trình bài bản."
+    },
+    "authForm": {
+      "home": "Trang chủ",
+      "login": "Đăng nhập",
+      "register": "Đăng ký",
+      "loginSub": "Để có những trải nghiệm tốt nhất",
+      "registerSub": "Để bắt đầu hành trình của riêng bạn",
+      "google": "Đăng nhập với Google",
+      "facebook": "Đăng nhập với Facebook",
+      "or": "Hoặc tiếp tục với",
+      "name": "Họ và tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "noAccount": "Chưa có tài khoản?",
+      "createAccount": "Tạo tài khoản",
+      "haveAccount": "Đã có tài khoản?",
+      "backToLogin": "Đăng nhập ngay"
     }
+  },
+  "Sandbox": {
+    "toolbar": {
+      "title": "Chế độ thí nghiệm",
+      "run": "Chạy",
+      "debug": "Gỡ lỗi",
+      "reset": "Đặt lại",
+      "settings": "Cài đặt",
+      "backToHome": "Trang chủ"
+    },
+    "status": {
+      "ready": "Sẵn sàng",
+      "running": "Đang chạy…",
+      "finished": "Hoàn thành",
+      "idle": "Chờ lệnh"
+    },
+    "simulator": {
+      "title": "Khu vực mô phỏng drone"
+    },
+    "blockly": {
+      "title": "Khu vực chỉnh sửa lệnh",
+      "categories": {
+        "motion": "📍 Di chuyển",
+        "loops": "🔄 Vòng lặp",
+        "logic": "🧠 Điều kiện",
+        "sensors": "📡 Cảm biến",
+        "math": "➗ Toán học",
+        "effects": "🎵 Hiệu ứng",
+        "input": "⌨️ Input",
+        "variables": "📦 Biến"
+      },
+      "blocks": {
+        "takeOff": {
+          "message": "Cất cánh",
+          "tooltip": "Kích hoạt drone cất cánh rời khỏi mặt đất"
+        },
+        "up": {
+          "message": "Bay lên %1 m",
+          "tooltip": "Tăng độ cao drone theo mét"
+        },
+        "down": {
+          "message": "Đi xuống %1 m",
+          "tooltip": "Giảm độ cao drone theo mét"
+        },
+        "left": {
+          "message": "Sang trái %1 m",
+          "tooltip": "Di chuyển drone sang trái theo trục X"
+        },
+        "right": {
+          "message": "Sang phải %1 m",
+          "tooltip": "Di chuyển drone sang phải theo trục X"
+        },
+        "forward": {
+          "message": "Tiến %1 m",
+          "tooltip": "Di chuyển drone về phía trước"
+        },
+        "backward": {
+          "message": "Lùi %1 m",
+          "tooltip": "Di chuyển drone về phía sau"
+        },
+        "turnRight": {
+          "message": "Xoay phải %1°",
+          "tooltip": "Quay drone sang phải theo độ"
+        },
+        "turnLeft": {
+          "message": "Xoay trái %1°",
+          "tooltip": "Quay drone sang trái theo độ"
+        },
+        "land": {
+          "message": "Hạ cánh",
+          "tooltip": "Hạ drone xuống đất"
+        },
+        "repeat": {
+          "message": "Lặp %1 lần",
+          "tooltip": "Lặp lại các lệnh bên trong N lần"
+        },
+        "if": {
+          "message": "Nếu %1",
+          "tooltip": "Thực hiện nếu điều kiện đúng"
+        },
+        "ifElse": {
+          "message": "Nếu %1",
+          "tooltip": "Thực hiện theo điều kiện",
+          "elseMessage": "Ngược lại %1"
+        },
+        "isObstacleAhead": {
+          "message": "có vật cản phía trước?",
+          "tooltip": "Kiểm tra xem có vật cản phía trước drone"
+        },
+        "amountValue": {
+          "tooltip": "Giá trị số để nối ngang"
+        },
+        "mathOperation": {
+          "tooltip": "Phép toán giữa hai số"
+        },
+        "playSound": {
+          "message": "Phát âm thanh %1",
+          "tooltip": "Phát âm thanh cho drone"
+        },
+        "inputNumber": {
+          "message": "Nhập số %1",
+          "tooltip": "Nhập một số từ người dùng"
+        }
+      }
+    }
+  }
 }

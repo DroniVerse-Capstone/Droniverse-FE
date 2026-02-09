@@ -14,7 +14,7 @@ import type * as BlocklyType from "blockly/core";
 import { SIM_CANVAS } from "@/lib/config3D/simConfig";
 import { useDroneController } from "@/hooks/useDroneController";
 import { useSandboxColors } from "@/hooks/useSandboxColors";
-import { t } from "@/lib/translations-fakeeeee/sandbox";
+import { useTranslations } from "@/providers/i18n-provider";
 import SettingsModal from "@/components/sandbox/SettingsModal";
 import { DEFAULT_DISPLAY_CONFIG } from "@/lib/config3D/displayDefaults";
 
@@ -33,8 +33,8 @@ const INITIAL_STATE: DroneState = {
 };
 
 export default function SandboxPage() {
-  const translations = t();
-  const [status, setStatus] = useState<string>(translations.status.ready);
+  const t = useTranslations("Sandbox");
+  const [status, setStatus] = useState<string>("ready");
   const [droneState, setDroneState] = useState<DroneState>(INITIAL_STATE);
   const [hasBlocks, setHasBlocks] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -90,17 +90,28 @@ export default function SandboxPage() {
   }, []);
 
   const toolboxXml = useMemo(
-    () => buildToolboxXml(SANDBOX_TOOLBOX_CATEGORIES),
-    []
+    () =>
+      buildToolboxXml(SANDBOX_TOOLBOX_CATEGORIES, {
+        categories: {
+          motion: t("blockly.categories.motion"),
+          loops: t("blockly.categories.loops"),
+          logic: t("blockly.categories.logic"),
+          sensors: t("blockly.categories.sensors"),
+          math: t("blockly.categories.math"),
+          effects: t("blockly.categories.effects"),
+          input: t("blockly.categories.input"),
+          variables: t("blockly.categories.variables"),
+        },
+      }),
+    [t]
   );
 
   // --- Actions ---
 
   const handleReset = useCallback(() => {
-    const translations = t();
     controller.reset(INITIAL_STATE);
     setDroneState(INITIAL_STATE);
-    setStatus(translations.status.ready);
+    setStatus("ready");
     simRef.current?.clearTrail?.();
     lastProgramRef.current = null;
     setIsDebugMode(false);
@@ -113,7 +124,6 @@ export default function SandboxPage() {
   }, [controller]);
 
   const handleRun = useCallback(() => {
-    const translations = t();
     // Stop debug if running
     if (isDebugMode) {
       if (debugIntervalRef.current !== null) {
@@ -124,7 +134,7 @@ export default function SandboxPage() {
       setIsDebugMode(false);
     }
 
-    if (!hasBlocks || status === translations.status.running) return;
+    if (!hasBlocks || status === "running") return;
     if (!blocklyContextRef.current) return;
 
     const { Blockly, workspace } = blocklyContextRef.current;
@@ -135,7 +145,7 @@ export default function SandboxPage() {
     if (program.length === 0) return;
 
     // Always restart mode
-    setStatus(translations.status.running);
+    setStatus("running");
     setDroneState(INITIAL_STATE);
     controller.stop();
     controller.reset(INITIAL_STATE);
@@ -143,15 +153,7 @@ export default function SandboxPage() {
     controller.enqueueMany(program);
     lastProgramRef.current = program;
     controller.run();
-  }, [
-    droneState,
-    isDebugMode,
-    hasBlocks,
-    status,
-    controller,
-  ]);
-
-
+  }, [droneState, isDebugMode, hasBlocks, status, controller, t]);
 
   // --- Debug Logic ---
 
@@ -247,7 +249,7 @@ export default function SandboxPage() {
 
   // UseEffect to watch for debug finish
   useEffect(() => {
-    if (status === "Hoàn thành" && isDebugMode) {
+    if (status === "finished" && isDebugMode) {
       setIsDebugPlaying(false);
       setIsDebugFinished(true);
       if (debugIntervalRef.current !== null) {
@@ -255,8 +257,7 @@ export default function SandboxPage() {
         debugIntervalRef.current = null;
       }
     }
-  }, [status, isDebugMode]);
-
+  }, [status, isDebugMode, t]);
 
   // --- Render Helpers ---
   const hudAxisHints = [
@@ -268,14 +269,13 @@ export default function SandboxPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 font-sans selection:bg-cyan-500/30">
-
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[120px] animate-[pulse_8s_ease-in-out_infinite]" />
         <div className="absolute -bottom-[10%] -right-[10%] w-[60%] h-[60%] bg-indigo-600/10 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite_2s]" />
         <div className="absolute top-1/4 right-1/4 w-[40%] h-[40%] bg-sky-500/5 rounded-full blur-[100px]" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_90%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/20 to-slate-950" />
+        <div className="absolute inset-0 bg-linear-to-b from-slate-950/0 via-slate-950/20 to-slate-950" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(2,6,23,0.6)_100%)]" />
       </div>
 
@@ -286,7 +286,6 @@ export default function SandboxPage() {
           status={status}
           backLink={{ href: "/" }}
           hasBlocks={hasBlocks}
-
           // Debug
           onDebug={startDebugMode}
           onStartDebug={startDebugMode}
@@ -298,20 +297,20 @@ export default function SandboxPage() {
           isPlayingDebug={isDebugPlaying}
           isDebugFinished={isDebugFinished}
           remainingSteps={queueLen}
-
           // Settings
           showSettings={true}
           onSettingsClick={() => setIsSettingsOpen(true)}
         />
 
         <div className="flex-1 p-4 lg:p-6 pt-0 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
-
           {/* Left: Blockly (Equal share) */}
           <div className="flex flex-col bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden group hover:border-slate-600 transition-colors">
             <div className="px-5 py-3 border-b border-slate-700 bg-slate-950 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_purple]" />
-                <span className="font-bold text-slate-300 tracking-wide text-sm uppercase">Block Editor</span>
+                <span className="font-bold text-slate-300 tracking-wide text-sm uppercase">
+                  {t("blockly.title")}
+                </span>
               </div>
               <div className="flex gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
@@ -332,11 +331,12 @@ export default function SandboxPage() {
 
           {/* Right: Simulator (Equal share) */}
           <div className="flex flex-col bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden relative">
-
             <div className="px-5 py-3 border-b border-slate-700 bg-slate-950 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_10px_cyan]" />
-                <span className="font-bold text-slate-300 tracking-wide text-sm uppercase">Simulator 3D</span>
+                <span className="font-bold text-slate-300 tracking-wide text-sm uppercase">
+                  {t("simulator.title")}
+                </span>
               </div>
             </div>
 
@@ -347,7 +347,6 @@ export default function SandboxPage() {
                 hudDescription=""
                 hudOrigin={SANDBOX_ORIGIN}
                 hudAxisHints={hudAxisHints}
-
                 // Color & Display
                 colorConfig={{
                   drone: {
@@ -364,7 +363,6 @@ export default function SandboxPage() {
                   ambient: colorConfig.ambient,
                 }}
                 displayConfig={displayConfig}
-
                 ref={simRef}
               />
             </div>

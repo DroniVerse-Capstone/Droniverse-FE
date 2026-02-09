@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { t } from "@/lib/translations-fakeeeee/sandbox";
+import { useTranslations } from "@/providers/i18n-provider";
+import { LanguageSwitcher } from "../layouts/LanguageSwitcher";
 
 type Props = {
   onRun: () => void;
@@ -43,7 +44,7 @@ export default function Toolbar(props: Props) {
     isDebugFinished = false,
   } = props;
 
-  const translations = t();
+  const t = useTranslations("Sandbox");
   const runDisabled = !hasBlocks;
 
   return (
@@ -51,7 +52,7 @@ export default function Toolbar(props: Props) {
       {/* Logo + Title */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-          {translations.toolbar.title}
+          {t("toolbar.title")}
         </div>
       </div>
 
@@ -63,7 +64,7 @@ export default function Toolbar(props: Props) {
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
           >
             <span>←</span>
-            <span>{backLink.label || translations.toolbar.backToHome}</span>
+            <span>{backLink.label || t("toolbar.backToHome")}</span>
           </Link>
         )}
 
@@ -82,7 +83,7 @@ export default function Toolbar(props: Props) {
               }}
               disabled={runDisabled}
             >
-              {translations.toolbar.run}
+              {t("toolbar.run")}
             </button>
           )}
 
@@ -96,7 +97,7 @@ export default function Toolbar(props: Props) {
               disabled={!hasBlocks}
               title="Debug mode"
             >
-              {translations.toolbar.debug}
+              {t("toolbar.debug")}
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -150,23 +151,25 @@ export default function Toolbar(props: Props) {
             className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 bg-slate-800/30 hover:bg-slate-800/50 rounded transition-all border border-slate-700/30"
             onClick={onReset}
           >
-            {translations.toolbar.reset}
+            {t("toolbar.reset")}
           </button>
         )}
 
         <span className="text-xs text-slate-400 px-3 py-1 bg-slate-800/30 rounded border border-slate-700/30">
-          {status}
+          {t("status." + status.toLowerCase())}
         </span>
-
         {showSettings && onSettingsClick && (
           <button
             className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-800/30 hover:bg-slate-800/50 rounded transition-all border border-slate-700/30"
             onClick={onSettingsClick}
-            title={translations.toolbar.settings}
+            title={t("toolbar.settings")}
           >
-            {translations.toolbar.settings}
+            {t("toolbar.settings")}
           </button>
         )}
+
+        <LanguageSwitcher />
+
       </div>
     </div>
   );
