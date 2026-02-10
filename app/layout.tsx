@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Droniverse",
-  description: "Mô phỏng drone 3D và học lập trình điều khiển bằng Blockly",
+  description: "Nền tảng kết nối cộng đồng drone, học tập qua khóa học và lab mô phỏng 3D.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/images/Logo.png",

@@ -171,5 +171,58 @@
       "obstacle": "Obstacle",
       "decor": "Decor"
     }
+  },
+  "PublicHeader": {
+    "home": "Home",
+    "about": "About Us",
+    "sandbox": "Lab Experience",
+    "contact": "Contact",
+    "login": "Login"
+  },
+  "PublicFooter": {
+    "description": "A platform connecting the drone community, learning through courses and 3D simulation labs.",
+    "links": {
+      "title": "Links",
+      "home": "Home",
+      "about": "About Us",
+      "sandbox": "Lab Experience",
+      "contact": "Contact"
+    },
+    "community": {
+      "title": "Community",
+      "join": "Join the Club",
+      "ask": "Q&A",
+      "instruction": "Guides",
+      "support": "Contact Support"
+    },
+    "connect": "Connect",
+    "rights": "All rights reserved."
+  },
+  "Home": {
+    "hero": {
+      "title": "Take Off with Droniverse",
+      "description": "Connect with a community of drone clubs, learn from basic to advanced levels through structured courses, and practice with a vivid 3D simulation lab system that helps you build real-world skills.",
+      "cta": "Join Now"
+    },
+    "community": {
+      "title": "Club Community",
+      "description": "A place where drone enthusiasts gather, learn through club courses, and challenge themselves with internal competitions to improve their skills.",
+      "join": "Join a Club",
+      "create": "Register a Club"
+    },
+    "lab": {
+      "title": "Interactive 3D Simulation",
+      "description": "Program through an intuitive drag-and-drop interface with Blockly",
+      "card1": "User-friendly Interface",
+      "card2": "Personal Customization",
+      "card3": "Upload Code Directly to the Drone",
+      "card4": "Many Unique Features",
+      "cta": "Try It Now"
+    },
+    "connect": {
+      "title": "Connect with Us",
+      "description": "If you would like more consultation or want to collaborate with us, feel free to contact us anytime.",
+      "cta": "Contact Us"
+    }
   }
 }

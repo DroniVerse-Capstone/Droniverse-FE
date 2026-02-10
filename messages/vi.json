@@ -131,5 +131,58 @@
         }
       }
     }
+  },
+  "PublicHeader": {
+    "home": "Trang chủ",
+    "about": "Về chúng tôi",
+    "sandbox": "Trải nghiệm Lab",
+    "contact": "Liên hệ",
+    "login": "Đăng nhập"
+  },
+  "PublicFooter": {
+    "description": "Nền tảng kết nối cộng đồng drone, học tập qua khóa học và lab mô phỏng 3D.",
+    "links": {
+      "title": "Liên kết",
+      "home": "Trang chủ",
+      "about": "Về chúng tôi",
+      "sandbox": "Trải nghiệm Lab",
+      "contact": "Liên hệ"
+    },
+    "community": {
+      "title": "Cộng đồng",
+      "join": "Tham gia Club",
+      "ask": "Hỏi đáp",
+      "instruction": "Hướng dẫn",
+      "support": "Liên hệ hỗ trợ"
+    },
+    "connect": "Kết nối",
+    "rights": "Tất cả quyền được bảo lưu."
+  },
+  "Home": {
+    "hero": {
+      "title": "Cất Cánh Cùng Droniverse",
+      "description": "Kết nối cộng đồng các câu lạc bộ đam mê drone, học từ nền tảng đến nâng cao thông qua các khóa học bài bản, kết hợp hệ thống lab mô phỏng 3D sống động giúp bạn rèn luyện kỹ năng sát với thực tế.",
+      "cta": "Tham gia ngay"
+    },
+    "community": {
+      "title": "Cộng Đồng Club",
+      "description": "Nơi quy tụ cộng đồng đam mê drone, học tập qua các khóa học trong club và thử sức với các kỳ thi nội bộ để nâng cao kỹ năng.",
+      "join": "Tham gia Club",
+      "create": "Đăng ký Club"
+    },
+    "lab": {
+      "title": "Mô Phỏng 3D Trực Quan",
+      "description": "Lập trình thông qua giao diện kéo thả trực quan với Blockly",
+      "card1": "Giao diện thân thiện",
+      "card2": "Custom theo sở thích cá nhân",
+      "card3": "Nạp Code trực tiếp cho Drone",
+      "card4": "Nhiều tính năng độc đáo",
+      "cta": "Trải nghiệm ngay"
+    },
+    "connect": {
+      "title": "Kết Nối Với Chúng Tôi",
+      "description": "Nếu bạn muốn được tư vấn kỹ hơn hoặc nếu bạn muốn hợp tác cùng chúng tôi hãy liên hệ với chúng tôi ngay",
+      "cta": "Liên hệ với chúng tôi"
+    }
   }
 }
