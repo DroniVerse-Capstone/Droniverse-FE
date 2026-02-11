@@ -260,5 +260,37 @@
     "team": {
       "title": "Development Team"
     }
+  },
+  "Contact": {
+    "hero": {
+      "title": "Contact Us",
+      "description": "Let us support you"
+    },
+    "link": {
+      "title": "Main Communication Channels",
+      "feature": {
+        "feature1": "Technical Support & Feedback",
+        "feature2": "Activity Updates",
+        "feature3": "Community Discussions",
+        "feature4": "Direct Contact"
+      }
+    },
+    "connect": {
+      "title": "Partnerships & Collaboration",
+      "feature": {
+        "feature1": {
+          "title": "Drone Clubs",
+          "description": "Connect and grow the drone community"
+        },
+        "feature2": {
+          "title": "Training Organizations",
+          "description": "Collaborate to build drone training programs"
+        },
+        "feature3": {
+          "title": "Technology Partners",
+          "description": "Develop solutions and platforms together"
+        }
+      }
+    }
   }
 }

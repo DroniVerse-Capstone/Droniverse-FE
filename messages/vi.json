@@ -220,5 +220,37 @@
     "team": {
       "title": "Đội Ngũ Phát Triển"
     }
+  },
+  "Contact": {
+    "hero": {
+      "title": "Liên Hệ Với Chúng Tôi",
+      "description": "Hãy để chúng tôi được hỗ trợ bạn"
+    },
+    "link": {
+      "title": "Kênh liên hệ chính",
+      "feature": {
+        "feature1": "Hỗ trợ kỹ thuật & Góp ý",
+        "feature2": "Cập nhật hoạt động",
+        "feature3": "Trao đổi cùng cộng đồng",
+        "feature4": "Liên hệ trực tiếp"
+      }
+    },
+    "connect": {
+      "title": "Hợp tác & Đối tác",
+      "feature": {
+        "feature1": {
+          "title": "Club Drone",
+          "description": "Kết nối và phát triển cộng đồng drone"
+        },
+        "feature2": {
+          "title": "Tổ chức đào tạo",
+          "description": "Hợp tác xây dựng chương trình học drone"
+        },
+        "feature3": {
+          "title": "Đối tác công nghệ",
+          "description": "Cùng phát triển giải pháp, nền tảng"
+        }
+      }
+    }
   }
 }

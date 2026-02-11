@@ -4,7 +4,9 @@ import { cn } from '@/lib/utils';
 interface ValueCardProps {
   icon?: React.ReactNode;
   title: string;
-  description: string;
+  description?: string;
+  link?: string;
+  url?: string;
   iconColor?: string;
   bgColor?: string;
   className?: string;
@@ -14,6 +16,8 @@ export default function ValueCard({
   icon,
   title,
   description,
+  link,
+  url,
   iconColor = "text-primary-200",
   bgColor = "bg-greyscale-700",
   className,
@@ -40,9 +44,18 @@ export default function ValueCard({
       </div>
 
       {/* Description */}
-      <p className="text-sm md:text-sm text-greyscale-100 leading-relaxed">
-        {description}
-      </p>
+      {description && (
+        <p className="text-sm md:text-sm text-greyscale-100 leading-relaxed">
+          {description}
+        </p>
+      )}
+
+      {/* Links */}
+      {link && (
+        <a href={url} className="text-sm md:text-sm text-greyscale-100 leading-relaxed underline">
+          {link}
+        </a>
+      )}
     </div>
   );
 }
