@@ -224,5 +224,41 @@
       "description": "If you would like more consultation or want to collaborate with us, feel free to contact us anytime.",
       "cta": "Contact Us"
     }
+  },
+  "About": {
+    "hero": {
+      "title": "Who Are We?",
+      "description1": "We build a drone learning platform that combines a club-based community, structured courses, and 3D simulation labs to help learners approach drone technology in a visual, safe, and effective way.",
+      "description2": "We are a platform that connects people passionate about drones, where learning goes beyond theory and is closely tied to practice, community, and advanced technology experiences.",
+      "description3": "Our goal is to help everyone — from beginners to advanced learners — gradually master drone technology in a structured and safe way."
+    },
+    "value": {
+      "title": "What Do We Offer?",
+      "feature1": {
+        "title": "Drone Club Community",
+        "description": "Bringing together drone enthusiasts to learn through club-based courses and share experiences."
+      },
+      "feature2": {
+        "title": "Structured Learning Path",
+        "description": "A clear learning roadmap suitable for beginners and those who want to improve their skills."
+      },
+      "feature3": {
+        "title": "3D Simulation Lab",
+        "description": "Practice flying and handling situations in a safe and intuitive 3D simulation environment."
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "To bring drone learning closer to everyone through community, high-quality courses, and a realistic 3D simulation environment.",
+      "feature": {
+        "title": "We believe that effective drone learning requires:",
+        "feature1": "A strong foundational knowledge",
+        "feature2": "Regular practice",
+        "feature3": "A learning community that shares and grows together"
+      }
+    },
+    "team": {
+      "title": "Development Team"
+    }
   }
 }

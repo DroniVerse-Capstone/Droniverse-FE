@@ -184,5 +184,41 @@
       "description": "Nếu bạn muốn được tư vấn kỹ hơn hoặc nếu bạn muốn hợp tác cùng chúng tôi hãy liên hệ với chúng tôi ngay",
       "cta": "Liên hệ với chúng tôi"
     }
+  },
+  "About": {
+    "hero": {
+      "title": "Chúng Tôi Là Ai ?",
+      "description1": "Chúng tôi xây dựng một nền tảng học drone kết hợp cộng đồng club, khóa học bài bản và lab mô phỏng 3D, giúp người học tiếp cận công nghệ drone một cách trực quan, an toàn và hiệu quả.",
+      "description2": "Chúng tôi là nền tảng kết nối những người đam mê drone, nơi việc học không chỉ dừng lại ở lý thuyết mà được gắn liền với thực hành, cộng đồng và trải nghiệm công nghệ tiên tiến.",
+      "description3": "Mục tiêu của chúng tôi là giúp mọi người — từ người mới bắt đầu đến người học nâng cao — từng bước làm chủ công nghệ drone một cách bài bản và an toàn."
+    },
+    "value": {
+      "title": "Chúng Tôi Mang Đến Điều Gì ?",
+      "feature1": {
+        "title": "Cộng đồng Club Drone",
+        "description": "Quy tụ những người đam mê drone, học tập qua các khóa học trong club và chia sẻ kinh nghiệm "
+      },
+      "feature2": {
+        "title": "Khóa học theo lộ trình",
+        "description": "Lộ trình học rõ ràng, phù hợp cho người mới bắt đầu và người muốn nâng cao kỹ năng."
+      },
+      "feature3": {
+        "title": "Lab mô phỏng 3D",
+        "description": "Thực hành bay và xử lý tình huống trong môi trường mô phỏng 3D an toàn, trực quan."
+      }
+    },
+    "mission": {
+      "title": "Sứ Mệnh",
+      "description": "Mang việc học drone đến gần hơn với mọi người thông qua cộng đồng, khóa học chất lượng và môi trường mô phỏng 3D sát với thực tế.",
+      "feature": {
+        "title": "Chúng tôi tin rằng học drone hiệu quả không thể thiếu:",
+        "feature1": "Kiến thức nền tảng vững chắc",
+        "feature2": "Thực hành thường xuyên",
+        "feature3": "Cộng đồng cùng học, cùng chia sẻ"
+      }
+    },
+    "team": {
+      "title": "Đội Ngũ Phát Triển"
+    }
   }
 }
