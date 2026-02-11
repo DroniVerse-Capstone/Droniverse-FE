@@ -171,5 +171,126 @@
       "obstacle": "Obstacle",
       "decor": "Decor"
     }
+  },
+  "PublicHeader": {
+    "home": "Home",
+    "about": "About Us",
+    "sandbox": "Lab Experience",
+    "contact": "Contact",
+    "login": "Login"
+  },
+  "PublicFooter": {
+    "description": "A platform connecting the drone community, learning through courses and 3D simulation labs.",
+    "links": {
+      "title": "Links",
+      "home": "Home",
+      "about": "About Us",
+      "sandbox": "Lab Experience",
+      "contact": "Contact"
+    },
+    "community": {
+      "title": "Community",
+      "join": "Join the Club",
+      "ask": "Q&A",
+      "instruction": "Guides",
+      "support": "Contact Support"
+    },
+    "connect": "Connect",
+    "rights": "All rights reserved."
+  },
+  "Home": {
+    "hero": {
+      "title": "Take Off with Droniverse",
+      "description": "Connect with a community of drone clubs, learn from basic to advanced levels through structured courses, and practice with a vivid 3D simulation lab system that helps you build real-world skills.",
+      "cta": "Join Now"
+    },
+    "community": {
+      "title": "Club Community",
+      "description": "A place where drone enthusiasts gather, learn through club courses, and challenge themselves with internal competitions to improve their skills.",
+      "join": "Join a Club",
+      "create": "Register a Club"
+    },
+    "lab": {
+      "title": "Interactive 3D Simulation",
+      "description": "Program through an intuitive drag-and-drop interface with Blockly",
+      "card1": "User-friendly Interface",
+      "card2": "Personal Customization",
+      "card3": "Upload Code Directly to the Drone",
+      "card4": "Many Unique Features",
+      "cta": "Try It Now"
+    },
+    "connect": {
+      "title": "Connect with Us",
+      "description": "If you would like more consultation or want to collaborate with us, feel free to contact us anytime.",
+      "cta": "Contact Us"
+    }
+  },
+  "About": {
+    "hero": {
+      "title": "Who Are We?",
+      "description1": "We build a drone learning platform that combines a club-based community, structured courses, and 3D simulation labs to help learners approach drone technology in a visual, safe, and effective way.",
+      "description2": "We are a platform that connects people passionate about drones, where learning goes beyond theory and is closely tied to practice, community, and advanced technology experiences.",
+      "description3": "Our goal is to help everyone — from beginners to advanced learners — gradually master drone technology in a structured and safe way."
+    },
+    "value": {
+      "title": "What Do We Offer?",
+      "feature1": {
+        "title": "Drone Club Community",
+        "description": "Bringing together drone enthusiasts to learn through club-based courses and share experiences."
+      },
+      "feature2": {
+        "title": "Structured Learning Path",
+        "description": "A clear learning roadmap suitable for beginners and those who want to improve their skills."
+      },
+      "feature3": {
+        "title": "3D Simulation Lab",
+        "description": "Practice flying and handling situations in a safe and intuitive 3D simulation environment."
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "To bring drone learning closer to everyone through community, high-quality courses, and a realistic 3D simulation environment.",
+      "feature": {
+        "title": "We believe that effective drone learning requires:",
+        "feature1": "A strong foundational knowledge",
+        "feature2": "Regular practice",
+        "feature3": "A learning community that shares and grows together"
+      }
+    },
+    "team": {
+      "title": "Development Team"
+    }
+  },
+  "Contact": {
+    "hero": {
+      "title": "Contact Us",
+      "description": "Let us support you"
+    },
+    "link": {
+      "title": "Main Communication Channels",
+      "feature": {
+        "feature1": "Technical Support & Feedback",
+        "feature2": "Activity Updates",
+        "feature3": "Community Discussions",
+        "feature4": "Direct Contact"
+      }
+    },
+    "connect": {
+      "title": "Partnerships & Collaboration",
+      "feature": {
+        "feature1": {
+          "title": "Drone Clubs",
+          "description": "Connect and grow the drone community"
+        },
+        "feature2": {
+          "title": "Training Organizations",
+          "description": "Collaborate to build drone training programs"
+        },
+        "feature3": {
+          "title": "Technology Partners",
+          "description": "Develop solutions and platforms together"
+        }
+      }
+    }
   }
 }

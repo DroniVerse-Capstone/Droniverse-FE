@@ -131,5 +131,126 @@
         }
       }
     }
+  },
+  "PublicHeader": {
+    "home": "Trang chủ",
+    "about": "Về chúng tôi",
+    "sandbox": "Trải nghiệm Lab",
+    "contact": "Liên hệ",
+    "login": "Đăng nhập"
+  },
+  "PublicFooter": {
+    "description": "Nền tảng kết nối cộng đồng drone, học tập qua khóa học và lab mô phỏng 3D.",
+    "links": {
+      "title": "Liên kết",
+      "home": "Trang chủ",
+      "about": "Về chúng tôi",
+      "sandbox": "Trải nghiệm Lab",
+      "contact": "Liên hệ"
+    },
+    "community": {
+      "title": "Cộng đồng",
+      "join": "Tham gia Club",
+      "ask": "Hỏi đáp",
+      "instruction": "Hướng dẫn",
+      "support": "Liên hệ hỗ trợ"
+    },
+    "connect": "Kết nối",
+    "rights": "Tất cả quyền được bảo lưu."
+  },
+  "Home": {
+    "hero": {
+      "title": "Cất Cánh Cùng Droniverse",
+      "description": "Kết nối cộng đồng các câu lạc bộ đam mê drone, học từ nền tảng đến nâng cao thông qua các khóa học bài bản, kết hợp hệ thống lab mô phỏng 3D sống động giúp bạn rèn luyện kỹ năng sát với thực tế.",
+      "cta": "Tham gia ngay"
+    },
+    "community": {
+      "title": "Cộng Đồng Club",
+      "description": "Nơi quy tụ cộng đồng đam mê drone, học tập qua các khóa học trong club và thử sức với các kỳ thi nội bộ để nâng cao kỹ năng.",
+      "join": "Tham gia Club",
+      "create": "Đăng ký Club"
+    },
+    "lab": {
+      "title": "Mô Phỏng 3D Trực Quan",
+      "description": "Lập trình thông qua giao diện kéo thả trực quan với Blockly",
+      "card1": "Giao diện thân thiện",
+      "card2": "Custom theo sở thích cá nhân",
+      "card3": "Nạp Code trực tiếp cho Drone",
+      "card4": "Nhiều tính năng độc đáo",
+      "cta": "Trải nghiệm ngay"
+    },
+    "connect": {
+      "title": "Kết Nối Với Chúng Tôi",
+      "description": "Nếu bạn muốn được tư vấn kỹ hơn hoặc nếu bạn muốn hợp tác cùng chúng tôi hãy liên hệ với chúng tôi ngay",
+      "cta": "Liên hệ với chúng tôi"
+    }
+  },
+  "About": {
+    "hero": {
+      "title": "Chúng Tôi Là Ai ?",
+      "description1": "Chúng tôi xây dựng một nền tảng học drone kết hợp cộng đồng club, khóa học bài bản và lab mô phỏng 3D, giúp người học tiếp cận công nghệ drone một cách trực quan, an toàn và hiệu quả.",
+      "description2": "Chúng tôi là nền tảng kết nối những người đam mê drone, nơi việc học không chỉ dừng lại ở lý thuyết mà được gắn liền với thực hành, cộng đồng và trải nghiệm công nghệ tiên tiến.",
+      "description3": "Mục tiêu của chúng tôi là giúp mọi người — từ người mới bắt đầu đến người học nâng cao — từng bước làm chủ công nghệ drone một cách bài bản và an toàn."
+    },
+    "value": {
+      "title": "Chúng Tôi Mang Đến Điều Gì ?",
+      "feature1": {
+        "title": "Cộng đồng Club Drone",
+        "description": "Quy tụ những người đam mê drone, học tập qua các khóa học trong club và chia sẻ kinh nghiệm "
+      },
+      "feature2": {
+        "title": "Khóa học theo lộ trình",
+        "description": "Lộ trình học rõ ràng, phù hợp cho người mới bắt đầu và người muốn nâng cao kỹ năng."
+      },
+      "feature3": {
+        "title": "Lab mô phỏng 3D",
+        "description": "Thực hành bay và xử lý tình huống trong môi trường mô phỏng 3D an toàn, trực quan."
+      }
+    },
+    "mission": {
+      "title": "Sứ Mệnh",
+      "description": "Mang việc học drone đến gần hơn với mọi người thông qua cộng đồng, khóa học chất lượng và môi trường mô phỏng 3D sát với thực tế.",
+      "feature": {
+        "title": "Chúng tôi tin rằng học drone hiệu quả không thể thiếu:",
+        "feature1": "Kiến thức nền tảng vững chắc",
+        "feature2": "Thực hành thường xuyên",
+        "feature3": "Cộng đồng cùng học, cùng chia sẻ"
+      }
+    },
+    "team": {
+      "title": "Đội Ngũ Phát Triển"
+    }
+  },
+  "Contact": {
+    "hero": {
+      "title": "Liên Hệ Với Chúng Tôi",
+      "description": "Hãy để chúng tôi được hỗ trợ bạn"
+    },
+    "link": {
+      "title": "Kênh liên hệ chính",
+      "feature": {
+        "feature1": "Hỗ trợ kỹ thuật & Góp ý",
+        "feature2": "Cập nhật hoạt động",
+        "feature3": "Trao đổi cùng cộng đồng",
+        "feature4": "Liên hệ trực tiếp"
+      }
+    },
+    "connect": {
+      "title": "Hợp tác & Đối tác",
+      "feature": {
+        "feature1": {
+          "title": "Club Drone",
+          "description": "Kết nối và phát triển cộng đồng drone"
+        },
+        "feature2": {
+          "title": "Tổ chức đào tạo",
+          "description": "Hợp tác xây dựng chương trình học drone"
+        },
+        "feature3": {
+          "title": "Đối tác công nghệ",
+          "description": "Cùng phát triển giải pháp, nền tảng"
+        }
+      }
+    }
   }
 }

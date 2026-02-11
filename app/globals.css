@@ -127,6 +127,48 @@ body {
   font-family: var(--font-family-primary);
 }
 
+/* === DRONIVERSE CUSTOM SCROLLBAR === */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(219, 65, 57, 0.3) rgba(38, 42, 52, 0.2);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(38, 42, 52, 0.2);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(219, 65, 57, 0.3);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(219, 65, 57, 0.5);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: rgba(219, 65, 57, 0.7);
+  background-clip: padding-box;
+}
+
+/* Horizontal scrollbar corner */
+*::-webkit-scrollbar-corner {
+  background: rgba(38, 42, 52, 0.2);
+}
+
 /* Ensure Settings Modal is always on top */
 [class*="SettingsModal"] {
   z-index: 9999 !important;
