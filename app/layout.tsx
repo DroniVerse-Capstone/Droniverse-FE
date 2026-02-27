@@ -3,9 +3,15 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { AppProvider } from "@/providers/app-provider";
 
+import { cookies } from "next/headers";
+
 export const metadata: Metadata = {
   title: "Droniverse",
-  description: "Mô phỏng drone 3D và học lập trình điều khiển bằng Blockly",
+  description: "Nền tảng kết nối cộng đồng drone, học tập qua khóa học và lab mô phỏng 3D.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/images/Logo.png",
+  },
 };
 
 const geistSans = Inter({
@@ -21,12 +27,13 @@ const geistMono = Roboto_Mono({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = cookies();
+  const locale = cookieStore.get("locale")?.value || "vi";
+
   return (
-    <html lang="vi">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AppProvider>{children}</AppProvider>
+    <html>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AppProvider initialLocale={locale}>{children}</AppProvider>
       </body>
     </html>
   );

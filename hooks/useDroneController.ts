@@ -26,10 +26,10 @@ export function useDroneController({
     controllerRef.current.setCallbacks(
       (state) => callbacksRef.current.onDroneStateChange(state),
       (status) => {
-        if (status === "running") callbacksRef.current.onStatusChange("Đang chạy…");
-        else if (status === "completed") callbacksRef.current.onStatusChange("Hoàn thành");
-        else if (status === "goal_reached") callbacksRef.current.onStatusChange("Đã tới đích");
-        else callbacksRef.current.onStatusChange("Sẵn sàng");
+        if (status === "running") callbacksRef.current.onStatusChange("running");
+        else if (status === "completed") callbacksRef.current.onStatusChange("finished");
+        else if (status === "goal_reached") callbacksRef.current.onStatusChange("finished");
+        else callbacksRef.current.onStatusChange("ready");
       }
     );
   }

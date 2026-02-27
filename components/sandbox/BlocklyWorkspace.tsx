@@ -5,6 +5,7 @@ import type * as BlocklyType from "blockly/core";
 import "blockly/blocks";
 import "blockly/javascript";
 import { registerBlocks } from "@/lib/blockly";
+import { useTranslations } from "@/providers/i18n-provider";
 import "@/styles/blocklyCustom.css";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlocksChange }: Props) {
+  const t = useTranslations("Sandbox");
   const blocklyDivRef = useRef<HTMLDivElement | null>(null);
   const workspaceRef = useRef<any>(null);
   const [panelsCollapsed, setPanelsCollapsed] = useState(false);
@@ -29,7 +31,26 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         mod) as unknown as typeof BlocklyType;
       if (!mounted) return;
 
-      registerBlocks(Blockly);
+      registerBlocks(Blockly, {
+        takeOff: { message: t("blockly.blocks.takeOff.message"), tooltip: t("blockly.blocks.takeOff.tooltip") },
+        up: { message: t("blockly.blocks.up.message"), tooltip: t("blockly.blocks.up.tooltip") },
+        down: { message: t("blockly.blocks.down.message"), tooltip: t("blockly.blocks.down.tooltip") },
+        left: { message: t("blockly.blocks.left.message"), tooltip: t("blockly.blocks.left.tooltip") },
+        right: { message: t("blockly.blocks.right.message"), tooltip: t("blockly.blocks.right.tooltip") },
+        forward: { message: t("blockly.blocks.forward.message"), tooltip: t("blockly.blocks.forward.tooltip") },
+        backward: { message: t("blockly.blocks.backward.message"), tooltip: t("blockly.blocks.backward.tooltip") },
+        turnRight: { message: t("blockly.blocks.turnRight.message"), tooltip: t("blockly.blocks.turnRight.tooltip") },
+        turnLeft: { message: t("blockly.blocks.turnLeft.message"), tooltip: t("blockly.blocks.turnLeft.tooltip") },
+        land: { message: t("blockly.blocks.land.message"), tooltip: t("blockly.blocks.land.tooltip") },
+        repeat: { message: t("blockly.blocks.repeat.message"), tooltip: t("blockly.blocks.repeat.tooltip") },
+        if: { message: t("blockly.blocks.if.message"), tooltip: t("blockly.blocks.if.tooltip") },
+        ifElse: { message: t("blockly.blocks.ifElse.message"), tooltip: t("blockly.blocks.ifElse.tooltip"), elseMessage: t("blockly.blocks.ifElse.elseMessage") || "Else %1" },
+        isObstacleAhead: { message: t("blockly.blocks.isObstacleAhead.message"), tooltip: t("blockly.blocks.isObstacleAhead.tooltip") },
+        amountValue: { tooltip: t("blockly.blocks.amountValue.tooltip") },
+        mathOperation: { tooltip: t("blockly.blocks.mathOperation.tooltip") },
+        playSound: { message: t("blockly.blocks.playSound.message"), tooltip: t("blockly.blocks.playSound.tooltip") },
+        inputNumber: { message: t("blockly.blocks.inputNumber.message"), tooltip: t("blockly.blocks.inputNumber.tooltip") },
+      });
       const blocklyDiv = blocklyDivRef.current!;
 
       const DarkTheme = Blockly.Theme.defineTheme("droneDark", {
