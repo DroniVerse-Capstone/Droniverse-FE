@@ -256,5 +256,58 @@
         }
       }
     }
+  },
+  "SystemSidebar": {
+    "subtitle": "Quản lý hệ thống",
+    "primary": "Chung",
+    "secondary": "Khác",
+    "dashboard": {
+      "title": "Tổng quan"
+    },
+    "clubs": {
+      "title": "Clubs",
+      "subitems": {
+        "club": "Quản lý club",
+        "request": "Yêu cầu đăng ký"
+      }
+    },
+    "courses": {
+      "title": "Khóa học",
+      "subitems": {
+        "course": "Quản lý khóa học",
+        "certificate": "Quản lý chứng chỉ",
+        "code": "Quản lý mã code"
+      }
+    },
+    "labs": {
+      "title": "Labs"
+    },
+    "users": {
+      "title": "Người dùng",
+      "subitems": {
+        "user": "Quản lý người dùng",
+        "roles": "Quản lý role",
+        "permissions": "Quản lý quyền"
+      }
+    },
+    "drone": {
+      "title": "Drones"
+    },
+    "category": {
+      "title": "Danh mục",
+      "subitems": {
+        "drone": "Danh mục drone",
+        "club": "Danh mục club & khóa học"
+      }
+    },
+    "event": {
+      "title": "Cuộc thi"
+    },
+    "settings": {
+      "title": "Thiết lập"
+    },
+    "help": {
+      "title": "Yêu cầu hỗ trợ"
+    }
   }
 }
