@@ -10,6 +10,7 @@ import {
   LoginResponse,
   loginResponseSchema
 } from '@/validations/auth'
+import toast from 'react-hot-toast'
 
 interface UseLoginOptions {
   onSuccess?: (data: LoginResponse) => void
@@ -80,7 +81,7 @@ export const useLogout = () => {
       }
     },
     onSuccess: () => {
-      // Redirect to login page
+      toast.success('Seeyah! 👋')
       router.push('/auth/login')
     }
   })

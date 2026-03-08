@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLogout } from '@/hooks/auth/useAuth';
+import { Spinner } from '@/components/ui/spinner';
 
 interface UserDropdownProps {
   user: {
@@ -109,7 +110,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-400/10 focus:bg-red-400/10"
         >
           <FiLogOut className="mr-2" />
-          {logout.isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
+          {logout.isPending ? <Spinner /> : 'Đăng xuất'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

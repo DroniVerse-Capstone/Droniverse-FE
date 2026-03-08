@@ -30,7 +30,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<Role>("CLUB_MEMBER");
 
   const isLogin = mode === "login";
@@ -66,7 +67,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
     } else {
       // Handle registration
       // TODO: Implement registration logic
-      console.log({ email, password, name, confirmPassword, role });
+      console.log({
+        email,
+        password,
+        firstName,
+        lastName,
+        confirmPassword,
+        role,
+      });
     }
   };
 
@@ -130,19 +138,35 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <form onSubmit={handleSubmit} className="space-y-2">
             {!isLogin && (
               <>
-                <div>
-                  <Label htmlFor="name" className="text-greyscale-0">
-                    {t("name")}
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder={t("name")}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-transparent border-greyscale-25 text-greyscale-0 mt-2"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="lastName" className="text-greyscale-0">
+                      {t("lastName")}
+                    </Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder={t("lastName")}
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="bg-transparent border-greyscale-25 text-greyscale-0 mt-2"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="firstName" className="text-greyscale-0">
+                      {t("firstName")}
+                    </Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder={t("firstName")}
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="bg-transparent border-greyscale-25 text-greyscale-0 mt-2"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>
