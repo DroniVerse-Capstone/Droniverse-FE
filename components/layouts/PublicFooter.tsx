@@ -10,6 +10,7 @@ import { RiInstagramFill } from "react-icons/ri";
 
 export default function PublicFooter() {
   const t = useTranslations("PublicFooter");
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-greyscale-900 text-greyscale-100">
       <div className="mx-auto px-4 md:px-8 py-4">
@@ -153,7 +154,7 @@ export default function PublicFooter() {
         {/* Copyright */}
         <div className="mt-4 pt-4 border-t border-greyscale-700 text-center">
           <p className="text-sm">
-            © 2026 Droniverse System. {t("rights")}
+            © {currentYear} Droniverse System. {t("rights")}
           </p>
         </div>
       </div>
