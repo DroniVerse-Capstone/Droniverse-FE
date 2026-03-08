@@ -2,7 +2,7 @@ import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { IoMdArrowBack } from "react-icons/io";
 import { FaFacebook } from "react-icons/fa";
@@ -14,7 +14,8 @@ import { SlideIn, StaggerContainer } from "@/components/animation";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { useLogin } from "@/hooks/auth/useAuth";
-import { AxiosError } from "axios";
+import { Spinner } from "@/components/ui/spinner";
+import toast from "react-hot-toast";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -25,12 +26,12 @@ type Role = "CLUB_MEMBER" | "CLUB_MANAGER";
 export default function AuthForm({ mode }: AuthFormProps) {
   const t = useTranslations("Auth.authForm");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("CLUB_MEMBER");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const isLogin = mode === "login";
 
@@ -39,21 +40,25 @@ export default function AuthForm({ mode }: AuthFormProps) {
     { value: "CLUB_MANAGER" as Role, label: t("manager") },
   ];
 
+  const redirectTo = searchParams.get('redirect') || undefined;
+
   const login = useLogin({
     onSuccess: (data) => {
-      console.log('Login successful:', data.data.user);
+      toast.success(data.message);
     },
     onError: (error) => {
-      const axiosError = error as AxiosError<{ message?: string }>;
-      const message = axiosError.response?.data?.message || error.message || 'Login failed';
-      setErrorMessage(message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed";
+
+      toast.error(message);
     },
-    redirectTo: '/sandbox'
+    redirectTo
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
     
     if (isLogin) {
       // Handle login
@@ -248,18 +253,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </div>
             )}
 
-            {errorMessage && (
-              <div className="text-red-400 text-sm text-center bg-red-400/10 p-2 rounded">
-                {errorMessage}
-              </div>
-            )}
-
             <Button
               type="submit"
               className="w-full bg-primary-200 hover:bg-primary-300"
               disabled={isLogin && login.isPending}
             >
-              {isLogin && login.isPending ? t("loading") || "Loading..." : (isLogin ? t("login") : t("register"))}
+              {isLogin && login.isPending ? <Spinner /> : (isLogin ? t("login") : t("register"))}
             </Button>
             <div className="text-sm font-medium text-greyscale-0">
               {isLogin ? (

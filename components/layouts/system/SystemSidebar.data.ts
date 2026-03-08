@@ -1,4 +1,5 @@
 import React from "react";
+import { canAccessRoute } from "@/lib/auth/access";
 import {
   BookOpen,
   CircleHelp,
@@ -27,6 +28,34 @@ export type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   href?: string;
   subItems?: SubItem[];
+};
+
+export const filterNavItemsByRole = (
+  items: NavItem[],
+  roleName?: string | null,
+): NavItem[] => {
+  return items.reduce<NavItem[]>((result, item) => {
+    if (item.subItems?.length) {
+      const allowedSubItems = item.subItems.filter(
+        (subItem) => !subItem.href || canAccessRoute(subItem.href, roleName),
+      );
+
+      if (allowedSubItems.length > 0) {
+        result.push({
+          ...item,
+          subItems: allowedSubItems,
+        });
+      }
+
+      return result;
+    }
+
+    if (!item.href || canAccessRoute(item.href, roleName)) {
+      result.push(item);
+    }
+
+    return result;
+  }, []);
 };
 
 export const primaryItems: NavItem[] = [

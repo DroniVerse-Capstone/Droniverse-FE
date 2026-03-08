@@ -1,9 +1,16 @@
 import { ApiError } from "@/types/api/common";
+import {
+  clearAuthCookies,
+  getAccessToken,
+  getRefreshToken,
+  setAuthCookies,
+} from "@/lib/auth/cookies";
 import axios, {
   AxiosInstance,
   AxiosError,
   InternalAxiosRequestConfig,
 } from "axios";
+import { User } from "@/validations/auth";
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -21,6 +28,30 @@ let failedQueue: Array<{
   reject: (reason?: unknown) => void;
 }> = [];
 
+interface RefreshTokenResponse {
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: User;
+  };
+  isSuccess: boolean;
+  message: string;
+}
+
+const AUTH_EXCLUDED_PATHS = ["/auth/login", "/auth/register", "/auth/refresh-token"];
+
+const shouldSkipAuthHandling = (
+  config?: InternalAxiosRequestConfig,
+) => {
+  const requestUrl = config?.url;
+
+  if (!requestUrl) {
+    return false;
+  }
+
+  return AUTH_EXCLUDED_PATHS.some((path) => requestUrl.includes(path));
+};
+
 const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -37,9 +68,7 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add auth token if available
-    const token = typeof window !== "undefined" 
-      ? localStorage.getItem("access_token") 
-      : null;
+    const token = getAccessToken();
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -64,17 +93,28 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
+    if (shouldSkipAuthHandling(originalRequest)) {
+      return Promise.reject(error);
+    }
+
     // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
+        originalRequest._retry = true;
+
         // Queue requests while refreshing
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
+            if (!token) {
+              return Promise.reject(error);
+            }
+
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${token}`;
             }
+
             return apiClient(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -83,39 +123,49 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = typeof window !== "undefined"
-        ? localStorage.getItem("refresh_token")
-        : null;
+      const refreshToken = getRefreshToken();
+      const currentAccessToken = getAccessToken();
 
-      if (!refreshToken) {
-        // No refresh token, logout
+      if (!refreshToken || !currentAccessToken) {
+        // No refresh token or access token, logout
         isRefreshing = false;
         if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
+          clearAuthCookies();
           window.location.href = "/auth/login";
         }
         return Promise.reject(error);
       }
 
       try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          { refreshToken }
+        const response = await axios.post<RefreshTokenResponse>(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+          {
+            refreshToken,
+            accessToken: currentAccessToken,
+          },
         );
 
-        const { accessToken } = response.data;
+        const {
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+          user,
+        } = response.data.data;
         
         if (typeof window !== "undefined") {
-          localStorage.setItem("access_token", accessToken);
+          setAuthCookies(
+            newAccessToken,
+            newRefreshToken,
+            user.roleName,
+          );
+          localStorage.setItem("user", JSON.stringify(user));
         }
 
         // Process queued requests
-        processQueue(null, accessToken);
+        processQueue(null, newAccessToken);
 
         // Retry original request with new token
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
         
         return apiClient(originalRequest);
@@ -124,8 +174,7 @@ apiClient.interceptors.response.use(
         processQueue(refreshError as Error, null);
         
         if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
+          clearAuthCookies();
           window.location.href = "/auth/login";
         }
         

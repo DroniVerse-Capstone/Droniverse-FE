@@ -13,10 +13,12 @@ import {
 } from "lucide-react";
 
 import {
+  filterNavItemsByRole,
   primaryItems,
   secondaryItems,
   type NavItem,
 } from "./SystemSidebar.data";
+import { getRoleName } from "@/lib/auth/cookies";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -245,6 +247,7 @@ function NavEntry({
 export default function SystemSidebar() {
   const pathname = usePathname();
   const t = useTranslations("SystemSidebar");
+  const [roleName, setRoleName] = React.useState<string | null>(null);
   const [collapsed, setCollapsed] = React.useState(false);
   const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>(
     () => ({
@@ -256,10 +259,24 @@ export default function SystemSidebar() {
   );
 
   React.useEffect(() => {
+    setRoleName(getRoleName());
+  }, []);
+
+  const visiblePrimaryItems = React.useMemo(
+    () => filterNavItemsByRole(primaryItems, roleName),
+    [roleName],
+  );
+
+  const visibleSecondaryItems = React.useMemo(
+    () => filterNavItemsByRole(secondaryItems, roleName),
+    [roleName],
+  );
+
+  React.useEffect(() => {
     setOpenMenus((current) => {
       const nextState = { ...current };
 
-      for (const item of primaryItems) {
+      for (const item of visiblePrimaryItems) {
         if (item.subItems?.some((subItem) => subItem.href === pathname)) {
           nextState[item.title] = true;
         }
@@ -267,7 +284,7 @@ export default function SystemSidebar() {
 
       return nextState;
     });
-  }, [pathname]);
+  }, [pathname, visiblePrimaryItems]);
 
   const renderSection = (title: string, items: NavItem[]) => (
     <div className="space-y-2">
@@ -363,9 +380,9 @@ export default function SystemSidebar() {
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
           <div className="space-y-6 px-1">
-            {renderSection("primary", primaryItems)}
+            {renderSection("primary", visiblePrimaryItems)}
             <Separator className="bg-greyscale-700" />
-            {renderSection("secondary", secondaryItems)}
+            {renderSection("secondary", visibleSecondaryItems)}
           </div>
         </div>
       </aside>

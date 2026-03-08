@@ -309,5 +309,10 @@
     "help": {
       "title": "Yêu cầu hỗ trợ"
     }
+  },
+  "ErrorPage": {
+    "title": "Oops! Không tìm thấy trang",
+    "description": "Trang bạn đang tìm kiếm có thể đã bị xóa, đã được đổi tên hoặc hiện đang tạm thời không khả dụng.",
+    "cta": "Quay lại"
   }
 }
