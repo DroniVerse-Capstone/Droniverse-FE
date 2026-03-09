@@ -1,9 +1,12 @@
+"use client"
+
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { AxiosError } from 'axios'
 import apiClient from '@/lib/api/client'
 import { resolveLoginRedirect } from '@/lib/auth/access'
 import { clearAuthCookies, getAccessToken, setAuthCookies } from '@/lib/auth/cookies'
+import { getStoredUser, useAuthStore } from '@/stores/auth-store'
 import { ApiError } from '@/types/api/common'
 import {
   LoginRequest,
@@ -41,7 +44,7 @@ export const useLogin = (options?: UseLoginOptions) => {
           data.data.refreshToken,
           data.data.user.roleName
         )
-        localStorage.setItem('user', JSON.stringify(data.data.user))
+        useAuthStore.getState().setUser(data.data.user)
       }
 
       // Call custom onSuccess callback if provided
@@ -73,11 +76,11 @@ export const useLogout = () => {
     mutationFn: async () => {
       // Optionally call logout endpoint
       // await apiClient.post('/auth/logout')
-      
+
       // Clear auth cookies and local user cache
       if (typeof window !== 'undefined') {
         clearAuthCookies()
-        localStorage.removeItem('user')
+        useAuthStore.getState().clearUser()
       }
     },
     onSuccess: () => {
@@ -87,18 +90,11 @@ export const useLogout = () => {
   })
 }
 
-// Helper function to get current user from localStorage
+// Helper function to get current user from auth store
 export const getCurrentUser = () => {
   if (typeof window === 'undefined') return null
 
-  const userStr = localStorage.getItem('user')
-  if (!userStr) return null
-
-  try {
-    return JSON.parse(userStr)
-  } catch {
-    return null
-  }
+  return getStoredUser()
 }
 
 // Helper function to check if user is authenticated

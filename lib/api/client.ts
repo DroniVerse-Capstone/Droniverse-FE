@@ -5,6 +5,7 @@ import {
   getRefreshToken,
   setAuthCookies,
 } from "@/lib/auth/cookies";
+import { useAuthStore } from "@/stores/auth-store";
 import axios, {
   AxiosInstance,
   AxiosError,
@@ -131,6 +132,7 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         if (typeof window !== "undefined") {
           clearAuthCookies();
+          useAuthStore.getState().clearUser();
           window.location.href = "/auth/login";
         }
         return Promise.reject(error);
@@ -157,7 +159,7 @@ apiClient.interceptors.response.use(
             newRefreshToken,
             user.roleName,
           );
-          localStorage.setItem("user", JSON.stringify(user));
+          useAuthStore.getState().setUser(user);
         }
 
         // Process queued requests
@@ -175,6 +177,7 @@ apiClient.interceptors.response.use(
         
         if (typeof window !== "undefined") {
           clearAuthCookies();
+          useAuthStore.getState().clearUser();
           window.location.href = "/auth/login";
         }
         
