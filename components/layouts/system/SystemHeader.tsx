@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-import { getCurrentUser } from "@/hooks/auth/useAuth";
+import { useAuthStore } from "@/stores/auth-store";
 import { useTranslations } from "@/providers/i18n-provider";
 import {
   Breadcrumb,
@@ -58,11 +58,7 @@ function getRouteEntries() {
 export default function SystemHeader() {
   const pathname = usePathname();
   const t = useTranslations("SystemSidebar");
-  const [user, setUser] = React.useState<any>(null);
-
-  React.useEffect(() => {
-    setUser(getCurrentUser());
-  }, []);
+  const user = useAuthStore((state) => state.user);
 
   const normalizedPath = normalizePath(pathname);
   const routeEntries = getRouteEntries();

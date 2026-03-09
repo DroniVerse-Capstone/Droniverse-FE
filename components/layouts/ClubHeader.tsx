@@ -1,20 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import UserDropdown from './UserDropdown';
 import NotificationDropdown from './NotificationDropdown';
-import { getCurrentUser } from '@/hooks/auth/useAuth';
+import { useAuthStore } from '@/stores/auth-store';
 
 export default function ClubHeader() {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-  }, []);
+  const user = useAuthStore((state) => state.user);
 
   const handleMarkAllAsRead = () => {
     // TODO: Implement mark all as read logic
