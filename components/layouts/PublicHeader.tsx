@@ -14,7 +14,6 @@ const navItems = [
   { labelKey: "about", href: "/about" },
   { labelKey: "sandbox", href: "/sandbox" },
   { labelKey: "contact", href: "/contact" },
-  { labelKey: "map-editor", href: "/map-editor" },
 ];
 
 export default function PublicHeader() {
