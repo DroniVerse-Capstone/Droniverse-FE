@@ -28,7 +28,17 @@
       "noAccount": "Chưa có tài khoản?",
       "createAccount": "Tạo tài khoản",
       "haveAccount": "Đã có tài khoản?",
-      "backToLogin": "Đăng nhập ngay"
+      "backToLogin": "Đăng nhập ngay",
+      "validation": {
+        "emailInvalid": "Email không hợp lệ",
+        "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự",
+        "confirmPasswordMin": "Xác nhận mật khẩu phải có ít nhất 6 ký tự",
+        "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp",
+        "firstNameRequired": "Tên không được để trống",
+        "lastNameRequired": "Họ không được để trống",
+        "roleRequired": "Vui lòng chọn vai trò",
+        "invalidForm": "Dữ liệu không hợp lệ"
+      }
     }
   },
   "Sandbox": {

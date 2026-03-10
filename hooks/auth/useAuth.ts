@@ -11,12 +11,21 @@ import { ApiError } from '@/types/api/common'
 import {
   LoginRequest,
   LoginResponse,
-  loginResponseSchema
+  loginResponseSchema,
+  RegisterRequest,
+  RegisterResponse,
+  registerResponseSchema
 } from '@/validations/auth'
 import toast from 'react-hot-toast'
 
 interface UseLoginOptions {
   onSuccess?: (data: LoginResponse) => void
+  onError?: (error: AxiosError<ApiError>) => void
+  redirectTo?: string
+}
+
+interface UseRegisterOptions {
+  onSuccess?: (data: RegisterResponse) => void
   onError?: (error: AxiosError<ApiError>) => void
   redirectTo?: string
 }
@@ -64,6 +73,38 @@ export const useLogin = (options?: UseLoginOptions) => {
       }
 
       // Call custom onError callback if provided
+      options?.onError?.(error)
+    }
+  })
+}
+
+export const useRegister = (options?: UseRegisterOptions) => {
+  const router = useRouter()
+
+  return useMutation<RegisterResponse, AxiosError<ApiError>, RegisterRequest>({
+    mutationFn: async (payload: RegisterRequest) => {
+      const response = await apiClient.post<RegisterResponse>(
+        '/auth/register',
+        payload
+      )
+
+      return registerResponseSchema.parse(response.data)
+    },
+    onSuccess: (data) => {
+      options?.onSuccess?.(data)
+
+      if (options?.redirectTo) {
+        router.push(options.redirectTo)
+        return
+      }
+
+      router.push('/auth/login')
+    },
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Register error:', error)
+      }
+
       options?.onError?.(error)
     }
   })
