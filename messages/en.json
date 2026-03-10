@@ -16,15 +16,29 @@
       "google": "Sign in with Google",
       "facebook": "Sign in with Facebook",
       "or": "Or continue with",
-      "name": "Full name",
+      "firstName": "First name",
+      "lastName": "Last name",
       "email": "Email",
+      "role": "Role",
+      "member": "Member",
+      "manager": "Manager",
       "password": "Password",
       "confirmPassword": "Confirm password",
       "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
       "haveAccount": "Already have an account?",
-      "backToLogin": "Login now"
+      "backToLogin": "Login now",
+      "validation": {
+        "emailInvalid": "Invalid email address",
+        "passwordMin": "Password must be at least 6 characters",
+        "confirmPasswordMin": "Confirm password must be at least 6 characters",
+        "confirmPasswordMismatch": "Confirm password does not match",
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "roleRequired": "Please select a role",
+        "invalidForm": "Invalid form data"
+      }
     }
   },
   "Sandbox": {
@@ -176,6 +190,7 @@
     "home": "Home",
     "about": "About Us",
     "sandbox": "Lab Experience",
+    "map-editor": "Create Lab",
     "contact": "Contact",
     "login": "Login"
   },
@@ -292,5 +307,63 @@
         }
       }
     }
+  },
+  "SystemSidebar": {
+    "subtitle": "System Control Center",
+    "primary": "General",
+    "secondary": "Others",
+    "dashboard": {
+      "title": "Dashboard"
+    },
+    "clubs": {
+      "title": "Clubs",
+      "subitems": {
+        "club": "Club Management",
+        "request": "Registration Requests"
+      }
+    },
+    "courses": {
+      "title": "Courses",
+      "subitems": {
+        "course": "Course Management",
+        "certificate": "Certificate Management",
+        "code": "Code Management"
+      }
+    },
+    "labs": {
+      "title": "Labs"
+    },
+    "users": {
+      "title": "Users",
+      "subitems": {
+        "user": "User Management",
+        "roles": "Role Management",
+        "permissions": "Permission Management"
+      }
+    },
+    "drone": {
+      "title": "Drones"
+    },
+    "category": {
+      "title": "Categories",
+      "subitems": {
+        "drone": "Drone Categories",
+        "club": "Club & Course Categories"
+      }
+    },
+    "event": {
+      "title": "Competitions"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "help": {
+      "title": "Support Requests"
+    }
+  },
+  "ErrorPage": {
+    "title": "Oops! Page Not Found",
+    "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
+    "cta": "Go Back"
   }
 }

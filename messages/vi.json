@@ -16,15 +16,29 @@
       "google": "Đăng nhập với Google",
       "facebook": "Đăng nhập với Facebook",
       "or": "Hoặc tiếp tục với",
-      "name": "Họ và tên",
+      "firstName": "Tên",
+      "lastName": "Họ",
       "email": "Email",
+      "role": "Vai trò",
+      "member": "Thành viên",
+      "manager": "Quản lý",
       "password": "Mật khẩu",
       "confirmPassword": "Xác nhận mật khẩu",
       "forgotPassword": "Quên mật khẩu?",
       "noAccount": "Chưa có tài khoản?",
       "createAccount": "Tạo tài khoản",
       "haveAccount": "Đã có tài khoản?",
-      "backToLogin": "Đăng nhập ngay"
+      "backToLogin": "Đăng nhập ngay",
+      "validation": {
+        "emailInvalid": "Email không hợp lệ",
+        "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự",
+        "confirmPasswordMin": "Xác nhận mật khẩu phải có ít nhất 6 ký tự",
+        "confirmPasswordMismatch": "Mật khẩu xác nhận không khớp",
+        "firstNameRequired": "Tên không được để trống",
+        "lastNameRequired": "Họ không được để trống",
+        "roleRequired": "Vui lòng chọn vai trò",
+        "invalidForm": "Dữ liệu không hợp lệ"
+      }
     }
   },
   "Sandbox": {
@@ -136,6 +150,7 @@
     "home": "Trang chủ",
     "about": "Về chúng tôi",
     "sandbox": "Trải nghiệm Lab",
+    "map-editor": "Tạo Lab",
     "contact": "Liên hệ",
     "login": "Đăng nhập"
   },
@@ -252,5 +267,63 @@
         }
       }
     }
+  },
+  "SystemSidebar": {
+    "subtitle": "Quản lý hệ thống",
+    "primary": "Chung",
+    "secondary": "Khác",
+    "dashboard": {
+      "title": "Tổng quan"
+    },
+    "clubs": {
+      "title": "Clubs",
+      "subitems": {
+        "club": "Quản lý club",
+        "request": "Yêu cầu đăng ký"
+      }
+    },
+    "courses": {
+      "title": "Khóa học",
+      "subitems": {
+        "course": "Quản lý khóa học",
+        "certificate": "Quản lý chứng chỉ",
+        "code": "Quản lý mã code"
+      }
+    },
+    "labs": {
+      "title": "Labs"
+    },
+    "users": {
+      "title": "Người dùng",
+      "subitems": {
+        "user": "Quản lý người dùng",
+        "roles": "Quản lý role",
+        "permissions": "Quản lý quyền"
+      }
+    },
+    "drone": {
+      "title": "Drones"
+    },
+    "category": {
+      "title": "Danh mục",
+      "subitems": {
+        "drone": "Danh mục drone",
+        "club": "Danh mục club & khóa học"
+      }
+    },
+    "event": {
+      "title": "Cuộc thi"
+    },
+    "settings": {
+      "title": "Thiết lập"
+    },
+    "help": {
+      "title": "Yêu cầu hỗ trợ"
+    }
+  },
+  "ErrorPage": {
+    "title": "Oops! Không tìm thấy trang",
+    "description": "Trang bạn đang tìm kiếm có thể đã bị xóa, đã được đổi tên hoặc hiện đang tạm thời không khả dụng.",
+    "cta": "Quay lại"
   }
 }

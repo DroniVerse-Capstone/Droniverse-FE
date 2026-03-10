@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Droniverse",
   description: "Nền tảng kết nối cộng đồng drone, học tập qua khóa học và lab mô phỏng 3D.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/images/Logo.png",
     shortcut: "/images/Logo.png",
   },
 };

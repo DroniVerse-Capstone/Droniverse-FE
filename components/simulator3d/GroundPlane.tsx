@@ -140,8 +140,7 @@ export default function GroundPlane({
         transparent={MAP_COLORS.BORDER.transparent}
       />
 
-      {/* Copyright Logo Image */}
-      <GroundLogo size={size} />
+      {/* <GroundLogo size={size} /> */}
     </group>
   );
 }
