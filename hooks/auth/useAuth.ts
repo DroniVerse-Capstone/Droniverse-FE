@@ -1,6 +1,6 @@
 "use client"
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { AxiosError } from 'axios'
 import apiClient from '@/lib/api/client'
@@ -112,6 +112,7 @@ export const useRegister = (options?: UseRegisterOptions) => {
 
 export const useLogout = () => {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async () => {
@@ -122,6 +123,7 @@ export const useLogout = () => {
       if (typeof window !== 'undefined') {
         clearAuthCookies()
         useAuthStore.getState().clearUser()
+        queryClient.clear()
       }
     },
     onSuccess: () => {

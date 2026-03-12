@@ -7,7 +7,7 @@ export default function ClubLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-greyscale-900">
       <ClubHeader />
       <main className="flex-1">{children}</main>
       <ClubFooter />

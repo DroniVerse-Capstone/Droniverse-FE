@@ -365,5 +365,58 @@
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
     "cta": "Go Back"
+  },
+  "RegisterClubDialog": {
+    "title": "Register Club",
+    "subtitle": "Fill out the form below to request creating your own Club",
+    "fields": {
+      "nameVi": "Club Name (Vietnamese)",
+      "nameEn": "Club Name (English)",
+      "description": "Reason for establishing the Club",
+      "category": "Category",
+      "categoryPlaceholder": "Select category",
+      "coverImage": "Club Image",
+      "isPublic": "Public Club",
+      "limitMembers": "Member Limit",
+      "limitManagers": "Manager Limit"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Register"
+    },
+    "validation": "Please fill in all valid information",
+    "error": "Failed to submit club creation request"
+  },
+  "ClubImageUpload": {
+    "toast": {
+      "success": "Image uploaded successfully",
+      "error": "Image upload failed",
+      "warning": "Please select a valid image file"
+    },
+    "caption": {
+      "upload": "Click or drag an image here to upload",
+      "change": "Drag another image here or click to choose again",
+      "accept": "Supports PNG, JPG, JPEG, WEBP",
+      "empty": "No image selected",
+      "remove": "Remove image"
+    }
+  },
+  "ClubDashboard": {
+    "myClubs": "My Clubs",
+    "myRequests": "My Requests",
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived"
+    },
+    "empty": {
+      "title": "No clubs yet."
+    },
+    "privacy": {
+      "public": "Public",
+      "private": "Private"
+    }
   }
 }

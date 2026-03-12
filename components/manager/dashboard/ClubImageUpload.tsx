@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type UploadTempImageResponse = {
   url: string;
@@ -32,6 +33,7 @@ export function ClubImageUpload({
   label = "Ảnh Club",
   disabled = false,
 }: ClubImageUploadProps) {
+  const t = useTranslations("ClubImageUpload");
   const inputRef = useRef<HTMLInputElement>(null);
   const [localPreview, setLocalPreview] = useState("");
   const [fileName, setFileName] = useState("");
@@ -68,16 +70,16 @@ export function ClubImageUpload({
     },
     onSuccess: (data) => {
       onChange(data.url);
-      toast.success("Upload ảnh thành công");
+      toast.success(t("toast.success"));
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Upload ảnh thất bại");
+      toast.error(error.response?.data?.message || t("toast.error"));
     },
   });
 
   const processFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Vui lòng chọn file ảnh hợp lệ");
+      toast.error(t("toast.warning"));
       return;
     }
 
@@ -205,7 +207,7 @@ export function ClubImageUpload({
                   {fileName || "Ảnh Club"}
                 </p>
                 <p className="text-xs text-greyscale-50">
-                  Kéo ảnh khác vào đây hoặc nhấn để chọn lại
+                  {t("caption.change")}
                 </p>
               </div>
             </div>
@@ -220,10 +222,10 @@ export function ClubImageUpload({
               </div>
 
               <p className="text-sm font-medium text-greyscale-0">
-                Click hoặc kéo ảnh vào đây để upload
+                {t("caption.upload")}
               </p>
               <p className="mt-1 text-xs text-greyscale-50">
-                Hỗ trợ PNG, JPG, JPEG, WEBP
+                {t("caption.accept")}
               </p>
             </>
           )}
@@ -231,7 +233,7 @@ export function ClubImageUpload({
 
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 truncate text-xs text-greyscale-50">
-            {fileName || "Chưa có ảnh nào được chọn"}
+            {fileName || t("caption.empty")}
           </p>
 
           {previewSrc && (
@@ -243,7 +245,7 @@ export function ClubImageUpload({
               className="h-8 px-2 text-greyscale-50 hover:text-red-400"
             >
               <Trash2 className="h-4 w-4" />
-              Xóa
+              {t("caption.remove")}
             </Button>
           )}
         </div>

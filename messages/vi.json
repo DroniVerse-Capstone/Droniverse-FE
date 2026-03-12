@@ -325,5 +325,58 @@
     "title": "Oops! Không tìm thấy trang",
     "description": "Trang bạn đang tìm kiếm có thể đã bị xóa, đã được đổi tên hoặc hiện đang tạm thời không khả dụng.",
     "cta": "Quay lại"
+  },
+  "RegisterClubDialog": {
+    "title": "Đăng ký Club",
+    "subtitle": "Điền form sau để yêu cầu tạo Club cho riêng bạn",
+    "fields": {
+      "nameVi": "Tên Club (Tiếng Việt)",
+      "nameEn": "Tên Club (Tiếng Anh)",
+      "description": "Lý do thành lập Club",
+      "category": "Danh mục",
+      "categoryPlaceholder": "Chọn danh mục",
+      "coverImage": "Ảnh Club",
+      "isPublic": "Công khai Club",
+      "limitMembers": "Giới hạn thành viên",
+      "limitManagers": "Giới hạn quản lý"
+    },
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "submit": "Đăng ký"
+    },
+    "validation": "Vui lòng điền đầy đủ thông tin hợp lệ",
+    "error": "Gửi yêu cầu tạo câu lạc bộ thất bại"
+  },
+  "ClubImageUpload":{
+    "toast": {
+      "success": "Upload ảnh thành công",
+      "error": "Upload ảnh thất bại",
+      "warning": "Vui lòng chọn file ảnh hợp lệ"
+    },
+    "caption": {
+      "upload": "Click hoặc kéo ảnh vào đây để upload",
+      "change": "Kéo ảnh khác vào đây hoặc nhấn để chọn lại",
+      "accept": "Hỗ trợ PNG, JPG, JPEG, WEBP",
+      "empty": "Chưa có ảnh nào được chọn",
+      "remove": "Xóa ảnh"
+    }
+  },
+  "ClubDashboard":{
+    "myClubs": "Câu lạc bộ của tôi",
+    "myRequests": "Yêu cầu của tôi",
+    "status": {
+      "all": "Tất cả",
+      "active": "Đang hoạt động",
+      "inactive": "Dừng hoạt động",
+      "suspended": "Đã bị cấm",
+      "archived": "Đã lưu trữ"
+    },
+    "empty": {
+      "title": "Chưa có câu lạc bộ nào."
+    },
+    "privacy": {
+      "public": "Công khai",
+      "private": "Riêng tư"
+    }
   }
 }
