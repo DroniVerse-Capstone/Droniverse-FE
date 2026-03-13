@@ -4,7 +4,7 @@ import Image from "next/image";
 import { IoPeopleOutline } from "react-icons/io5";
 import { CiLock, CiUnlock } from "react-icons/ci";
 
-import ClubStatusBadge from "@/components/common/ClubStatusBadge";
+import ClubStatusBadge from "@/components/club/ClubStatusBadge";
 import { Club } from "@/validations/club/club";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 

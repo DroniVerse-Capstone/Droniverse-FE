@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import RegisterClubDialog from "@/components/manager/dashboard/RegisterClubDialog";
+import RegisterClubDialog from "@/components/club/RegisterClubDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MyClub from "@/components/manager/dashboard/MyClub";
 import MyRequest from "@/components/manager/dashboard/MyRequest";

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import { Spinner } from "@/components/ui/spinner";
 import { useGetMyClubs } from "@/hooks/club/useClub";
-import ClubCard from "@/components/common/ClubCard";
+import ClubCard from "@/components/club/ClubCard";
 import { Empty } from "@/components/ui/empty";
 import EmptyState from "@/components/common/EmptyState";
 import { CLUB_STATUS } from "@/lib/constants/club";

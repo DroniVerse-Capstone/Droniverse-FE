@@ -6,5 +6,16 @@ export const CLUB_STATUS = [
   { value: "ARCHIVED", label: "status.archived" },
 ];
 
+export const CLUB_REQUEST_STATUS = [
+  { value: null, label: "Tất cả" },
+  { value: "APPROVED", label: "Đã duyệt" },
+  { value: "PENDING", label: "Chờ duyệt" },
+  { value: "REJECTED", label: "Từ chối" },
+  { value: "CANCEL", label: "Đã hủy" },
+];
+
 export const getClubStatus = (value: string ) =>
   CLUB_STATUS.find((e) => e.value === value)?.label || value;
+
+export const getClubRequestStatus = (value: string) =>
+  CLUB_REQUEST_STATUS.find((e) => e.value === value)?.label || value;
