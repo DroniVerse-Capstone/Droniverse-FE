@@ -2,10 +2,10 @@
 import React from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MyRequest from "@/components/manager/dashboard/MyRequest";
 import { useTranslations } from "@/providers/i18n-provider";
-import MyClub from '@/components/member/dahsboard/Myclub';
 import JoinClubDialog from '@/components/member/dahsboard/JoinClubDialog';
+import MyClub from '@/components/member/dahsboard/Myclub';
+import MyRequest from '@/components/member/dahsboard/MyRequest';
 
 export default function MemberDashboard() {
    const t = useTranslations("ClubDashboard");

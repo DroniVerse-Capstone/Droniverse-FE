@@ -411,6 +411,20 @@
       "validation": "Please enter a reject reason"
     }
   },
+  "JoinClubDialog": {
+    "title": "Join Club",
+    "subtitle": "Enter the club code to request to join the club",
+    "field": {
+      "code": "Club Code",
+      "codePlaceholder": "Enter club code..."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Join",
+      "find": "Find Club"
+    },
+    "error": "Club not found"
+  },
   "ClubImageUpload": {
     "toast": {
       "success": "Image uploaded successfully",
@@ -454,8 +468,10 @@
         "image": "Club Image",
         "createdAt": "Created At",
         "approvedAt": "Approved At",
+        "processedAt": "Processed At",
         "category": "Category",
         "requester": "Requester",
+        "approver": "Approver",
         "rejectReason": "Reject Reason",
         "status": "Status",
         "actions": "Actions"

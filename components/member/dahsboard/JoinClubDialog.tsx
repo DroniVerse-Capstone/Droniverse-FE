@@ -15,10 +15,12 @@ import { useGetClubDetailByCode } from "@/hooks/club/useClub";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import { useClubAttempt } from "@/hooks/club-attempt/useClubAttempt";
-import { da } from "zod/v4/locales";
+import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
 import { Spinner } from "@/components/ui/spinner";
+import { useTranslations } from "@/providers/i18n-provider";
 
 export default function JoinClubDialog() {
+  const t = useTranslations("JoinClubDialog");
   const [clubCode, setClubCode] = useState("");
   const [searchCode, setSearchCode] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -63,30 +65,30 @@ export default function JoinClubDialog() {
 
   useEffect(() => {
     if (isError) {
-      toast.error(error?.response?.data?.message || "Không tìm thấy club");
+      toast.error(error?.response?.data?.message || t("error"));
     }
   }, [isError, error]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Tham gia Club</Button>
+        <Button icon={<VscGitPullRequestGoToChanges size={20} />}>{t("title")}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Tìm kiếm Club</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Hãy nhập mã Club bạn muốn tham gia để đăng ký gia nhập
+            {t("subtitle")}
           </p>
         </DialogHeader>
         <div className="space-y-2 w-full">
-          <Label className="text-sm font-medium">Mã Club</Label>
+          <Label className="text-sm font-medium">{t("field.code")}</Label>
           <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
             <Input
               className="min-w-0 w-full"
               value={clubCode}
               onChange={(e) => setClubCode(e.target.value)}
-              placeholder="Nhập mã Club"
+              placeholder={t("field.codePlaceholder")}
             />
             <Button
               className="shrink-0"
@@ -94,7 +96,7 @@ export default function JoinClubDialog() {
               onClick={handleFindClub}
               disabled={isLoading || !clubCode}
             >
-              {isLoading ? "Đang tìm..." : "Tìm Club"}
+              {isLoading ? <Spinner /> : t("buttons.find")}
             </Button>
           </div>
         </div>
@@ -106,11 +108,11 @@ export default function JoinClubDialog() {
         <DialogFooter>
           <DialogClose asChild>
             <Button onClick={resetForm} variant="outline">
-              Hủy bỏ
+              {t("buttons.cancel")}
             </Button>
           </DialogClose>
           <Button onClick={handleJoin} disabled={!club || isJoining}>
-            {isJoining ? <Spinner /> : "Tham gia"}
+            {isJoining ? <Spinner /> : t("buttons.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -14,8 +14,18 @@ export const CLUB_REQUEST_STATUS = [
   { value: "CANCEL", label: "status.cancelled" },
 ];
 
+export const CLUB_ATTEMPT_REQUEST_STATUS = [
+  { value: null, label: "status.all" },
+  { value: "PENDING", label: "status.pending" },
+  { value: "APPROVED", label: "status.approved" },
+  { value: "REJECT", label: "status.rejected" },
+];
+
 export const getClubStatus = (value: string ) =>
   CLUB_STATUS.find((e) => e.value === value)?.label || value;
 
 export const getClubRequestStatus = (value: string) =>
   CLUB_REQUEST_STATUS.find((e) => e.value === value)?.label || value;
+
+export const getClubAttemptRequestStatus = (value: string) =>
+  CLUB_ATTEMPT_REQUEST_STATUS.find((e) => e.value === value)?.label || value;

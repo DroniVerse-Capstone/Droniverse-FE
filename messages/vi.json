@@ -371,6 +371,20 @@
       "validation": "Vui lòng nhập lý do từ chối"
     }
   },
+  "JoinClubDialog": {
+    "title": "Tham gia Club",
+    "subtitle": "Hãy nhập mã Club bạn muốn tham gia để đăng ký tham gia",
+    "field": {
+      "code": "Mã Club",
+      "codePlaceholder": "Nhập mã Club..."
+    },
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "confirm": "Tham gia",
+      "find": "Tìm Club"
+    },
+    "error": "Không tìm thấy club"
+  },
   "ClubImageUpload": {
     "toast": {
       "success": "Upload ảnh thành công",
@@ -414,8 +428,10 @@
         "image": "Ảnh club",
         "createdAt": "Ngày tạo",
         "approvedAt": "Phê duyệt",
+        "processedAt": "Ngày xử lý",
         "category": "Danh mục",
         "requester": "Người yêu cầu",
+        "approver": "Người duyệt",
         "rejectReason": "Lý do từ chối",
         "status": "Trạng thái",
         "actions": "Thao tác"
