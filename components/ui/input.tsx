@@ -3,20 +3,51 @@ import { cn } from "@/lib/utils"
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, onKeyDown, onPaste, min, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false)
     const isPassword = type === "password"
+    const isNumber = type === "number"
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (isNumber && ["-", "+", "e", "E"].includes(event.key)) {
+        event.preventDefault()
+      }
+
+      onKeyDown?.(event)
+    }
+
+    const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+      if (isNumber) {
+        const pastedValue = event.clipboardData.getData("text").trim()
+
+        if (
+          pastedValue.includes("-") ||
+          pastedValue.includes("+") ||
+          pastedValue.includes("e") ||
+          pastedValue.includes("E")
+        ) {
+          event.preventDefault()
+        }
+      }
+
+      onPaste?.(event)
+    }
 
     return (
       <div className="relative">
         <input
           type={isPassword && showPassword ? "text" : type}
+          min={isNumber ? (min ?? 0) : min}
           className={cn(
             "flex h-10 w-full rounded border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             isPassword && "pr-10",
+            isNumber &&
+              "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
             className
           )}
           ref={ref}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           {...props}
         />
         {isPassword && (
@@ -37,6 +68,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     )
   }
 )
+
 Input.displayName = "Input"
 
 export { Input }

@@ -325,5 +325,134 @@
     "title": "Oops! Không tìm thấy trang",
     "description": "Trang bạn đang tìm kiếm có thể đã bị xóa, đã được đổi tên hoặc hiện đang tạm thời không khả dụng.",
     "cta": "Quay lại"
+  },
+  "RegisterClubDialog": {
+    "title": "Đăng ký Club",
+    "subtitle": "Điền form sau để yêu cầu tạo Club cho riêng bạn",
+    "editTitle": "Sửa yêu cầu tạo Club",
+    "editSubtitle": "Cập nhật thông tin yêu cầu tạo Club của bạn",
+    "viewTitle": "Chi tiết yêu cầu",
+    "fields": {
+      "nameVi": "Tên Club (Tiếng Việt)",
+      "nameEn": "Tên Club (Tiếng Anh)",
+      "description": "Lý do thành lập Club",
+      "category": "Danh mục",
+      "categoryPlaceholder": "Chọn danh mục",
+      "coverImage": "Ảnh Club",
+      "isPublic": "Công khai Club",
+      "limitMembers": "Giới hạn thành viên",
+      "limitManagers": "Giới hạn quản lý",
+      "mode": "Chế độ",
+      "createAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "approvedAt": "Ngày duyệt",
+      "rejectReason": "Lý do từ chối",
+      "approveBy": "Duyệt bởi"
+    },
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "submit": "Đăng ký",
+      "update": "Cập nhật",
+      "approve": "Duyệt",
+      "reject": "Từ chối",
+      "confirm": "Xác nhận từ chối"
+    },
+    "privacy": {
+      "public": "Công khai",
+      "private": "Riêng tư"
+    },
+    "validation": "Vui lòng điền đầy đủ thông tin hợp lệ",
+    "error": "Gửi yêu cầu tạo câu lạc bộ thất bại",
+    "empty": "Không tìm thấy dữ liệu",
+    "reject": {
+      "title": "Lý do từ chối",
+      "description": "Nhập lý do để từ chối yêu cầu tạo câu lạc bộ này.",
+      "placeholder": "Nhập lý do từ chối...",
+      "validation": "Vui lòng nhập lý do từ chối"
+    }
+  },
+  "JoinClubDialog": {
+    "title": "Tham gia Club",
+    "subtitle": "Hãy nhập mã Club bạn muốn tham gia để đăng ký tham gia",
+    "field": {
+      "code": "Mã Club",
+      "codePlaceholder": "Nhập mã Club..."
+    },
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "confirm": "Tham gia",
+      "find": "Tìm Club"
+    },
+    "error": "Không tìm thấy club"
+  },
+  "ClubImageUpload": {
+    "toast": {
+      "success": "Upload ảnh thành công",
+      "error": "Upload ảnh thất bại",
+      "warning": "Vui lòng chọn file ảnh hợp lệ"
+    },
+    "caption": {
+      "upload": "Click hoặc kéo ảnh vào đây để upload",
+      "change": "Kéo ảnh khác vào đây hoặc nhấn để chọn lại",
+      "accept": "Hỗ trợ PNG, JPG, JPEG, WEBP",
+      "empty": "Chưa có ảnh nào được chọn",
+      "remove": "Xóa ảnh"
+    }
+  },
+  "ClubDashboard": {
+    "myClubs": "Câu lạc bộ của tôi",
+    "myRequests": "Yêu cầu của tôi",
+    "status": {
+      "all": "Tất cả",
+      "active": "Đang hoạt động",
+      "inactive": "Dừng hoạt động",
+      "suspended": "Bị cấm",
+      "archived": "Lưu trữ",
+      "pending": "Chờ duyệt",
+      "rejected": "Từ chối",
+      "approved": "Đã duyệt",
+      "cancelled": "Đã hủy"
+    },
+    "empty": {
+      "title": "Chưa có câu lạc bộ nào.",
+      "title1": "Chưa có yêu cầu nào"
+    },
+    "privacy": {
+      "public": "Công khai",
+      "private": "Riêng tư"
+    },
+    "table": {
+      "headers": {
+        "name": "Tên Club",
+        "mode": "Chế độ",
+        "image": "Ảnh club",
+        "createdAt": "Ngày tạo",
+        "approvedAt": "Phê duyệt",
+        "processedAt": "Ngày xử lý",
+        "category": "Danh mục",
+        "requester": "Người yêu cầu",
+        "approver": "Người duyệt",
+        "rejectReason": "Lý do từ chối",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "actions": {
+        "view": "Xem chi tiết",
+        "edit": "Sửa yêu cầu",
+        "delete": "Hủy yêu cầu",
+        "titleDelete": "Hủy yêu cầu này?",
+        "warnDelete": "Hành động này sẽ hủy bỏ yêu cầu tạo câu lạc bộ",
+        "confirm": "Xác nhận",
+        "cancel": "Đóng"
+      }
+    }
+  },
+  "Pagination": {
+    "previous": "Trước",
+    "next": "Sau",
+    "page": "Trang",
+    "sum": "Tổng",
+    "records": "bản ghi",
+    "more": "Thêm trang"
   }
 }
