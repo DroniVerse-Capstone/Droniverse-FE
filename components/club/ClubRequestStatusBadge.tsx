@@ -22,6 +22,7 @@ export default function ClubRequestStatusBadge({
   status,
   className,
 }: ClubRequestStatusBadgeProps) {
+  const t = useTranslations("ClubDashboard")
   return (
     <span
       className={cn(
@@ -30,7 +31,7 @@ export default function ClubRequestStatusBadge({
         className
       )}
     >
-      {getClubRequestStatus(status)}
+      {t(getClubRequestStatus(status))}
     </span>
   )
 }

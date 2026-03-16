@@ -22,11 +22,11 @@ export default function ClubCard({ club, onClick }: ClubCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group overflow-hidden rounded border border-greyscale-700 bg-transparent p-4 shadow-sm transition-colors hover:bg-greyscale-800 cursor-pointer"
+      className="group overflow-hidden rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm transition-colors hover:bg-greyscale-800 cursor-pointer"
     >
       <div className="relative h-45 overflow-hidden rounded">
         <Image
-          src={club.image || "/images/club-placeholder.jpg"}
+          src={club.imageUrl || "/images/club-placeholder.jpg"}
           alt={clubName}
           fill
           className="rounded object-cover transition-transform duration-500 group-hover:scale-105"

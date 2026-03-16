@@ -11,7 +11,7 @@ export const clubSchema = z.object({
   clubCode: z.string(),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "ARCHIVED"]),
   isPublic: z.boolean(),
-  image: z.string().optional(),
+  imageUrl: z.string(). nullable(),
   limitParticipation: z.number().int().nonnegative(),
   limitClubManagers: z.number().int().nonnegative(),
   totalMembers: z.number().int().nonnegative(),
@@ -26,5 +26,12 @@ export const getMyClubsResponseSchema = z.object({
   message: z.string(),
 })
 
+export const getClubDetailResponseSchema = z.object({
+  data: clubSchema,
+  isSuccess: z.boolean(),
+  message: z.string(),
+})
+
 export type Club = z.infer<typeof clubSchema>
 export type GetMyClubsResponse = z.infer<typeof getMyClubsResponseSchema>
+export type GetClubDetailResponse = z.infer<typeof getClubDetailResponseSchema>

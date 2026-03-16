@@ -18,12 +18,20 @@ import {
   UpdateClubCreationRequestStatusResponse,
   UpdateClubCreationRequestStatus,
   updateClubCreationRequestStatusResponseSchema,
+  GetAllClubCreationRequestsData,
+  getAllClubCreationRequestsResponseSchema,
 } from "@/validations/club-creation/club-creation";
 
 type ClubCreationRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCEL";
 
 type UseGetMyClubCreationRequestsOptions = {
   status?: ClubCreationRequestStatus | null;
+};
+
+type UseGetAllClubCreationRequestsOptions = {
+  status?: ClubCreationRequestStatus | null;
+  currentPage?: number;
+  pageSize?: number;
 };
 
 export const useClubCreation = () => {
@@ -66,6 +74,34 @@ export const useGetMyClubCreationRequests = (
       const parsed = getMyClubCreationRequestsResponseSchema.parse(
         response.data,
       );
+      return parsed.data;
+    },
+  });
+};
+
+export const useGetAllClubCreationRequests = (
+  options?: UseGetAllClubCreationRequestsOptions,
+) => {
+  return useQuery<GetAllClubCreationRequestsData, AxiosError<ApiError>>({
+    queryKey: [
+      "all-club-creation-requests",
+      options?.status,
+      options?.currentPage,
+      options?.pageSize,
+    ],
+    queryFn: async () => {
+      const response = await apiClient.get("/club-creation-request", {
+        params: {
+          ...(options?.status && { status: options.status }),
+          ...(options?.currentPage && { CurrentPage: options.currentPage }),
+          ...(options?.pageSize && { PageSize: options.pageSize }),
+        },
+      });
+
+      const parsed = getAllClubCreationRequestsResponseSchema.parse(
+        response.data,
+      );
+
       return parsed.data;
     },
   });
@@ -142,6 +178,9 @@ export const useUpdateClubCreationRequestStatus = () => {
         }),
         queryClient.invalidateQueries({
           queryKey: ["club-creation-request-detail", variables.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["all-club-creation-requests"],
         }),
       ]);
     },

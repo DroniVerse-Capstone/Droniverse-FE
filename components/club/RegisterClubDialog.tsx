@@ -147,12 +147,12 @@ export default function RegisterClubDialog({
     });
   };
 
-  const dialogTitle = mode === "edit" ? "Chỉnh sửa yêu cầu tạo câu lạc bộ" : t("title");
+  const dialogTitle = mode === "edit" ? t("editTitle") : t("title");
   const dialogSubtitle =
     mode === "edit"
-      ? "Cập nhật thông tin và lưu thay đổi."
+      ? t("editSubtitle")
       : t("subtitle");
-  const submitLabel = mode === "edit" ? "Chỉnh sửa" : t("buttons.submit");
+  const submitLabel = mode === "edit" ? t("buttons.update") : t("buttons.submit");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -263,7 +263,7 @@ export default function RegisterClubDialog({
 
           <DialogFooter className="flex-row justify-end gap-3 border-t border-greyscale-700 px-6 py-4 sm:space-x-0">
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button onClick={resetForm} type="button" variant="outline">
                 {t("buttons.cancel")}
               </Button>
             </DialogClose>

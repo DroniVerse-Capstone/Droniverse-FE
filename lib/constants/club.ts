@@ -7,11 +7,11 @@ export const CLUB_STATUS = [
 ];
 
 export const CLUB_REQUEST_STATUS = [
-  { value: null, label: "Tất cả" },
-  { value: "APPROVED", label: "Đã duyệt" },
-  { value: "PENDING", label: "Chờ duyệt" },
-  { value: "REJECTED", label: "Từ chối" },
-  { value: "CANCEL", label: "Đã hủy" },
+  { value: null, label: "status.all" },
+  { value: "APPROVED", label: "status.approved" },
+  { value: "PENDING", label: "status.pending" },
+  { value: "REJECTED", label: "status.rejected" },
+  { value: "CANCEL", label: "status.cancelled" },
 ];
 
 export const getClubStatus = (value: string ) =>

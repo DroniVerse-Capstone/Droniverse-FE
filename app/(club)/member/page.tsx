@@ -1,7 +1,8 @@
+import MemberDashboard from '@/components/member/dahsboard/MemberDashboard'
 import React from 'react'
 
-export default function MemberDashboard() {
+export default function MemberDashboardPage() {
   return (
-    <div>MemberDashboard</div>
+    <MemberDashboard />
   )
 }

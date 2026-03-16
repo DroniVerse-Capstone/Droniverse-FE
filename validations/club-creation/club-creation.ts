@@ -42,12 +42,33 @@ export const clubCreationRequestItemSchema = z.object({
     clubID: z.string().nullable(),
     requesterID: z.string(),
     approverID: z.string().nullable(),
+    approverName: z.string().nullable(),
+    approverEmail: z.string().nullable(),
+    requesterName: z.string(),
+    requesterEmail: z.string(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "CANCEL"]),
     categories: z.array(categorySchema),
 })
 
 export const getMyClubCreationRequestsResponseSchema = z.object({
     data: z.array(clubCreationRequestItemSchema),
+    isSuccess: z.boolean(),
+    message: z.string(),
+})
+
+// ---- GET all requests (paginated) ----
+
+
+export const getAllClubCreationRequestsDataSchema = z.object({
+    data: z.array(clubCreationRequestItemSchema),
+    totalRecords: z.number().int(),
+    pageIndex: z.number().int(),
+    pageSize: z.number().int(),
+    totalPages: z.number().int(),
+})
+
+export const getAllClubCreationRequestsResponseSchema = z.object({
+    data: getAllClubCreationRequestsDataSchema,
     isSuccess: z.boolean(),
     message: z.string(),
 })
@@ -114,6 +135,8 @@ export type UpdateClubCreationRequest = z.infer<typeof clubCreationRequestSchema
 export type UpdateClubCreationRequestData = z.infer<typeof updateClubCreationRequestDataSchema>
 export type UpdateClubCreationRequestResponse = z.infer<typeof updateClubCreationRequestResponseSchema>
 export type GetMyClubCreationRequestsResponse = z.infer<typeof getMyClubCreationRequestsResponseSchema>
+export type GetAllClubCreationRequestsData = z.infer<typeof getAllClubCreationRequestsDataSchema>
+export type GetAllClubCreationRequestsResponse = z.infer<typeof getAllClubCreationRequestsResponseSchema>
 export type ClubCreationRequestDetailResponse = z.infer<typeof clubCreationRequestDetailResponseSchema>
 export type UpdateClubCreationRequestStatus = z.infer<typeof updateClubCreationRequestStatusSchema>
 export type UpdateClubCreationRequestStatusData = z.infer<typeof updateClubCreationRequestStatusDataSchema>
