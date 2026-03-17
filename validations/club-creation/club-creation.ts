@@ -44,8 +44,8 @@ export const clubCreationRequestItemSchema = z.object({
     approverID: z.string().nullable(),
     approverName: z.string().nullable(),
     approverEmail: z.string().nullable(),
-    requesterName: z.string(),
-    requesterEmail: z.string(),
+    requesterName: z.string().nullable(),
+    requesterEmail: z.string().nullable(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "CANCEL"]),
     categories: z.array(categorySchema),
 })

@@ -28,7 +28,7 @@ export const clubAttemptRequestItemSchema = z.object({
   clubNameVN: z.string(),
   clubNameEN: z.string(),
   imageUrl: z.string().nullable().optional(),
-  requesterName: z.string(),
+  requesterName: z.string().nullable(),
   approverName: z.string().nullable(),
   status: z.enum(["PENDING", "APPROVED", "REJECT"]),
   createAt: z.string(),
