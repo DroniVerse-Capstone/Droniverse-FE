@@ -219,9 +219,6 @@ export default function MyRequest() {
                         <TooltipWrapper label={t("table.actions.delete")}>
                           <Button
                             className="rounded border border-error/40 bg-error/15 p-2 text-error transition-colors hover:bg-error/25"
-                            onClick={() => {
-                              setViewId(req.clubCreationRequestID);
-                            }}
                           >
                             <CiTrash size={18} />
                           </Button>
@@ -231,7 +228,7 @@ export default function MyRequest() {
                       description={
                         <>
                           {t("table.actions.warnDelete")}
-                          <span className="font-semibold text-greyscale-25">
+                          <span className="font-semibold text-greyscale-25 ml-1">
                             {req.nameVN}
                           </span>
                           .
