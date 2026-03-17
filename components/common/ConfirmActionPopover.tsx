@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
 
 type ConfirmActionPopoverProps = {
   trigger: React.ReactNode;
@@ -35,7 +36,9 @@ export default function ConfirmActionPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverTrigger asChild>
+        <span className="inline-flex">{trigger}</span>
+      </PopoverTrigger>
 
       <PopoverContent align={align} className={`${widthClassName} space-y-3`}>
         <div className="space-y-1">
@@ -62,7 +65,7 @@ export default function ConfirmActionPopover({
               onConfirm();
             }}
           >
-            {isLoading ? "Đang xử lý..." : confirmText}
+            {isLoading ? <Spinner /> : confirmText}
           </Button>
         </div>
       </PopoverContent>
