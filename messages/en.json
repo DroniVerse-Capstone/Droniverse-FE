@@ -494,5 +494,36 @@
     "sum": "Total",
     "records": "records",
     "more": "More pages"
+  },
+  "ClubDetail": {
+    "Nav": {
+      "home": "Overview",
+      "members": "Members",
+      "courses": "Courses",
+      "myCourses": "My Courses",
+      "competitions": "Competitions"
+    },
+    "ClubSwitcher": {
+      "title": "Switch Club",
+      "subtitle": "Select a club from your list to quickly switch.",
+      "empty": "You haven't joined any clubs yet.",
+      "now": "Current Club"
+    },
+    "ClubInfo": {
+      "createdAt": "Founded Date",
+      "members": "Total Members",
+      "manager": "Club Manager",
+      "courses": "Owned Courses",
+      "out": "Leave Club",
+      "privacy": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "empty": {
+        "title": "Club Not Found",
+        "description": "The club link is invalid or you don't have permission to access it."
+      },
+      "error": "Failed to load club information"
+    }
   }
 }

@@ -41,3 +41,15 @@ export const useGetClubDetailByCode = (clubCode?: string) => {
     },
   });
 };
+
+export const useGetClubDetailById = (clubId?: string) => {
+  return useQuery<Club, AxiosError<ApiError>>({
+    queryKey: ["club-detail-by-id", clubId],
+    enabled: !!clubId,
+    queryFn: async () => {
+      const response = await apiClient.get(`/clubs/${clubId}`);
+      const parsed = getClubDetailResponseSchema.parse(response.data);
+      return parsed.data;
+    },
+  });
+};

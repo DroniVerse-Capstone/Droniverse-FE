@@ -8,9 +8,16 @@ import ClubCard from "@/components/club/ClubCard";
 import { Empty } from "@/components/ui/empty";
 import EmptyState from "@/components/common/EmptyState";
 import { useTranslations } from "@/providers/i18n-provider";
+import { useRouter } from "next/navigation";
+import { slugify } from "@/lib/utils/slugify";
 
 export default function MyClub() {
   const t = useTranslations("ClubDashboard");
+  const router = useRouter();
+
+  const handleClickClub = (clubName: string, clubId: string) => {
+    router.push(`/member/${slugify(clubName)}-${clubId}`);
+  }
 
   const { data: clubs = [], isLoading, isError, error } = useGetMyClubs({});
 
@@ -39,7 +46,7 @@ export default function MyClub() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {clubs.map((club) => (
-            <ClubCard key={club.clubID} club={club} />
+            <ClubCard key={club.clubID} club={club} onClick={() => handleClickClub(club.nameVN, club.clubID)} />
           ))}
         </div>
       )}
