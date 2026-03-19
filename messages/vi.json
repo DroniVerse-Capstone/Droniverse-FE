@@ -454,5 +454,36 @@
     "sum": "Tổng",
     "records": "bản ghi",
     "more": "Thêm trang"
+  },
+  "ClubDetail": {
+    "Nav": {
+      "home": "Tổng quan Club",
+      "members": "Thành viên",
+      "courses": "Khóa học",
+      "myCourses": "Khóa học của tôi",
+      "competitions": "Thi đấu"
+    },
+    "ClubSwitcher": {
+      "title": "Đổi Club",
+      "subtitle": "Chọn một câu lạc bộ trong danh sách của bạn để chuyển nhanh.",
+      "empty": "Bạn chưa tham gia câu lạc bộ nào.",
+      "now": "Hiện tại"
+    },
+    "ClubInfo": {
+      "createdAt": "Ngày thành lập",
+      "members": "Tổng Thành Viên",
+      "manager": "Quản Lý Club",
+      "courses": "Khóa Học Sở Hữu",
+      "out": "Rời khỏi Club",
+      "privacy": {
+        "public": "Công khai",
+        "private": "Riêng tư"
+      },
+      "empty": {
+        "title": "Không tìm thấy câu lạc bộ",
+        "description": "Đường dẫn câu lạc bộ không hợp lệ hoặc bạn không có quyền truy cập."
+      },
+      "error": "Không tải được thông tin câu lạc bộ"
+    }
   }
 }

@@ -9,12 +9,19 @@ import { Empty } from "@/components/ui/empty";
 import EmptyState from "@/components/common/EmptyState";
 import { CLUB_STATUS } from "@/lib/constants/club";
 import { useTranslations } from "@/providers/i18n-provider";
+import { slugify } from "@/lib/utils/slugify";
+import { useRouter } from "next/navigation";
 
 type ClubStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | "ARCHIVED" | null;
 
 export default function MyClub() {
+  const router = useRouter();
   const t = useTranslations("ClubDashboard");
   const [selectedStatus, setSelectedStatus] = useState<ClubStatus>(null);
+
+  const handleClickClub = (clubName: string, clubId: string) => {
+      router.push(`/manager/${slugify(clubName)}-${clubId}`);
+    }
 
   const {
     data: clubs = [],
@@ -78,7 +85,7 @@ export default function MyClub() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {clubs.map((club) => (
-            <ClubCard key={club.clubID} club={club} />
+            <ClubCard key={club.clubID} club={club} onClick={() => handleClickClub(club.nameVN, club.clubID)} />
           ))}
         </div>
       )}
