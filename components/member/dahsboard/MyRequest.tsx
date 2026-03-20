@@ -109,15 +109,22 @@ export default function MyRequest() {
               <TableCell>
                 <div className="relative h-12 w-18 overflow-hidden rounded border border-greyscale-700">
                   <Image
-                    src={req.imageUrl || "/images/club-placeholder.jpg"}
+                    src={req.clubImageUrl || "/images/club-placeholder.jpg"}
                     alt={req.clubNameVN}
                     fill
                     className="object-cover"
                   />
                 </div>
               </TableCell>
-              <TableCell className="text-sm text-greyscale-50">
-                {req.approverName || "—"}
+              <TableCell>
+                <div className="space-y-1">
+                  <p className="font-medium text-greyscale-0">
+                    {req.approverName || "—"}
+                  </p>
+                  <p className="text-xs text-greyscale-100">
+                    {req.approverEmail || "—"}
+                  </p>
+                </div>
               </TableCell>
 
               <TableCell className="text-sm text-greyscale-50">

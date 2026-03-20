@@ -43,6 +43,12 @@ export const registerResponseSchema = z.object({
   message: z.string()
 })
 
+export const meResponseSchema = z.object({
+  data: userSchema,
+  isSuccess: z.boolean(),
+  message: z.string()
+})
+
 // Types
 export type LoginRequest = z.infer<typeof loginRequestSchema>
 export type RegisterRequest = z.infer<typeof registerRequestSchema>
@@ -50,3 +56,4 @@ export type User = z.infer<typeof userSchema>
 export type LoginData = z.infer<typeof loginDataSchema>
 export type LoginResponse = z.infer<typeof loginResponseSchema>
 export type RegisterResponse = z.infer<typeof registerResponseSchema>
+export type MeResponse = z.infer<typeof meResponseSchema>
