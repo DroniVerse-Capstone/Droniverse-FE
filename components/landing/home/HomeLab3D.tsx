@@ -49,7 +49,7 @@ export default function HomeLab3D() {
           {/* Right Image */}
           <div className="md:col-span-3 w-full h-[300px] md:h-[400px] lg:h-[450px] relative">
             <Image
-              src="/images/lab3d.png"
+              src="/images/lab3D.png"
               fill
               className="rounded object-fill"
               alt="Lab 3D"
