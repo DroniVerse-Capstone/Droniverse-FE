@@ -11,8 +11,8 @@ export const courseVersionSchema = z.object({
 	imageUrl: z.string().nullable(),
 	level: z.enum(['EASY', 'MEDIUM', 'HARD']),
 	estimatedDuration: z.number().int().nonnegative(),
-	updateBy: z.string(),
-	updateAt: z.string(),
+	updateBy: z.string().nullable(),
+	updateAt: z.string().nullable(),
 	contextVN: z.string(),
 	contextEN: z.string(),
 	categories: z.array(z.unknown()),
@@ -25,6 +25,7 @@ export const courseSchema = z.object({
 	createAt: z.string(),
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
 	currentVersion: courseVersionSchema.nullable(),
+	courseVersions: z.array(courseVersionSchema).default([]),
 })
 
 export const getCoursesDataSchema = z.object({
@@ -41,7 +42,14 @@ export const getCoursesResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const createCourseResponseSchema = z.object({
+	data: courseSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type CourseVersion = z.infer<typeof courseVersionSchema>
 export type Course = z.infer<typeof courseSchema>
 export type GetCoursesData = z.infer<typeof getCoursesDataSchema>
 export type GetCoursesResponse = z.infer<typeof getCoursesResponseSchema>
+export type CreateCourseResponse = z.infer<typeof createCourseResponseSchema>

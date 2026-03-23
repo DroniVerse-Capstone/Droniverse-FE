@@ -21,7 +21,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
     "Khóa học đang ở bản nháp, chưa có nội dung phiên bản hiện tại.";
 
   return (
-    <article className="rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm">
+    <article className="rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm hover:bg-greyscale-800 transition-colors">
       <div className="relative mb-3 h-42 overflow-hidden rounded border border-greyscale-700">
         <Image src={imageUrl} alt={title} fill className="object-cover" />
       </div>

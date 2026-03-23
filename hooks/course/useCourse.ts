@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 
 import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
+	Course,
 	GetCoursesData,
+	createCourseResponseSchema,
 	getCoursesResponseSchema,
 } from "@/validations/course/course"
 
@@ -27,7 +29,7 @@ export const useGetCourses = (options?: UseGetCoursesOptions) => {
 			options?.status,
 		],
 		queryFn: async () => {
-			const response = await apiClient.get("/courses", {
+			const response = await apiClient.get("/academy/courses", {
 				params: {
 					...(options?.pageIndex !== undefined && { pageIndex: options.pageIndex }),
 					...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
@@ -38,6 +40,21 @@ export const useGetCourses = (options?: UseGetCoursesOptions) => {
 
 			const parsed = getCoursesResponseSchema.parse(response.data)
 			return parsed.data
+		},
+	})
+}
+
+export const useCreateCourse = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<Course, AxiosError<ApiError>, void>({
+		mutationFn: async () => {
+			const response = await apiClient.post("/academy/courses")
+			const parsed = createCourseResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ["courses"] })
 		},
 	})
 }

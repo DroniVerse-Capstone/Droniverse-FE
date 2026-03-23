@@ -29,7 +29,7 @@ export const useClubAttempt = () => {
   >({
     mutationFn: async (data: ClubAttemptRequest) => {
       const response = await apiClient.post<ClubAttemptResponse>(
-        "/clubs/attemption",
+        "/community/clubs/attemption",
         data
       );
 
@@ -49,7 +49,7 @@ export const useGetMyClubAttemptRequests = (
   return useQuery<ClubAttemptRequestItem[], AxiosError<ApiError>>({
     queryKey: ["my-club-attempt-requests", options?.status],
     queryFn: async () => {
-      const response = await apiClient.get("/club-attempt-request/my-requests", {
+      const response = await apiClient.get("/community/club-attempt-request/my-requests", {
         params: {
           ...(options?.status && { status: options.status }),
         },

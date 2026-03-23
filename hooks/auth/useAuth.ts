@@ -47,7 +47,7 @@ export const useMe = (options?: UseMeOptions) => {
     queryKey: ['auth', 'me'],
     enabled: options?.enabled,
     queryFn: async () => {
-      const response = await apiClient.get<MeResponse>('/auth/me')
+      const response = await apiClient.get<MeResponse>('/identity/auth/me')
 
       return meResponseSchema.parse(response.data)
     }
@@ -82,7 +82,7 @@ export const useLogin = (options?: UseLoginOptions) => {
   return useMutation<LoginResponse, AxiosError<ApiError>, LoginRequest>({
     mutationFn: async (credentials: LoginRequest) => {
       const response = await apiClient.post<LoginResponse>(
-        '/auth/login',
+        '/identity/auth/login',
         credentials
       )
 
@@ -130,7 +130,7 @@ export const useRegister = (options?: UseRegisterOptions) => {
   return useMutation<RegisterResponse, AxiosError<ApiError>, RegisterRequest>({
     mutationFn: async (payload: RegisterRequest) => {
       const response = await apiClient.post<RegisterResponse>(
-        '/auth/register',
+        '/identity/auth/register',
         payload
       )
 
@@ -163,7 +163,7 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: async () => {
       try {
-        await apiClient.post('/auth/logout')
+        await apiClient.post('/identity/auth/logout')
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Logout API error:', error)

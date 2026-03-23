@@ -1,24 +1,14 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import apiClient from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useUploadTempClubImage } from "@/hooks/club/useClub";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "@/providers/i18n-provider";
-
-type UploadTempImageResponse = {
-  url: string;
-};
-
-type UploadImageError = {
-  message?: string;
-};
 
 type ClubImageUploadProps = {
   value?: string;
@@ -47,27 +37,7 @@ export function ClubImageUpload({
     };
   }, [localPreview]);
 
-  const uploadMutation = useMutation<
-    UploadTempImageResponse,
-    AxiosError<UploadImageError>,
-    File
-  >({
-    mutationFn: async (file) => {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await apiClient.post<UploadTempImageResponse>(
-        "/clubs/upload-temp-image",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      return response.data;
-    },
+  const uploadMutation = useUploadTempClubImage({
     onSuccess: (data) => {
       onChange(data.url);
       toast.success(t("toast.success"));

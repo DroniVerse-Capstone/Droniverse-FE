@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import AppPagination from "@/components/common/AppPagination";
 import AdminCourseCard from "@/components/course/AdminCourseCard";
+import CreateCourseDialog from "@/components/system/course-management/CreateCourseDialog";
 import { Empty } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -77,6 +78,10 @@ export default function CourseManagement() {
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Tìm kiếm theo tiêu đề khóa học"
             />
+          </div>
+
+          <div className="md:shrink-0">
+            <CreateCourseDialog />
           </div>
         </div>
       </header>
