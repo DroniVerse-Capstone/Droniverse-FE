@@ -28,7 +28,17 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Create account",
       "haveAccount": "Already have an account?",
-      "backToLogin": "Login now"
+      "backToLogin": "Login now",
+      "validation": {
+        "emailInvalid": "Invalid email address",
+        "passwordMin": "Password must be at least 6 characters",
+        "confirmPasswordMin": "Confirm password must be at least 6 characters",
+        "confirmPasswordMismatch": "Confirm password does not match",
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "roleRequired": "Please select a role",
+        "invalidForm": "Invalid form data"
+      }
     }
   },
   "Sandbox": {
