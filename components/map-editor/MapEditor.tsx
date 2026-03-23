@@ -15,12 +15,36 @@ import GroundPlane from "../simulator3d/GroundPlane";
 import { MAP_COLORS, GRID_CONFIG } from "@/lib/models3d/mapConfig";
 import { CAMERA_CONFIG } from "@/lib/config3D/cameraConfig";
 import { WORLD_SCALE } from "@/lib/config3D/constants";
+import { useSearchParams, useRouter } from "next/navigation";
+import { LabData } from "@/types/lab";
+import { getLabValidation } from "@/lib/map-editor/labValidation";
+import { useLabFull, useUpdateLabFull, useSuspenseLabFull } from "@/hooks/lab/useLabs";
+import {
+  FaSave, FaArrowLeft, FaCheck, FaClock, FaStar, FaExclamationTriangle,
+  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage
+} from "react-icons/fa";
+import Loading from "@/app/loading";
+import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  all: <FaGlobe />,
+  drone: <FaPaperPlane />,
+  obstacle: <FaCube />,
+  decor: <FaTree />,
+  bonus: <FaGem />,
+  checkpoint: <FaMapMarkerAlt />,
+  theme: <FaImage />,
+  uncategorized: <FaQuestionCircle />
+};
 
 import {
   OrbitControls,
   TransformControls,
   Environment,
   ContactShadows,
+  Html,
+  Stars,
+  Sky,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { Box3, Vector3, Quaternion, Euler, Color } from "three";
@@ -43,12 +67,17 @@ import {
   getModelConfig,
 } from "@/lib/map-editor/editorModels";
 import { useToast, ToastContainer } from "./Toast";
+const EDITOR_CONFIG = {
+  MAX_ALT_CEILING: 150,
+  THROTTLE_MS: 16,
+};
+
 // @ts-ignore - FBXLoader typing may not be present in this project
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 type TransformMode = "translate" | "rotate" | "scale";
 
-type MapObject = {
+export type MapObject = {
   id: string;
   position: [number, number, number];
   rotation: [number, number, number];
@@ -65,20 +94,28 @@ type MapObject = {
   radius?: number;
 };
 
-type MissionSettings = {
+export type MissionSettings = {
   labName: string;
+  labNameEN?: string;
   description: string;
+  descriptionEN?: string;
   timeLimit: number;
   requiredScore: number;
   sequentialCheckpoints: boolean;
+  difficulty?: "easy" | "medium" | "hard";
+  category?: "LEARNING" | "COMPETING";
+  mapTheme?: "default" | "space" | "sunset" | "daylight";
 };
 
 const DEFAULT_MISSION: MissionSettings = {
-  labName: "",
-  description: "",
-  timeLimit: 120,
-  requiredScore: 0,
+  labName: "New Lab",
+  labNameEN: "New Lab (English)",
+  description: "Description",
+  descriptionEN: "Description (English)",
+  timeLimit: 0, // Force intentional setup
+  requiredScore: 0, // Force intentional setup
   sequentialCheckpoints: false,
+  mapTheme: "default",
 };
 
 function degToRad(deg: number) {
@@ -148,21 +185,28 @@ function SidebarModelPreview({ m }: { m: any }) {
   const inView = useInView(containerRef, { amount: 0.1, once: true });
 
   const [shouldRender, setShouldRender] = useState(false);
+  const [mountedNode, setMountedNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setMountedNode(containerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
-    if (inView && !shouldRender) {
+    if (inView && !shouldRender && mountedNode) {
       timeout = setTimeout(() => setShouldRender(true), 150);
     }
     return () => clearTimeout(timeout);
-  }, [inView, shouldRender]);
+  }, [inView, shouldRender, mountedNode]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full h-full flex items-center justify-center"
     >
-      {!shouldRender ? (
+      {!shouldRender || !mountedNode ? (
         <div className="flex flex-col items-center gap-2">
           <div className="w-6 h-6 border-2 border-sky-400/20 border-t-sky-400 rounded-full animate-spin" />
           <span className="text-[10px] text-sky-400/50 font-medium uppercase tracking-widest">
@@ -171,6 +215,7 @@ function SidebarModelPreview({ m }: { m: any }) {
         </div>
       ) : (
         <Canvas
+          eventSource={mountedNode}
           shadows
           gl={{
             toneMapping: THREE.ACESFilmicToneMapping,
@@ -260,7 +305,7 @@ function ModelObject({
       const effectiveRadius =
         baseRadius * (meshRef.current.scale.toArray()[0] ?? 1);
       const limit = Math.max(0, MAP_HALF - effectiveRadius);
-      const MAX_ALT_CEILING = 50;
+
 
       const cx = Math.max(-limit, Math.min(limit, position[0]));
       const cz = Math.max(-limit, Math.min(limit, position[2]));
@@ -272,7 +317,7 @@ function ModelObject({
         finalFloor = Math.max(finalFloor, effectiveRadius + 0.3);
       }
 
-      const cy = Math.max(finalFloor, Math.min(MAX_ALT_CEILING, position[1]));
+      const cy = Math.max(finalFloor, Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, position[1]));
 
       if (cx !== position[0] || cz !== position[2] || cy !== position[1]) {
         meshRef.current.position.set(cx, cy, cz);
@@ -345,12 +390,17 @@ function ModelObject({
             node.material._origEmissive =
               node.material.emissive?.clone() || new Color(0, 0, 0);
           }
-          node.material.emissive.setRGB(intensity, 0, 0);
+          node.material.emissive?.setRGB(intensity, 0, 0);
         }
       });
     } else if (meshRef.current) {
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material && node.material._origEmissive) {
+        if (
+          node.isMesh &&
+          node.material &&
+          node.material.emissive &&
+          node.material._origEmissive
+        ) {
           node.material.emissive.copy(node.material._origEmissive);
         }
       });
@@ -360,7 +410,7 @@ function ModelObject({
   const lastSyncRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const THROTTLE_MS = 16;
+  const THROTTLE_MS = EDITOR_CONFIG.THROTTLE_MS;
   const scheduleSync = useCallback(() => {
     if (finalizingRef.current) return;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -502,6 +552,7 @@ function ModelObject({
             onClick={handleClick}
             position={object.position}
             rotation={object.rotation}
+            scale={object.scale}
           >
             <CheckpointRing
               radius={object.radius ?? 2}
@@ -679,7 +730,7 @@ function ModelObjectFBX({
       const center = new Vector3();
       box.getCenter(center);
       c.position.sub(center);
-    } catch (e) {}
+    } catch (e) { }
     return c;
   }, [scene]);
 
@@ -725,7 +776,7 @@ function ModelObjectFBX({
       const effectiveRadius =
         baseRadius * (meshRef.current.scale.toArray()[0] ?? 1);
       const limit = Math.max(0, MAP_HALF - effectiveRadius);
-      const MAX_ALT_CEILING = 50;
+
 
       const cx = Math.max(-limit, Math.min(limit, position[0]));
       const cz = Math.max(-limit, Math.min(limit, position[2]));
@@ -737,7 +788,7 @@ function ModelObjectFBX({
         finalFloor = Math.max(finalFloor, effectiveRadius + 0.3);
       }
 
-      const cy = Math.max(finalFloor, Math.min(MAX_ALT_CEILING, position[1]));
+      const cy = Math.max(finalFloor, Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, position[1]));
 
       if (cx !== position[0] || cz !== position[2] || cy !== position[1]) {
         meshRef.current.position.set(cx, cy, cz);
@@ -805,17 +856,21 @@ function ModelObjectFBX({
       const time = state.clock.getElapsedTime();
       const intensity = (Math.sin(time * 15) * 0.5 + 0.5) * 0.8;
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material) {
+        if (node.isMesh && node.material && node.material.emissive) {
           if (!node.material._origEmissive) {
-            node.material._origEmissive =
-              node.material.emissive?.clone() || new Color(0, 0, 0);
+            node.material._origEmissive = node.material.emissive.clone();
           }
-          node.material.emissive.setRGB(intensity, 0, 0);
+          node.material.emissive?.setRGB(intensity, 0, 0);
         }
       });
     } else if (meshRef.current) {
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material && node.material._origEmissive) {
+        if (
+          node.isMesh &&
+          node.material &&
+          node.material.emissive &&
+          node.material._origEmissive
+        ) {
           node.material.emissive.copy(node.material._origEmissive);
         }
       });
@@ -825,7 +880,7 @@ function ModelObjectFBX({
   const lastSyncRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const THROTTLE_MS = 16;
+  const THROTTLE_MS = EDITOR_CONFIG.THROTTLE_MS;
   const scheduleSync = useCallback(() => {
     if (finalizingRef.current) return;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -1011,6 +1066,70 @@ function ModelObjectWrapper(props: {
 
 const MemoModelObject = memo(ModelObjectWrapper);
 
+function CameraManager({ mapCells, labId, resetToken }: { mapCells: number; labId: string | null; resetToken: number }) {
+  const { camera, controls } = useThree();
+  const lastLoadedRef = useRef<string | null>(null);
+  const targetPos = useRef<THREE.Vector3 | null>(null);
+
+  const performReset = useCallback(() => {
+    const worldSize = mapCells * GRID_CONFIG.sectionSize;
+    const distance = worldSize * 0.8;
+    const height = worldSize * 0.4;
+    const newTarget = new THREE.Vector3(distance, height, distance);
+
+    if (!lastLoadedRef.current) {
+      camera.position.copy(newTarget);
+      camera.lookAt(0, 0, 0);
+      if (controls) {
+        (controls as any).target.set(0, 0, 0);
+        (controls as any).update();
+      }
+    } else {
+      targetPos.current = newTarget;
+    }
+  }, [camera, controls, mapCells]);
+
+  useFrame(() => {
+    if (targetPos.current) {
+      camera.position.lerp(targetPos.current, 0.1);
+      camera.lookAt(0, 0, 0);
+      if (camera.position.distanceTo(targetPos.current) < 0.1) {
+        targetPos.current = null;
+      }
+    }
+  });
+
+  // Handle initial load and lab changes
+  useEffect(() => {
+    if (labId && lastLoadedRef.current !== labId) {
+      performReset();
+      lastLoadedRef.current = labId;
+    }
+  }, [labId, performReset]);
+
+  // Handle manual reset token
+  useEffect(() => {
+    if (resetToken > 0) {
+      performReset();
+    }
+  }, [resetToken, performReset]);
+
+  return null;
+}
+
+function MapLoading() {
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-3 backdrop-blur-md bg-greyscale-900/40 p-10 rounded-3xl border border-white/5 shadow-2xl">
+        <div className="w-10 h-10 border-3 border-sky-400/20 border-t-sky-400 rounded-full animate-spin" />
+        <span className="text-xs text-sky-400 font-black uppercase tracking-[0.3em] drop-shadow-sm">
+          Loading
+        </span>
+      </div>
+    </Html>
+  );
+}
+
 function Scene({
   objects,
   selectedObjectId,
@@ -1021,6 +1140,8 @@ function Scene({
   onTransformStart,
   onTransformEnd,
   mapCells,
+  labId,
+  cameraResetToken,
 }: {
   objects: MapObject[];
   selectedObjectId: string | null;
@@ -1031,8 +1152,10 @@ function Scene({
   onTransformStart: (id?: string) => void;
   onTransformEnd: (id?: string) => void;
   mapCells: number;
+  labId: string | null;
+  cameraResetToken: number;
 }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, controls } = useThree();
 
   const handleCanvasClick = useCallback(
     (e: any) => {
@@ -1043,7 +1166,8 @@ function Scene({
   );
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<MapLoading />}>
+      <CameraManager mapCells={mapCells} labId={labId} resetToken={cameraResetToken} />
       <hemisphereLight intensity={1} groundColor="#444444" color="#ffffff" />
       <directionalLight
         position={[10, 10, 5]}
@@ -1122,27 +1246,304 @@ function Scene({
   );
 }
 
+export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunset" | "daylight" }) {
+  if (theme === "space") {
+    return (
+      <>
+        <color attach="background" args={["#050510"]} />
+        <Stars radius={200} depth={200} count={5000} factor={3} saturation={0} fade speed={1} />
+        <ambientLight intensity={0.2} />
+      </>
+    );
+  }
+  if (theme === "sunset") {
+    return (
+      <>
+        <Sky
+          sunPosition={[100, 10, 100]}
+          turbidity={10}
+          rayleigh={1}
+          mieCoefficient={0.005}
+          mieDirectionalG={0.8}
+        />
+
+        <Environment preset="sunset" />
+        <ambientLight intensity={0.5} />
+
+        {/* Clear Golden Hour Sunlight */}
+        <directionalLight
+          position={[50, 50, 50]}
+          intensity={1.5}
+          color="#ff8c42"
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+        />
+      </>
+    );
+  }
+  if (theme === "daylight") {
+    return (
+      <>
+        <Sky sunPosition={[100, 20, 100]} />
+        <ambientLight intensity={0.8} />
+      </>
+    );
+  }
+  return <color attach="background" args={["#071427"]} />;
+}
+
 function MapEditorContent() {
-  const [objects, setObjects] = useState<MapObject[]>([]);
+  const mainCanvasContainerRef = useRef<HTMLDivElement>(null);
+  const [mountedNode, setMountedNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (mainCanvasContainerRef.current) {
+      setMountedNode(mainCanvasContainerRef.current);
+    }
+  }, []);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const labId = searchParams.get("id");
+  const { data: storedLab, contentId } = useSuspenseLabFull(labId || "");
+  const { toasts, dismiss, toast } = useToast();
+
+  // -- Core states initialized from suspended data to avoid "jumping" on first render --
+  const [objects, setObjects] = useState<MapObject[]>(() =>
+    storedLab?.labContent?.environment?.objects || []
+  );
+  const [mapCells, setMapCells] = useState(() =>
+    storedLab?.labContent?.environment?.mapCells || 20
+  );
+  const [hasSolution, setHasSolution] = useState(() =>
+    storedLab?.labContent?.environment?.hasSolution || false
+  );
+
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [transformMode, setTransformMode] =
     useState<TransformMode>("translate");
   const [isTransforming, setIsTransforming] = useState(false);
   const [lockedObjectId, setLockedObjectId] = useState<string | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const [mapCells, setMapCells] = useState(20);
   const mapWorldSize = mapCells * GRID_CONFIG.sectionSize;
+  const [cameraResetToken, setCameraResetToken] = useState(0);
 
-  const [clipboardObject, setClipboardObject] = useState<Omit<
-    MapObject,
-    "id"
-  > | null>(null);
+  // -- Persistence & Missions --
+  const updateLabFull = useUpdateLabFull();
+  const hasLoadedRef = useRef<string | null>(labId);
+  const [missionSettings, setMissionSettings] = useState<MissionSettings>(() => {
+    if (!storedLab) return DEFAULT_MISSION;
+    return {
+      labName: storedLab.nameVN,
+      labNameEN: storedLab.nameEN || "",
+      description: storedLab.descriptionVN,
+      descriptionEN: storedLab.descriptionEN || "",
+      difficulty: (storedLab.level?.toLowerCase() || "easy") as any,
+      category: (storedLab.type === "COMPETITION" ? "COMPETING" : "LEARNING") as any,
+      timeLimit: storedLab.labContent?.environment?.timeLimit || 0,
+      requiredScore: storedLab.labContent?.environment?.requiredScore || 0,
+      sequentialCheckpoints: storedLab.labContent?.environment?.sequentialCheckpoints || false,
+      mapTheme: storedLab.labContent?.environment?.mapTheme || "default",
+    };
+  });
 
-  const { toasts, dismiss, toast } = useToast();
 
-  const [missionSettings, setMissionSettings] =
-    useState<MissionSettings>(DEFAULT_MISSION);
+  // -- UX & Resilience States --
+  const [isDirty, setIsDirty] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const lastSavedStateRef = useRef<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMissionModal, setShowMissionModal] = useState(false);
+  const [clipboardObject, setClipboardObject] = useState<Omit<MapObject, "id"> | null>(null);
+
+  // 1. Monitor Online Status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // 2. Track Dirty State (Change Detection)
+  useEffect(() => {
+    // Only track after initial load from API is successfully applied
+    if (!storedLab || hasLoadedRef.current !== labId) return;
+
+    const currentState = JSON.stringify({
+      objects,
+      mapCells,
+      missionSettings: {
+        timeLimit: missionSettings.timeLimit,
+        requiredScore: missionSettings.requiredScore,
+        sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+      },
+      hasSolution
+    });
+
+    if (!lastSavedStateRef.current) {
+      // First run after load: Snapshot as the reference point
+      lastSavedStateRef.current = currentState;
+      setIsDirty(false); // Ensure clean on start
+      return;
+    }
+
+    const modified = currentState !== lastSavedStateRef.current;
+    if (isDirty !== modified) {
+      setIsDirty(modified);
+    }
+  }, [objects, mapCells, missionSettings.timeLimit, missionSettings.requiredScore, missionSettings.sequentialCheckpoints, hasSolution, labId, storedLab, isDirty]);
+
+  // 3. Navigation Guard
+  useEffect(() => {
+    // A. External Navigation (Browser Refresh/Close)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?";
+      }
+    };
+
+    // B. Internal Navigation (SPA links)
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+
+      if (anchor && anchor.href && isDirty) {
+        // Only intercept internal links that actually change the path or search
+        try {
+          const url = new URL(anchor.href);
+          const isInternal = url.origin === window.location.origin;
+          const isDifferentPath = url.pathname !== window.location.pathname || url.search !== window.location.search;
+
+          if (isInternal && isDifferentPath) {
+            if (!window.confirm("Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?")) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }
+        } catch (e) {
+          // Ignore invalid URLs
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("click", handleAnchorClick, true); // Use capture phase
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("click", handleAnchorClick, true);
+    };
+  }, [isDirty]);
+
+  const handleBack = useCallback(() => {
+    if (isDirty) {
+      if (window.confirm("Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?")) {
+        router.push("/lab-management");
+      }
+    } else {
+      router.push("/lab-management");
+    }
+  }, [isDirty, router]);
+
+
+
+
+  const saveToStorage = useCallback(async (publish: boolean = false) => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    if (!isOnline) {
+      toast.error("Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền!");
+      setIsSaving(false);
+      return;
+    }
+
+    try {
+      // Small delay for psychological feedback (feel premium)
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const labDataUpdate: Partial<LabData> = {
+        nameVN: missionSettings.labName,
+        nameEN: missionSettings.labNameEN,
+        descriptionVN: missionSettings.description,
+        descriptionEN: missionSettings.descriptionEN,
+        level: (missionSettings.difficulty?.toUpperCase() || "EASY") as any,
+        type: (missionSettings.category === "COMPETING" ? "COMPETITION" : "LEARNING") as any,
+        status: (publish ? "ACTIVE" : (storedLab?.status || "DRAFT")),
+      };
+
+      const labContentData: any = {
+        environment: {
+          objects,
+          mapCells,
+          timeLimit: missionSettings.timeLimit,
+          requiredScore: missionSettings.requiredScore,
+          sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+          hasSolution,
+          mapTheme: missionSettings.mapTheme,
+        }
+      };
+
+      if (publish) {
+        const validation = getLabValidation({
+          ...storedLab,
+          ...labDataUpdate,
+          labContent: labContentData
+        } as any);
+
+        if (!validation.isValid) {
+          toast.error("Bài Lab chưa đạt điều kiện để xuất bản. Hãy hoàn thành các mục trong Checklist!");
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      if (labId) {
+        updateLabFull.mutate({
+          labID: labId,
+          data: { ...labDataUpdate, labContent: labContentData },
+          contentId
+        }, {
+          onSuccess: () => {
+            setSaveSuccess(true);
+            setIsDirty(false);
+            // Snapshot new state as the reference
+            lastSavedStateRef.current = JSON.stringify({
+              objects,
+              mapCells,
+              missionSettings: {
+                timeLimit: missionSettings.timeLimit,
+                requiredScore: missionSettings.requiredScore,
+                sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+              },
+              hasSolution
+            });
+
+            toast.success(publish ? "Đã xuất bản bài lab thành công!" : "Đã lưu map!");
+            if (publish) {
+              setTimeout(() => router.push("/lab-management"), 1200);
+            }
+            setTimeout(() => setSaveSuccess(false), 2000);
+          },
+          onError: () => {
+            toast.error("Lưu dữ liệu thất bại!");
+          },
+          onSettled: () => {
+            setIsSaving(false);
+          }
+        });
+      }
+    } catch (err) {
+      toast.error("An error occurred while saving");
+      setIsSaving(false);
+    }
+  }, [labId, missionSettings, objects, router, toast, mapCells, hasSolution, storedLab, updateLabFull, contentId]);
 
   const [missionRunning, setMissionRunning] = useState(false);
   const [missionTimeLeft, setMissionTimeLeft] = useState(0);
@@ -1189,6 +1590,8 @@ function MapEditorContent() {
       clearInterval(missionTimerRef.current!);
       setMissionRunning(false);
       setMissionResult("pass");
+      setHasSolution(true);
+      toast.success("Giải bài Lab thành công! Bài Lab đã sẵn sàng để xuất bản.");
     }
   }, [
     collectedCheckpoints,
@@ -1197,6 +1600,18 @@ function MapEditorContent() {
     objects,
     missionSettings.requiredScore,
   ]);
+
+  const lastOnlineToastRef = useRef<boolean>(isOnline);
+  useEffect(() => {
+    if (lastOnlineToastRef.current !== isOnline) {
+      if (!isOnline) {
+        toast.warning("Mất kết nối mạng. Vui lòng kiểm tra đường truyền để có thể lưu dữ liệu!");
+      } else {
+        toast.success("Đã có kết nối mạng trở lại!");
+      }
+      lastOnlineToastRef.current = isOnline;
+    }
+  }, [isOnline, toast]);
 
   const startMission = useCallback(() => {
     setCollectedCheckpoints(new Set());
@@ -1340,7 +1755,6 @@ function MapEditorContent() {
               baseRadius * (merged.scale ? merged.scale[0] : obj.scale[0]);
 
             const limit = Math.max(0, MAP_HALF - effectiveRadius);
-            const MAX_ALT_CEILING = 50;
             const floor =
               getConstraintsForModel(merged.modelUrl)?.translate.y.min ?? 0;
 
@@ -1349,7 +1763,7 @@ function MapEditorContent() {
               const nz = Math.max(-limit, Math.min(limit, incomingPos[2]));
               const ny = Math.max(
                 floor,
-                Math.min(MAX_ALT_CEILING, incomingPos[1]),
+                Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, incomingPos[1]),
               );
 
               merged.position = [nx, ny, nz];
@@ -1365,7 +1779,7 @@ function MapEditorContent() {
               );
               const clampedY = Math.max(
                 floor,
-                Math.min(MAX_ALT_CEILING, incomingPos[1]),
+                Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, incomingPos[1]),
               );
 
               const wasClamped =
@@ -1518,7 +1932,10 @@ function MapEditorContent() {
     [],
   );
 
-  const categories = useMemo(() => [...MODEL_CATEGORIES], []);
+  const categories = useMemo(() => [
+    ...MODEL_CATEGORIES,
+    { id: "theme", name: "Environment", models: [] }
+  ], []);
 
   // Export / Import
   const exportLabData = useCallback(() => {
@@ -1632,7 +2049,7 @@ function MapEditorContent() {
         setSelectedObjectId(null);
         stopMission();
       } catch (err) {
-        alert("Failed to load lab data: " + (err as any)?.message);
+        alert("Tải dữ liệu bài Lab thất bại: " + (err as any)?.message);
       }
     },
     [stopMission],
@@ -1655,14 +2072,19 @@ function MapEditorContent() {
     };
   }, []);
 
+  if (!storedLab) {
+    return <MapEditorErrorScreen />;
+  }
+
   return (
-    <div className="fixed inset-0 flex bg-gray-900 text-gray-100 overflow-hidden">
+    <div className="fixed inset-0 flex bg-greyscale-900 text-gray-100 overflow-hidden select-none">
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
       {/* Left sidebar */}
       <aside
         className="
     w-85 sm:w-[420px] h-full
-    bg-[linear-gradient(180deg,#041129_0%,#071426_45%,#020617_100%)]
+    
+    bg-[linear-gradient(180deg,#0b0f18,#071426_45%,#0b0f18)]
     border-r border-white/6
     flex
     overflow-y-auto
@@ -1670,7 +2092,7 @@ function MapEditorContent() {
   "
       >
         {/* Category  */}
-        <nav className="sticky top-0 h-full w-16 sm:w-20 flex flex-col items-center gap-4 py-6 bg-[#061a2b]/80 backdrop-blur-xl border-r border-white/6 ring-1 ring-white/5">
+        <nav className="sticky top-0 h-full w-16 sm:w-20 flex flex-col items-center gap-4 py-6 bg-greyscale-900 backdrop-blur-xl border-r border-white/6 ring-1 ring-white/5">
           {categories.map((cat) => {
             const active = selectedCategory === cat.id;
             return (
@@ -1681,77 +2103,138 @@ function MapEditorContent() {
                 className={`
             relative w-10 h-10 sm:w-12 sm:h-12 rounded  
             flex items-center justify-center
-            transition-all duration-250
-            ${
-              active
-                ? "bg-linear-to-br from-sky-400 to-blue-600 text-white shadow-lg"
-                : "bg-white/4 text-gray-400 hover:bg-white/8 hover:text-white"
-            }
+            transition-all duration-300 ease-out
+            ${active
+                    ? "bg-sky-500 text-white shadow-[0_0_20px_rgba(14,165,233,0.4)] scale-105 border border-sky-400/30"
+                    : "bg-white/5 text-slate-400 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/10"
+                  }
           `}
               >
-                <span className="text-lg">{cat.icon}</span>
+                <span className={`text-xl transition-transform duration-300 ${active ? 'scale-110 drop-shadow-md' : ''}`}>
+                  {CATEGORY_ICONS[cat.id] || <FaQuestionCircle />}
+                </span>
               </button>
             );
           })}
         </nav>
 
         {/* Asset  */}
-        <div className="flex-1 px-4 py-5">
-          <div className="grid grid-cols-2 gap-4">
-            {MODEL_CATEGORIES.find(
-              (c) => c.id === selectedCategory,
-            )?.models.map((m) => (
-              <div
-                key={m.id}
-                className="group relative flex flex-col rounded-xl overflow-hidden border border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] transition-all duration-200 hover:shadow-[0_0_24px_rgba(56,189,248,0.10)]"
-              >
-                {/* Colored accent line top */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+        <div className="flex-1 px-4 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {selectedCategory === "theme" ? (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-1 opacity-60">Cài đặt Môi Trường</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { id: 'default', name: 'Mặc định', img: '/images/enviroment/default.jpg' },
+                  { id: 'space', name: 'Vũ trụ', img: '/images/enviroment/space.jpg' },
+                  { id: 'sunset', name: 'Hoàng hôn', img: '/images/enviroment/sunset.jpg' },
+                  { id: 'daylight', name: 'Sáng sớm', img: '/images/enviroment/daylight.jpg' }
+                ].map(theme => {
+                  const isActive = missionSettings.mapTheme === theme.id;
+                  return (
+                    <div
+                      key={theme.id}
+                      onClick={() => setMissionSettings(s => ({ ...s, mapTheme: theme.id as any }))}
+                      className={`group relative flex flex-col rounded overflow-hidden border transition-all duration-200 ${isActive
+                        ? 'border-sky-400/40 shadow-[0_0_24px_rgba(56,189,248,0.15)] bg-sky-500/5'
+                        : 'border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] hover:shadow-[0_0_24px_rgba(56,189,248,0.1)]'
+                        }`}
+                    >
+                      {/* Colored accent line top */}
+                      <div className={`absolute top-0 left-0 right-0 h-[2px] transition-opacity duration-300 z-10 ${isActive ? 'bg-sky-400 opacity-100' : 'bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100'
+                        }`} />
 
-                {/* Preview */}
-                <div className="relative h-28 sm:h-36 overflow-hidden">
-                  {m.defaultScoreValue && (
-                    <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-semibold">
-                      ✦ {m.defaultScoreValue} pts
+                      {/* Preview area - matching exactly h-28 sm:h-36 */}
+                      <div className="relative h-28 sm:h-36 overflow-hidden bg-black">
+                        <img
+                          src={theme.img}
+                          alt={theme.name}
+                          className={`w-full h-full object-cover transition-transform duration-500 ${isActive ? 'scale-110' : 'opacity-60 group-hover:opacity-90 group-hover:scale-[1.04]'}`}
+                        />
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
+                      </div>
+
+                      {/* Footer - matching exactly px-3 py-2.5 bg-white/[0.02] border-t */}
+                      <div className={`flex items-center gap-2 px-3 py-2.5 border-t transition-colors ${isActive ? 'border-sky-400/30 bg-sky-400/10' : 'border-white/[0.06] bg-white/[0.02]'
+                        }`}>
+                        <span className={`text-[13px] font-semibold truncate flex-1 tracking-tight ${isActive ? 'text-sky-300' : 'text-white'}`}>
+                          {theme.name}
+                        </span>
+
+                        <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive
+                          ? 'bg-sky-500 border border-sky-400 text-white shadow-[0_0_12px_rgba(56,189,248,0.4)]'
+                          : 'bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] text-slate-500'
+                          }`}>
+                          {isActive ? (
+                            <FaCheck className="text-[10px]" />
+                          ) : (
+                            <div className="w-1.5 h-1.5 bg-sky-500/50 rounded-full" />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
-                  <div className="w-full h-full group-hover:scale-[1.04] transition-transform duration-300 ease-out">
-                    <SidebarModelPreview m={m} />
+                  );
+                })}
+              </div>
+            </div>
+
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {MODEL_CATEGORIES.find(
+                (c) => c.id === selectedCategory,
+              )?.models.map((m) => (
+                <div
+                  key={m.id}
+                  className="group relative flex flex-col rounded overflow-hidden border border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] transition-all duration-200 hover:shadow-[0_0_24px_rgba(56,189,248,0.10)]"
+                >
+                  {/* Colored accent line top */}
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+
+                  {/* Preview */}
+                  <div className="relative h-28 sm:h-36 overflow-hidden">
+                    {m.defaultScoreValue && (
+                      <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-semibold">
+                        ✦ {m.defaultScoreValue} pts
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
+                    <div className="w-full h-full group-hover:scale-[1.04] transition-transform duration-300 ease-out">
+                      <SidebarModelPreview m={m} />
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
+                    <span className="text-[13px] font-semibold text-white truncate flex-1 tracking-tight">
+                      {m.name}
+                    </span>
+                    <button
+                      onClick={() => addPredefinedModel(m)}
+                      aria-label={`Add ${m.name}`}
+                      className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="#38bdf8"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-
-                {/* Footer */}
-                <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
-                  <span className="text-[13px] font-semibold text-white truncate flex-1 tracking-tight">
-                    {m.name}
-                  </span>
-                  <button
-                    onClick={() => addPredefinedModel(m)}
-                    aria-label={`Add ${m.name}`}
-                    className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
-                  >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="#38bdf8"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-[#07111f]/95 border-b border-white/[0.06] backdrop-blur-md flex-wrap gap-y-2">
+        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap gap-y-2">
           {/* Map size */}
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
             <svg
               width="13"
               height="13"
@@ -1791,125 +2274,60 @@ function MapEditorContent() {
 
           <div className="h-5 w-px bg-white/10" />
 
-          {/* Action buttons */}
+          {/* Navigation & Save */}
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setShowMissionModal(true)}
-              title="Mission Settings"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13]"
+              onClick={handleBack}
+              className="group flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold rounded bg-greyscale-700 text-greyscale-0 border-2 border-greyscale-600 hover:bg-white/5 transition-all shadow-sm"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="3"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                />
-                <path
-                  d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-              Mission
+              <FaArrowLeft className="text-[10px] group-hover:-translate-x-0.5 transition-transform text-primary-300" />
+              Quay Lại
             </button>
 
             <button
-              onClick={exportLabData}
-              title="Export lab as JSON"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13]"
+              onClick={() => saveToStorage(false)}
+              disabled={isSaving || !isOnline}
+              className={`
+                relative flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded transition-all duration-300 border
+                ${saveSuccess
+                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                  : !isOnline
+                    ? "bg-red-500/10 text-red-400 border-red-500/20 opacity-70"
+                    : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                }
+                disabled:opacity-50 disabled:cursor-not-allowed
+              `}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 3v13M7 11l5 5 5-5M5 20h14"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Export
+              {isSaving ? (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : saveSuccess ? (
+                <FaCheck className="animate-in zoom-in duration-300" />
+              ) : !isOnline ? (
+                <span>⚠</span>
+              ) : (
+                <FaSave className="text-[10px]" />
+              )}
+              {saveSuccess ? "Đã lưu!" : isSaving ? "Đang lưu..." : !isOnline ? "Mất kết nối" : "Lưu Map"}
+
+              {isDirty && !saveSuccess && !isSaving && isOnline && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-400 rounded-full border-2 border-greyscale-900 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+              )}
             </button>
 
-            <label
-              title="Load lab from JSON"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13] cursor-pointer"
+            <button
+              onClick={() => setShowMissionModal(true)}
+              className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-primary-300 text-white border border-primary-200 hover:bg-primary-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300 ml-1"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 21V8M7 13l5-5 5 5M5 4h14"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Load
-              <input
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (evt) => {
-                    try {
-                      loadLabData(JSON.parse(evt.target!.result as string));
-                    } catch {
-                      toast.error("Invalid JSON file");
-                    }
-                  };
-                  reader.readAsText(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
+              Cấu Hình Rule <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
 
-            {clipboardObject && (
-              <button
-                onClick={() => {
-                  const newObj: MapObject = {
-                    ...clipboardObject,
-                    id: `object-${Date.now()}-${Math.random()}`,
-                    position: [
-                      clipboardObject.position[0] + 1,
-                      clipboardObject.position[1],
-                      clipboardObject.position[2] + 1,
-                    ],
-                    isClamped: false,
-                  };
-                  setObjects((prev) => [...prev, newObj]);
-                  setTimeout(() => setSelectedObjectId(newObj.id), 0);
-                }}
-                title="Paste copied object (Ctrl+V)"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 transition-all duration-150 border border-sky-500/20 hover:border-sky-400/40"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <rect
-                    x="8"
-                    y="4"
-                    width="12"
-                    height="16"
-                    rx="2"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  />
-                  <path
-                    d="M8 8H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-3"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                Paste
-                <kbd className="px-1 py-px bg-sky-950/60 rounded text-[9px] font-mono border border-sky-700/30 leading-tight opacity-70">
-                  ⌃V
-                </kbd>
-              </button>
-            )}
+
+          </div>
+
+          <div className="h-5 w-px bg-white/10" />
+
+          <div className="flex items-center gap-1.5">
+            {/* Action buttons removed */}
           </div>
 
           {/* Mission HUD */}
@@ -1924,22 +2342,22 @@ function MapEditorContent() {
           )}
           {missionResult === "pass" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-semibold tracking-wide">
-              PASS
+              HOÀN THÀNH
             </span>
           )}
           {missionResult === "fail" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 font-semibold tracking-wide">
-              FAIL
+              THẤT BẠI
             </span>
           )}
 
           {/* Transform mode */}
           <div className="ml-auto relative">
-            <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.04] p-0.5 border border-white/[0.07]">
+            <div className="flex items-center gap-0.5 rounded bg-white/[0.04] p-0.5 border border-white/[0.07]">
               {[
                 {
                   mode: "translate" as TransformMode,
-                  label: "Move",
+                  label: "Di Chuyển",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1960,7 +2378,7 @@ function MapEditorContent() {
                 },
                 {
                   mode: "rotate" as TransformMode,
-                  label: "Rotate",
+                  label: "Xoay",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1974,7 +2392,7 @@ function MapEditorContent() {
                 },
                 {
                   mode: "scale" as TransformMode,
-                  label: "Scale",
+                  label: "Tỷ Lệ",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1990,25 +2408,24 @@ function MapEditorContent() {
                 <button
                   key={mode}
                   onClick={() => setTransformMode(mode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-all duration-150 ${
-                    transformMode === mode
-                      ? "bg-sky-500/20 text-sky-300"
-                      : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]"
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded transition-all duration-150 ${transformMode === mode
+                    ? "bg-sky-500/20 text-sky-300"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]"
+                    }`}
                 >
                   {icon}
                   {label}
                 </button>
               ))}
             </div>
-            <kbd className="absolute -top-2 -left-2 px-1 py-px bg-[#07111f] text-slate-600 rounded text-[9px] font-mono border border-white/[0.06] leading-tight">
+            <kbd className="absolute -top-2 -left-2 px-1 py-px bg-[#07111f] text-slate-300 rounded text-[11px] font-mono border border-white/[0.06] leading-tight">
               Tab
             </kbd>
           </div>
         </div>
 
         {/* 3D Canvas */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative" ref={mainCanvasContainerRef}>
           {selectedObject && (
             <button
               onClick={handleDeleteSelected}
@@ -2030,7 +2447,7 @@ function MapEditorContent() {
                   strokeLinejoin="round"
                 />
               </svg>
-              Delete
+              Xóa
               <kbd className="ml-0.5 px-1 py-px bg-red-950/60 rounded text-[9px] font-mono border border-red-700/50 leading-tight text-red-500 group-hover:border-red-500/50 group-hover:text-red-300 transition-colors">
                 Del
               </kbd>
@@ -2227,7 +2644,7 @@ function MapEditorContent() {
                   <input
                     type="range"
                     min={4}
-                    max={10}
+                    max={15}
                     step={0.5}
                     value={selectedObject.radius ?? 2}
                     onChange={(e) =>
@@ -2268,176 +2685,173 @@ function MapEditorContent() {
           {/* ── Mission Settings Modal ────────────────────────────────── */}
           {showMissionModal && (
             <div
-              className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
               onClick={(e) => {
                 if (e.target === e.currentTarget) setShowMissionModal(false);
               }}
             >
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-[380px] shadow-2xl text-gray-100">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-base font-semibold">
-                    ⚙ Mission Settings
-                  </h2>
-                  <button
-                    onClick={() => setShowMissionModal(false)}
-                    className="text-gray-500 hover:text-white text-lg leading-none"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">
-                      Lab Name
-                    </label>
-                    <input
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                      value={missionSettings.labName}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          labName: e.target.value,
-                        }))
-                      }
-                      placeholder="My Lab"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm resize-none h-20"
-                      value={missionSettings.description}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          description: e.target.value,
-                        }))
-                      }
-                      placeholder="Describe the mission objectives…"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+              <div className="bg-greyscale-900 border border-white/[0.08] rounded-xl p-6 sm:p-8 w-full max-w-lg shadow-xl relative overflow-hidden">
+                <div className="relative z-10 flex flex-col gap-8">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">
-                        Time Limit (s)
-                      </label>
+                      <h3 className="text-xl font-bold uppercase tracking-widest flex items-center gap-3 text-white">
+                        <span className="w-2.5 h-2.5 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))] animate-pulse"></span>
+                        Cấu hình Luật & Logic
+                      </h3>
+                      <p className="text-greyscale-400 text-xs font-bold tracking-widest uppercase mt-2">Bước 3: Cấu Hình Luật Chơi</p>
+                    </div>
+                    <button
+                      onClick={() => setShowMissionModal(false)}
+                      className="text-greyscale-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    <div className="grid grid-cols-2 gap-5">
+                      <div className="flex flex-col gap-2 p-4 rounded-xl bg-black/40 border border-white/5 relative group hover:border-primary-300/30 transition-colors">
+                        <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                          <FaClock className="text-xl text-primary-300" />
+                        </div>
+                        <label className="text-xs font-bold text-greyscale-400 uppercase tracking-widest">Thời gian cho phép (giây)</label>
+                        <input
+                          type="number"
+                          min={10}
+                          step={5}
+                          className="w-full bg-transparent text-3xl font-black text-white focus:outline-none select-auto"
+                          value={missionSettings.timeLimit}
+                          onChange={(e) =>
+                            setMissionSettings((s) => ({
+                              ...s,
+                              timeLimit: Math.max(10, Number(e.target.value)),
+                            }))
+                          }
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-2 p-4 rounded-xl bg-black/40 border border-white/5 relative group hover:border-primary-300/30 transition-colors">
+                        <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                          <FaStar className="text-xl text-primary-300" />
+                        </div>
+                        <label className="text-xs font-bold text-greyscale-400 uppercase tracking-widest">Điểm yêu cầu (Score)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          className="w-full bg-transparent text-3xl font-black text-white focus:outline-none select-auto"
+                          value={missionSettings.requiredScore}
+                          onChange={(e) =>
+                            setMissionSettings((s) => ({
+                              ...s,
+                              requiredScore: Math.max(0, Number(e.target.value)),
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+
+
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-sky-500/10 to-transparent border border-sky-500/20">
                       <input
-                        type="number"
-                        min={10}
-                        step={5}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                        value={missionSettings.timeLimit}
+                        id="seq-cp"
+                        type="checkbox"
+                        checked={missionSettings.sequentialCheckpoints}
                         onChange={(e) =>
                           setMissionSettings((s) => ({
                             ...s,
-                            timeLimit: Math.max(10, Number(e.target.value)),
+                            sequentialCheckpoints: e.target.checked,
                           }))
                         }
+                        className="w-5 h-5 accent-sky-400 rounded cursor-pointer"
                       />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-400 block mb-1">
-                        Required Score
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                        value={missionSettings.requiredScore}
-                        onChange={(e) =>
-                          setMissionSettings((s) => ({
-                            ...s,
-                            requiredScore: Math.max(0, Number(e.target.value)),
-                          }))
-                        }
-                      />
+                      <div className="flex flex-col">
+                        <label
+                          htmlFor="seq-cp"
+                          className="text-sm font-bold text-sky-100 cursor-pointer uppercase tracking-widest"
+                        >
+                          Kiểm Tra Checkpoint Tuần Tự
+                        </label>
+                        <span className="text-xs text-sky-400/60 font-medium">Bắt buộc người chơi bay qua các điểm đánh dấu theo đúng thứ tự 1, 2, 3...</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      id="seq-cp"
-                      type="checkbox"
-                      checked={missionSettings.sequentialCheckpoints}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          sequentialCheckpoints: e.target.checked,
-                        }))
-                      }
-                      className="w-4 h-4 accent-[#3AC0D3]"
-                    />
-                    <label
-                      htmlFor="seq-cp"
-                      className="text-sm text-gray-300 cursor-pointer"
+
+                  <div className="mt-4 pt-6 border-t border-white/10 flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      {!missionRunning ? (
+                        <button
+                          onClick={() => {
+                            setShowMissionModal(false);
+                            startMission();
+                          }}
+                          className="flex items-center gap-2 px-5 py-2.5 text-xs rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-black uppercase tracking-widest border border-indigo-500/30 transition-all"
+                        >
+                          ▶ Chạy Thử UI Map
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setShowMissionModal(false);
+                            stopMission();
+                          }}
+                          className="flex items-center gap-2 px-5 py-2.5 text-xs rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-black uppercase tracking-widest border border-rose-500/30 transition-all"
+                        >
+                          ■ Dừng Chạy Thử
+                        </button>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setShowMissionModal(false);
+                        await saveToStorage(false);
+                        router.push("/lab-management");
+                      }}
+                      className="px-6 py-2.5 rounded-lg bg-primary-300 hover:bg-primary-400 text-white font-black uppercase tracking-widest shadow-[0_6px_25px_-5px_var(--primary-300,rgba(239,68,68,0.4))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all active:scale-95 text-xs"
                     >
-                      Sequential Checkpoints
-                    </label>
+                      Lưu
+                    </button>
                   </div>
-                </div>
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    onClick={() => setShowMissionModal(false)}
-                    className="px-4 py-2 text-sm rounded bg-gray-700 hover:bg-gray-600"
-                  >
-                    Close
-                  </button>
-                  {!missionRunning ? (
-                    <button
-                      onClick={() => {
-                        setShowMissionModal(false);
-                        startMission();
-                      }}
-                      className="px-4 py-2 text-sm rounded bg-emerald-700 hover:bg-emerald-600 text-white font-medium"
-                    >
-                      ▶ Start Mission
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setShowMissionModal(false);
-                        stopMission();
-                      }}
-                      className="px-4 py-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white font-medium"
-                    >
-                      ■ Stop Mission
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
           )}
 
-          <Canvas
-            shadows
-            gl={{
-              toneMapping: THREE.ACESFilmicToneMapping,
-              toneMappingExposure: 0.8,
-              outputColorSpace: THREE.SRGBColorSpace,
-              preserveDrawingBuffer: true,
-            }}
-            camera={{
-              position: CAMERA_CONFIG.INITIAL_POSITION,
-              fov: CAMERA_CONFIG.FOV,
-              near: CAMERA_CONFIG.NEAR,
-              far: 5000,
-            }}
-            className="w-full h-full"
-          >
-            <color attach="background" args={["#071427"]} />
-            <Scene
-              objects={objects}
-              selectedObjectId={selectedObjectId}
-              onSelectObject={setSelectedObjectId}
-              transformMode={transformMode}
-              onObjectTransform={handleObjectTransform}
-              disableOrbitControls={isTransforming}
-              onTransformStart={handleTransformStart}
-              onTransformEnd={handleTransformEnd}
-              mapCells={mapCells}
-            />
-          </Canvas>
+          {mountedNode && (
+            <Canvas
+              eventSource={mountedNode}
+              shadows
+              gl={{
+                toneMapping: THREE.ACESFilmicToneMapping,
+                toneMappingExposure: 0.8,
+                outputColorSpace: THREE.SRGBColorSpace,
+                preserveDrawingBuffer: true,
+              }}
+              camera={{
+                position: CAMERA_CONFIG.INITIAL_POSITION,
+                fov: CAMERA_CONFIG.FOV,
+                near: CAMERA_CONFIG.NEAR,
+                far: 5000,
+              }}
+              className="w-full h-full"
+            >
+              <MapEnvironment theme={missionSettings.mapTheme} />
+              <Scene
+                objects={objects}
+                selectedObjectId={selectedObjectId}
+                onSelectObject={setSelectedObjectId}
+                transformMode={transformMode}
+                onObjectTransform={handleObjectTransform}
+                disableOrbitControls={isTransforming}
+                onTransformStart={handleTransformStart}
+                onTransformEnd={handleTransformEnd}
+                mapCells={mapCells}
+                labId={labId}
+                cameraResetToken={cameraResetToken}
+              />
+            </Canvas>
+          )}
         </div>
       </div>
     </div>
@@ -2445,5 +2859,11 @@ function MapEditorContent() {
 }
 
 export default function MapEditor() {
-  return <MapEditorContent />;
+  return (
+    <MapEditorErrorBoundary>
+      <Suspense fallback={<Loading />}>
+        <MapEditorContent />
+      </Suspense>
+    </MapEditorErrorBoundary>
+  );
 }

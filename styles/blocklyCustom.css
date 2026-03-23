@@ -7,11 +7,9 @@
 
 .blocklyToolboxDiv {
   width: var(--toolbox-width) !important;
-  background: linear-gradient(
-    180deg,
-    #2f3e4e 0%,
-    #1f2a38 100%
-  ) !important;
+  background: linear-gradient(180deg,
+      #2f3e4e 0%,
+      #1f2a38 100%) !important;
   border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
   color: #e0e7ff !important;
@@ -32,6 +30,7 @@
     --flyout-width: 220px;
   }
 }
+
 .blocklyTreeRow {
   height: 44px !important;
   line-height: 44px !important;
@@ -77,6 +76,7 @@
     font-size: 12px !important;
   }
 }
+
 .blocklyTreeRow:hover {
   background-color: rgba(97, 116, 138, 0.6) !important;
   border-color: rgba(148, 163, 184, 0.3) !important;
@@ -85,11 +85,9 @@
 }
 
 .blocklyTreeRow.blocklyTreeSelected {
-  background: linear-gradient(
-    135deg,
-    rgba(79, 163, 255, 0.35),
-    rgba(99, 146, 255, 0.25)
-  ) !important;
+  background: linear-gradient(135deg,
+      rgba(79, 163, 255, 0.35),
+      rgba(99, 146, 255, 0.25)) !important;
   border: 2px solid rgba(59, 130, 246, 0.5) !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15),
     0 4px 12px rgba(59, 130, 246, 0.25) !important;
@@ -101,6 +99,7 @@
   font-weight: 700 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
+
 .blocklyTreeRow input[type="checkbox"],
 .blocklyTreeIcon {
   display: none !important;
@@ -108,12 +107,10 @@
 
 .blocklyFlyout {
   transition: transform 0.25s ease, opacity 0.2s ease !important;
-  background: linear-gradient(
-    180deg,
-    #0f172a 0%,
-    #0c1224 55%,
-    #0b1220 100%
-  ) !important;
+  background: linear-gradient(180deg,
+      #0f172a 0%,
+      #0c1224 55%,
+      #0b1220 100%) !important;
   transform: translate(var(--flyout-offset), 0px) !important;
   z-index: 10 !important;
   border-right: 1px solid rgba(148, 163, 184, 0.15) !important;
@@ -134,7 +131,7 @@
     margin: 4px 2px !important;
   }
 
-  .blocklyFlyout .blocklyBlockCanvas > g {
+  .blocklyFlyout .blocklyBlockCanvas>g {
     min-width: 160px !important;
   }
 
@@ -158,7 +155,7 @@
     min-width: 180px !important;
   }
 
-  .blocklyFlyout .blocklyBlockCanvas > g {
+  .blocklyFlyout .blocklyBlockCanvas>g {
     min-width: 180px !important;
   }
 
@@ -175,6 +172,7 @@
     min-width: 140px !important;
   }
 }
+
 .blocklyScrollbarVertical,
 .blocklyScrollbarHorizontal {
   z-index: 20 !important;
@@ -188,10 +186,11 @@
   opacity: 1 !important;
   pointer-events: auto !important;
 }
+
 .blocklyToggleBtn {
   position: absolute;
   top: 10px;
-  left: calc(var(--toolbox-width) + var(--flyout-width) - 50px);
+  left: calc(var(--toolbox-width) + var(--flyout-width) - 80px);
   z-index: 30;
   padding: 8px 10px;
   border-radius: 999px;
@@ -261,6 +260,7 @@
 .blockly-panels-collapsed .blocklyFlyout {
   overflow: hidden !important;
 }
+
 .blocklyFlyoutBackground {
   fill: rgba(15, 23, 42, 0.85) !important;
   stroke: rgba(148, 163, 184, 0.15) !important;
@@ -278,7 +278,7 @@
   filter: brightness(1.03) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.26)) !important;
 }
 
-.blocklyFlyout .blocklyBlockCanvas > g {
+.blocklyFlyout .blocklyBlockCanvas>g {
   min-width: 200px !important;
 }
 
@@ -294,6 +294,7 @@
 .blocklyFlyout .blocklyText {
   min-width: 150px !important;
 }
+
 .blocklyDraggable:hover {
   filter: brightness(1.05) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
   cursor: grab !important;
@@ -305,13 +306,13 @@
   opacity: 0.9 !important;
 }
 
-.blocklySelected > .blocklyPath {
+.blocklySelected>.blocklyPath {
   stroke: #3b82f6 !important;
   stroke-width: 3px !important;
   filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5)) !important;
 }
 
-.blocklyInsertionMarker > .blocklyPath {
+.blocklyInsertionMarker>.blocklyPath {
   fill: rgba(59, 130, 246, 0.2) !important;
   stroke: #3b82f6 !important;
   stroke-width: 2px !important;
@@ -329,6 +330,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   font-weight: 500 !important;
 }
+
 .blocklyScrollbarHandle {
   rx: 4px !important;
   transition: fill 0.2s ease, opacity 0.2s ease !important;
@@ -349,6 +351,7 @@
   border-radius: 8px !important;
   transition: all 0.2s ease !important;
 }
+
 .blocklyFlyoutButton:hover {
   filter: brightness(1.1) !important;
   transform: scale(1.02) !important;
@@ -366,9 +369,11 @@
   opacity: 0.7 !important;
   transition: opacity 0.15s ease !important;
 }
+
 .blocklyTrash:hover {
   opacity: 1 !important;
 }
+
 .blocklyGridPattern line {
   stroke: #e2e8f0 !important;
   stroke-opacity: 0.5 !important;
