@@ -20,7 +20,7 @@ export function GlassCard({ children, icon, className, variant = 'horizontal', t
     >
       {variant === 'horizontal' ? (
         <div className="flex items-center gap-3">
-          {icon && <span className="inline-flex text-primary-300 [&_svg]:w-5 [&_svg]:h-5 [&_svg]:shrink-0">{icon}</span>}
+          {icon && <span className="inline-flex text-greyscale-0 [&_svg]:w-5 [&_svg]:h-5 [&_svg]:shrink-0">{icon}</span>}
           <span>{children}</span>
         </div>
       ) : (

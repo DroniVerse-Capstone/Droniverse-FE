@@ -11,13 +11,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "@/providers/i18n-provider";
 import { SlideIn, StaggerContainer } from "@/components/animation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import CommonDropdown from "@/components/common/CommonDropdown";
 import { useLogin, useRegister } from "@/hooks/auth/useAuth";
 import { Spinner } from "@/components/ui/spinner";
 import toast from "react-hot-toast";
@@ -252,35 +246,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="role" className="text-greyscale-0">
-                    {t("role")}
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between bg-greyscale-800 text-greyscale-0 hover:bg-greyscale-900 mt-2"
-                      >
-                        {roleOptions.find((opt) => opt.value === role)?.label}
-                        <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) bg-greyscale-800 border-greyscale-700">
-                      {roleOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option.value}
-                          onClick={() => setRole(option.value)}
-                          className={`cursor-pointer text-base hover:bg-greyscale-700 focus:bg-greyscale-700 ${
-                            role === option.value
-                              ? "bg-primary-200/20 text-primary-200"
-                              : "text-greyscale-0"
-                          }`}
-                        >
-                          {option.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <CommonDropdown
+                    label={t("role")}
+                    value={role}
+                    onChange={(value) => setRole(value as Role)}
+                    options={roleOptions}
+                  />
                 </div>
               </>
             )}

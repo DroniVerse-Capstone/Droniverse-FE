@@ -365,5 +365,165 @@
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
     "cta": "Go Back"
+  },
+  "RegisterClubDialog": {
+    "title": "Register Club",
+    "subtitle": "Fill out the form below to request creating your own Club",
+    "editTitle": "Edit Club Creation Request",
+    "editSubtitle": "Update your club creation request information",
+    "viewTitle": "Request Details",
+    "fields": {
+      "nameVi": "Club Name (Vietnamese)",
+      "nameEn": "Club Name (English)",
+      "description": "Reason for establishing the Club",
+      "category": "Category",
+      "categoryPlaceholder": "Select category",
+      "coverImage": "Club Image",
+      "isPublic": "Public Club",
+      "limitMembers": "Member Limit",
+      "limitManagers": "Manager Limit",
+      "mode": "Mode",
+      "createAt": "Created At",
+      "updatedAt": "Updated At",
+      "approvedAt": "Approved At",
+      "rejectReason": "Reject Reason",
+      "approveBy": "Approved By"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Register",
+      "update": "Update",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirm": "Confirm Rejection"
+    },
+    "privacy": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "validation": "Please fill in all valid information",
+    "error": "Failed to submit club creation request",
+    "empty": "No data found",
+    "reject": {
+      "title": "Reject Reason",
+      "description": "Enter the reason for rejecting this club creation request.",
+      "placeholder": "Enter reject reason...",
+      "validation": "Please enter a reject reason"
+    }
+  },
+  "JoinClubDialog": {
+    "title": "Join Club",
+    "subtitle": "Enter the club code to request to join the club",
+    "field": {
+      "code": "Club Code",
+      "codePlaceholder": "Enter club code..."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Join",
+      "find": "Find Club"
+    },
+    "error": "Club not found"
+  },
+  "ClubImageUpload": {
+    "toast": {
+      "success": "Image uploaded successfully",
+      "error": "Image upload failed",
+      "warning": "Please select a valid image file"
+    },
+    "caption": {
+      "upload": "Click or drag an image here to upload",
+      "change": "Drag another image here or click to choose again",
+      "accept": "Supports PNG, JPG, JPEG, WEBP",
+      "empty": "No image selected",
+      "remove": "Remove image"
+    }
+  },
+  "ClubDashboard": {
+    "myClubs": "My Clubs",
+    "myRequests": "My Requests",
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "approved": "Approved",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "title": "No clubs yet.",
+      "title1": "No requests yet"
+    },
+    "privacy": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "table": {
+      "headers": {
+        "name": "Club Name",
+        "mode": "Mode",
+        "image": "Club Image",
+        "createdAt": "Created At",
+        "approvedAt": "Approved At",
+        "processedAt": "Processed At",
+        "category": "Category",
+        "requester": "Requester",
+        "approver": "Approver",
+        "rejectReason": "Reject Reason",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit Request",
+        "delete": "Cancel Request",
+        "titleDelete": "Cancel this request?",
+        "warnDelete": "This action will cancel the club creation request",
+        "confirm": "Confirm",
+        "cancel": "Close"
+      }
+    }
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "sum": "Total",
+    "records": "records",
+    "more": "More pages"
+  },
+  "ClubDetail": {
+    "Nav": {
+      "home": "Overview",
+      "members": "Members",
+      "courses": "Courses",
+      "myCourses": "My Courses",
+      "competitions": "Competitions"
+    },
+    "ClubSwitcher": {
+      "title": "Switch Club",
+      "subtitle": "Select a club from your list to quickly switch.",
+      "empty": "You haven't joined any clubs yet.",
+      "now": "Current Club"
+    },
+    "ClubInfo": {
+      "createdAt": "Founded Date",
+      "members": "Total Members",
+      "manager": "Club Manager",
+      "courses": "Owned Courses",
+      "out": "Leave Club",
+      "privacy": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "empty": {
+        "title": "Club Not Found",
+        "description": "The club link is invalid or you don't have permission to access it."
+      },
+      "error": "Failed to load club information"
+    }
   }
 }

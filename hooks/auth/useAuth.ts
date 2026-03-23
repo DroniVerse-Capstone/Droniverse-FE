@@ -1,6 +1,7 @@
 "use client"
 
-import { useMutation } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { AxiosError } from 'axios'
 import apiClient from '@/lib/api/client'
@@ -12,6 +13,8 @@ import {
   LoginRequest,
   LoginResponse,
   loginResponseSchema,
+  MeResponse,
+  meResponseSchema,
   RegisterRequest,
   RegisterResponse,
   registerResponseSchema
@@ -28,6 +31,49 @@ interface UseRegisterOptions {
   onSuccess?: (data: RegisterResponse) => void
   onError?: (error: AxiosError<ApiError>) => void
   redirectTo?: string
+}
+
+interface UseMeOptions {
+  enabled?: boolean
+  onSuccess?: (data: MeResponse) => void
+  onError?: (error: AxiosError<ApiError>) => void
+}
+
+export const useMe = (options?: UseMeOptions) => {
+  const onSuccess = options?.onSuccess
+  const onError = options?.onError
+
+  const query = useQuery<MeResponse, AxiosError<ApiError>>({
+    queryKey: ['auth', 'me'],
+    enabled: options?.enabled,
+    queryFn: async () => {
+      const response = await apiClient.get<MeResponse>('/auth/me')
+
+      return meResponseSchema.parse(response.data)
+    }
+  })
+
+  useEffect(() => {
+    if (query.data) {
+      if (typeof window !== 'undefined') {
+        useAuthStore.getState().setUser(query.data.data)
+      }
+
+      onSuccess?.(query.data)
+    }
+  }, [onSuccess, query.data])
+
+  useEffect(() => {
+    if (query.error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Me API error:', query.error)
+      }
+
+      onError?.(query.error)
+    }
+  }, [onError, query.error])
+
+  return query
 }
 
 export const useLogin = (options?: UseLoginOptions) => {
@@ -112,16 +158,23 @@ export const useRegister = (options?: UseRegisterOptions) => {
 
 export const useLogout = () => {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async () => {
-      // Optionally call logout endpoint
-      // await apiClient.post('/auth/logout')
+      try {
+        await apiClient.post('/auth/logout')
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Logout API error:', error)
+        }
+      }
 
-      // Clear auth cookies and local user cache
+      // Clear auth cookies and in-memory user cache
       if (typeof window !== 'undefined') {
         clearAuthCookies()
         useAuthStore.getState().clearUser()
+        queryClient.clear()
       }
     },
     onSuccess: () => {

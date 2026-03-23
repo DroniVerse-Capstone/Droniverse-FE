@@ -71,13 +71,11 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           <>
             <div className="px-3 py-2 text-sm">
               <p className="font-semibold text-greyscale-0">
-                {user.firstName && user.lastName 
-                  ? `${user.firstName} ${user.lastName}`
-                  : user.username}
+                {user.username}
               </p>
               <p className="text-xs text-greyscale-300 truncate">{user.email}</p>
               {user.roleName && (
-                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-primary-200/20 text-primary-200">
+                <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded bg-primary-200/20 text-primary-200">
                   {user.roleName}
                 </span>
               )}
