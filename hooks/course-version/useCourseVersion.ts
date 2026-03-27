@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 
 import apiClient from "@/lib/api/client"
@@ -6,13 +6,98 @@ import { ApiError } from "@/types/api/common"
 import {
 	CourseVersion,
 	CreateCourseVersionRequest,
+	UpdateCourseVersionRequest,
+	GetCourseVersionsData,
+	ActivateCourseVersionResponse,
+	DeactivateCourseVersionResponse,
+	activateCourseVersionResponseSchema,
 	createCourseVersionRequestSchema,
 	createCourseVersionResponseSchema,
+	deactivateCourseVersionResponseSchema,
+	getCourseVersionDetailResponseSchema,
+	getCourseVersionsResponseSchema,
+	updateCourseVersionRequestSchema,
+	updateCourseVersionResponseSchema,
 } from "@/validations/course-version/course-version"
 
 type CreateCourseVersionVariables = {
 	courseId: string
 	payload: CreateCourseVersionRequest
+}
+
+type UpdateCourseVersionVariables = {
+	courseId: string
+	versionId: string
+	payload: UpdateCourseVersionRequest
+}
+
+type ToggleCourseVersionStatusVariables = {
+	courseId: string
+	versionId: string
+}
+
+type UseGetCourseVersionsOptions = {
+	courseId?: string
+	pageIndex?: number
+	pageSize?: number
+}
+
+type UseGetCourseVersionDetailOptions = {
+	courseId?: string
+	versionId?: string
+}
+
+export const useGetCourseVersions = (options?: UseGetCourseVersionsOptions) => {
+	return useQuery<GetCourseVersionsData, AxiosError<ApiError>>({
+		queryKey: [
+			"course-versions",
+			options?.courseId,
+			options?.pageIndex,
+			options?.pageSize,
+		],
+		enabled: Boolean(options?.courseId),
+		queryFn: async () => {
+			if (!options?.courseId) {
+				throw new Error("courseId is required")
+			}
+
+			const response = await apiClient.get(
+				`/academy/courses/${options.courseId}/versions`,
+				{
+					params: {
+						...(options.pageIndex !== undefined && {
+							pageIndex: options.pageIndex,
+						}),
+						...(options.pageSize !== undefined && { pageSize: options.pageSize }),
+					},
+				}
+			)
+
+			const parsed = getCourseVersionsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetCourseVersionDetail = (
+	options?: UseGetCourseVersionDetailOptions
+) => {
+	return useQuery<CourseVersion, AxiosError<ApiError>>({
+		queryKey: ["course-version-detail", options?.courseId, options?.versionId],
+		enabled: Boolean(options?.courseId && options?.versionId),
+		queryFn: async () => {
+			if (!options?.courseId || !options?.versionId) {
+				throw new Error("courseId and versionId are required")
+			}
+
+			const response = await apiClient.get(
+				`/academy/courses/${options.courseId}/versions/${options.versionId}`
+			)
+
+			const parsed = getCourseVersionDetailResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
 }
 
 export const useCreateCourseVersion = () => {
@@ -34,9 +119,97 @@ export const useCreateCourseVersion = () => {
 			return parsed.data
 		},
 		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ["courses"] })
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
+			])
 		},
 	})
 }
 
-export type { CreateCourseVersionVariables }
+export const useUpdateCourseVersion = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		CourseVersion,
+		AxiosError<ApiError>,
+		UpdateCourseVersionVariables
+	>({
+		mutationFn: async ({ courseId, versionId, payload }) => {
+			const requestBody = updateCourseVersionRequestSchema.parse(payload)
+			const response = await apiClient.put(
+				`/academy/courses/${courseId}/versions/${versionId}`,
+				requestBody
+			)
+
+			const parsed = updateCourseVersionResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
+			])
+		},
+	})
+}
+
+export const useActivateCourseVersion = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		ActivateCourseVersionResponse,
+		AxiosError<ApiError>,
+		ToggleCourseVersionStatusVariables
+	>({
+		mutationFn: async ({ courseId, versionId }) => {
+			const response = await apiClient.put(
+				`/academy/courses/${courseId}/versions/${versionId}/activate`
+			)
+
+			return activateCourseVersionResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
+			])
+		},
+	})
+}
+
+export const useDeactivateCourseVersion = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		DeactivateCourseVersionResponse,
+		AxiosError<ApiError>,
+		ToggleCourseVersionStatusVariables
+	>({
+		mutationFn: async ({ courseId, versionId }) => {
+			const response = await apiClient.put(
+				`/academy/courses/${courseId}/versions/${versionId}/deactivate`
+			)
+
+			return deactivateCourseVersionResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
+			])
+		},
+	})
+}
+
+export type {
+	CreateCourseVersionVariables,
+	UpdateCourseVersionVariables,
+	ToggleCourseVersionStatusVariables,
+	UseGetCourseVersionsOptions,
+	UseGetCourseVersionDetailOptions,
+}

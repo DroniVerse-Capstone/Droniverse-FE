@@ -1,5 +1,11 @@
 import { z } from "zod"
 
+export const courseUserSchema = z.object({
+	userId: z.string(),
+	fullName: z.string(),
+	email: z.string(),
+})
+
 export const courseVersionSchema = z.object({
 	courseVersionID: z.string(),
 	titleVN: z.string(),
@@ -11,7 +17,8 @@ export const courseVersionSchema = z.object({
 	imageUrl: z.string().nullable(),
 	level: z.enum(['EASY', 'MEDIUM', 'HARD']),
 	estimatedDuration: z.number().int().nonnegative(),
-	updateBy: z.string().nullable(),
+	changeLog: z.string().nullable(),
+	updater: courseUserSchema.nullable(),
 	updateAt: z.string().nullable(),
 	contextVN: z.string(),
 	contextEN: z.string(),
@@ -21,7 +28,7 @@ export const courseVersionSchema = z.object({
 
 export const courseSchema = z.object({
 	courseID: z.string(),
-	createBy: z.string(),
+	creator: courseUserSchema,
 	createAt: z.string(),
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
 	currentVersion: courseVersionSchema.nullable(),
@@ -48,8 +55,15 @@ export const createCourseResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const getCourseDetailResponseSchema = z.object({
+	data: courseSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type CourseVersion = z.infer<typeof courseVersionSchema>
 export type Course = z.infer<typeof courseSchema>
 export type GetCoursesData = z.infer<typeof getCoursesDataSchema>
 export type GetCoursesResponse = z.infer<typeof getCoursesResponseSchema>
 export type CreateCourseResponse = z.infer<typeof createCourseResponseSchema>
+export type GetCourseDetailResponse = z.infer<typeof getCourseDetailResponseSchema>

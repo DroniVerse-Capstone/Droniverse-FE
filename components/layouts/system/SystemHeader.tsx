@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
 
 import { useAuthStore } from "@/stores/auth-store";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,6 +57,8 @@ function getRouteEntries() {
 
 export default function SystemHeader() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const locale = useLocale();
   const t = useTranslations("SystemSidebar");
   const user = useAuthStore((state) => state.user);
 
@@ -97,10 +99,24 @@ export default function SystemHeader() {
 
     const remainingPath = normalizedPath.slice(matchedEntry.href.length);
     const remainingSegments = remainingPath.split("/").filter(Boolean);
+    const courseTitleVNParam = searchParams.get("titleVN");
+    const courseTitleENParam = searchParams.get("titleEN");
+    const legacyCourseTitleParam = searchParams.get("title");
+    const localizedCourseTitle =
+      locale === "en"
+        ? courseTitleENParam || courseTitleVNParam || legacyCourseTitleParam
+        : courseTitleVNParam || courseTitleENParam || legacyCourseTitleParam;
 
     remainingSegments.forEach((segment, index) => {
+      const isCourseDetailLastSegment =
+        matchedEntry.href === "/course-management" &&
+        index === remainingSegments.length - 1 &&
+        Boolean(localizedCourseTitle);
+
       items.push({
-        label: formatFallbackSegment(segment),
+        label: isCourseDetailLastSegment
+          ? (localizedCourseTitle as string)
+          : formatFallbackSegment(segment),
         href: `${matchedEntry.href}/${remainingSegments
           .slice(0, index + 1)
           .join("/")}`,
@@ -111,7 +127,7 @@ export default function SystemHeader() {
       ...item,
       isLast: index === items.length - 1,
     }));
-  }, [matchedEntry, normalizedPath, t]);
+  }, [locale, matchedEntry, normalizedPath, searchParams, t]);
 
   const handleMarkAllAsRead = () => {
     console.log("Mark all notifications as read");

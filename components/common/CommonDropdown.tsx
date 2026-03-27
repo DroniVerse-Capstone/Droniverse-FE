@@ -21,6 +21,7 @@ export type CommonDropdownOption = {
   label: string
   description?: string
   disabled?: boolean
+  leadingDotClassName?: string
 }
 
 type CommonDropdownBaseProps = {
@@ -97,6 +98,14 @@ export default function CommonDropdown(props: CommonDropdownProps) {
     return selectedOptions.map((option) => option.label).join(", ")
   }, [maxLabelCount, placeholder, props.multiple, selectedOptions])
 
+  const selectedSingleOption = React.useMemo(() => {
+    if (props.multiple) {
+      return undefined
+    }
+
+    return options.find((option) => option.value === props.value)
+  }, [options, props])
+
   const handleMultiCheckedChange = (optionValue: string, checked: boolean) => {
     if (!props.multiple) {
       return
@@ -129,8 +138,18 @@ export default function CommonDropdown(props: CommonDropdownProps) {
             )}
             disabled={disabled || isLoading}
           >
-            <span className="min-w-0 flex-1 truncate text-left" title={triggerLabel}>
-              {isLoading ? "Đang tải dữ liệu..." : triggerLabel}
+            <span className="min-w-0 flex flex-1 items-center gap-2 text-left" title={triggerLabel}>
+              {!props.multiple && selectedSingleOption?.leadingDotClassName ? (
+                <span
+                  className={cn(
+                    "h-2 w-2 shrink-0 rounded-full",
+                    selectedSingleOption.leadingDotClassName
+                  )}
+                />
+              ) : null}
+              <span className="min-w-0 truncate">
+                {isLoading ? "Đang tải dữ liệu..." : triggerLabel}
+              </span>
             </span>
 
             {isLoading ? (
@@ -183,7 +202,14 @@ export default function CommonDropdown(props: CommonDropdownProps) {
                     )}
                   >
                     <div className="flex flex-col gap-1">
-                      <span className="font-medium text-sm">{option.label}</span>
+                      <span className="flex items-center gap-2 font-medium text-sm">
+                        {option.leadingDotClassName ? (
+                          <span
+                            className={cn("h-2 w-2 shrink-0 rounded-full", option.leadingDotClassName)}
+                          />
+                        ) : null}
+                        <span className="min-w-0 truncate">{option.label}</span>
+                      </span>
                       {option.description ? (
                         <span className="text-xs text-greyscale-300">{option.description}</span>
                       ) : null}
@@ -209,7 +235,14 @@ export default function CommonDropdown(props: CommonDropdownProps) {
                 >
                   <div className="flex w-full items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <span className="truncate font-medium text-sm">{option.label}</span>
+                      <span className="flex items-center gap-2 font-medium text-sm">
+                        {option.leadingDotClassName ? (
+                          <span
+                            className={cn("h-2 w-2 shrink-0 rounded-full", option.leadingDotClassName)}
+                          />
+                        ) : null}
+                        <span className="min-w-0 truncate">{option.label}</span>
+                      </span>
                       {option.description ? (
                         <span className="text-xs text-greyscale-300">{option.description}</span>
                       ) : null}

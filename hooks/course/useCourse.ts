@@ -7,6 +7,7 @@ import {
 	Course,
 	GetCoursesData,
 	createCourseResponseSchema,
+	getCourseDetailResponseSchema,
 	getCoursesResponseSchema,
 } from "@/validations/course/course"
 
@@ -39,6 +40,23 @@ export const useGetCourses = (options?: UseGetCoursesOptions) => {
 			})
 
 			const parsed = getCoursesResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetCourseDetail = (courseId?: string) => {
+	return useQuery<Course, AxiosError<ApiError>>({
+		queryKey: ["course-detail", courseId],
+		enabled: Boolean(courseId),
+		queryFn: async () => {
+			if (!courseId) {
+				throw new Error("courseId is required")
+			}
+
+			const response = await apiClient.get(`/academy/courses/${courseId}`)
+			const parsed = getCourseDetailResponseSchema.parse(response.data)
+
 			return parsed.data
 		},
 	})

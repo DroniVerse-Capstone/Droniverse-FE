@@ -46,9 +46,14 @@ export default function CourseManagement() {
   return (
     <section className="space-y-5">
       <header className="space-y-3">
-        <p className="text-sm text-greyscale-100">
-          Tổng số khóa học: {totalRecords}
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-greyscale-100">
+            Tổng số khóa học: {totalRecords}
+          </p>
+          <div className="md:shrink-0">
+            <CreateCourseDialog />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2">
@@ -78,10 +83,6 @@ export default function CourseManagement() {
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Tìm kiếm theo tiêu đề khóa học"
             />
-          </div>
-
-          <div className="md:shrink-0">
-            <CreateCourseDialog />
           </div>
         </div>
       </header>
