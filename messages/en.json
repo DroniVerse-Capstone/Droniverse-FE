@@ -525,5 +525,167 @@
       },
       "error": "Failed to load club information"
     }
+  },
+  "CourseManagement": {
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "publish": "Published",
+      "unpublish": "Unpublished",
+      "archived": "Archived",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deprecated": "Deprecated"
+    },
+    "level": {
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "management": {
+      "total": "Total courses",
+      "search": "Search by course title",
+      "empty": "No matching courses found"
+    },
+    "CreateCourseDialog": {
+      "title": "Create New Course",
+      "subtitle": "Fill in the basic information to create a new course",
+      "titleEdit": "Update",
+      "subtitleEdit": "Edit current version information and add change notes.",
+      "fields": {
+        "title": {
+          "vi": "Course title (Vietnamese)",
+          "en": "Course title (English)",
+          "placeholderVi": "Enter Vietnamese title",
+          "placeholderEn": "Enter English title"
+        },
+        "description": {
+          "vi": "Course description (Vietnamese)",
+          "en": "Course description (English)",
+          "placeholderVi": "Enter Vietnamese description",
+          "placeholderEn": "Enter English description"
+        },
+        "estimatedTime": "Estimated duration (minutes)",
+        "level": "Difficulty level",
+        "coverImage": "Course cover image",
+        "context": {
+          "vi": "Introduction content (Vietnamese)",
+          "en": "Introduction content (English)",
+          "placeholderVi": "Enter Vietnamese content",
+          "placeholderEn": "Enter English content"
+        },
+        "changeLog": "Change log"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create course",
+        "update": "Update course"
+      },
+      "toast": {
+        "success": "Course created successfully",
+        "success1": "Course version updated successfully.",
+        "error": "Please enter all required information in the correct format."
+      },
+      "error": {
+        "createFailed": "Failed to create course",
+        "updateFailed": "Failed to update course version"
+      },
+      "level": {
+        "easy": "Beginner",
+        "medium": "Intermediate",
+        "hard": "Advanced"
+      }
+    },
+    "AdminCourseCard": {
+      "title": "No version available",
+      "description": "This course is in draft and has no current version content.",
+      "unknown": "Unknown",
+      "min": "minutes",
+      "creator": "Created by",
+      "updater": "Updated by"
+    },
+    "CourseEdit": {
+      "courseInfo": "Course Information",
+      "courseSettings": "Course Settings",
+      "error": {
+        "cantfind": "No valid course found.",
+        "details": "Unable to load course details.",
+        "empty": "No course data available.",
+        "cantload": "Unable to load course version details."
+      }
+    },
+    "CourseInfo": {
+      "title": {
+        "untitled": "Untitled course"
+      },
+      "description": {
+        "label": "Description",
+        "empty": "No description"
+      },
+      "context": {
+        "label": "Content",
+        "empty": "<p>—</p>"
+      },
+      "changeLog": {
+        "label": "Changes",
+        "empty": "No changes"
+      },
+      "category": {
+        "label": "Categories",
+        "empty": "No categories"
+      },
+      "drone": {
+        "label": "Required drones",
+        "empty": "No required drones"
+      },
+      "image": {
+        "empty": "No image available"
+      },
+      "meta": {
+        "createdBy": "Created by",
+        "createdAt": "Created at",
+        "updatedBy": "Updated by",
+        "updatedAt": "Updated at"
+      },
+      "version": {
+        "label": "Version"
+      },
+      "duration": {
+        "label": "minutes",
+        "unknown": "Unknown"
+      },
+      "level": {
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "activate": "Activate",
+        "delete": "Delete",
+        "update": "Update"
+      },
+      "confirm": {
+        "activate": {
+          "title": "Confirm activation",
+          "description": "Once activated, this version will be used as the current course version.",
+          "confirmText": "Activate",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deletion",
+          "description": "This action cannot be undone. Are you sure you want to delete the selected version?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "activateSuccess": "Course version activated successfully.",
+        "activateError": "Failed to activate course version.",
+        "deleteSuccess": "Course version deleted successfully.",
+        "deleteError": "Failed to delete course version."
+      },
+      "empty": {
+        "noVersion": "No course version data available."
+      }
+    }
   }
 }

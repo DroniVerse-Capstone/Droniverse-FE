@@ -1,7 +1,7 @@
 "use client";
 
 import { AxiosError } from "axios";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import QuillEditor from "@/components/common/QuillEditor";
 import { ClubImageUpload } from "@/components/manager/dashboard/ClubImageUpload";
@@ -25,14 +25,17 @@ import {
   updateCourseVersionRequestSchema,
 } from "@/validations/course-version/course-version";
 import { BiEdit } from "react-icons/bi";
+import { COURSE_LEVELS } from "@/lib/constants/course";
+import { Spinner } from "@/components/ui/spinner";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type CourseLevel = "EASY" | "MEDIUM" | "HARD";
 
-const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> = [
-  { value: "EASY", label: "Dễ" },
-  { value: "MEDIUM", label: "Trung bình" },
-  { value: "HARD", label: "Khó" },
-];
+const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> =
+  COURSE_LEVELS.filter((item) => item.value !== null).map((item) => ({
+    value: item.value as CourseLevel,
+    label: item.label,
+  }));
 
 type UpdateCourseVersionDialogProps = {
   courseId: string;
@@ -50,7 +53,7 @@ function toFormValue(version: CourseVersion) {
     imageUrl: version.imageUrl || "",
     level: version.level,
     estimatedDuration: version.estimatedDuration,
-    changeLog: version.changeLog || "",
+    changeLog: "",
   };
 }
 
@@ -58,21 +61,21 @@ export default function UpdateCourseVersionDialog({
   courseId,
   version,
 }: UpdateCourseVersionDialogProps) {
-  const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState(() => toFormValue(version));
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const firstInputRef = React.useRef<HTMLInputElement>(null);
-
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(() => toFormValue(version));
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("CourseManagement.CreateCourseDialog");
   const updateCourseVersionMutation = useUpdateCourseVersion();
   const isSubmitting = updateCourseVersionMutation.isPending;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setForm(toFormValue(version));
     }
   }, [open, version]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
 
     requestAnimationFrame(() => {
@@ -133,7 +136,7 @@ export default function UpdateCourseVersionDialog({
 
   const handleSubmit = async () => {
     if (!isFormValid || !formValidation.success) {
-      toast.error("Vui lòng nhập đầy đủ và đúng định dạng thông tin.");
+      toast.error(t("toast.error"));
       return;
     }
 
@@ -144,14 +147,14 @@ export default function UpdateCourseVersionDialog({
         payload: formValidation.data,
       });
 
-      toast.success("Cập nhật phiên bản khóa học thành công.");
+      toast.success(t("toast.success1"));
       setOpen(false);
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật phiên bản khóa học."
+          t("error.updateFailed")
       );
     }
   };
@@ -160,7 +163,7 @@ export default function UpdateCourseVersionDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="tertiary" icon={<BiEdit size={20} />}>
-          Cập nhật
+          {t("titleEdit")}
         </Button>
       </DialogTrigger>
 
@@ -176,61 +179,61 @@ export default function UpdateCourseVersionDialog({
       >
         <div className="flex max-h-[90vh] flex-col">
           <DialogHeader className="px-6 pt-6">
-            <DialogTitle>Cập nhật phiên bản khóa học</DialogTitle>
+            <DialogTitle>{t("titleEdit")}</DialogTitle>
             <DialogDescription>
-              Chỉnh sửa thông tin phiên bản hiện tại và thêm ghi chú thay đổi.
+              {t("subtitleEdit")}
             </DialogDescription>
           </DialogHeader>
 
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-6 py-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="update-course-title-vn">Tiêu đề (VI)</Label>
+                <Label htmlFor="update-course-title-vn">{t("fields.title.vi")}</Label>
                 <Input
                   ref={firstInputRef}
                   id="update-course-title-vn"
                   value={form.titleVN}
                   onChange={(event) => setField("titleVN", event.target.value)}
-                  placeholder="Nhập tiêu đề tiếng Việt"
+                  placeholder={t("fields.title.placeholderVi")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="update-course-title-en">Tiêu đề (EN)</Label>
+                <Label htmlFor="update-course-title-en">{t("fields.title.en")}</Label>
                 <Input
                   id="update-course-title-en"
                   value={form.titleEN}
                   onChange={(event) => setField("titleEN", event.target.value)}
-                  placeholder="Enter English title"
+                  placeholder={t("fields.title.placeholderEn")}
                 />
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="update-course-desc-vn">Mô tả ngắn (VI)</Label>
+                <Label htmlFor="update-course-desc-vn">{t("fields.description.vi")}</Label>
                 <Textarea
                   id="update-course-desc-vn"
                   value={form.descriptionVN}
                   onChange={(event) => setField("descriptionVN", event.target.value)}
-                  placeholder="Nhập mô tả tiếng Việt"
+                  placeholder={t("fields.description.placeholderVi")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="update-course-desc-en">Mô tả ngắn (EN)</Label>
+                <Label htmlFor="update-course-desc-en">{t("fields.description.en")}</Label>
                 <Textarea
                   id="update-course-desc-en"
                   value={form.descriptionEN}
                   onChange={(event) => setField("descriptionEN", event.target.value)}
-                  placeholder="Enter English description"
+                  placeholder={t("fields.description.placeholderEn")}
                 />
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="update-course-duration">Thời lượng dự kiến (phút)</Label>
+                <Label htmlFor="update-course-duration">{t("fields.estimatedTime")}</Label>
                 <Input
                   id="update-course-duration"
                   type="number"
@@ -243,7 +246,7 @@ export default function UpdateCourseVersionDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>Độ khó</Label>
+                <Label>{t("fields.level")}</Label>
                 <div className="flex flex-wrap gap-2">
                   {COURSE_LEVEL_OPTIONS.map((item) => (
                     <button
@@ -256,7 +259,7 @@ export default function UpdateCourseVersionDialog({
                           : "rounded border border-greyscale-600 bg-greyscale-800 px-3 py-1.5 text-sm text-greyscale-100 hover:border-greyscale-400"
                       }
                     >
-                      {item.label}
+                      {t(item.label)}
                     </button>
                   ))}
                 </div>
@@ -264,18 +267,18 @@ export default function UpdateCourseVersionDialog({
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label htmlFor="update-course-change-log">Change log *</Label>
+              <Label htmlFor="update-course-change-log">{t("fields.changeLog")} *</Label>
               <Textarea
                 id="update-course-change-log"
                 value={form.changeLog}
                 onChange={(event) => setField("changeLog", event.target.value)}
-                placeholder="Mô tả các thay đổi trong phiên bản này"
               />
             </div>
 
             <div className="mt-4">
               <ClubImageUpload
-                label="Ảnh khóa học"
+                label={t("fields.coverImage")}
+
                 value={form.imageUrl}
                 onChange={(url) => setField("imageUrl", url)}
                 disabled={isSubmitting}
@@ -283,21 +286,21 @@ export default function UpdateCourseVersionDialog({
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label>Nội dung chi tiết (VI)</Label>
+              <Label>{t("fields.context.vi")}</Label>
               <QuillEditor
                 value={form.contextVN}
                 onChange={(value) => setField("contextVN", value)}
-                placeholder="Nhập nội dung tiếng Việt"
+                placeholder={t("fields.context.placeholderVi")}
                 minHeight={220}
               />
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label>Nội dung chi tiết (EN)</Label>
+              <Label>{t("fields.context.en")}</Label>
               <QuillEditor
                 value={form.contextEN}
                 onChange={(value) => setField("contextEN", value)}
-                placeholder="Enter English content"
+                placeholder={t("fields.context.placeholderEn")}
                 minHeight={220}
               />
             </div>
@@ -306,7 +309,7 @@ export default function UpdateCourseVersionDialog({
           <DialogFooter className="flex-row justify-end gap-3 border-t border-greyscale-700 px-6 py-4 sm:space-x-0">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={isSubmitting}>
-                Hủy
+                {t("buttons.cancel")}
               </Button>
             </DialogClose>
 
@@ -315,7 +318,7 @@ export default function UpdateCourseVersionDialog({
               onClick={handleSubmit}
               disabled={isSubmitting || !isFormValid}
             >
-              {isSubmitting ? "Đang cập nhật..." : "Xác nhận cập nhật"}
+              {isSubmitting ? <Spinner /> : t("buttons.update")}
             </Button>
           </DialogFooter>
         </div>

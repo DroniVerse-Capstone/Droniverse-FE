@@ -68,7 +68,7 @@ export const activateCourseVersionResponseSchema = z.object({
   message: z.string(),
 });
 
-export const deactivateCourseVersionResponseSchema = z.object({
+export const deleteCourseVersionResponseSchema = z.object({
   isSuccess: z.boolean(),
   message: z.string(),
 });
@@ -99,7 +99,7 @@ export type CourseVersion = z.infer<typeof courseVersionSchema>;
 export type CreateCourseVersionResponse = z.infer<typeof createCourseVersionResponseSchema>;
 export type UpdateCourseVersionResponse = z.infer<typeof updateCourseVersionResponseSchema>;
 export type ActivateCourseVersionResponse = z.infer<typeof activateCourseVersionResponseSchema>;
-export type DeactivateCourseVersionResponse = z.infer<typeof deactivateCourseVersionResponseSchema>;
+export type DeleteCourseVersionResponse = z.infer<typeof deleteCourseVersionResponseSchema>;
 export type GetCourseVersionsData = z.infer<typeof getCourseVersionsDataSchema>;
 export type GetCourseVersionsResponse = z.infer<typeof getCourseVersionsResponseSchema>;
 export type GetCourseVersionDetailResponse = z.infer<typeof getCourseVersionDetailResponseSchema>;

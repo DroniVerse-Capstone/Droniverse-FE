@@ -1,21 +1,32 @@
 "use client";
 
+import { AxiosError } from "axios";
 import React from "react";
-
+import toast from "react-hot-toast";
+import { GoZap } from "react-icons/go";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import CourseVersionStatusBadge from "@/components/course/CourseVersionStatusBadge";
 import UpdateCourseVersionDialog from "@/components/system/course-edit/UpdateCourseVersionDialog";
 import { Empty } from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  useActivateCourseVersion,
+  useDeleteCourseVersion,
+} from "@/hooks/course-version/useCourseVersion";
 import { formatDateTime } from "@/lib/utils/format-date";
-import { useLocale } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
+import { ApiError } from "@/types/api/common";
 import { CourseVersion } from "@/validations/course-version/course-version";
 import Image from "next/image";
+import { MdDeleteOutline } from "react-icons/md";
 
 type CourseInfoTabProps = {
   selectedVersionId?: string;
   isVersionFetching: boolean;
   courseId: string;
+  currentVersionId?: string;
   courseCreateAt: string;
   courseCreator?: {
     fullName: string;
@@ -28,11 +39,15 @@ export default function CourseInfoTab({
   selectedVersionId,
   isVersionFetching,
   courseId,
+  currentVersionId,
   courseCreateAt,
   courseCreator,
   version,
 }: CourseInfoTabProps) {
   const locale = useLocale();
+  const activateCourseVersionMutation = useActivateCourseVersion();
+  const deleteCourseVersionMutation = useDeleteCourseVersion();
+  const t = useTranslations("CourseManagement.CourseInfo");
 
   if (!selectedVersionId || (isVersionFetching && !version)) {
     return (
@@ -46,7 +61,7 @@ export default function CourseInfoTab({
     return (
       <Empty>
         <p className="text-sm text-muted-foreground">
-          Không có dữ liệu phiên bản khóa học.
+          {t("empty.noVersion")}
         </p>
       </Empty>
     );
@@ -55,18 +70,58 @@ export default function CourseInfoTab({
   const title =
     locale === "en"
       ? version.titleEN || version.titleVN || "Untitled course"
-      : version.titleVN || version.titleEN || "Khóa học chưa có tiêu đề";
+      : version.titleVN || version.titleEN || t("title.untitled");
   const description =
     locale === "en"
       ? version.descriptionEN || version.descriptionVN || "No description"
-      : version.descriptionVN || version.descriptionEN || "Chưa có mô tả";
+      : version.descriptionVN || version.descriptionEN || t("description.empty");
   const contextLabel = locale === "en" ? "Context" : "Nội dung";
   const localizedContext =
     locale === "en"
       ? version.contextEN || version.contextVN || "<p>—</p>"
       : version.contextVN || version.contextEN || "<p>—</p>";
   const hasChangeLog = Boolean(version.changeLog?.trim());
-  const canUpdateVersion = version.status === "DRAFT" || version.status === "INACTIVE";
+  const canUpdateVersion = version.status === "DRAFT";
+  const canShowVersionActions =
+    version.status === "DRAFT" || version.status === "DEPRECATED";
+  const canDeleteVersion =
+    canShowVersionActions && version.courseVersionID !== currentVersionId;
+  const isActivating = activateCourseVersionMutation.isPending;
+  const isDeleting = deleteCourseVersionMutation.isPending;
+
+  const handleActivateVersion = async () => {
+    try {
+      await activateCourseVersionMutation.mutateAsync({
+        courseId,
+        versionId: version.courseVersionID,
+      });
+      toast.success(t("toast.activateSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("toast.activateError")
+      );
+    }
+  };
+
+  const handleDeleteVersion = async () => {
+    try {
+      await deleteCourseVersionMutation.mutateAsync({
+        courseId,
+        versionId: version.courseVersionID,
+      });
+      toast.success(t("toast.deleteSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("toast.deleteError")
+      );
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -79,21 +134,65 @@ export default function CourseInfoTab({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <CourseLevelBadge level={version.level || "Chưa xác định"} />
+              <CourseLevelBadge level={version.level || t("level.unknown")} />
               <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary/40">
-                {version.estimatedDuration ?? "Chưa xác định"} phút
+                {version.estimatedDuration ?? t("duration.unknown")} {t("duration.label")}
               </span>
               <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-greyscale-700 text-greyscale-100 border border-greyscale-600">
-                Phiên bản {version.version}
+                {t("version.label")} {version.version}
               </span>
             </div>
           </div>
 
           <div className="flex flex-col items-end gap-2">
             <CourseVersionStatusBadge status={version.status} />
-            {canUpdateVersion ? (
-              <UpdateCourseVersionDialog courseId={courseId} version={version} />
+            <div className="flex flex-wrap justify-end gap-2">
+              {canUpdateVersion ? (
+                <UpdateCourseVersionDialog courseId={courseId} version={version} />
+              ) : null}
+
+              {canShowVersionActions ? (
+                <ConfirmActionPopover
+                  trigger={
+                    <Button
+                      icon={<GoZap size={20}/>}
+                      type="button"
+                      variant="secondary"
+                      disabled={isActivating || isDeleting}
+                    >
+                      {t("actions.activate")}
+                    </Button>
+                  }
+                  title={t("confirm.activate.title")}
+                  description={t("confirm.activate.description")}
+                  confirmText={t("confirm.activate.confirmText")}
+                  cancelText={t("confirm.activate.cancelText")}
+                  isLoading={isActivating}
+                  onConfirm={handleActivateVersion}
+                />
             ) : null}
+
+              {canDeleteVersion ? (
+                <ConfirmActionPopover
+                  trigger={
+                    <Button
+                      icon={<MdDeleteOutline size={20} />}
+                      type="button"
+                      variant="default"
+                      disabled={isActivating || isDeleting}
+                    >
+                      {t("actions.delete")}
+                    </Button>
+                  }
+                  title={t("confirm.delete.title")}
+                  description={t("confirm.delete.description")}
+                  confirmText={t("confirm.delete.confirmText")}
+                  cancelText={t("confirm.delete.cancelText")}
+                  isLoading={isDeleting}
+                  onConfirm={handleDeleteVersion}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       </header>
@@ -102,13 +201,13 @@ export default function CourseInfoTab({
         className={hasChangeLog ? "grid grid-cols-1 gap-4 lg:grid-cols-2" : ""}
       >
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <h3 className="text-sm font-semibold text-greyscale-0">Mô tả</h3>
+          <h3 className="text-sm font-semibold text-greyscale-0">{t("description.label")}</h3>
           <p className="text-sm text-greyscale-100">{description}</p>
         </div>
 
         {hasChangeLog ? (
           <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-            <h3 className="text-sm font-semibold text-greyscale-0">Thay đổi</h3>
+            <h3 className="text-sm font-semibold text-greyscale-0">{t("changeLog.label")}</h3>
             <p className="text-sm text-greyscale-100">{version.changeLog}</p>
           </div>
         ) : null}
@@ -116,9 +215,9 @@ export default function CourseInfoTab({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <h3 className="text-sm font-semibold text-greyscale-0">Danh mục</h3>
+          <h3 className="text-sm font-semibold text-greyscale-0">{t("category.label")}</h3>
           {version.categories.length === 0 ? (
-            <p className="text-sm text-greyscale-300">Không có danh mục</p>
+            <p className="text-sm text-greyscale-300">{t("category.empty")}</p>
           ) : (
             <pre className="overflow-auto whitespace-pre-wrap text-xs text-greyscale-100">
               {JSON.stringify(version.categories, null, 2)}
@@ -127,10 +226,10 @@ export default function CourseInfoTab({
         </div>
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
           <h3 className="text-sm font-semibold text-greyscale-0">
-            Drone yêu cầu
+            {t("drone.label")}
           </h3>
           {version.requiredDrones.length === 0 ? (
-            <p className="text-sm text-greyscale-300">Không có drone yêu cầu</p>
+            <p className="text-sm text-greyscale-300">{t("drone.empty")}</p>
           ) : (
             <pre className="overflow-auto whitespace-pre-wrap text-xs text-greyscale-100">
               {JSON.stringify(version.requiredDrones, null, 2)}
@@ -152,7 +251,7 @@ export default function CourseInfoTab({
           </div>
         ) : (
           <div className="flex h-56 items-center justify-center rounded border border-greyscale-700 bg-greyscale-900 text-sm text-greyscale-300">
-            Không có hình ảnh
+            {t("image.empty")}
           </div>
         )}
 
@@ -169,22 +268,22 @@ export default function CourseInfoTab({
 
       <div className="grid grid-cols-1 gap-3 text-sm text-greyscale-100 md:grid-cols-2">
         <p>
-          <span className="text-greyscale-300">Người tạo:</span>{" "}
+          <span className="text-greyscale-300">{t("meta.createdBy")}:</span>{" "}
           {(courseCreator?.fullName || "") +
             (courseCreator?.email ? ` (${courseCreator.email})` : "") || "—"}
         </p>
         <p>
-          <span className="text-greyscale-300">Ngày tạo:</span>{" "}
+          <span className="text-greyscale-300">{t("meta.createdAt")}:</span>{" "}
           {formatDateTime(courseCreateAt || null)}
         </p>
         <p>
-          <span className="text-greyscale-300">Cập nhật bởi:</span>{" "}
+          <span className="text-greyscale-300">{t("meta.updatedBy")}:</span>{" "}
           {(version.updater?.fullName || "") +
             (version.updater?.email ? ` (${version.updater.email})` : "") ||
             "—"}
         </p>
         <p>
-          <span className="text-greyscale-300">Cập nhật:</span>{" "}
+          <span className="text-greyscale-300">{t("meta.updatedAt")}:</span>{" "}
           {formatDateTime(version.updateAt || null)}
         </p>
       </div>

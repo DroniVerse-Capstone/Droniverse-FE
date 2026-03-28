@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetCourseDetail } from "@/hooks/course/useCourse";
 import { useGetCourseVersionDetail } from "@/hooks/course-version/useCourseVersion";
+import { useTranslations } from "@/providers/i18n-provider";
 
 function extractCourseIdFromSlug(courseSlug?: string) {
   if (!courseSlug) return undefined;
@@ -27,7 +28,7 @@ export default function CourseEdit() {
   const courseSlug = params?.courseSlug;
   const courseId = extractCourseIdFromSlug(courseSlug);
   const [selectedVersionId, setSelectedVersionId] = useState<string>();
-
+  const t = useTranslations("CourseManagement.CourseEdit");
   const { data: course, isLoading, isError, error } = useGetCourseDetail(courseId);
   const {
     data: selectedVersion,
@@ -49,7 +50,7 @@ export default function CourseEdit() {
     return (
       <Empty>
         <p className="text-sm text-muted-foreground">
-          Không tìm thấy courseId hợp lệ từ đường dẫn.
+          {t("error.cantfind")}
         </p>
       </Empty>
     );
@@ -69,7 +70,7 @@ export default function CourseEdit() {
         <p className="text-sm text-muted-foreground">
           {error.response?.data?.message ||
             error.message ||
-            "Không thể tải chi tiết khóa học."}
+            t("error.details")}
         </p>
       </Empty>
     );
@@ -78,7 +79,9 @@ export default function CourseEdit() {
   if (!course) {
     return (
       <Empty>
-        <p className="text-sm text-muted-foreground">Không có dữ liệu khóa học.</p>
+        <p className="text-sm text-muted-foreground">
+          {t("error.empty")}
+        </p>
       </Empty>
     );
   }
@@ -89,7 +92,7 @@ export default function CourseEdit() {
         <p className="text-sm text-warning">
           {versionError.response?.data?.message ||
             versionError.message ||
-            "Không thể tải chi tiết phiên bản đã chọn."}
+            t("error.cantload")}
         </p>
       ) : null}
 
@@ -100,13 +103,13 @@ export default function CourseEdit() {
               value="course-info"
               className="rounded border border-greyscale-700 bg-greyscale-800 px-4 py-2 text-greyscale-100 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-greyscale-0"
             >
-              Thông tin khóa học
+              {t("courseInfo")}
             </TabsTrigger>
             <TabsTrigger
               value="course-settings"
               className="rounded border border-greyscale-700 bg-greyscale-800 px-4 py-2 text-greyscale-100 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-greyscale-0"
             >
-              Thiết lập khóa học
+              {t("courseSettings")}
             </TabsTrigger>
           </TabsList>
 
@@ -124,6 +127,7 @@ export default function CourseEdit() {
             selectedVersionId={selectedVersionId}
             isVersionFetching={isVersionFetching}
             courseId={course.courseID}
+            currentVersionId={course.currentVersion?.courseVersionID}
             courseCreateAt={course.createAt}
             courseCreator={course.creator}
             version={selectedVersion}

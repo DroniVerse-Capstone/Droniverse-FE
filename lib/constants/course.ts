@@ -1,24 +1,24 @@
 export const COURSE_STATUS = [
-  { value: null, label: "Tất cả" },
-  { value: "DRAFT", label: "Nháp" },
-  { value: "PUBLISH", label: "Xuất bản" },
-  { value: "UNPUBLISH", label: "Chưa xuất bản" },
-  { value: "ARCHIVED", label: "Lưu trữ" },
+  { value: null, label: "status.all" },
+  { value: "DRAFT", label: "status.draft" },
+  { value: "PUBLISH", label: "status.publish" },
+  { value: "UNPUBLISH", label: "status.unpublish" },
+  { value: "ARCHIVED", label: "status.archived" },
 ];
 
 export const COURSE_VERSION_STATUS = [
-  { value: null, label: "Tất cả" },
-  { value: "DRAFT", label: "Nháp" },
-  { value: "ACTIVE", label: "Hoạt động" },
-  { value: "INACTIVE", label: "Không hoạt động" },
-  { value: "DEPRECATED", label: "Lỗi thời" },
+  { value: null, label: "status.all" },
+  { value: "DRAFT", label: "status.draft" },
+  { value: "ACTIVE", label: "status.active" },
+  { value: "INACTIVE", label: "status.inactive" },
+  { value: "DEPRECATED", label: "status.deprecated" },
 ];
 
 export const COURSE_LEVELS = [
-  { value: null, label: "Tất cả" },
-  { value: "EASY", label: "Cơ bản" },
-  { value: "MEDIUM", label: "Trung bình" },
-  { value: "HARD", label: "Nâng cao" },
+  { value: null, label: "level.all" },
+  { value: "EASY", label: "level.easy" },
+  { value: "MEDIUM", label: "level.medium" },
+  { value: "HARD", label: "level.hard" },
 ];
 
 export const getCourseStatus = (value: string ) =>

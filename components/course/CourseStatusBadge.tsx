@@ -2,6 +2,7 @@
 
 import { getCourseStatus } from "@/lib/constants/course"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "@/providers/i18n-provider"
 
 type CourseStatus = "DRAFT" | "PUBLISH" | "UNPUBLISH" | "ARCHIVED"
 
@@ -21,6 +22,7 @@ export default function CourseStatusBadge({
   status,
   className,
 }: CourseStatusBadgeProps) {
+  const t = useTranslations("CourseManagement");
   return (
     <span
       className={cn(
@@ -30,7 +32,7 @@ export default function CourseStatusBadge({
         className,
       )}
     >
-      {getCourseStatus(status)}
+      {t(getCourseStatus(status))}
     </span>
   )
 }

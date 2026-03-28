@@ -2,6 +2,7 @@
 
 import { getCourseLevel } from "@/lib/constants/course"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "@/providers/i18n-provider"
 
 type CourseLevel = "EASY" | "MEDIUM" | "HARD"
 
@@ -20,6 +21,7 @@ export default function CourseLevelBadge({
   level,
   className,
 }: CourseLevelBadgeProps) {
+  const t = useTranslations("CourseManagement");
   return (
     <span
       className={cn(
@@ -29,7 +31,7 @@ export default function CourseLevelBadge({
         className,
       )}
     >
-      {getCourseLevel(level)}
+      {t(getCourseLevel(level))}
     </span>
   )
 }

@@ -9,15 +9,15 @@ import {
 	UpdateCourseVersionRequest,
 	GetCourseVersionsData,
 	ActivateCourseVersionResponse,
-	DeactivateCourseVersionResponse,
 	activateCourseVersionResponseSchema,
 	createCourseVersionRequestSchema,
 	createCourseVersionResponseSchema,
-	deactivateCourseVersionResponseSchema,
 	getCourseVersionDetailResponseSchema,
 	getCourseVersionsResponseSchema,
 	updateCourseVersionRequestSchema,
 	updateCourseVersionResponseSchema,
+	deleteCourseVersionResponseSchema,
+	DeleteCourseVersionResponse,
 } from "@/validations/course-version/course-version"
 
 type CreateCourseVersionVariables = {
@@ -165,7 +165,7 @@ export const useActivateCourseVersion = () => {
 		ToggleCourseVersionStatusVariables
 	>({
 		mutationFn: async ({ courseId, versionId }) => {
-			const response = await apiClient.put(
+			const response = await apiClient.post(
 				`/academy/courses/${courseId}/versions/${versionId}/activate`
 			)
 
@@ -181,20 +181,20 @@ export const useActivateCourseVersion = () => {
 	})
 }
 
-export const useDeactivateCourseVersion = () => {
+export const useDeleteCourseVersion = () => {
 	const queryClient = useQueryClient()
 
 	return useMutation<
-		DeactivateCourseVersionResponse,
+		DeleteCourseVersionResponse,
 		AxiosError<ApiError>,
 		ToggleCourseVersionStatusVariables
 	>({
 		mutationFn: async ({ courseId, versionId }) => {
-			const response = await apiClient.put(
-				`/academy/courses/${courseId}/versions/${versionId}/deactivate`
+			const response = await apiClient.delete(
+				`/academy/courses/${courseId}/versions/${versionId}`
 			)
 
-			return deactivateCourseVersionResponseSchema.parse(response.data)
+			return deleteCourseVersionResponseSchema.parse(response.data)
 		},
 		onSuccess: async () => {
 			await Promise.all([

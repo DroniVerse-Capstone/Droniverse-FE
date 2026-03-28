@@ -24,14 +24,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourse } from "@/hooks/course/useCourse";
 import { useCreateCourseVersion } from "@/hooks/course-version/useCourseVersion";
 import { createCourseVersionRequestSchema } from "@/validations/course-version/course-version";
+import { COURSE_LEVELS } from "@/lib/constants/course";
+import { useTranslations } from "@/providers/i18n-provider";
+import { Spinner } from "@/components/ui/spinner";
 
 type CourseLevel = "EASY" | "MEDIUM" | "HARD";
 
-const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> = [
-  { value: "EASY", label: "Dễ" },
-  { value: "MEDIUM", label: "Trung bình" },
-  { value: "HARD", label: "Khó" },
-];
+const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> =
+  COURSE_LEVELS.filter((item) => item.value !== null).map((item) => ({
+    value: item.value as CourseLevel,
+    label: item.label,
+  }));
 
 const DEFAULT_FORM = {
   titleVN: "",
@@ -48,6 +51,8 @@ const DEFAULT_FORM = {
 export default function CreateCourseDialog() {
   const [open, setOpen] = React.useState(false);
   const [form, setForm] = React.useState(DEFAULT_FORM);
+
+  const t = useTranslations("CourseManagement.CreateCourseDialog");
 
   const createCourseMutation = useCreateCourse();
   const createCourseVersionMutation = useCreateCourseVersion();
@@ -109,7 +114,7 @@ export default function CreateCourseDialog() {
 
   const handleSubmit = async () => {
     if (!isFormValid || !formValidation.success) {
-      toast.error("Vui lòng nhập đầy đủ và đúng định dạng thông tin khóa học.");
+      toast.error(t("toast.error"));
       return;
     }
 
@@ -121,7 +126,7 @@ export default function CreateCourseDialog() {
         payload: formValidation.data,
       });
 
-      toast.success("Tạo khóa học và phiên bản khóa học thành công.");
+      toast.success(t("toast.success"));
       setOpen(false);
       resetForm();
     } catch (error) {
@@ -129,7 +134,7 @@ export default function CreateCourseDialog() {
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể tạo khóa học mới."
+          t("error.createFailed"),
       );
     }
   };
@@ -137,66 +142,66 @@ export default function CreateCourseDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button icon={<MdOutlineAddCircleOutline size={20} />}>Tạo khóa học</Button>
+        <Button icon={<MdOutlineAddCircleOutline size={20} />}>{t("title")}</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0">
         <div className="flex max-h-[90vh] flex-col">
           <DialogHeader className="px-6 pt-6">
-            <DialogTitle>Tạo khóa học mới</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
             <DialogDescription>
-              Nhập thông tin phiên bản đầu tiên. Hệ thống sẽ tạo course trước, sau đó tự tạo course version.
+              {t("subtitle")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="course-title-vn">Tiêu đề (VI)</Label>
+                <Label htmlFor="course-title-vn">{t("fields.title.vi")}</Label>
                 <Input
                   id="course-title-vn"
                   value={form.titleVN}
                   onChange={(event) => setField("titleVN", event.target.value)}
-                  placeholder="Nhập tiêu đề tiếng Việt"
+                  placeholder={t("fields.title.placeholderVi")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="course-title-en">Tiêu đề (EN)</Label>
+                <Label htmlFor="course-title-en">{t("fields.title.en")}</Label>
                 <Input
                   id="course-title-en"
                   value={form.titleEN}
                   onChange={(event) => setField("titleEN", event.target.value)}
-                  placeholder="Enter English title"
+                  placeholder={t("fields.title.placeholderEn")}
                 />
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="course-desc-vn">Mô tả ngắn (VI)</Label>
+                <Label htmlFor="course-desc-vn">{t("fields.description.vi")}</Label>
                 <Textarea
                   id="course-desc-vn"
                   value={form.descriptionVN}
                   onChange={(event) => setField("descriptionVN", event.target.value)}
-                  placeholder="Nhập mô tả tiếng Việt"
+                  placeholder={t("fields.description.placeholderVi")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="course-desc-en">Mô tả ngắn (EN)</Label>
+                <Label htmlFor="course-desc-en">{t("fields.description.en")}</Label>
                 <Textarea
                   id="course-desc-en"
                   value={form.descriptionEN}
                   onChange={(event) => setField("descriptionEN", event.target.value)}
-                  placeholder="Enter English description"
+                  placeholder={t("fields.description.placeholderEn")}
                 />
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="course-duration">Thời lượng dự kiến (phút)</Label>
+                <Label htmlFor="course-duration">{t("fields.estimatedTime")}</Label>
                 <Input
                   id="course-duration"
                   type="number"
@@ -209,7 +214,7 @@ export default function CreateCourseDialog() {
               </div>
 
               <div className="space-y-2">
-                <Label>Độ khó</Label>
+                <Label>{t("fields.level")}</Label>
                 <div className="flex flex-wrap gap-2">
                   {COURSE_LEVEL_OPTIONS.map((item) => (
                     <button
@@ -222,7 +227,7 @@ export default function CreateCourseDialog() {
                           : "rounded border border-greyscale-600 bg-greyscale-800 px-3 py-1.5 text-sm text-greyscale-100 hover:border-greyscale-400"
                       }
                     >
-                      {item.label}
+                      {t(item.label)}
                     </button>
                   ))}
                 </div>
@@ -231,7 +236,7 @@ export default function CreateCourseDialog() {
 
             <div className="mt-4">
               <ClubImageUpload
-                label="Ảnh khóa học"
+                label={t("fields.coverImage")}
                 value={form.imageUrl}
                 onChange={(url) => setField("imageUrl", url)}
                 disabled={isSubmitting}
@@ -239,21 +244,21 @@ export default function CreateCourseDialog() {
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label>Nội dung chi tiết (VI)</Label>
+              <Label>{t("fields.context.vi")}</Label>
               <QuillEditor
                 value={form.contextVN}
                 onChange={(value) => setField("contextVN", value)}
-                placeholder="Nhập nội dung tiếng Việt"
+                placeholder={t("fields.context.placeholderVi")}
                 minHeight={220}
               />
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label>Nội dung chi tiết (EN)</Label>
+              <Label>{t("fields.context.en")}</Label>
               <QuillEditor
                 value={form.contextEN}
                 onChange={(value) => setField("contextEN", value)}
-                placeholder="Enter English content"
+                placeholder={t("fields.context.placeholderEn")}
                 minHeight={220}
               />
             </div>
@@ -262,7 +267,7 @@ export default function CreateCourseDialog() {
           <DialogFooter className="flex-row justify-end gap-3 border-t border-greyscale-700 px-6 py-4 sm:space-x-0">
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={isSubmitting}>
-                Hủy
+                {t("buttons.cancel")}
               </Button>
             </DialogClose>
 
@@ -271,7 +276,7 @@ export default function CreateCourseDialog() {
               onClick={handleSubmit}
               disabled={isSubmitting || !isFormValid}
             >
-              {isSubmitting ? "Đang tạo..." : "Xác nhận tạo khóa học"}
+              {isSubmitting ? <Spinner /> : t("buttons.create")}
             </Button>
           </DialogFooter>
         </div>

@@ -12,12 +12,14 @@ import { useGetCourses } from "@/hooks/course/useCourse";
 import { cn } from "@/lib/utils";
 import { COURSE_STATUS } from "@/lib/constants/course";
 import EmptyState from "@/components/common/EmptyState";
+import { useTranslations } from "@/providers/i18n-provider";
 
 const PAGE_SIZE = 9;
 
 type CourseStatus = "DRAFT" | "PUBLISH" | "UNPUBLISH" | "ARCHIVED" | null;
 
 export default function CourseManagement() {
+  const t = useTranslations("CourseManagement");
   const [selectedStatus, setSelectedStatus] = useState<CourseStatus>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -48,7 +50,7 @@ export default function CourseManagement() {
       <header className="space-y-3">
         <div className="flex justify-between items-center">
           <p className="text-sm text-greyscale-100">
-            Tổng số khóa học: {totalRecords}
+            {t("management.total")}: {totalRecords}
           </p>
           <div className="md:shrink-0">
             <CreateCourseDialog />
@@ -72,7 +74,7 @@ export default function CourseManagement() {
                     : "bg-greyscale-700 text-greyscale-100 hover:bg-greyscale-600",
                 )}
               >
-                {status.label}
+                {t(status.label)}
               </button>
             ))}
           </div>
@@ -81,7 +83,7 @@ export default function CourseManagement() {
               type="search"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Tìm kiếm theo tiêu đề khóa học"
+              placeholder={t("management.search")}
             />
           </div>
         </div>
@@ -100,7 +102,7 @@ export default function CourseManagement() {
           </p>
         </Empty>
       ) : courses.length === 0 ? (
-        <EmptyState title="Không tìm thấy khóa học phù hợp" />
+        <EmptyState title={t("management.empty")} />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
