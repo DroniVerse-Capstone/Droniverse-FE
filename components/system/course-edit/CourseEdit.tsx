@@ -135,7 +135,11 @@ export default function CourseEdit() {
         </TabsContent>
 
         <TabsContent value="course-settings" className="mt-0">
-          <CourseSettingsTab />
+          <CourseSettingsTab
+            courseId={course.courseID}
+            versionId={selectedVersionId}
+            versionStatus={selectedVersion?.status}
+          />
         </TabsContent>
       </Tabs>
     </section>
