@@ -20,6 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useUpdateModule } from "@/hooks/module/useModule";
 import { ApiError } from "@/types/api/common";
 import { Module } from "@/validations/module/module";
+import TooltipWrapper from "@/components/common/ToolTipWrapper";
 
 type UpdateModuleDialogProps = {
   courseId?: string;
@@ -82,20 +83,22 @@ export default function UpdateModuleDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật chương."
+          "Không thể cập nhật chương.",
       );
     }
   };
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => handleOpenChange(true)}
-      >
-        <BiEdit size={18} />
-      </Button>
+      <TooltipWrapper label="Chỉnh sửa chương">
+        <Button
+          variant="editIcon"
+          size="icon"
+          onClick={() => handleOpenChange(true)}
+        >
+          <BiEdit size={18} />
+        </Button>
+      </TooltipWrapper>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-lg">

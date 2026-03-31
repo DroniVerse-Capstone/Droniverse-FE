@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useGetLessons } from "@/hooks/lesson/useLesson";
 import UpdateModuleDialog from "@/components/system/course-edit/course-settings/UpdateModuleDialog";
 import { Module } from "@/validations/module/module";
+import TooltipWrapper from "@/components/common/ToolTipWrapper";
 
 type ModuleItemProps = {
   courseId?: string;
@@ -79,9 +80,11 @@ export default function ModuleItem({
 
             <ConfirmActionPopover
               trigger={
-                <Button variant="outline" size="icon">
+                <TooltipWrapper label="Xóa chương">
+                <Button variant="deleteIcon" size="icon">
                   <MdDeleteOutline size={18} />
                 </Button>
+                </TooltipWrapper>
               }
               title="Xóa chương"
               description={`Bạn có chắc muốn xóa Chương ${module.moduleNumber}?`}
@@ -115,6 +118,7 @@ export default function ModuleItem({
             isLoading={lessonsQuery.isLoading}
             isError={lessonsQuery.isError}
             error={lessonsQuery.error}
+            canManageLessons={canManageModules}
           />
         </div>
       ) : null}

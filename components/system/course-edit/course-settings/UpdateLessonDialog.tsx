@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 
@@ -34,19 +34,19 @@ export default function UpdateLessonDialog({
   lesson,
   onOpenChange,
 }: UpdateLessonDialogProps) {
-  const [theoryTitleVN, setTheoryTitleVN] = React.useState("");
-  const [theoryTitleEN, setTheoryTitleEN] = React.useState("");
-  const [theoryContentVN, setTheoryContentVN] = React.useState("");
-  const [theoryContentEN, setTheoryContentEN] = React.useState("");
-  const [theoryEstimatedTime, setTheoryEstimatedTime] = React.useState("");
+  const [theoryTitleVN, setTheoryTitleVN] = useState("");
+  const [theoryTitleEN, setTheoryTitleEN] = useState("");
+  const [theoryContentVN, setTheoryContentVN] = useState("");
+  const [theoryContentEN, setTheoryContentEN] = useState("");
+  const [theoryEstimatedTime, setTheoryEstimatedTime] = useState("");
 
-  const [quizTitleVN, setQuizTitleVN] = React.useState("");
-  const [quizTitleEN, setQuizTitleEN] = React.useState("");
-  const [quizDescriptionVN, setQuizDescriptionVN] = React.useState("");
-  const [quizDescriptionEN, setQuizDescriptionEN] = React.useState("");
-  const [quizTimeLimit, setQuizTimeLimit] = React.useState("");
-  const [quizTotalScore, setQuizTotalScore] = React.useState("");
-  const [quizPassScore, setQuizPassScore] = React.useState("");
+  const [quizTitleVN, setQuizTitleVN] = useState("");
+  const [quizTitleEN, setQuizTitleEN] = useState("");
+  const [quizDescriptionVN, setQuizDescriptionVN] = useState("");
+  const [quizDescriptionEN, setQuizDescriptionEN] = useState("");
+  const [quizTimeLimit, setQuizTimeLimit] = useState("");
+  const [quizTotalScore, setQuizTotalScore] = useState("");
+  const [quizPassScore, setQuizPassScore] = useState("");
 
   const theoryId = open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId = open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
@@ -84,7 +84,7 @@ export default function UpdateLessonDialog({
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (theoryDetailQuery.data && lesson?.type === "THEORY") {
       const detail = theoryDetailQuery.data;
       setTheoryTitleVN(detail.titleVN);
@@ -95,7 +95,7 @@ export default function UpdateLessonDialog({
     }
   }, [lesson?.type, theoryDetailQuery.data]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (quizDetailQuery.data && lesson?.type === "QUIZ") {
       const detail = quizDetailQuery.data;
       setQuizTitleVN(detail.titleVN);

@@ -102,6 +102,7 @@ export default function QuillEditor({
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const quillRef = useRef<QuillLikeEditor | null>(null)
 	const onChangeRef = useRef(onChange)
+	const valueRef = useRef(value)
 	const changeHandlerRef = useRef<(() => void) | null>(null)
 	const isApplyingValueRef = useRef(false)
 	const readOnlyRef = useRef(readOnly)
@@ -112,6 +113,10 @@ export default function QuillEditor({
 	useEffect(() => {
 		onChangeRef.current = onChange
 	}, [onChange])
+
+	useEffect(() => {
+		valueRef.current = value
+	}, [value])
 
 	useEffect(() => {
 		readOnlyRef.current = readOnly
@@ -214,8 +219,9 @@ export default function QuillEditor({
 				formats: mergedFormats,
 			})
 
-			if (value) {
-				instance.clipboard.dangerouslyPasteHTML(value)
+			const initialValue = valueRef.current
+			if (initialValue) {
+				instance.clipboard.dangerouslyPasteHTML(initialValue)
 			}
 
 			const handleTextChange = () => {

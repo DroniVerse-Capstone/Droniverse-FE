@@ -11,18 +11,22 @@ import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import EmptyState from "@/components/common/EmptyState";
 import LessonTypeIcon from "@/components/course/LessonTypeIcon";
 import LessonDetailDialog from "@/components/system/course-edit/course-settings/LessonDetailDialog";
+import QuizQuestionConfigDialog from "@/components/system/course-edit/course-settings/QuizQuestionConfigDialog";
 import UpdateLessonDialog from "@/components/system/course-edit/course-settings/UpdateLessonDialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useDeleteLesson } from "@/hooks/lesson/useLesson";
 import { ApiError } from "@/types/api/common";
 import { Lesson } from "@/validations/lesson/lesson";
+import { LucideFileQuestion } from "lucide-react";
+import TooltipWrapper from "@/components/common/ToolTipWrapper";
 
 type ModuleLessonsProps = {
   lessons: Lesson[];
   isLoading: boolean;
   isError: boolean;
   error?: AxiosError<ApiError> | null;
+  canManageLessons: boolean;
 };
 
 export default function ModuleLessons({
@@ -30,10 +34,16 @@ export default function ModuleLessons({
   isLoading,
   isError,
   error,
+  canManageLessons,
 }: ModuleLessonsProps) {
   const [viewOpen, setViewOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
-  const [selectedLesson, setSelectedLesson] = React.useState<Lesson | null>(null);
+  const [quizQuestionOpen, setQuizQuestionOpen] = React.useState(false);
+  const [selectedLesson, setSelectedLesson] = React.useState<Lesson | null>(
+    null,
+  );
+  const [selectedQuizLesson, setSelectedQuizLesson] =
+    React.useState<Lesson | null>(null);
 
   const deleteLessonMutation = useDeleteLesson({
     onSuccess: (data) => {
@@ -76,6 +86,15 @@ export default function ModuleLessons({
     });
   };
 
+  const handleOpenQuizQuestions = (lesson: Lesson) => {
+    if (lesson.type !== "QUIZ") {
+      return;
+    }
+
+    setSelectedQuizLesson(lesson);
+    setQuizQuestionOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-3">
@@ -110,49 +129,76 @@ export default function ModuleLessons({
               <div className="flex items-center gap-2">
                 <LessonTypeIcon type={lesson.type} />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-greyscale-0">{lesson.titleVN}</p>
+                  <p className="text-sm font-medium text-greyscale-0">
+                    {lesson.titleVN}
+                  </p>
                   <p className="text-xs text-greyscale-200">{lesson.titleEN}</p>
                   <div className="flex items-center gap-1">
                     <MdOutlineTimer className="text-greyscale-200" />
-                    <p className="text-xs text-greyscale-300">{lesson.estimatedTime} phút</p>
+                    <p className="text-xs text-greyscale-300">
+                      {lesson.estimatedTime} phút
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-1">
+                <TooltipWrapper label="Xem chi tiết">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="viewIcon"
                   size="icon"
                   onClick={() => handleOpenView(lesson)}
                 >
                   <FaRegEye size={16} />
                 </Button>
+                </TooltipWrapper>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleOpenEdit(lesson)}
-                >
-                  <BiEdit size={16} />
-                </Button>
-
-                <ConfirmActionPopover
-                  trigger={
-                    <Button type="button" variant="outline" size="icon">
-                      <MdDeleteOutline size={16} />
+                {lesson.type === "QUIZ" ? (
+                  <TooltipWrapper label="Cấu hình câu hỏi">
+                    <Button
+                      type="button"
+                      variant="secondaryIcon"
+                      size={"icon"}
+                      onClick={() => handleOpenQuizQuestions(lesson)}
+                    >
+                      <LucideFileQuestion size={16} />
                     </Button>
-                  }
-                  title="Xóa bài học"
-                  description="Bạn có chắc muốn xóa bài học này?"
-                  confirmText="Xóa"
-                  cancelText="Hủy"
-                  isLoading={deleteLessonMutation.isPending}
-                  onConfirm={() => {
-                    void handleDelete(lesson);
-                  }}
-                />
+                  </TooltipWrapper>
+                ) : null}
+
+                {canManageLessons ? (
+                  <>
+                    <TooltipWrapper label="Chỉnh sửa">
+                      <Button
+                        type="button"
+                        variant="editIcon"
+                        size="icon"
+                        onClick={() => handleOpenEdit(lesson)}
+                      >
+                        <BiEdit size={16} />
+                      </Button>
+                    </TooltipWrapper>
+
+                    <ConfirmActionPopover
+                      trigger={
+                        <TooltipWrapper label="Xóa bài học">
+                          <Button type="button" variant="deleteIcon" size="icon">
+                            <MdDeleteOutline size={16} />
+                          </Button>
+                        </TooltipWrapper>
+                      }
+                      title="Xóa bài học"
+                      description="Bạn có chắc muốn xóa bài học này?"
+                      confirmText="Xóa"
+                      cancelText="Hủy"
+                      isLoading={deleteLessonMutation.isPending}
+                      onConfirm={() => {
+                        void handleDelete(lesson);
+                      }}
+                    />
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
@@ -177,6 +223,18 @@ export default function ModuleLessons({
           setEditOpen(nextOpen);
           if (!nextOpen) {
             setSelectedLesson(null);
+          }
+        }}
+      />
+
+      <QuizQuestionConfigDialog
+        open={quizQuestionOpen}
+        lesson={selectedQuizLesson}
+        canManageQuestions={canManageLessons}
+        onOpenChange={(nextOpen) => {
+          setQuizQuestionOpen(nextOpen);
+          if (!nextOpen) {
+            setSelectedQuizLesson(null);
           }
         }}
       />
