@@ -125,6 +125,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-family-primary);
+  scrollbar-gutter: stable;
 }
 
 /* === DRONIVERSE CUSTOM SCROLLBAR === */

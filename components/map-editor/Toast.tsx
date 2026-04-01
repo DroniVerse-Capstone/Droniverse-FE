@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, ReactNode, useMemo } from "react";
 import { createPortal } from "react-dom";
 
 type ToastType = "error" | "warning" | "success" | "info";
 
 interface Toast {
     id: number;
-    message: string;
+    message: ReactNode;
     type: ToastType;
+    autoClose?: boolean;
 }
 
 const ICONS: Record<ToastType, string> = {
@@ -49,14 +50,17 @@ function ToastItem({
 
     useEffect(() => {
         const show = requestAnimationFrame(() => setVisible(true));
-        const hide = setTimeout(() => setVisible(false), 2700);
-        const remove = setTimeout(() => onDismiss(toast.id), 3000);
-        return () => {
-            cancelAnimationFrame(show);
-            clearTimeout(hide);
-            clearTimeout(remove);
-        };
-    }, [toast.id, onDismiss]);
+        if (toast.autoClose !== false) {
+            const hide = setTimeout(() => setVisible(false), 2700);
+            const remove = setTimeout(() => onDismiss(toast.id), 3000);
+            return () => {
+                cancelAnimationFrame(show);
+                clearTimeout(hide);
+                clearTimeout(remove);
+            };
+        }
+        return () => cancelAnimationFrame(show);
+    }, [toast.id, toast.autoClose, onDismiss]);
 
     return (
         <div
@@ -109,19 +113,19 @@ export function useToast() {
     }, []);
 
     const show = useCallback(
-        (message: string, type: ToastType = "info") => {
+        (message: ReactNode, type: ToastType = "info", options?: { autoClose?: boolean }) => {
             const id = ++_nextId;
-            setToasts((prev) => [...prev, { id, message, type }]);
+            setToasts((prev) => [...prev, { id, message, type, autoClose: options?.autoClose }]);
         },
         [],
     );
 
-    const toast = {
-        error: (msg: string) => show(msg, "error"),
-        warning: (msg: string) => show(msg, "warning"),
-        success: (msg: string) => show(msg, "success"),
-        info: (msg: string) => show(msg, "info"),
-    };
+    const toast = useMemo(() => ({
+        error: (msg: ReactNode, opts?: { autoClose?: boolean }) => show(msg, "error", opts),
+        warning: (msg: ReactNode, opts?: { autoClose?: boolean }) => show(msg, "warning", opts),
+        success: (msg: ReactNode, opts?: { autoClose?: boolean }) => show(msg, "success", opts),
+        info: (msg: ReactNode, opts?: { autoClose?: boolean }) => show(msg, "info", opts),
+    }), [show]);
 
     return { toasts, dismiss, toast };
 }

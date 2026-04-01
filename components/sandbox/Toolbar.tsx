@@ -48,7 +48,7 @@ export default function Toolbar(props: Props) {
   const runDisabled = !hasBlocks;
 
   return (
-    <div className="w-full flex items-center justify-between gap-4 px-5 py-3 border-b border-slate-800/40 bg-slate-950/60 text-white backdrop-blur-sm">
+    <div className="w-full flex items-center justify-between gap-4 px-5 py-3 border-b border-slate-700/40 bg-slate-950/60 text-white backdrop-blur-sm">
       {/* Logo + Title */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="text-xs font-mono text-slate-400 uppercase tracking-wider">
