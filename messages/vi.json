@@ -486,6 +486,404 @@
       "error": "Không tải được thông tin câu lạc bộ"
     }
   },
+  "CourseManagement": {
+    "status": {
+      "all": "Tất cả",
+      "draft": "Bản nháp",
+      "publish": "Xuất bản",
+      "unpublish": "Dừng xuất bản",
+      "archived": "Lưu trữ",
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động",
+      "deprecated": "Lỗi thời"
+    },
+    "level": {
+      "all": "Tất cả",
+      "easy": "Cơ bản",
+      "medium": "Trung bình",
+      "hard": "Nâng cao"
+    },
+    "management": {
+      "total": "Tổng số khóa học",
+      "search": "Tìm kiếm theo tiêu đề khóa học",
+      "empty": "Không tìm thấy khóa học phù hợp"
+    },
+    "CreateCourseDialog": {
+      "title": "Tạo khóa học mới",
+      "subtitle": "Điền thông tin cơ bản để tạo khóa học mới",
+      "titleEdit": "Cập nhật",
+      "subtitleEdit": "Chỉnh sửa thông tin phiên bản hiện tại và thêm ghi chú thay đổi.",
+      "tileVersion": "Tạo phiên bản mới",
+      "subtitleVersion": "Nhập thông tin để tạo phiên bản khóa học mới.",
+      "fields": {
+        "title": {
+          "vi": "Tiêu đề khóa học (Tiếng Việt)",
+          "en": "Tiêu đề khóa học (Tiếng Anh)",
+          "placeholderVi": "Nhập tiêu đề tiếng Việt",
+          "placeholderEn": "Nhập tiêu đề tiếng Anh"
+        },
+        "description": {
+          "vi": "Mô tả khóa học (Tiếng Việt)",
+          "en": "Mô tả khóa học (Tiếng Anh)",
+          "placeholderVi": "Nhập mô tả tiếng Việt",
+          "placeholderEn": "Nhập mô tả tiếng Anh"
+        },
+        "estimatedTime": "Thời lượng dự kiến (phút)",
+        "level": "Độ khó",
+        "coverImage": "Ảnh bìa khóa học",
+        "context": {
+          "vi": "Nội dung giới thiệu (Tiếng Việt)",
+          "en": "Nội dung giới thiệu (Tiếng Anh)",
+          "placeholderVi": "Nhập nội dung giới thiệu tiếng Việt",
+          "placeholderEn": "Nhập nội dung giới thiệu tiếng Anh"
+        },
+        "changeLog": "Nhật ký thay đổi"
+      },
+      "buttons": {
+        "cancel": "Hủy bỏ",
+        "create": "Tạo khóa học",
+        "update": "Cập nhật khóa học",
+        "createVersion": "Tạo phiên bản"
+      },
+      "toast": {
+        "success": "Tạo khóa học thành công",
+        "success1": "Cập nhật phiên bản khóa học thành công.",
+        "error": "Vui lòng nhập đầy đủ và đúng định dạng thông tin khóa học."
+      },
+      "error": {
+        "createFailed": "Tạo khóa học thất bại",
+        "updateFailed": "Cập nhật phiên bản khóa học thất bại"
+      },
+      "level": {
+        "easy": "Cơ bản",
+        "medium": "Trung bình",
+        "hard": "Nâng cao"
+      }
+    },
+    "AdminCourseCard": {
+      "title": "Chưa có phiên bản",
+      "description": "Khóa học đang ở bản nháp, chưa có nội dung phiên bản hiện tại.",
+      "unknown": "Chưa xác định",
+      "min": "phút",
+      "creator": "Người tạo",
+      "updater": "Người cập nhật"
+    },
+    "CourseEdit": {
+      "courseInfo": "Thông tin khóa học",
+      "courseSettings": "Thiết lập khóa học",
+      "addVersion": "Thêm phiên bản",
+      "createVersion": "Tạo phiên bản mới",
+      "duplicateVersion": "Nhân bản từ phiên bản có sẵn",
+      "error": {
+        "cantfind": "Không tìm thấy khóa học hợp lệ.",
+        "details": "Không thể tải chi tiết khóa học.",
+        "empty": "KHông có dữ liệu khóa học.",
+        "cantload": "Không thể tải chi tiết phiên bản."
+      }
+    },
+    "CourseInfo": {
+      "title": {
+        "untitled": "Khóa học chưa có tiêu đề"
+      },
+      "description": {
+        "label": "Mô tả",
+        "empty": "Chưa có mô tả"
+      },
+      "context": {
+        "label": "Nội dung",
+        "empty": "<p>—</p>"
+      },
+      "changeLog": {
+        "label": "Thay đổi",
+        "empty": "Không có thay đổi"
+      },
+      "category": {
+        "label": "Danh mục",
+        "empty": "Không có danh mục"
+      },
+      "drone": {
+        "label": "Drone yêu cầu",
+        "empty": "Không có drone yêu cầu"
+      },
+      "image": {
+        "empty": "Không có hình ảnh"
+      },
+      "meta": {
+        "createdBy": "Người tạo",
+        "createdAt": "Ngày tạo",
+        "updatedBy": "Cập nhật bởi",
+        "updatedAt": "Cập nhật"
+      },
+      "version": {
+        "label": "Phiên bản"
+      },
+      "duration": {
+        "label": "phút",
+        "unknown": "Chưa xác định"
+      },
+      "level": {
+        "unknown": "Chưa xác định"
+      },
+      "actions": {
+        "activate": "Kích hoạt",
+        "delete": "Xóa",
+        "update": "Cập nhật"
+      },
+      "confirm": {
+        "activate": {
+          "title": "Xác nhận kích hoạt phiên bản",
+          "description": "Sau khi kích hoạt, phiên bản này sẽ được dùng làm phiên bản hiện tại của khóa học.",
+          "confirmText": "Kích hoạt",
+          "cancelText": "Hủy"
+        },
+        "delete": {
+          "title": "Xác nhận xóa phiên bản",
+          "description": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa phiên bản đã chọn?",
+          "confirmText": "Xóa",
+          "cancelText": "Hủy"
+        }
+      },
+      "toast": {
+        "activateSuccess": "Đã kích hoạt phiên bản khóa học.",
+        "activateError": "Không thể kích hoạt phiên bản khóa học.",
+        "deleteSuccess": "Đã xóa phiên bản khóa học.",
+        "deleteError": "Không thể xóa phiên bản khóa học."
+      },
+      "empty": {
+        "noVersion": "Không có dữ liệu phiên bản khóa học."
+      }
+    },
+    "DuplicateCourseVersionDialog": {
+      "title": "Nhân bản phiên bản khóa học",
+      "subtitle": "Chọn một phiên bản hiện có để nhân bản làm phiên bản mới.",
+      "field": {
+        "sourceVersion": "Phiên bản nguồn",
+        "sourceVersionPlaceholder": "Chọn phiên bản để nhân bản"
+      },
+      "buttons": {
+        "cancel": "Hủy bỏ",
+        "confirm": "Nhân bản"
+      },
+      "error": {
+        "empty": "Vui lòng chọn phiên bản để nhân bản.",
+        "duplicateFailed": "Nhân bản phiên bản khóa học thất bại.",
+        "loadingVersions": "Không tải được danh sách phiên bản.",
+        "emptyMessage": "Khóa học chưa có phiên bản nào"
+      }
+    },
+    "CourseSettings": {
+      "title": "Danh sách chương",
+      "error": {
+        "cantLoad": "Không thể tải danh sách chương",
+        "emptyId": "Vui lòng chọn course version để tải danh sách module.",
+        "empty": "Chưa có chương nào."
+      },
+      "ModuleDialog": {
+        "title": "Thêm chương mới",
+        "subtitle": "Số chương sẽ được tự động gán là",
+        "editTitle": "Chỉnh sửa chương",
+        "editSubtitle": "Cập nhật thông tin cho chương",
+        "fields": {
+          "title": {
+            "vi": "Tiêu đề tiếng Việt",
+            "en": "Tiêu đề tiếng Anh",
+            "placeholderVi": "Nhập tiêu đề tiếng Việt",
+            "placeholderEn": "Nhập tiêu đề tiếng Anh"
+          }
+        },
+        "buttons": {
+          "cancel": "Hủy bỏ",
+          "create": "Thêm chương",
+          "update": "Lưu thay đổi"
+        },
+        "error": {
+          "emptyId": "Vui lòng chọn course version trước khi thêm chương.",
+          "normalized": "Vui lòng nhập đầy đủ thông tin."
+        },
+        "toast": {
+          "success": "Thêm chương mới thành công.",
+          "error": "Thêm chương thất bại.",
+          "updateFailed": "Không thể cập nhật chương."
+        }
+      },
+      "ModuleItem": {
+        "module": "Chương",
+        "delete": {
+          "title": "Xóa chương",
+          "description": "Bạn có chắc muốn xóa Chương",
+          "confirmText": "Xóa",
+          "cancelText": "Hủy"
+        },
+        "list": "Danh sách bài học"
+      },
+      "ModuleLesson":{
+        "minutes": "phút",
+        "tooltip": {
+          "view": "Xem chi tiết",
+          "question":"Cấu hình câu hỏi",
+          "edit": "Chỉnh sửa", 
+          "delete": "Xóa bài học"
+        },
+        "delete": {
+          "title": "Xóa bài học",
+          "description": "Bạn có chắc muốn xóa bài học này?",
+          "confirmText": "Xóa",
+          "cancelText": "Hủy"
+        },
+        "empty": "Chưa có bài học nào trong chương này."
+      },
+      "CreateLessonDialog": {
+        "title": "Tạo bài học mới",
+        "subtitle": "Thứ tự bài học sẽ được gán là {orderIndex} trong chương này.",
+        "lessonType": "Loại bài học",
+        "lessonTypePlaceholder": "Chọn loại bài học",
+        "lessonTypes": {
+          "theory": "Lý thuyết",
+          "quiz": "Bài kiểm tra",
+          "lab": "Lab"
+        },
+        "fields": {
+          "titleVN": "Tiêu đề tiếng Việt",
+          "titleEN": "Tiêu đề tiếng Anh",
+          "titleVNPlaceholder": "Nhập tiêu đề tiếng Việt",
+          "titleENPlaceholder": "Nhập tiêu đề tiếng Anh",
+          "theoryContentVN": "Nội dung tiếng Việt",
+          "theoryContentEN": "Nội dung tiếng Anh",
+          "theoryContentVNPlaceholder": "Nhập nội dung lý thuyết tiếng Việt",
+          "theoryContentENPlaceholder": "Nhập nội dung lý thuyết tiếng Anh",
+          "estimatedTime": "Thời lượng (phút)",
+          "estimatedTimePlaceholder": "Ví dụ: 15",
+          "quizDescriptionVN": "Mô tả tiếng Việt",
+          "quizDescriptionEN": "Mô tả tiếng Anh",
+          "quizDescriptionVNPlaceholder": "Nhập mô tả bài kiểm tra tiếng Việt",
+          "quizDescriptionENPlaceholder": "Nhập mô tả bài kiểm tra tiếng Anh",
+          "quizTimeLimit": "Giới hạn thời gian (phút)",
+          "quizTimeLimitPlaceholder": "Ví dụ: 20",
+          "quizTotalScore": "Tổng điểm",
+          "quizTotalScorePlaceholder": "Ví dụ: 10",
+          "quizPassScore": "Điểm đạt",
+          "quizPassScorePlaceholder": "Ví dụ: 7"
+        },
+        "buttons": {
+          "createLesson": "Tạo bài học",
+          "cancel": "Hủy"
+        },
+        "toast": {
+          "labComingSoon": "Tính năng tạo bài Lab sẽ được cập nhật sau."
+        },
+        "error": {
+          "missingTitle": "Vui lòng nhập tiêu đề tiếng Việt và tiếng Anh.",
+          "missingTheory": "Vui lòng nhập đầy đủ thông tin cho bài lý thuyết.",
+          "missingQuiz": "Vui lòng nhập đầy đủ thông tin cho bài kiểm tra.",
+          "invalidPassScore": "Điểm đạt không được lớn hơn tổng điểm.",
+          "createTheoryFailed": "Không thể tạo bài lý thuyết.",
+          "createQuizFailed": "Không thể tạo bài kiểm tra."
+        }
+      },
+      "UpdateLessonDialog": {
+        "title": "Chỉnh sửa bài học",
+        "subtitle": {
+          "theory": "Cập nhật bài lý thuyết",
+          "quiz": "Cập nhật bài kiểm tra"
+        },
+        "fields": {
+          "titleVN": "Tiêu đề tiếng Việt",
+          "titleEN": "Tiêu đề tiếng Anh",
+          "theoryContentVN": "Nội dung tiếng Việt",
+          "theoryContentEN": "Nội dung tiếng Anh",
+          "estimatedTime": "Thời lượng (phút)",
+          "quizDescriptionVN": "Mô tả tiếng Việt",
+          "quizDescriptionEN": "Mô tả tiếng Anh",
+          "quizTimeLimit": "Giới hạn thời gian",
+          "quizTotalScore": "Tổng điểm",
+          "quizPassScore": "Điểm đạt"
+        },
+        "buttons": {
+          "cancel": "Hủy",
+          "save": "Lưu thay đổi"
+        },
+        "error": {
+          "missingTheory": "Vui lòng nhập đầy đủ thông tin bài lý thuyết.",
+          "missingQuiz": "Vui lòng nhập đầy đủ thông tin bài kiểm tra.",
+          "invalidPassScore": "Điểm đạt không được lớn hơn tổng điểm.",
+          "updateTheoryFailed": "Không thể cập nhật bài lý thuyết.",
+          "updateQuizFailed": "Không thể cập nhật bài kiểm tra."
+        }
+      },
+      "LessonDetailDialog": {
+        "title": "Xem chi tiết bài học",
+        "subtitle": {
+          "theory": "Chi tiết bài lý thuyết",
+          "quiz": "Chi tiết bài kiểm tra"
+        },
+        "fields": {
+          "titleVN": "Tiêu đề (Tiếng Việt)",
+          "titleEN": "Tiêu đề (Tiếng Anh)",
+          "estimatedTime": "{value} phút",
+          "timeLimit": "Thời gian: {value} phút",
+          "maxScore": "Điểm tối đa: {value}",
+          "passScore": "Điểm đạt: {value}",
+          "theoryContentVN": "Nội dung tiếng Việt",
+          "theoryContentEN": "Nội dung tiếng Anh",
+          "quizDescriptionVN": "Mô tả tiếng Việt",
+          "quizDescriptionEN": "Mô tả tiếng Anh"
+        },
+        "error": {
+          "loadTheoryFailed": "Không thể tải chi tiết bài lý thuyết.",
+          "loadQuizFailed": "Không thể tải chi tiết bài kiểm tra."
+        }
+      },
+      "QuizQuestionConfigDialog": {
+        "title": "Cấu hình câu hỏi bài kiểm tra",
+        "subtitle": "Thiết lập câu hỏi cho bài kiểm tra.",
+        "lessonPrefix": "Bài học",
+        "form": {
+          "createTitle": "Thêm câu hỏi mới",
+          "updateTitle": "Cập nhật câu hỏi",
+          "description": "Điền đầy đủ nội dung, 4 đáp án và chọn đáp án đúng.",
+          "reset": "Tạo mới",
+          "contentVN": "Nội dung tiếng Việt",
+          "contentEN": "Nội dung tiếng Anh",
+          "answers": "Đáp án",
+          "score": "Điểm",
+          "answerVNPlaceholder": "Đáp án tiếng Việt",
+          "answerENPlaceholder": "Đáp án tiếng Anh",
+          "submitCreate": "Thêm câu hỏi",
+          "submitUpdate": "Cập nhật câu hỏi"
+        },
+        "list": {
+          "title": "Danh sách câu hỏi",
+          "searchPlaceholder": "Tìm câu hỏi",
+          "questionPrefix": "Câu",
+          "questionSuffix": "câu hỏi",
+          "editing": "Đang sửa",
+          "totalScore": "Tổng điểm",
+          "score": "Điểm"
+        },
+        "empty": {
+          "noQuestions": "Chưa có câu hỏi trong bài kiểm tra này.",
+          "notFound": "Không tìm thấy câu hỏi phù hợp."
+        },
+        "confirm": {
+          "deleteTitle": "Xóa câu hỏi",
+          "deleteDescription": "Bạn có chắc muốn xóa câu hỏi này?",
+          "confirmText": "Xóa",
+          "cancelText": "Hủy"
+        },
+        "tooltip": {
+          "edit": "Sửa câu hỏi",
+          "delete": "Xóa câu hỏi"
+        },
+        "error": {
+          "missingFields": "Vui lòng nhập đầy đủ thông tin câu hỏi.",
+          "loadFailed": "Không thể tải danh sách câu hỏi.",
+          "createFailed": "Không thể tạo câu hỏi.",
+          "updateFailed": "Không thể cập nhật câu hỏi.",
+          "deleteFailed": "Không thể xóa câu hỏi."
+        }
+      }
+    }
+  },
   "Common": {
     "buttons": {
       "cancel": "Hủy bỏ",

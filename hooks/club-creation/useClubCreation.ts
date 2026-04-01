@@ -43,7 +43,7 @@ export const useClubCreation = () => {
   >({
     mutationFn: async (data: ClubCreationRequest) => {
       const response = await apiClient.post<ClubCreationResponse>(
-        "/club-creation-request",
+        "/community/club-creation-request",
         data,
       );
 
@@ -64,7 +64,7 @@ export const useGetMyClubCreationRequests = (
     queryKey: ["my-club-creation-requests", options?.status],
     queryFn: async () => {
       const response = await apiClient.get(
-        "/club-creation-request/my-requests",
+        "/community/club-creation-request/my-requests",
         {
           params: {
             ...(options?.status && { status: options.status }),
@@ -90,7 +90,7 @@ export const useGetAllClubCreationRequests = (
       options?.pageSize,
     ],
     queryFn: async () => {
-      const response = await apiClient.get("/club-creation-request", {
+      const response = await apiClient.get("/community/club-creation-request", {
         params: {
           ...(options?.status && { status: options.status }),
           ...(options?.currentPage && { CurrentPage: options.currentPage }),
@@ -113,7 +113,7 @@ export const useGetClubCreationRequestDetail = (id?: string) => {
     enabled: !!id,
     queryFn: async () => {
       const response = await apiClient.get(
-        `/club-creation-request/${id}`
+        `/community/club-creation-request/${id}`
       );
 
       const parsed =
@@ -134,7 +134,7 @@ export const useUpdateClubCreationRequestInformation = () => {
   >({
     mutationFn: async ({ id, data }) => {
       const response = await apiClient.put(
-        `/club-creation-request/${id}/information`,
+        `/community/club-creation-request/${id}/information`,
         data
       );
 
@@ -163,7 +163,7 @@ export const useUpdateClubCreationRequestStatus = () => {
   >({
     mutationFn: async ({ id, data }) => {
       const response = await apiClient.put(
-        `/club-creation-request/${id}/status`,
+        `/community/club-creation-request/${id}/status`,
         data
       );
 

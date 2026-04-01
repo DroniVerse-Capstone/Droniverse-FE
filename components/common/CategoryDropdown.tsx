@@ -1,5 +1,7 @@
 import { useGetCategories } from "@/hooks/category/useCategory"
 import CommonDropdown from "@/components/common/CommonDropdown"
+import { useLocale, useTranslations } from "@/providers/i18n-provider"
+import { pl } from "zod/v4/locales"
 
 type CategoryDropdownProps = {
   value: string[]
@@ -19,11 +21,12 @@ export default function CategoryDropdown({
   label = "Danh mục",
 }: CategoryDropdownProps) {
   const { data: categories = [], isLoading, isError, error } = useGetCategories()
+  const locale = useLocale()
 
   const options = categories.map((category) => ({
     value: category.categoryId,
-    label: category.typeNameVN,
-    description: category.descriptionVN,
+    label: locale === "en" ? category.typeNameEN : category.typeNameVN,
+    description: locale === "en" ? category.descriptionEN : category.descriptionVN,
   }))
 
   return (
@@ -36,7 +39,7 @@ export default function CategoryDropdown({
       className={className}
       disabled={disabled}
       label={label}
-      menuLabel="Chọn category"
+      menuLabel={placeholder}
       emptyMessage="Không có category"
       errorMessage={isError ? error?.message || "Không tải được danh mục" : undefined}
       isLoading={isLoading}

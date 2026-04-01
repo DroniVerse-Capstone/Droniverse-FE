@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "quill/dist/quill.snow.css";
 
 @plugin "tailwindcss-animate";
 
@@ -241,4 +242,144 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dv-quill-editor .ql-toolbar.ql-snow,
+.dv-quill-editor .ql-container.ql-snow {
+  border-color: var(--color-greyscale-700);
+}
+
+.dv-quill-editor .ql-toolbar.ql-snow {
+  border-radius: 8px 8px 0 0;
+  background: var(--color-greyscale-900);
+}
+
+.dv-quill-editor .ql-container.ql-snow {
+  border-radius: 0 0 8px 8px;
+  background: var(--color-greyscale-800);
+}
+
+.dv-quill-editor .ql-editor {
+  min-height: 180px;
+  color: var(--color-greyscale-0);
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: normal;
+}
+
+.dv-quill-editor .ql-container {
+  direction: ltr;
+}
+
+.dv-quill-editor .ql-editor.ql-blank::before {
+  color: var(--color-greyscale-300);
+  font-style: normal;
+}
+
+.dv-quill-editor .ql-stroke {
+  stroke: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-fill {
+  fill: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-picker,
+.dv-quill-editor .ql-picker-options,
+.dv-quill-editor .ql-picker-item,
+.dv-quill-editor .ql-picker-label,
+.dv-quill-editor .ql-snow .ql-picker.ql-expanded .ql-picker-label {
+  color: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-snow .ql-picker-options {
+  background: var(--color-greyscale-900);
+  border-color: var(--color-greyscale-700);
+}
+
+.dv-quill-editor .ql-snow.ql-toolbar button:hover .ql-stroke,
+.dv-quill-editor .ql-snow .ql-toolbar button:hover .ql-stroke,
+.dv-quill-editor .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.dv-quill-editor .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+  stroke: var(--color-primary-200);
+}
+
+.dv-quill-editor .ql-snow.ql-toolbar button:hover .ql-fill,
+.dv-quill-editor .ql-snow .ql-toolbar button:hover .ql-fill,
+.dv-quill-editor .ql-snow.ql-toolbar button.ql-active .ql-fill,
+.dv-quill-editor .ql-snow .ql-toolbar button.ql-active .ql-fill {
+  fill: var(--color-primary-200);
+}
+
+.dv-quill-editor--error .ql-toolbar.ql-snow,
+.dv-quill-editor--error .ql-container.ql-snow {
+  border-color: var(--color-error-100);
+}
+
+.dv-quill-render {
+  color: var(--color-greyscale-0);
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+
+.dv-quill-render h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.dv-quill-render h2 {
+  margin: 0 0 0.625rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+  color: var(--color-secondary-25);
+}
+
+.dv-quill-render h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+  color: var(--color-secondary-25);
+}
+
+.dv-quill-render p {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: var(--color-greyscale-25);
+}
+
+.dv-quill-render strong {
+  color: var(--color-greyscale-0);
+}
+
+.dv-quill-render a {
+  color: var(--color-tertiary-50);
+  text-decoration: underline;
+}
+
+.dv-quill-render ul,
+.dv-quill-render ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.dv-quill-render ul {
+  list-style: disc;
+}
+
+.dv-quill-render ol {
+  list-style: decimal;
+}
+
+.dv-quill-render blockquote {
+  margin: 0 0 0.75rem;
+  border-left: 3px solid var(--color-primary-200);
+  padding-left: 0.75rem;
+  color: var(--color-greyscale-100);
 }

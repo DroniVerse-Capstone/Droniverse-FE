@@ -130,7 +130,7 @@ export const useRegister = (options?: UseRegisterOptions) => {
   return useMutation<RegisterResponse, AxiosError<ApiError>, RegisterRequest>({
     mutationFn: async (payload: RegisterRequest) => {
       const response = await apiClient.post<RegisterResponse>(
-        '/auth/register',
+        '/identity/auth/register',
         payload
       )
 
@@ -163,7 +163,7 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: async () => {
       try {
-        await apiClient.post('/auth/logout')
+        await apiClient.post('/identity/auth/logout')
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
           console.error('Logout API error:', error)

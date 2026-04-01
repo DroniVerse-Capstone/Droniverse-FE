@@ -490,6 +490,404 @@
       "error": "Failed to load club information"
     }
   },
+  "CourseManagement": {
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "publish": "Published",
+      "unpublish": "Unpublished",
+      "archived": "Archived",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deprecated": "Deprecated"
+    },
+    "level": {
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "management": {
+      "total": "Total courses",
+      "search": "Search by course title",
+      "empty": "No matching courses found"
+    },
+    "CreateCourseDialog": {
+      "title": "Create New Course",
+      "subtitle": "Fill in the basic information to create a new course",
+      "titleEdit": "Update",
+      "subtitleEdit": "Edit current version information and add change notes.",
+      "titleVersion": "Create New Version",
+      "subtitleVersion": "Fill in the basic information to create a new course version.",
+      "fields": {
+        "title": {
+          "vi": "Course title (Vietnamese)",
+          "en": "Course title (English)",
+          "placeholderVi": "Enter Vietnamese title",
+          "placeholderEn": "Enter English title"
+        },
+        "description": {
+          "vi": "Course description (Vietnamese)",
+          "en": "Course description (English)",
+          "placeholderVi": "Enter Vietnamese description",
+          "placeholderEn": "Enter English description"
+        },
+        "estimatedTime": "Estimated duration (minutes)",
+        "level": "Difficulty level",
+        "coverImage": "Course cover image",
+        "context": {
+          "vi": "Introduction content (Vietnamese)",
+          "en": "Introduction content (English)",
+          "placeholderVi": "Enter Vietnamese content",
+          "placeholderEn": "Enter English content"
+        },
+        "changeLog": "Change log"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create course",
+        "update": "Update course",
+        "createVersion": "Create version"
+      },
+      "toast": {
+        "success": "Course created successfully",
+        "success1": "Course version updated successfully.",
+        "error": "Please enter all required information in the correct format."
+      },
+      "error": {
+        "createFailed": "Failed to create course",
+        "updateFailed": "Failed to update course version"
+      },
+      "level": {
+        "easy": "Beginner",
+        "medium": "Intermediate",
+        "hard": "Advanced"
+      }
+    },
+    "AdminCourseCard": {
+      "title": "No version available",
+      "description": "This course is in draft and has no current version content.",
+      "unknown": "Unknown",
+      "min": "minutes",
+      "creator": "Created by",
+      "updater": "Updated by"
+    },
+    "CourseEdit": {
+      "courseInfo": "Course Information",
+      "courseSettings": "Course Settings",
+      "addVersion": "Add Version",
+      "createVersion": "Create New Version",
+      "duplicateVersion": "Duplicate from Existing Version",
+      "error": {
+        "cantfind": "No valid course found.",
+        "details": "Unable to load course details.",
+        "empty": "No course data available.",
+        "cantload": "Unable to load course version details."
+      }
+    },
+    "CourseInfo": {
+      "title": {
+        "untitled": "Untitled course"
+      },
+      "description": {
+        "label": "Description",
+        "empty": "No description"
+      },
+      "context": {
+        "label": "Content",
+        "empty": "<p>—</p>"
+      },
+      "changeLog": {
+        "label": "Changes",
+        "empty": "No changes"
+      },
+      "category": {
+        "label": "Categories",
+        "empty": "No categories"
+      },
+      "drone": {
+        "label": "Required drones",
+        "empty": "No required drones"
+      },
+      "image": {
+        "empty": "No image available"
+      },
+      "meta": {
+        "createdBy": "Created by",
+        "createdAt": "Created at",
+        "updatedBy": "Updated by",
+        "updatedAt": "Updated at"
+      },
+      "version": {
+        "label": "Version"
+      },
+      "duration": {
+        "label": "minutes",
+        "unknown": "Unknown"
+      },
+      "level": {
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "activate": "Activate",
+        "delete": "Delete",
+        "update": "Update"
+      },
+      "confirm": {
+        "activate": {
+          "title": "Confirm activation",
+          "description": "Once activated, this version will be used as the current course version.",
+          "confirmText": "Activate",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deletion",
+          "description": "This action cannot be undone. Are you sure you want to delete the selected version?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "activateSuccess": "Course version activated successfully.",
+        "activateError": "Failed to activate course version.",
+        "deleteSuccess": "Course version deleted successfully.",
+        "deleteError": "Failed to delete course version."
+      },
+      "empty": {
+        "noVersion": "No course version data available."
+      }
+    },
+    "DuplicateCourseVersionDialog": {
+      "title": "Duplicate Course Version",
+      "subtitle": "Select an existing version to duplicate as a new version.",
+      "field": {
+        "sourceVersion": "Source Version",
+        "sourceVersionPlaceholder": "Select a version to duplicate"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "confirm": "Duplicate"
+      },
+      "error": {
+        "empty": "Please select a version to duplicate.",
+        "duplicateFailed": "Failed to duplicate the course version.",
+        "loadingVersions": "Failed to load version list.",
+        "emptyMessage": "This course has no versions yet."
+      }
+    },
+    "CourseSettings": {
+      "title": "Module List",
+      "error": {
+        "cantLoad": "Unable to load module list.",
+        "emptyId": "Please select a course version to load modules.",
+        "empty": "No modules available yet."
+      },
+      "ModuleDialog": {
+        "title": "Add New Module",
+        "subtitle": "The module number will be automatically assigned as",
+        "editTitle": "Edit Module",
+        "editSubtitle": "Update module information",
+        "fields": {
+          "title": {
+            "vi": "Vietnamese Title",
+            "en": "English Title",
+            "placeholderVi": "Enter Vietnamese title",
+            "placeholderEn": "Enter English title"
+          }
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Add Module",
+          "update": "Save Changes"
+        },
+        "error": {
+          "emptyId": "Please select a course version before adding a module.",
+          "normalized": "Please fill in all required fields."
+        },
+        "toast": {
+          "success": "Module added successfully.",
+          "error": "Failed to add module.",
+          "updateFailed": "Failed to update module."
+        }
+      },
+      "ModuleItem": {
+        "module": "Module",
+        "delete": {
+          "title": "Delete Module",
+          "description": "Are you sure you want to delete Module",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "list": "Lesson List"
+      },
+      "ModuleLesson": {
+        "minutes": "minutes",
+        "tooltip": {
+          "view": "View details",
+          "question": "Configure questions",
+          "edit": "Edit",
+          "delete": "Delete lesson"
+        },
+        "delete": {
+          "title": "Delete Lesson",
+          "description": "Are you sure you want to delete this lesson?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "empty": "No lessons in this module yet."
+      },
+      "CreateLessonDialog": {
+        "title": "Create New Lesson",
+        "subtitle": "The lesson order will be assigned as {orderIndex} in this module.",
+        "lessonType": "Lesson Type",
+        "lessonTypePlaceholder": "Select lesson type",
+        "lessonTypes": {
+          "theory": "Theory",
+          "quiz": "Quiz",
+          "lab": "Lab"
+        },
+        "fields": {
+          "titleVN": "Vietnamese Title",
+          "titleEN": "English Title",
+          "titleVNPlaceholder": "Enter Vietnamese title",
+          "titleENPlaceholder": "Enter English title",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "theoryContentVNPlaceholder": "Enter Vietnamese theory content",
+          "theoryContentENPlaceholder": "Enter English theory content",
+          "estimatedTime": "Estimated Time (minutes)",
+          "estimatedTimePlaceholder": "e.g., 15",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description",
+          "quizDescriptionVNPlaceholder": "Enter Vietnamese quiz description",
+          "quizDescriptionENPlaceholder": "Enter English quiz description",
+          "quizTimeLimit": "Time Limit (minutes)",
+          "quizTimeLimitPlaceholder": "e.g., 20",
+          "quizTotalScore": "Total Score",
+          "quizTotalScorePlaceholder": "e.g., 10",
+          "quizPassScore": "Pass Score",
+          "quizPassScorePlaceholder": "e.g., 7"
+        },
+        "buttons": {
+          "createLesson": "Create Lesson",
+          "cancel": "Cancel"
+        },
+        "toast": {
+          "labComingSoon": "Lab creation feature will be available soon."
+        },
+        "error": {
+          "missingTitle": "Please enter both Vietnamese and English titles.",
+          "missingTheory": "Please fill in all required theory fields.",
+          "missingQuiz": "Please fill in all required quiz fields.",
+          "invalidPassScore": "Pass score cannot be greater than total score.",
+          "createTheoryFailed": "Failed to create theory lesson.",
+          "createQuizFailed": "Failed to create quiz lesson."
+        }
+      },
+      "UpdateLessonDialog": {
+        "title": "Edit Lesson",
+        "subtitle": {
+          "theory": "Update theory lesson",
+          "quiz": "Update quiz lesson"
+        },
+        "fields": {
+          "titleVN": "Vietnamese Title",
+          "titleEN": "English Title",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "estimatedTime": "Estimated Time (minutes)",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description",
+          "quizTimeLimit": "Time Limit",
+          "quizTotalScore": "Total Score",
+          "quizPassScore": "Pass Score"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save Changes"
+        },
+        "error": {
+          "missingTheory": "Please fill in all required theory fields.",
+          "missingQuiz": "Please fill in all required quiz fields.",
+          "invalidPassScore": "Pass score cannot be greater than total score.",
+          "updateTheoryFailed": "Failed to update theory lesson.",
+          "updateQuizFailed": "Failed to update quiz lesson."
+        }
+      },
+      "LessonDetailDialog": {
+        "title": "Lesson Details",
+        "subtitle": {
+          "theory": "Theory Lesson Details",
+          "quiz": "Quiz Lesson Details"
+        },
+        "fields": {
+          "titleVN": "Title (Vietnamese)",
+          "titleEN": "Title (English)",
+          "estimatedTime": "{value} minutes",
+          "timeLimit": "Time: {value} minutes",
+          "maxScore": "Max Score: {value}",
+          "passScore": "Pass Score: {value}",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description"
+        },
+        "error": {
+          "loadTheoryFailed": "Failed to load theory lesson details.",
+          "loadQuizFailed": "Failed to load quiz lesson details."
+        }
+      },
+      "QuizQuestionConfigDialog": {
+        "title": "Quiz Question Configuration",
+        "subtitle": "Set up questions for the quiz.",
+        "lessonPrefix": "Lesson",
+        "form": {
+          "createTitle": "Add New Question",
+          "updateTitle": "Update Question",
+          "description": "Fill in all content, 4 answers, and select the correct one.",
+          "reset": "Reset",
+          "contentVN": "Vietnamese Content",
+          "contentEN": "English Content",
+          "answers": "Answers",
+          "score": "Score",
+          "answerVNPlaceholder": "Vietnamese answer",
+          "answerENPlaceholder": "English answer",
+          "submitCreate": "Add Question",
+          "submitUpdate": "Update Question"
+        },
+        "list": {
+          "title": "Question List",
+          "searchPlaceholder": "Search questions",
+          "questionPrefix": "Question",
+          "questionSuffix": "questions",
+          "editing": "Editing",
+          "totalScore": "Total Score",
+          "score": "Score"
+        },
+        "empty": {
+          "noQuestions": "No questions in this quiz yet.",
+          "notFound": "No matching questions found."
+        },
+        "confirm": {
+          "deleteTitle": "Delete Question",
+          "deleteDescription": "Are you sure you want to delete this question?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "tooltip": {
+          "edit": "Edit question",
+          "delete": "Delete question"
+        },
+        "error": {
+          "missingFields": "Please fill in all required fields.",
+          "loadFailed": "Failed to load questions.",
+          "createFailed": "Failed to create question.",
+          "updateFailed": "Failed to update question.",
+          "deleteFailed": "Failed to delete question."
+        }
+      }
+    }
+  },
   "Common": {
     "buttons": {
       "cancel": "Cancel",

@@ -12,7 +12,7 @@ export const useGetCategories = () => {
   return useQuery<Category[], AxiosError<ApiError>>({
     queryKey: ["categories"],
     queryFn: async () => {
-      const response = await apiClient.get("/categories")
+      const response = await apiClient.get("/community/categories")
       const parsed = getCategoriesResponseSchema.parse(response.data)
       return parsed.data
     },

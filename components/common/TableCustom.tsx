@@ -96,6 +96,12 @@ export function TableCustom<T>({
     ? getVisiblePages(currentPage, totalPages, siblingCount)
     : [];
 
+  const baseControlClass =
+    "h-11 rounded border border-greyscale-700 bg-greyscale-900 text-greyscale-25 shadow-none transition-colors hover:bg-greyscale-800";
+
+  const pageControlClass =
+    "h-11 w-11 rounded border border-greyscale-700 bg-greyscale-900 text-greyscale-25 shadow-none transition-colors hover:bg-greyscale-800";
+
   return (
     <div className="space-y-4">
       <div className="rounded border border-greyscale-700">
@@ -128,13 +134,14 @@ export function TableCustom<T>({
           )}
 
           <Pagination className="justify-end sm:mx-0 sm:w-auto">
-            <PaginationContent className="flex-wrap justify-end">
+            <PaginationContent className="flex-wrap justify-end gap-2">
               <PaginationItem>
                 <PaginationLink
                   href="#"
                   size="default"
                   className={cn(
-                    "gap-1 pl-2.5 [&>span:last-child]:hidden sm:[&>span:last-child]:inline",
+                    baseControlClass,
+                    "px-4 gap-1.5 [&>span:last-child]:hidden sm:[&>span:last-child]:inline",
                     currentPage <= 1 && "pointer-events-none opacity-50",
                   )}
                   onClick={(e) => {
@@ -163,6 +170,11 @@ export function TableCustom<T>({
                     <PaginationLink
                       href="#"
                       isActive={item === currentPage}
+                      className={cn(
+                        pageControlClass,
+                        item === currentPage &&
+                          "bg-primary text-greyscale-0 border-primary hover:bg-primary-300",
+                      )}
                       onClick={(e) => {
                         e.preventDefault();
                         pagination.onPageChange(item);
@@ -179,7 +191,8 @@ export function TableCustom<T>({
                   href="#"
                   size="default"
                   className={cn(
-                    "gap-1 pr-2.5 [&>span:first-child]:hidden sm:[&>span:first-child]:inline",
+                    baseControlClass,
+                    "px-4 gap-1.5 [&>span:first-child]:hidden sm:[&>span:first-child]:inline",
                     currentPage >= totalPages && "pointer-events-none opacity-50",
                   )}
                   onClick={(e) => {

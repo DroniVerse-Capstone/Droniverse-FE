@@ -20,6 +20,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "photo2.tinhte.vn",
+      },
+      {
+        protocol: "https",
+        hostname: "doanhnhanplus.vn",
+      },
     ],
   },
 };
