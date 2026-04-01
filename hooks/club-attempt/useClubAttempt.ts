@@ -30,15 +30,20 @@ export const useClubAttempt = () => {
     mutationFn: async (data: ClubAttemptRequest) => {
       const response = await apiClient.post<ClubAttemptResponse>(
         "/community/clubs/attemption",
-        data
+        data,
       );
 
       return clubAttemptResponseSchema.parse(response.data);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["my-club-attempt-requests"],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["my-club-attempt-requests"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["my-clubs"],
+        }),
+      ]);
     },
   });
 };
@@ -49,15 +54,19 @@ export const useGetMyClubAttemptRequests = (
   return useQuery<ClubAttemptRequestItem[], AxiosError<ApiError>>({
     queryKey: ["my-club-attempt-requests", options?.status],
     queryFn: async () => {
-      const response = await apiClient.get("/community/club-attempt-request/my-requests", {
-        params: {
-          ...(options?.status && { status: options.status }),
+      const response = await apiClient.get(
+        "/community/club-attempt-request/my-requests",
+        {
+          params: {
+            ...(options?.status && { status: options.status }),
+          },
         },
-      });
+      );
 
-      const parsed = getMyClubAttemptRequestsResponseSchema.parse(response.data);
+      const parsed = getMyClubAttemptRequestsResponseSchema.parse(
+        response.data,
+      );
       return parsed.data;
     },
   });
 };
-

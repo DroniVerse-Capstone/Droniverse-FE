@@ -13,6 +13,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useGetQuizDetail } from "@/hooks/quiz/useQuiz";
 import { useGetTheoryDetail } from "@/hooks/theory/useTheory";
+import { useTranslations } from "@/providers/i18n-provider";
 import { Lesson } from "@/validations/lesson/lesson";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { FaRegStar } from "react-icons/fa";
@@ -28,6 +29,7 @@ export default function LessonDetailDialog({
   lesson,
   onOpenChange,
 }: LessonDetailDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.LessonDetailDialog");
   const theoryId =
     open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId =
@@ -40,11 +42,11 @@ export default function LessonDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-hidden sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Xem chi tiết bài học</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
             {lesson?.type === "THEORY"
-              ? "Chi tiết bài lý thuyết"
-              : "Chi tiết bài kiểm tra"}
+              ? t("subtitle.theory")
+              : t("subtitle.quiz")}
           </DialogDescription>
         </DialogHeader>
 
@@ -61,7 +63,7 @@ export default function LessonDetailDialog({
                 <p className="text-sm text-warning">
                   {theoryDetailQuery.error.response?.data?.message ||
                     theoryDetailQuery.error.message ||
-                    "Không thể tải chi tiết bài lý thuyết."}
+                    t("error.loadTheoryFailed")}
                 </p>
               ) : null}
 
@@ -69,14 +71,14 @@ export default function LessonDetailDialog({
                 <>
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="text-sm tracking-wide text-greyscale-200">
-                      Tiêu đề (Tiếng Việt)
+                      {t("fields.titleVN")}
                     </p>
                     <p className="text-base font-medium text-greyscale-25">
                       {theoryDetailQuery.data.titleVN}
                     </p>
 
                     <p className="mt-3 text-sm tracking-wide text-greyscale-200">
-                      Tiêu đề (Tiếng Anh)
+                      {t("fields.titleEN")}
                     </p>
                     <p className="text-base font-medium text-greyscale-25">
                       {theoryDetailQuery.data.titleEN}
@@ -85,14 +87,17 @@ export default function LessonDetailDialog({
                     <div className="mt-3">
                       <span className="inline-flex items-center gap-1 rounded border border-tertiary/40 bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
                         <MdOutlineTimer size={14} />
-                        {theoryDetailQuery.data.estimatedTime} phút
+                        {t("fields.estimatedTime").replace(
+                          "{value}",
+                          String(theoryDetailQuery.data.estimatedTime)
+                        )}
                       </span>
                     </div>
                   </div>
 
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="mb-2 text-sm font-medium text-greyscale-200">
-                      Nội dung tiếng Việt
+                      {t("fields.theoryContentVN")}
                     </p>
                     <div
                       className="dv-quill-render ql-editor"
@@ -104,7 +109,7 @@ export default function LessonDetailDialog({
 
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="mb-2 text-sm font-medium text-greyscale-200">
-                      Nội dung tiếng Anh
+                      {t("fields.theoryContentEN")}
                     </p>
                     <div
                       className="dv-quill-render ql-editor"
@@ -130,7 +135,7 @@ export default function LessonDetailDialog({
                 <p className="text-sm text-warning">
                   {quizDetailQuery.error.response?.data?.message ||
                     quizDetailQuery.error.message ||
-                    "Không thể tải chi tiết bài kiểm tra."}
+                    t("error.loadQuizFailed")}
                 </p>
               ) : null}
 
@@ -138,14 +143,14 @@ export default function LessonDetailDialog({
                 <>
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="text-sm tracking-wide text-greyscale-200">
-                      Tiêu đề (Tiếng Việt)
+                      {t("fields.titleVN")}
                     </p>
                     <p className="text-base font-medium text-greyscale-25">
                       {quizDetailQuery.data.titleVN}
                     </p>
 
                     <p className="mt-3 text-sm tracking-wide text-greyscale-200">
-                      Tiêu đề (Tiếng Anh)
+                      {t("fields.titleEN")}
                     </p>
                     <p className="text-base font-medium text-greyscale-25">
                       {quizDetailQuery.data.titleEN}
@@ -154,22 +159,31 @@ export default function LessonDetailDialog({
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <span className="inline-flex items-center gap-1 rounded border border-tertiary/40 bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
                         <MdOutlineTimer size={14} />
-                        Thời gian: {quizDetailQuery.data.timeLimit} phút
+                        {t("fields.timeLimit").replace(
+                          "{value}",
+                          String(quizDetailQuery.data.timeLimit)
+                        )}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/15 px-2 py-1 text-xs font-medium text-primary">
                         <FaRegStar size={14} />
-                        Điểm tối đa: {quizDetailQuery.data.totalScore}
+                        {t("fields.maxScore").replace(
+                          "{value}",
+                          String(quizDetailQuery.data.totalScore)
+                        )}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded border border-warning/40 bg-warning/15 px-2 py-1 text-xs font-medium text-warning">
                        <RiVerifiedBadgeLine size={14} />
-                        Điểm đạt: {quizDetailQuery.data.passScore}
+                        {t("fields.passScore").replace(
+                          "{value}",
+                          String(quizDetailQuery.data.passScore)
+                        )}
                       </span>
                     </div>
                   </div>
 
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="mb-2 text-sm font-medium text-greyscale-200">
-                      Mô tả tiếng Việt
+                      {t("fields.quizDescriptionVN")}
                     </p>
                     <p className="text-base text-greyscale-25">
                       {quizDetailQuery.data.descriptionVN}
@@ -178,7 +192,7 @@ export default function LessonDetailDialog({
 
                   <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
                     <p className="mb-2 text-xs font-medium text-greyscale-200">
-                      Mô tả tiếng Anh
+                      {t("fields.quizDescriptionEN")}
                     </p>
                     <p className="text-base text-greyscale-25">
                       {quizDetailQuery.data.descriptionEN}

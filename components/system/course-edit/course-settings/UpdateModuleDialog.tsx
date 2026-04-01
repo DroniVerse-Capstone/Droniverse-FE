@@ -21,6 +21,7 @@ import { useUpdateModule } from "@/hooks/module/useModule";
 import { ApiError } from "@/types/api/common";
 import { Module } from "@/validations/module/module";
 import TooltipWrapper from "@/components/common/ToolTipWrapper";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type UpdateModuleDialogProps = {
   courseId?: string;
@@ -33,6 +34,7 @@ export default function UpdateModuleDialog({
   versionId,
   module,
 }: UpdateModuleDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.ModuleDialog");
   const [open, setOpen] = React.useState(false);
   const [titleVN, setTitleVN] = React.useState(module.titleVN);
   const [titleEN, setTitleEN] = React.useState(module.titleEN);
@@ -52,7 +54,7 @@ export default function UpdateModuleDialog({
 
   const handleUpdateModule = async () => {
     if (!courseId || !versionId) {
-      toast.error("Thiếu dữ liệu để cập nhật chương.");
+      toast.error(t("errors.emptyId"));
       return;
     }
 
@@ -60,7 +62,7 @@ export default function UpdateModuleDialog({
     const normalizedTitleEN = titleEN.trim();
 
     if (!normalizedTitleVN || !normalizedTitleEN) {
-      toast.error("Vui lòng nhập đầy đủ thông tin.");
+      toast.error(t("errors.normalized"));
       return;
     }
 
@@ -83,14 +85,14 @@ export default function UpdateModuleDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật chương.",
+          t("errors.updateFailed"),
       );
     }
   };
 
   return (
     <>
-      <TooltipWrapper label="Chỉnh sửa chương">
+      <TooltipWrapper label={t("editTitle")}>
         <Button
           variant="editIcon"
           size="icon"
@@ -103,35 +105,35 @@ export default function UpdateModuleDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Chỉnh sửa chương</DialogTitle>
+            <DialogTitle>{t("editTitle")}</DialogTitle>
             <DialogDescription>
-              Cập nhật thông tin cho chương {module.moduleNumber}.
+              {t("editSubtitle")} {module.moduleNumber}.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor={`edit-module-title-vn-${module.moduleID}`}>
-                Tiêu đề tiếng Việt
+                {t("fields.title.vi")}
               </Label>
               <Input
                 id={`edit-module-title-vn-${module.moduleID}`}
                 value={titleVN}
                 onChange={(event) => setTitleVN(event.target.value)}
-                placeholder="Nhập tiêu đề tiếng Việt"
+                placeholder={t("fields.title.placeholderVi")}
                 disabled={isUpdatingModule}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor={`edit-module-title-en-${module.moduleID}`}>
-                Tiêu đề tiếng Anh
+                {t("fields.title.en")}
               </Label>
               <Input
                 id={`edit-module-title-en-${module.moduleID}`}
                 value={titleEN}
                 onChange={(event) => setTitleEN(event.target.value)}
-                placeholder="Enter English title"
+                placeholder={t("fields.title.placeholderEn")}
                 disabled={isUpdatingModule}
               />
             </div>
@@ -143,7 +145,7 @@ export default function UpdateModuleDialog({
               onClick={() => handleOpenChange(false)}
               disabled={isUpdatingModule}
             >
-              Hủy
+              {t("buttons.cancel")}
             </Button>
             <Button
               onClick={() => {
@@ -152,7 +154,7 @@ export default function UpdateModuleDialog({
               disabled={isUpdatingModule}
             >
               {isUpdatingModule ? <Spinner className="h-4 w-4" /> : null}
-              Lưu thay đổi
+              {t("buttons.update")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -11,6 +11,7 @@ import ModuleItem from "@/components/system/course-edit/course-settings/ModuleIt
 import { useDeleteModule, useGetModules } from "@/hooks/module/useModule";
 import { ApiError } from "@/types/api/common";
 import { Module } from "@/validations/module/module";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type CourseSettingsTabProps = {
   courseId?: string;
@@ -25,7 +26,7 @@ export default function CourseSettingsTab({
 }: CourseSettingsTabProps) {
   const modulesQuery = useGetModules({ courseId, versionId });
   const deleteModuleMutation = useDeleteModule();
-
+  const t = useTranslations("CourseManagement.CourseSettings");
   const modules = modulesQuery.data || [];
   const canManageModules = versionStatus === "DRAFT";
 
@@ -59,10 +60,10 @@ export default function CourseSettingsTab({
     return (
       <div className="rounded border border-greyscale-700 bg-greyscale-850 p-4">
         <h2 className="mb-2 text-base font-semibold text-greyscale-0">
-          Thiết lập khóa học
+          {t("title")}
         </h2>
         <p className="text-sm text-greyscale-100">
-          Vui lòng chọn course version để tải danh sách module.
+          {t("error.emptyId")}
         </p>
       </div>
     );
@@ -79,13 +80,10 @@ export default function CourseSettingsTab({
   if (modulesQuery.isError) {
     return (
       <div className="rounded border border-greyscale-700 bg-greyscale-850 p-4">
-        <h2 className="mb-2 text-base font-semibold text-greyscale-0">
-          Thiết lập khóa học
-        </h2>
         <p className="text-sm text-warning">
           {modulesQuery.error.response?.data?.message ||
             modulesQuery.error.message ||
-            "Không thể tải danh sách module."}
+            t("error.cantLoad")}
         </p>
       </div>
     );
@@ -95,7 +93,7 @@ export default function CourseSettingsTab({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-greyscale-0">
-          Danh sách chương
+          {t("title")}
         </h2>
 
         {canManageModules ? (
@@ -108,7 +106,7 @@ export default function CourseSettingsTab({
       </div>
 
       {modules.length === 0 ? (
-        <EmptyState title="Chưa có chương nào" />
+        <EmptyState title={t("error.empty")} />
       ) : (
         <div className="space-y-2">
           {modules.map((module) => (

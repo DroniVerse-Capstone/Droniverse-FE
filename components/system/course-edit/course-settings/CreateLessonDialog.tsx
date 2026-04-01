@@ -28,22 +28,18 @@ import { useCreateQuiz } from "@/hooks/quiz/useQuiz";
 import { useCreateTheory } from "@/hooks/theory/useTheory";
 import { ApiError } from "@/types/api/common";
 import { Lesson, LessonType } from "@/validations/lesson/lesson";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type CreateLessonDialogProps = {
   moduleId: string;
   lessons: Lesson[];
 };
 
-const lessonTypeOptions: CommonDropdownOption[] = [
-  { value: "THEORY", label: "Lý thuyết" },
-  { value: "QUIZ", label: "Bài kiểm tra" },
-  { value: "LAB", label: "Lab" },
-];
-
 export default function CreateLessonDialog({
   moduleId,
   lessons,
 }: CreateLessonDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.CreateLessonDialog");
   const [open, setOpen] = React.useState(false);
   const [lessonType, setLessonType] = React.useState<LessonType>("THEORY");
 
@@ -69,7 +65,7 @@ export default function CreateLessonDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể tạo bài lý thuyết.",
+          t("error.createTheoryFailed"),
       );
     },
   });
@@ -85,10 +81,16 @@ export default function CreateLessonDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể tạo bài kiểm tra.",
+          t("error.createQuizFailed"),
       );
     },
   });
+
+  const lessonTypeOptions: CommonDropdownOption[] = [
+    { value: "THEORY", label: t("lessonTypes.theory") },
+    { value: "QUIZ", label: t("lessonTypes.quiz") },
+    { value: "LAB", label: t("lessonTypes.lab") },
+  ];
 
   const isSubmitting =
     createTheoryMutation.isPending || createQuizMutation.isPending;
@@ -144,7 +146,7 @@ export default function CreateLessonDialog({
     const normalizedTitleEN = titleEN.trim();
 
     if (!normalizedTitleVN || !normalizedTitleEN) {
-      toast.error("Vui lòng nhập tiêu đề tiếng Việt và tiếng Anh.");
+      toast.error(t("error.missingTitle"));
       return;
     }
 
@@ -154,7 +156,7 @@ export default function CreateLessonDialog({
       const parsedEstimatedTime = parsePositiveInt(estimatedTime);
 
       if (!normalizedContentVN || !normalizedContentEN || !parsedEstimatedTime) {
-        toast.error("Vui lòng nhập đầy đủ thông tin cho bài lý thuyết.");
+        toast.error(t("error.missingTheory"));
         return;
       }
 
@@ -185,12 +187,12 @@ export default function CreateLessonDialog({
         !parsedTotalScore ||
         parsedPassScore === null
       ) {
-        toast.error("Vui lòng nhập đầy đủ thông tin cho bài kiểm tra.");
+        toast.error(t("error.missingQuiz"));
         return;
       }
 
       if (parsedPassScore > parsedTotalScore) {
-        toast.error("Điểm đạt không được lớn hơn tổng điểm.");
+        toast.error(t("error.invalidPassScore"));
         return;
       }
 
@@ -209,54 +211,54 @@ export default function CreateLessonDialog({
       return;
     }
 
-    toast("Tính năng tạo bài Lab sẽ được cập nhật sau.");
+    toast(t("toast.labComingSoon"));
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button icon={<MdOutlineAddCircleOutline size={18} />} variant="secondary">
-          Thêm bài học
+          {t("buttons.createLesson")}
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Tạo bài học mới</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            Thứ tự bài học sẽ được gán là {nextOrderIndex} trong chương này.
+            {t("subtitle").replace("{orderIndex}", String(nextOrderIndex))}
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[65vh] space-y-4 overflow-y-auto py-2 pr-1">
           <CommonDropdown
-            label="Loại bài học"
+            label={t("lessonType")}
             options={lessonTypeOptions}
             value={lessonType}
             onChange={(value) => setLessonType(value as LessonType)}
-            placeholder="Chọn loại bài học"
+            placeholder={t("lessonTypePlaceholder")}
             disabled={isSubmitting}
           />
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="create-lesson-title-vn">Tiêu đề tiếng Việt</Label>
+              <Label htmlFor="create-lesson-title-vn">{t("fields.titleVN")}</Label>
               <Input
                 id="create-lesson-title-vn"
                 value={titleVN}
                 onChange={(event) => setTitleVN(event.target.value)}
-                placeholder="Nhập tiêu đề tiếng Việt"
+                placeholder={t("fields.titleVNPlaceholder")}
                 disabled={isSubmitting}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="create-lesson-title-en">Tiêu đề tiếng Anh</Label>
+              <Label htmlFor="create-lesson-title-en">{t("fields.titleEN")}</Label>
               <Input
                 id="create-lesson-title-en"
                 value={titleEN}
                 onChange={(event) => setTitleEN(event.target.value)}
-                placeholder="Enter English title"
+                placeholder={t("fields.titleENPlaceholder")}
                 disabled={isSubmitting}
               />
             </div>
@@ -266,33 +268,33 @@ export default function CreateLessonDialog({
             <div className="space-y-4">
               <QuillEditor
                 id="create-theory-content-vn"
-                label="Nội dung tiếng Việt"
+                label={t("fields.theoryContentVN")}
                 value={contentVN}
                 onChange={setContentVN}
-                placeholder="Nhập nội dung lý thuyết tiếng Việt"
+                placeholder={t("fields.theoryContentVNPlaceholder")}
                 readOnly={isSubmitting}
                 minHeight={200}
               />
 
               <QuillEditor
                 id="create-theory-content-en"
-                label="Nội dung tiếng Anh"
+                label={t("fields.theoryContentEN")}
                 value={contentEN}
                 onChange={setContentEN}
-                placeholder="Enter theory content in English"
+                placeholder={t("fields.theoryContentENPlaceholder")}
                 readOnly={isSubmitting}
                 minHeight={200}
               />
 
               <div className="space-y-2">
-                <Label htmlFor="create-theory-estimated-time">Thời lượng (phút)</Label>
+                <Label htmlFor="create-theory-estimated-time">{t("fields.estimatedTime")}</Label>
                 <Input
                   id="create-theory-estimated-time"
                   type="number"
                   min={1}
                   value={estimatedTime}
                   onChange={(event) => setEstimatedTime(event.target.value)}
-                  placeholder="Ví dụ: 15"
+                  placeholder={t("fields.estimatedTimePlaceholder")}
                   disabled={isSubmitting}
                 />
               </div>
@@ -302,63 +304,63 @@ export default function CreateLessonDialog({
           {lessonType === "QUIZ" ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="create-quiz-description-vn">Mô tả tiếng Việt</Label>
+                <Label htmlFor="create-quiz-description-vn">{t("fields.quizDescriptionVN")}</Label>
                 <Textarea
                   id="create-quiz-description-vn"
                   value={descriptionVN}
                   onChange={(event) => setDescriptionVN(event.target.value)}
-                  placeholder="Nhập mô tả bài kiểm tra tiếng Việt"
+                  placeholder={t("fields.quizDescriptionVNPlaceholder")}
                   disabled={isSubmitting}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="create-quiz-description-en">Mô tả tiếng Anh</Label>
+                <Label htmlFor="create-quiz-description-en">{t("fields.quizDescriptionEN")}</Label>
                 <Textarea
                   id="create-quiz-description-en"
                   value={descriptionEN}
                   onChange={(event) => setDescriptionEN(event.target.value)}
-                  placeholder="Enter quiz description in English"
+                  placeholder={t("fields.quizDescriptionENPlaceholder")}
                   disabled={isSubmitting}
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-time-limit">Giới hạn thời gian (phút)</Label>
+                  <Label htmlFor="create-quiz-time-limit">{t("fields.quizTimeLimit")}</Label>
                   <Input
                     id="create-quiz-time-limit"
                     type="number"
                     min={1}
                     value={timeLimit}
                     onChange={(event) => setTimeLimit(event.target.value)}
-                    placeholder="Ví dụ: 20"
+                    placeholder={t("fields.quizTimeLimitPlaceholder")}
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-total-score">Tổng điểm</Label>
+                  <Label htmlFor="create-quiz-total-score">{t("fields.quizTotalScore")}</Label>
                   <Input
                     id="create-quiz-total-score"
                     type="number"
                     min={1}
                     value={totalScore}
                     onChange={(event) => setTotalScore(event.target.value)}
-                    placeholder="Ví dụ: 10"
+                    placeholder={t("fields.quizTotalScorePlaceholder")}
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-pass-score">Điểm đạt</Label>
+                  <Label htmlFor="create-quiz-pass-score">{t("fields.quizPassScore")}</Label>
                   <Input
                     id="create-quiz-pass-score"
                     type="number"
                     min={0}
                     value={passScore}
                     onChange={(event) => setPassScore(event.target.value)}
-                    placeholder="Ví dụ: 7"
+                    placeholder={t("fields.quizPassScorePlaceholder")}
                     disabled={isSubmitting}
                   />
                 </div>
@@ -368,7 +370,7 @@ export default function CreateLessonDialog({
 
           {lessonType === "LAB" ? (
             <div className="rounded border border-greyscale-700 bg-greyscale-900/70 p-3 text-sm text-greyscale-200">
-              Tính năng tạo bài Lab sẽ được cập nhật sau.
+              {t("toast.labComingSoon")}
             </div>
           ) : null}
         </div>
@@ -376,13 +378,13 @@ export default function CreateLessonDialog({
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isSubmitting}>
-              Hủy
+              {t("buttons.cancel")}
             </Button>
           </DialogClose>
 
           <Button onClick={() => void handleSubmit()} disabled={isSubmitting}>
             {isSubmitting ? <Spinner className="h-4 w-4" /> : null}
-            Tạo bài học
+            {t("buttons.createLesson")}
           </Button>
         </DialogFooter>
       </DialogContent>

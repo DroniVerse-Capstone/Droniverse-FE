@@ -123,6 +123,18 @@ export default function CourseInfoTab({
     }
   };
 
+  const getDroneStatusClassName = (status: string) => {
+    if (status === "ACTIVE") {
+      return "bg-secondary/15 text-secondary border-secondary/40";
+    }
+
+    if (status === "DRAFT") {
+      return "bg-tertiary/15 text-tertiary border-tertiary/40";
+    }
+
+    return "bg-greyscale-700 text-greyscale-100 border-greyscale-600";
+  };
+
   return (
     <div className="space-y-5">
       <header className="space-y-3 border-b border-greyscale-700 pb-4">
@@ -219,9 +231,30 @@ export default function CourseInfoTab({
           {version.categories.length === 0 ? (
             <p className="text-sm text-greyscale-300">{t("category.empty")}</p>
           ) : (
-            <pre className="overflow-auto whitespace-pre-wrap text-xs text-greyscale-100">
-              {JSON.stringify(version.categories, null, 2)}
-            </pre>
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+              {version.categories.map((category) => {
+                const categoryName =
+                  locale === "en"
+                    ? category.typeNameEN || category.typeNameVN
+                    : category.typeNameVN || category.typeNameEN;
+                const categoryDescription =
+                  locale === "en"
+                    ? category.descriptionEN || category.descriptionVN
+                    : category.descriptionVN || category.descriptionEN;
+
+                return (
+                  <div
+                    key={category.categoryID}
+                    className="rounded border border-greyscale-700 bg-greyscale-800 p-3"
+                  >
+                    <p className="text-sm font-semibold text-greyscale-0">{categoryName}</p>
+                    <p className="mt-1 line-clamp-3 text-xs text-greyscale-200">
+                      {categoryDescription}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
@@ -231,9 +264,39 @@ export default function CourseInfoTab({
           {version.requiredDrones.length === 0 ? (
             <p className="text-sm text-greyscale-300">{t("drone.empty")}</p>
           ) : (
-            <pre className="overflow-auto whitespace-pre-wrap text-xs text-greyscale-100">
-              {JSON.stringify(version.requiredDrones, null, 2)}
-            </pre>
+            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+              {version.requiredDrones.map((drone) => {
+                const droneName =
+                  locale === "en"
+                    ? drone.droneNameEN || drone.droneNameVN
+                    : drone.droneNameVN || drone.droneNameEN;
+                const droneTypeName =
+                  locale === "en"
+                    ? drone.droneTypeNameEN || drone.droneTypeNameVN
+                    : drone.droneTypeNameVN || drone.droneTypeNameEN;
+
+                const description =
+                  locale === "en"
+                    ? drone.descriptionEN || drone.descriptionVN
+                    : drone.descriptionVN || drone.descriptionEN;
+
+                return (
+                  <div
+                    key={drone.droneID}
+                    className="space-y-2 rounded border border-greyscale-700 bg-greyscale-800 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold text-greyscale-0">{droneName}</p>
+                        <p className="text-xs text-greyscale-25">{droneTypeName}</p>
+                      </div>
+                    </div>
+                    <p className="line-clamp-3 text-xs text-greyscale-200">{description}</p>
+                    
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

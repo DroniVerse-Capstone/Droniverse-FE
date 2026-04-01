@@ -27,6 +27,7 @@ import {
   useGetQuizQuestions,
   useUpdateQuizQuestion,
 } from "@/hooks/quiz-question/useQuizQuestion";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { ApiError } from "@/types/api/common";
 import { Lesson } from "@/validations/lesson/lesson";
 import { QuizQuestion } from "@/validations/quiz-question/quiz-question";
@@ -44,6 +45,8 @@ export default function QuizQuestionConfigDialog({
   canManageQuestions,
   onOpenChange,
 }: QuizQuestionConfigDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.QuizQuestionConfigDialog");
+  const locale = useLocale();
   const [editingQuestionId, setEditingQuestionId] = React.useState<
     string | null
   >(null);
@@ -53,6 +56,10 @@ export default function QuizQuestionConfigDialog({
   const [answerB, setAnswerB] = React.useState("");
   const [answerC, setAnswerC] = React.useState("");
   const [answerD, setAnswerD] = React.useState("");
+  const [answerA_EN, setAnswerA_EN] = React.useState("");
+  const [answerB_EN, setAnswerB_EN] = React.useState("");
+  const [answerC_EN, setAnswerC_EN] = React.useState("");
+  const [answerD_EN, setAnswerD_EN] = React.useState("");
   const [correctAnswer, setCorrectAnswer] = React.useState("A");
   const [score, setScore] = React.useState("");
   const [searchKeyword, setSearchKeyword] = React.useState("");
@@ -72,7 +79,7 @@ export default function QuizQuestionConfigDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể tạo câu hỏi.",
+          t("error.createFailed"),
       );
     },
   });
@@ -87,7 +94,7 @@ export default function QuizQuestionConfigDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật câu hỏi.",
+          t("error.updateFailed"),
       );
     },
   });
@@ -101,7 +108,7 @@ export default function QuizQuestionConfigDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể xóa câu hỏi.",
+          t("error.deleteFailed"),
       );
     },
   });
@@ -126,6 +133,10 @@ export default function QuizQuestionConfigDialog({
         question.answerB,
         question.answerC,
         question.answerD,
+        question.answerA_EN,
+        question.answerB_EN,
+        question.answerC_EN,
+        question.answerD_EN,
       ]
         .join(" ")
         .toLowerCase();
@@ -147,6 +158,10 @@ export default function QuizQuestionConfigDialog({
     setAnswerB("");
     setAnswerC("");
     setAnswerD("");
+    setAnswerA_EN("");
+    setAnswerB_EN("");
+    setAnswerC_EN("");
+    setAnswerD_EN("");
     setCorrectAnswer("A");
     setScore("");
   }
@@ -168,6 +183,10 @@ export default function QuizQuestionConfigDialog({
     setAnswerB(question.answerB);
     setAnswerC(question.answerC);
     setAnswerD(question.answerD);
+    setAnswerA_EN(question.answerA_EN);
+    setAnswerB_EN(question.answerB_EN);
+    setAnswerC_EN(question.answerC_EN);
+    setAnswerD_EN(question.answerD_EN);
     setCorrectAnswer(question.correctAnswer);
     setScore(String(question.score));
   };
@@ -177,6 +196,13 @@ export default function QuizQuestionConfigDialog({
     if (choice === "B") return answerB;
     if (choice === "C") return answerC;
     return answerD;
+  };
+
+  const getAnswerValueEN = (choice: "A" | "B" | "C" | "D") => {
+    if (choice === "A") return answerA_EN;
+    if (choice === "B") return answerB_EN;
+    if (choice === "C") return answerC_EN;
+    return answerD_EN;
   };
 
   const setAnswerValue = (choice: "A" | "B" | "C" | "D", value: string) => {
@@ -198,6 +224,25 @@ export default function QuizQuestionConfigDialog({
     setAnswerD(value);
   };
 
+  const setAnswerValueEN = (choice: "A" | "B" | "C" | "D", value: string) => {
+    if (choice === "A") {
+      setAnswerA_EN(value);
+      return;
+    }
+
+    if (choice === "B") {
+      setAnswerB_EN(value);
+      return;
+    }
+
+    if (choice === "C") {
+      setAnswerC_EN(value);
+      return;
+    }
+
+    setAnswerD_EN(value);
+  };
+
   const handleSubmit = async () => {
     if (!quizId) {
       return;
@@ -209,6 +254,10 @@ export default function QuizQuestionConfigDialog({
     const normalizedAnswerB = answerB.trim();
     const normalizedAnswerC = answerC.trim();
     const normalizedAnswerD = answerD.trim();
+    const normalizedAnswerA_EN = answerA_EN.trim();
+    const normalizedAnswerB_EN = answerB_EN.trim();
+    const normalizedAnswerC_EN = answerC_EN.trim();
+    const normalizedAnswerD_EN = answerD_EN.trim();
     const parsedScore = parsePositiveInt(score);
 
     if (
@@ -218,9 +267,13 @@ export default function QuizQuestionConfigDialog({
       !normalizedAnswerB ||
       !normalizedAnswerC ||
       !normalizedAnswerD ||
+      !normalizedAnswerA_EN ||
+      !normalizedAnswerB_EN ||
+      !normalizedAnswerC_EN ||
+      !normalizedAnswerD_EN ||
       !parsedScore
     ) {
-      toast.error("Vui lòng nhập đầy đủ thông tin câu hỏi.");
+      toast.error(t("error.missingFields"));
       return;
     }
 
@@ -231,6 +284,10 @@ export default function QuizQuestionConfigDialog({
       answerB: normalizedAnswerB,
       answerC: normalizedAnswerC,
       answerD: normalizedAnswerD,
+      answerA_EN: normalizedAnswerA_EN,
+      answerB_EN: normalizedAnswerB_EN,
+      answerC_EN: normalizedAnswerC_EN,
+      answerD_EN: normalizedAnswerD_EN,
       correctAnswer: correctAnswer as "A" | "B" | "C" | "D",
       score: parsedScore,
     };
@@ -279,20 +336,20 @@ export default function QuizQuestionConfigDialog({
         }
       }}
     >
-      <DialogContent className="max-h-[94vh] sm:max-w-295">
+      <DialogContent className="max-h-[94vh] sm:max-w-300">
         <DialogHeader>
-          <DialogTitle>Cấu hình câu hỏi bài kiểm tra</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
             {lesson
-              ? `Bài học: ${lesson.titleVN}`
-              : "Thiết lập câu hỏi cho bài kiểm tra."}
+              ? `${t("lessonPrefix")}: ${locale === "vi" ? lesson.titleVN : lesson.titleEN}`
+              : t("subtitle")}
           </DialogDescription>
         </DialogHeader>
 
         <div
           className={
             canManageQuestions
-              ? "grid gap-4 md:grid-cols-[1.35fr_1fr]"
+              ? "grid gap-4 md:grid-cols-[1fr_1.25fr]"
               : "grid gap-4 md:grid-cols-1"
           }
         >
@@ -301,10 +358,10 @@ export default function QuizQuestionConfigDialog({
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-sm font-medium text-greyscale-0">
-                  {editingQuestionId ? "Cập nhật câu hỏi" : "Thêm câu hỏi mới"}
+                  {editingQuestionId ? t("form.updateTitle") : t("form.createTitle")}
                 </p>
                 <p className="text-xs text-greyscale-300">
-                  Điền đầy đủ nội dung, 4 đáp án và chọn đáp án đúng.
+                  {t("form.description")}
                 </p>
               </div>
 
@@ -314,7 +371,7 @@ export default function QuizQuestionConfigDialog({
                   variant="secondary"
                   onClick={resetForm}
                 >
-                  Tạo mới
+                  {t("form.reset")}
                 </Button>
               ) : null}
             </div>
@@ -322,7 +379,7 @@ export default function QuizQuestionConfigDialog({
             <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
               <div className="space-y-2">
                 <Label htmlFor="quiz-question-content-vn">
-                  Nội dung tiếng Việt
+                  {t("form.contentVN")}
                 </Label>
                 <Textarea
                   id="quiz-question-content-vn"
@@ -334,7 +391,7 @@ export default function QuizQuestionConfigDialog({
 
               <div className="space-y-2">
                 <Label htmlFor="quiz-question-content-en">
-                  Nội dung tiếng Anh
+                  {t("form.contentEN")}
                 </Label>
                 <Textarea
                   id="quiz-question-content-en"
@@ -346,9 +403,9 @@ export default function QuizQuestionConfigDialog({
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Đáp án</Label>
+                  <Label>{t("form.answers")}</Label>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="quiz-question-score">Điểm:</Label>
+                    <Label htmlFor="quiz-question-score">{t("form.score")}:</Label>
                     <Input
                       id="quiz-question-score"
                       type="number"
@@ -365,7 +422,7 @@ export default function QuizQuestionConfigDialog({
                   {(["A", "B", "C", "D"] as const).map((choice) => (
                     <div
                       key={choice}
-                      className="grid grid-cols-[54px_minmax(0,1fr)] items-center"
+                      className="grid grid-cols-[54px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2"
                     >
                       <label
                         htmlFor={`quiz-question-answer-${choice.toLowerCase()}`}
@@ -389,6 +446,18 @@ export default function QuizQuestionConfigDialog({
                             setAnswerValue(choice, event.target.value)
                           }
                           disabled={isSaving}
+                          placeholder={t("form.answerVNPlaceholder")}
+                        />
+                      </div>
+                      <div className="min-w-0 w-full">
+                        <Input
+                          id={`quiz-question-answer-${choice.toLowerCase()}-en`}
+                          value={getAnswerValueEN(choice)}
+                          onChange={(event) =>
+                            setAnswerValueEN(choice, event.target.value)
+                          }
+                          disabled={isSaving}
+                          placeholder={t("form.answerENPlaceholder")}
                         />
                       </div>
                     </div>
@@ -405,7 +474,7 @@ export default function QuizQuestionConfigDialog({
                 className="w-full"
               >
                 {isSaving ? <Spinner className="h-4 w-4" /> : null}
-                {editingQuestionId ? "Cập nhật câu hỏi" : "Thêm câu hỏi"}
+                {editingQuestionId ? t("form.submitUpdate") : t("form.submitCreate")}
               </Button>
             </div>
             </div>
@@ -415,10 +484,10 @@ export default function QuizQuestionConfigDialog({
             <div className="flex items-center justify-between gap-2 rounded border border-greyscale-700/70 bg-greyscale-800/60 px-3 py-2">
               <div>
                 <p className="text-sm font-medium text-greyscale-0">
-                  Danh sách câu hỏi
+                  {t("list.title")}
                 </p>
                 <p className="text-xs text-greyscale-300">
-                  {questions.length} câu hỏi | Tổng điểm: {totalScore}
+                  {questions.length} {t("list.questionSuffix")} | {t("list.totalScore")}: {totalScore}
                 </p>
               </div>
 
@@ -427,7 +496,7 @@ export default function QuizQuestionConfigDialog({
                   type="search"
                   value={searchKeyword}
                   onChange={(event) => setSearchKeyword(event.target.value)}
-                  placeholder="Tìm câu hỏi"
+                  placeholder={t("list.searchPlaceholder")}
                   disabled={quizQuestionsQuery.isLoading || isSaving}
                   className="h-9"
                 />
@@ -444,14 +513,14 @@ export default function QuizQuestionConfigDialog({
               <p className="text-sm text-warning">
                 {quizQuestionsQuery.error?.response?.data?.message ||
                   quizQuestionsQuery.error?.message ||
-                  "Không thể tải danh sách câu hỏi."}
+                  t("error.loadFailed")}
               </p>
             ) : null}
 
             {!quizQuestionsQuery.isLoading &&
             !quizQuestionsQuery.isError &&
             questions.length === 0 ? (
-              <EmptyState title="Chưa có câu hỏi trong bài kiểm tra này." />
+              <EmptyState title={t("empty.noQuestions")} />
             ) : null}
 
             {!quizQuestionsQuery.isLoading &&
@@ -459,7 +528,7 @@ export default function QuizQuestionConfigDialog({
             questions.length > 0 &&
             filteredQuestions.length === 0 ? (
               <div className="rounded border border-greyscale-700 bg-greyscale-800 p-3 text-sm text-greyscale-200">
-                Không tìm thấy câu hỏi phù hợp.
+                {t("empty.notFound")}
               </div>
             ) : null}
 
@@ -480,31 +549,31 @@ export default function QuizQuestionConfigDialog({
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <p className="rounded bg-primary-200/70 px-2 py-0.5 text-xs font-medium text-greyscale-0">
-                          Câu {index + 1}
+                          {t("list.questionPrefix")} {index + 1}
                         </p>
                         {isEditing ? (
                           <span className="rounded border border-primary-200/70 bg-primary-200/10 px-2 py-0.5 text-xs text-primary-200">
-                            Đang sửa
+                            {t("list.editing")}
                           </span>
                         ) : null}
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="rounded border border-secondary-200 px-2 py-0.5 text-xs text-secondary-200 bg-secondary-200/25">
-                          Điểm: {question.score}
+                          {t("list.score")}: {question.score}
                         </span>
                       </div>
                     </div>
 
                     <p className="line-clamp-2 text-base font-medium text-greyscale-25">
-                      {question.contentVN}
+                      {locale === "vi" ? question.contentVN : question.contentEN}
                     </p>
                     <p className="line-clamp-2 text-sm text-greyscale-200">
-                      {question.contentEN}
+                      {locale === "vi" ? question.contentEN : question.contentVN}
                     </p>
 
                     <div className="grid gap-1 text-sm sm:grid-cols-2">
                       {(["A", "B", "C", "D"] as const).map((choice) => {
-                        const answer =
+                        const answerVN =
                           choice === "A"
                             ? question.answerA
                             : choice === "B"
@@ -512,6 +581,14 @@ export default function QuizQuestionConfigDialog({
                               : choice === "C"
                                 ? question.answerC
                                 : question.answerD;
+                        const answerEN =
+                          choice === "A"
+                            ? question.answerA_EN
+                            : choice === "B"
+                              ? question.answerB_EN
+                              : choice === "C"
+                                ? question.answerC_EN
+                                : question.answerD_EN;
                         const isCorrect = question.correctAnswer === choice;
 
                         return (
@@ -523,21 +600,21 @@ export default function QuizQuestionConfigDialog({
                                 : "text-greyscale-200"
                             }
                           >
-                            {choice}. {answer} {isCorrect ? "(Đúng)" : ""}
+                            {choice}. {locale === "vi"? answerVN : answerEN } / {locale === "vi" ? answerEN : answerVN}
                           </p>
                         );
                       })}
                     </div>
 
                     {canManageQuestions ? (
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-2">
                         <Button
                           type="button"
                           variant="editIcon"
                           size="icon"
                           onClick={() => startEdit(question)}
                           disabled={isSaving}
-                          title="Sửa câu hỏi"
+                          title={t("tooltip.edit")}
                         >
                           <BiEdit size={16} />
                         </Button>
@@ -549,15 +626,15 @@ export default function QuizQuestionConfigDialog({
                               variant="deleteIcon"
                               size="icon"
                               disabled={isSaving}
-                              title="Xóa câu hỏi"
+                              title={t("tooltip.delete")}
                             >
                               <MdDeleteOutline size={16} />
                             </Button>
                           }
-                          title="Xóa câu hỏi"
-                          description="Bạn có chắc muốn xóa câu hỏi này?"
-                          confirmText="Xóa"
-                          cancelText="Hủy"
+                          title={t("confirm.deleteTitle")}
+                          description={t("confirm.deleteDescription")}
+                          confirmText={t("confirm.confirmText")}
+                          cancelText={t("confirm.cancelText")}
                           isLoading={deleteQuizQuestionMutation.isPending}
                           onConfirm={() => {
                             void handleDelete(question.questionID);

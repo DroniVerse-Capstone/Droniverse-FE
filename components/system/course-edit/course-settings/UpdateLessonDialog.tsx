@@ -20,6 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetQuizDetail, useUpdateQuiz } from "@/hooks/quiz/useQuiz";
 import { useGetTheoryDetail, useUpdateTheory } from "@/hooks/theory/useTheory";
+import { useTranslations } from "@/providers/i18n-provider";
 import { ApiError } from "@/types/api/common";
 import { Lesson } from "@/validations/lesson/lesson";
 
@@ -34,6 +35,7 @@ export default function UpdateLessonDialog({
   lesson,
   onOpenChange,
 }: UpdateLessonDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.UpdateLessonDialog");
   const [theoryTitleVN, setTheoryTitleVN] = useState("");
   const [theoryTitleEN, setTheoryTitleEN] = useState("");
   const [theoryContentVN, setTheoryContentVN] = useState("");
@@ -64,7 +66,7 @@ export default function UpdateLessonDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật bài lý thuyết.",
+          t("error.updateTheoryFailed"),
       );
     },
   });
@@ -79,7 +81,7 @@ export default function UpdateLessonDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể cập nhật bài kiểm tra.",
+          t("error.updateQuizFailed"),
       );
     },
   });
@@ -144,7 +146,7 @@ export default function UpdateLessonDialog({
       !normalizedContentEN ||
       !parsedEstimatedTime
     ) {
-      toast.error("Vui lòng nhập đầy đủ thông tin bài lý thuyết.");
+      toast.error(t("error.missingTheory"));
       return;
     }
 
@@ -183,12 +185,12 @@ export default function UpdateLessonDialog({
       !parsedTotalScore ||
       parsedPassScore === null
     ) {
-      toast.error("Vui lòng nhập đầy đủ thông tin bài kiểm tra.");
+      toast.error(t("error.missingQuiz"));
       return;
     }
 
     if (parsedPassScore > parsedTotalScore) {
-      toast.error("Điểm đạt không được lớn hơn tổng điểm.");
+      toast.error(t("error.invalidPassScore"));
       return;
     }
 
@@ -222,9 +224,9 @@ export default function UpdateLessonDialog({
     >
       <DialogContent className="max-h-[90vh] sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Chỉnh sửa bài học</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            {lesson?.type === "THEORY" ? "Cập nhật bài lý thuyết" : "Cập nhật bài kiểm tra"}
+            {lesson?.type === "THEORY" ? t("subtitle.theory") : t("subtitle.quiz")}
           </DialogDescription>
         </DialogHeader>
 
@@ -240,7 +242,7 @@ export default function UpdateLessonDialog({
               <>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-theory-title-vn">Tiêu đề tiếng Việt</Label>
+                    <Label htmlFor="edit-theory-title-vn">{t("fields.titleVN")}</Label>
                     <Input
                       id="edit-theory-title-vn"
                       value={theoryTitleVN}
@@ -249,7 +251,7 @@ export default function UpdateLessonDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-theory-title-en">Tiêu đề tiếng Anh</Label>
+                    <Label htmlFor="edit-theory-title-en">{t("fields.titleEN")}</Label>
                     <Input
                       id="edit-theory-title-en"
                       value={theoryTitleEN}
@@ -261,7 +263,7 @@ export default function UpdateLessonDialog({
 
                 <QuillEditor
                   id="edit-theory-content-vn"
-                  label="Nội dung tiếng Việt"
+                  label={t("fields.theoryContentVN")}
                   value={theoryContentVN}
                   onChange={setTheoryContentVN}
                   readOnly={isSaving}
@@ -270,7 +272,7 @@ export default function UpdateLessonDialog({
 
                 <QuillEditor
                   id="edit-theory-content-en"
-                  label="Nội dung tiếng Anh"
+                  label={t("fields.theoryContentEN")}
                   value={theoryContentEN}
                   onChange={setTheoryContentEN}
                   readOnly={isSaving}
@@ -278,7 +280,7 @@ export default function UpdateLessonDialog({
                 />
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-theory-estimated-time">Thời lượng (phút)</Label>
+                  <Label htmlFor="edit-theory-estimated-time">{t("fields.estimatedTime")}</Label>
                   <Input
                     id="edit-theory-estimated-time"
                     type="number"
@@ -305,7 +307,7 @@ export default function UpdateLessonDialog({
               <>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-quiz-title-vn">Tiêu đề tiếng Việt</Label>
+                    <Label htmlFor="edit-quiz-title-vn">{t("fields.titleVN")}</Label>
                     <Input
                       id="edit-quiz-title-vn"
                       value={quizTitleVN}
@@ -314,7 +316,7 @@ export default function UpdateLessonDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-quiz-title-en">Tiêu đề tiếng Anh</Label>
+                    <Label htmlFor="edit-quiz-title-en">{t("fields.titleEN")}</Label>
                     <Input
                       id="edit-quiz-title-en"
                       value={quizTitleEN}
@@ -325,7 +327,7 @@ export default function UpdateLessonDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-quiz-description-vn">Mô tả tiếng Việt</Label>
+                  <Label htmlFor="edit-quiz-description-vn">{t("fields.quizDescriptionVN")}</Label>
                   <Textarea
                     id="edit-quiz-description-vn"
                     value={quizDescriptionVN}
@@ -336,7 +338,7 @@ export default function UpdateLessonDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-quiz-description-en">Mô tả tiếng Anh</Label>
+                  <Label htmlFor="edit-quiz-description-en">{t("fields.quizDescriptionEN")}</Label>
                   <Textarea
                     id="edit-quiz-description-en"
                     value={quizDescriptionEN}
@@ -348,7 +350,7 @@ export default function UpdateLessonDialog({
 
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-quiz-time-limit">Giới hạn thời gian</Label>
+                    <Label htmlFor="edit-quiz-time-limit">{t("fields.quizTimeLimit")}</Label>
                     <Input
                       id="edit-quiz-time-limit"
                       type="number"
@@ -359,7 +361,7 @@ export default function UpdateLessonDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-quiz-total-score">Tổng điểm</Label>
+                    <Label htmlFor="edit-quiz-total-score">{t("fields.quizTotalScore")}</Label>
                     <Input
                       id="edit-quiz-total-score"
                       type="number"
@@ -370,7 +372,7 @@ export default function UpdateLessonDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-quiz-pass-score">Điểm đạt</Label>
+                    <Label htmlFor="edit-quiz-pass-score">{t("fields.quizPassScore")}</Label>
                     <Input
                       id="edit-quiz-pass-score"
                       type="number"
@@ -388,7 +390,7 @@ export default function UpdateLessonDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
-            Hủy
+            {t("buttons.cancel")}
           </Button>
 
           <Button
@@ -405,7 +407,7 @@ export default function UpdateLessonDialog({
             disabled={isSaving}
           >
             {isSaving ? <Spinner className="h-4 w-4" /> : null}
-            Lưu thay đổi
+            {t("buttons.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

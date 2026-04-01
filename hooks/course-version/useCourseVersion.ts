@@ -12,12 +12,14 @@ import {
 	activateCourseVersionResponseSchema,
 	createCourseVersionRequestSchema,
 	createCourseVersionResponseSchema,
+	duplicateCourseVersionResponseSchema,
 	getCourseVersionDetailResponseSchema,
 	getCourseVersionsResponseSchema,
 	updateCourseVersionRequestSchema,
 	updateCourseVersionResponseSchema,
 	deleteCourseVersionResponseSchema,
 	DeleteCourseVersionResponse,
+	DuplicateCourseVersionResponse,
 } from "@/validations/course-version/course-version"
 
 type CreateCourseVersionVariables = {
@@ -32,6 +34,11 @@ type UpdateCourseVersionVariables = {
 }
 
 type ToggleCourseVersionStatusVariables = {
+	courseId: string
+	versionId: string
+}
+
+type DuplicateCourseVersionVariables = {
 	courseId: string
 	versionId: string
 }
@@ -206,10 +213,36 @@ export const useDeleteCourseVersion = () => {
 	})
 }
 
+export const useDuplicateCourseVersion = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		DuplicateCourseVersionResponse,
+		AxiosError<ApiError>,
+		DuplicateCourseVersionVariables
+	>({
+		mutationFn: async ({ courseId, versionId }) => {
+			const response = await apiClient.post(
+				`/academy/courses/${courseId}/versions/${versionId}/duplicate`
+			)
+
+			return duplicateCourseVersionResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
+				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
+			])
+		},
+	})
+}
+
 export type {
 	CreateCourseVersionVariables,
 	UpdateCourseVersionVariables,
 	ToggleCourseVersionStatusVariables,
+	DuplicateCourseVersionVariables,
 	UseGetCourseVersionsOptions,
 	UseGetCourseVersionDetailOptions,
 }

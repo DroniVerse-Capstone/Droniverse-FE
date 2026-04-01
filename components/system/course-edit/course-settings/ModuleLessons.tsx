@@ -20,6 +20,7 @@ import { ApiError } from "@/types/api/common";
 import { Lesson } from "@/validations/lesson/lesson";
 import { LucideFileQuestion } from "lucide-react";
 import TooltipWrapper from "@/components/common/ToolTipWrapper";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type ModuleLessonsProps = {
   lessons: Lesson[];
@@ -36,6 +37,8 @@ export default function ModuleLessons({
   error,
   canManageLessons,
 }: ModuleLessonsProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.ModuleLesson");
+  const locale = useLocale();
   const [viewOpen, setViewOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
   const [quizQuestionOpen, setQuizQuestionOpen] = React.useState(false);
@@ -114,7 +117,7 @@ export default function ModuleLessons({
   }
 
   if (lessons.length === 0) {
-    return <EmptyState title="Chưa có bài học trong chương này." />;
+    return <EmptyState title={t("empty")} />;
   }
 
   return (
@@ -130,20 +133,22 @@ export default function ModuleLessons({
                 <LessonTypeIcon type={lesson.type} />
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-greyscale-0">
-                    {lesson.titleVN}
+                    {locale === "vi" ? lesson.titleVN : lesson.titleEN}
                   </p>
-                  <p className="text-xs text-greyscale-200">{lesson.titleEN}</p>
+                  <p className="text-xs text-greyscale-200">
+                    {locale === "vi" ? lesson.titleEN : lesson.titleVN}
+                  </p>
                   <div className="flex items-center gap-1">
                     <MdOutlineTimer className="text-greyscale-200" />
                     <p className="text-xs text-greyscale-300">
-                      {lesson.estimatedTime} phút
+                      {lesson.estimatedTime} {t("minutes")}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1">
-                <TooltipWrapper label="Xem chi tiết">
+              <div className="flex items-center gap-2">
+                <TooltipWrapper label={t("tooltip.view")}>
                 <Button
                   type="button"
                   variant="viewIcon"
@@ -155,7 +160,7 @@ export default function ModuleLessons({
                 </TooltipWrapper>
 
                 {lesson.type === "QUIZ" ? (
-                  <TooltipWrapper label="Cấu hình câu hỏi">
+                  <TooltipWrapper label={t("tooltip.question")}>
                     <Button
                       type="button"
                       variant="secondaryIcon"
@@ -169,7 +174,7 @@ export default function ModuleLessons({
 
                 {canManageLessons ? (
                   <>
-                    <TooltipWrapper label="Chỉnh sửa">
+                    <TooltipWrapper label={t("tooltip.edit")}>
                       <Button
                         type="button"
                         variant="editIcon"
@@ -182,16 +187,16 @@ export default function ModuleLessons({
 
                     <ConfirmActionPopover
                       trigger={
-                        <TooltipWrapper label="Xóa bài học">
+                        <TooltipWrapper label={t("tooltip.delete")}>
                           <Button type="button" variant="deleteIcon" size="icon">
                             <MdDeleteOutline size={16} />
                           </Button>
                         </TooltipWrapper>
                       }
-                      title="Xóa bài học"
-                      description="Bạn có chắc muốn xóa bài học này?"
-                      confirmText="Xóa"
-                      cancelText="Hủy"
+                      title={t("delete.title")}
+                      description={t("delete.description")}
+                      confirmText={t("delete.confirmText")}
+                      cancelText={t("delete.cancelText")}
                       isLoading={deleteLessonMutation.isPending}
                       onConfirm={() => {
                         void handleDelete(lesson);

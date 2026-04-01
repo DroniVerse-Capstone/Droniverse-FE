@@ -11,6 +11,7 @@ import { useGetLessons } from "@/hooks/lesson/useLesson";
 import UpdateModuleDialog from "@/components/system/course-edit/course-settings/UpdateModuleDialog";
 import { Module } from "@/validations/module/module";
 import TooltipWrapper from "@/components/common/ToolTipWrapper";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type ModuleItemProps = {
   courseId?: string;
@@ -29,6 +30,8 @@ export default function ModuleItem({
   canManageModules,
   onDelete,
 }: ModuleItemProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.ModuleItem");
+  const locale = useLocale();
   const [isExpanded, setIsExpanded] = React.useState(false);
   const lessonsQuery = useGetLessons({
     moduleId: isExpanded ? module.moduleID : undefined,
@@ -56,18 +59,20 @@ export default function ModuleItem({
 
           <div className="min-w-0">
             <p className="text-xs text-greyscale-300">
-              Chương {module.moduleNumber}
+              {t("module")} {module.moduleNumber}
             </p>
             <p className="text-sm font-medium text-greyscale-0">
-              {module.titleVN}
+              {locale === "vi" ? module.titleVN : module.titleEN}
             </p>
-            <p className="text-xs text-greyscale-200">{module.titleEN}</p>
+            <p className="text-xs text-greyscale-200">
+              {locale === "vi" ? module.titleEN : module.titleVN}
+            </p>
           </div>
         </button>
 
         {canManageModules ? (
           <div
-            className="flex shrink-0 items-center gap-1"
+            className="flex shrink-0 items-center gap-2"
             onClick={(event) => {
               event.stopPropagation();
             }}
@@ -80,16 +85,16 @@ export default function ModuleItem({
 
             <ConfirmActionPopover
               trigger={
-                <TooltipWrapper label="Xóa chương">
-                <Button variant="deleteIcon" size="icon">
-                  <MdDeleteOutline size={18} />
-                </Button>
+                <TooltipWrapper label={t("delete.title")}>
+                  <Button variant="deleteIcon" size="icon">
+                    <MdDeleteOutline size={18} />
+                    </Button>
                 </TooltipWrapper>
               }
-              title="Xóa chương"
-              description={`Bạn có chắc muốn xóa Chương ${module.moduleNumber}?`}
-              confirmText="Xóa"
-              cancelText="Hủy"
+              title={t("delete.title")}
+              description={`${t("delete.description")} ${module.moduleNumber}?`}
+              confirmText={t("delete.confirmText")}
+              cancelText={t("delete.cancelText")}
               isLoading={isDeletingModule}
               onConfirm={() => {
                 void onDelete(module);
@@ -103,7 +108,7 @@ export default function ModuleItem({
         <div className="border-t border-greyscale-700 px-3 py-2">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-base font-medium text-greyscale-0">
-              Danh sách bài học
+              {t("list")}
             </p>
             {canManageModules ? (
                 <CreateLessonDialog

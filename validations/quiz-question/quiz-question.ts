@@ -9,6 +9,10 @@ export const quizQuestionSchema = z.object({
 	answerB: z.string(),
 	answerC: z.string(),
 	answerD: z.string(),
+	answerA_EN: z.string(),
+	answerB_EN: z.string(),
+	answerC_EN: z.string(),
+	answerD_EN: z.string(),
 	correctAnswer: z.enum(["A", "B", "C", "D"]),
 	score: z.number().int().positive(),
 })
@@ -26,6 +30,10 @@ export const createQuizQuestionRequestSchema = z.object({
 	answerB: z.string(),
 	answerC: z.string(),
 	answerD: z.string(),
+	answerA_EN: z.string(),
+	answerB_EN: z.string(),
+	answerC_EN: z.string(),
+	answerD_EN: z.string(),
 	correctAnswer: z.enum(["A", "B", "C", "D"]),
 	score: z.number().int().positive(),
 })
@@ -37,6 +45,10 @@ export const updateQuizQuestionRequestSchema = z.object({
 	answerB: z.string(),
 	answerC: z.string(),
 	answerD: z.string(),
+	answerA_EN: z.string(),
+	answerB_EN: z.string(),
+	answerC_EN: z.string(),
+	answerD_EN: z.string(),
 	correctAnswer: z.enum(["A", "B", "C", "D"]),
 	score: z.number().int().positive(),
 })

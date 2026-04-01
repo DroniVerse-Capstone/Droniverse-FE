@@ -22,6 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCreateModule } from "@/hooks/module/useModule";
 import { ApiError } from "@/types/api/common";
 import { Module } from "@/validations/module/module";
+import { useTranslations } from "@/providers/i18n-provider";
 
 type ModuleDialogProps = {
   courseId?: string;
@@ -34,6 +35,7 @@ export default function ModuleDialog({
   versionId,
   modules,
 }: ModuleDialogProps) {
+  const t = useTranslations("CourseManagement.CourseSettings.ModuleDialog");
   const [open, setOpen] = React.useState(false);
   const [titleVN, setTitleVN] = React.useState("");
   const [titleEN, setTitleEN] = React.useState("");
@@ -64,12 +66,12 @@ export default function ModuleDialog({
     const normalizedTitleEN = titleEN.trim();
 
     if (!courseId || !versionId) {
-      toast.error("Vui lòng chọn course version trước khi thêm chương.");
+      toast.error(t("error.emptyId"));
       return;
     }
 
     if (!normalizedTitleVN || !normalizedTitleEN) {
-      toast.error("Vui lòng nhập đầy đủ thông tin.");
+      toast.error(t("error.normalized"));
       return;
     }
 
@@ -84,7 +86,7 @@ export default function ModuleDialog({
         },
       });
 
-      toast.success("Thêm chương mới thành công.");
+      toast.success(t("toast.success"));
       setOpen(false);
       resetForm();
     } catch (error) {
@@ -92,7 +94,7 @@ export default function ModuleDialog({
       toast.error(
         axiosError.response?.data?.message ||
           axiosError.message ||
-          "Không thể thêm chương."
+          t("toast.error")
       );
     }
   };
@@ -100,36 +102,36 @@ export default function ModuleDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button icon={<MdOutlineAddCircleOutline size={20} />}>Thêm chương</Button>
+        <Button icon={<MdOutlineAddCircleOutline size={20} />}>{t("title")}</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Thêm chương mới</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            Số chương sẽ được tự động gán là {nextModuleNumber}.
+            {t("subtitle")} {nextModuleNumber}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="module-title-vn">Tiêu đề tiếng Việt</Label>
+            <Label htmlFor="module-title-vn">{t("fields.title.vi")}</Label>
             <Input
               id="module-title-vn"
               value={titleVN}
               onChange={(event) => setTitleVN(event.target.value)}
-              placeholder="Nhập tiêu đề tiếng Việt"
+              placeholder={t("fields.title.placeholderVi")}
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="module-title-en">Tiêu đề tiếng Anh</Label>
+            <Label htmlFor="module-title-en">{t("fields.title.en")}</Label>
             <Input
               id="module-title-en"
               value={titleEN}
               onChange={(event) => setTitleEN(event.target.value)}
-              placeholder="Enter English title"
+              placeholder={t("fields.title.placeholderEn")}
               disabled={isSubmitting}
             />
           </div>
@@ -138,12 +140,12 @@ export default function ModuleDialog({
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" disabled={isSubmitting}>
-              Hủy
+              {t("buttons.cancel")}
             </Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? <Spinner className="h-4 w-4" /> : null}
-            Tạo chương
+            {t("buttons.create")}
           </Button>
         </DialogFooter>
       </DialogContent>
