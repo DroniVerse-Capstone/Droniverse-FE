@@ -45,7 +45,7 @@ export default function CheckpointBeacon({
         const t = state.clock.getElapsedTime();
 
         if (baseRef.current) {
-            baseRef.current.rotation.y = t * 0.4;
+            baseRef.current.rotation.y = t * 0.8;
         }
 
         if (scanningRingsRef.current) {
@@ -53,7 +53,7 @@ export default function CheckpointBeacon({
                 if (!(child instanceof THREE.Mesh)) return;
                 const ring = child;
                 const offset = (i * 0.5) % 1;
-                const progress = (t * 0.8 + offset) % 1;
+                const progress = (t * 1.2 + offset) % 1;
                 ring.position.y = progress * BEAM_HEIGHT;
 
                 if (ring.material && ring.material instanceof THREE.MeshStandardMaterial) {
@@ -62,12 +62,10 @@ export default function CheckpointBeacon({
             });
         }
 
-        if (labelRef.current && groupRef.current) {
-            labelRef.current.position.y = BEAM_HEIGHT + 1.5 + Math.sin(t * 1.5) * 0.4;
-            labelRef.current.rotation.y = Math.atan2(
-                state.camera.position.x - groupRef.current.position.x,
-                state.camera.position.z - groupRef.current.position.z
-            );
+        if (labelRef.current) {
+            labelRef.current.position.y = BEAM_HEIGHT + 1.5 + Math.sin(t * 2.5) * 0.4;
+            // Force orientation to match camera exactly for "snappy" feel
+            labelRef.current.quaternion.copy(state.camera.quaternion);
         }
     });
 

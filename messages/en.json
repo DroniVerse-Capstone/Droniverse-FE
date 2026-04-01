@@ -150,42 +150,6 @@
       }
     }
   },
-  "MapEditor": {
-    "toolbar": {
-      "mode": "Mode",
-      "translate": "Translate",
-      "rotate": "Rotate",
-      "scale": "Scale"
-    },
-    "loading": "Loading…",
-    "alerts": {
-      "droneAlreadyExists": "There is already a drone in the scene."
-    },
-    "panels": {
-      "rotate": {
-        "title": "Rotate (Y)",
-        "rotate90": "Rotate +90°"
-      },
-      "obstacle": {
-        "title": "Obstacle",
-        "color": "Color",
-        "width": "Width (X)",
-        "height": "Height (Y)",
-        "depth": "Depth (Z)",
-        "dimensions": "Dimensions ≈ W×H×D:",
-        "rotate90": "Rotate +90°"
-      }
-    },
-    "buttons": {
-      "add": "Add"
-    },
-    "categories": {
-      "all": "All",
-      "drone": "Drone",
-      "obstacle": "Obstacle",
-      "decor": "Decor"
-    }
-  },
   "PublicHeader": {
     "home": "Home",
     "about": "About Us",
@@ -922,6 +886,205 @@
           "deleteFailed": "Failed to delete question."
         }
       }
+    }
+  },
+  "Common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "save": "Save Changes",
+      "delete": "Delete",
+      "close": "Close",
+      "edit": "Edit",
+      "create": "Create New"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "draft": "Draft",
+      "loading": "Loading...",
+      "noData": "No data available"
+    }
+  },
+  "LabManagement": {
+    "title": "LAB MANAGEMENT",
+    "createBtn": "CREATE NEW LAB",
+    "searchPlaceholder": "Search lab name...",
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stats": {
+      "total": "TOTAL LABS",
+      "active": "ACTIVE",
+      "draft": "DRAFT",
+      "inactive": "INACTIVE"
+    },
+    "table": {
+      "databaseTitle": "Lab Database",
+      "empty": "No Lab data available",
+      "notFound": "No Labs found",
+      "emptyDesc": "The system has not recorded any Labs yet. Please create a new Lab to continue.",
+      "notFoundDesc": "No Labs match your search content or status.",
+      "noDescription": "No detailed description available.",
+      "status": {
+        "active": "ACTIVE",
+        "draft": "DRAFT",
+        "inactive": "INACTIVE"
+      },
+      "actions": {
+        "editInfo": "Edit Information",
+        "delete": "Delete lab",
+        "editMap": "Proceed to Map Design"
+      }
+    },
+    "form": {
+      "createTitle": "Initialize Lab",
+      "editTitle": "Configure Lab",
+      "nameVN": "Lab Name (Vietnamese) *",
+      "nameEN": "Lab Name (English) *",
+      "descVN": "Description (Vietnamese) *",
+      "descEN": "Description (English) *",
+      "namePlaceholderVN": "Ex: Flight Training...",
+      "namePlaceholderEN": "Ex: Flight Training...",
+      "descPlaceholderVN": "Lab content...",
+      "descPlaceholderEN": "Lab description...",
+      "level": "Difficulty",
+      "type": "Lab Type",
+      "status": "Status",
+      "publishRequirements": "Requirements for publication",
+      "syncing": "Syncing data...",
+      "checklist": {
+        "drone": "Drone starting point",
+        "objects": "Objects in Map",
+        "rules": "Rules & Time",
+        "solution": "Successfully solved (Solve Test)"
+      }
+    },
+    "confirm": {
+      "deleteTitle": "Confirm delete lab?",
+      "deleteDescription": "This action cannot be undone."
+    },
+    "toasts": {
+      "createSuccess": "Lab initialized successfully!",
+      "updateSuccess": "Lab information updated successfully!",
+      "deleteSuccess": "Lab deleted successfully!",
+      "publishError": "Lab does not meet the requirements for publication. Please check the requirements again!",
+      "droneError": "Drone is a unique object, cannot be copied."
+    },
+    "pagination": {
+      "page": "Page"
+    }
+  },
+  "MapEditor": {
+    "categories": {
+      "all": "All",
+      "drone": "Drone",
+      "obstacle": "Obstacle",
+      "decor": "Decor",
+      "bonus": "Bonus",
+      "checkpoint": "Checkpoint",
+      "theme": "Environment",
+      "uncategorized": "Other"
+    },
+    "themes": {
+      "title": "Environment Settings",
+      "default": "Default",
+      "space": "Space",
+      "sunset": "Sunset",
+      "daylight": "Early Morning"
+    },
+    "models": {
+      "drone": "Drone",
+      "box": "Box",
+      "tree": "Tree 1",
+      "tree2": "Tree 2",
+      "grass": "Grass",
+      "rock": "Rock",
+      "diamond": "Diamond",
+      "star": "Star",
+      "heart": "Heart",
+      "checkpoint": "Checkpoint",
+      "pts": "pts",
+      "loading": "Loading...",
+      "add": "Add {name}"
+    },
+    "toolbar": {
+      "back": "Back",
+      "save": "Save Map",
+      "saving": "Saving...",
+      "saved": "Saved!",
+      "offline": "Offline",
+      "configureRules": "Rules",
+      "mapSize": "Map Size",
+      "transform": {
+        "translate": "Translate",
+        "rotate": "Rotate",
+        "scale": "Scale"
+      }
+    },
+    "hud": {
+      "completed": "COMPLETED",
+      "failed": "FAILED"
+    },
+    "status": {
+      "loading": "Loading",
+      "saving": "Syncing..."
+    },
+    "toasts": {
+      "networkLost": "Network connection lost. Please check your connection to save data!",
+      "networkRestored": "Network connection restored!",
+      "noNetwork": "No network connection. Please check your connection!",
+      "saveSuccess": "Map saved!",
+      "publishSuccess": "Lab published successfully!",
+      "publishError": "Lab does not meet publishing requirements. Please check the Checklist!",
+      "saveError": "Failed to save data!",
+      "genericError": "An error occurred while saving",
+      "solutionSuccess": "Lab solved successfully! Lab is ready to be published.",
+      "droneExists": "Drone already exists in scene!",
+      "droneCopyError": "Drone is unique, cannot be copied.",
+      "dronePasteError": "Drone is unique, cannot be pasted."
+    },
+    "confirm": {
+      "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?"
+    },
+    "properties": {
+      "title": "Properties",
+      "color": "Color",
+      "width": "Width (X)",
+      "height": "Height (Y)",
+      "depth": "Depth (Z)",
+      "rotateY": "Rotate (Y)",
+      "radius": "Radius",
+      "checkpointTitle": "Checkpoint Properties",
+      "order": "Order",
+      "remove": "Remove Object",
+      "removeCheckpoint": "Remove Checkpoint",
+      "deleteTooltip": "Delete selected object (Del / Backspace)"
+    },
+    "rules": {
+      "title": "Rule Configuration",
+      "description": "Set completion conditions for the lab",
+      "requiredScore": "Required Score *",
+      "totalAvailable": "Total score available",
+      "scoreError": "⚠ Required score exceeds current total available ({maxScore} pts)",
+      "timeLimit": "Time Limit (sec) *",
+      "maxBlocks": "Max Blocks *",
+      "advancedRules": "Advanced Rules",
+      "sequentialCheckpoints": "Sequential Fly",
+      "sequentialDesc": "Drone must pass through checkpoints in order 1 → 2 → 3...",
+      "sequentialError": "⚠ Need at least 2 checkpoints on the map to enable this rule",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "error": {
+      "title": "Access Error",
+      "description": "The system could not load the Lab data. Invalid ID, deleted data, or network issues.",
+      "retry": "Try Again",
+      "manage": "Manage Labs"
     }
   }
 }

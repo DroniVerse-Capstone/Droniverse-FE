@@ -304,7 +304,7 @@ export default function SandboxPage() {
 
         <div className="flex-1 p-4 lg:p-6 pt-0 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Blockly (Equal share) */}
-          <div className="flex flex-col bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden group hover:border-slate-600 transition-colors">
+          <div className="flex flex-col bg-slate-900 rounded-md border border-slate-700 shadow-2xl overflow-hidden group hover:border-slate-600 transition-colors">
             <div className="px-5 py-3 border-b border-slate-700 bg-slate-950 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_purple]" />
@@ -312,11 +312,7 @@ export default function SandboxPage() {
                   {t("blockly.title")}
                 </span>
               </div>
-              <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
-                <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />
-              </div>
+
             </div>
             <div className="flex-1 relative bg-slate-900">
               <div className="absolute inset-0">
@@ -330,7 +326,7 @@ export default function SandboxPage() {
           </div>
 
           {/* Right: Simulator (Equal share) */}
-          <div className="flex flex-col bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden relative">
+          <div className="flex flex-col bg-slate-900 rounded-md border border-slate-700 shadow-2xl overflow-hidden relative">
             <div className="px-5 py-3 border-b border-slate-700 bg-slate-950 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_10px_cyan]" />

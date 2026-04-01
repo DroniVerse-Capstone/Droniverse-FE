@@ -1,0 +1,278 @@
+import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api/client";
+import { LabData, LabContent } from "@/types/lab";
+import toast from "react-hot-toast";
+
+// Helpers to avoid crash when BE returns {}
+const sanitizeEnvironment = (env: any) => {
+  if (!env || Object.keys(env).length === 0) {
+    return {
+      objects: [],
+      map: { cells: 20, theme: "default" },
+      rule: { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
+      hasSolution: false
+    };
+  }
+  return {
+    objects: env.objects || [],
+    map: env.map || { cells: 20, theme: "default" },
+    rule: env.rule ? {
+      timeLimit: env.rule.timeLimit || 0,
+      requiredScore: env.rule.requiredScore || 0,
+      sequentialCheckpoints: !!env.rule.sequentialCheckpoints,
+      maxBlocks: env.rule.maxBlocks || 0
+    } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
+    hasSolution: env.hasSolution || env.rule?.hasSolution || false
+  };
+};
+
+export const useGetLabs = () => {
+  return useQuery({
+    queryKey: ["labs"],
+    queryFn: async () => {
+      // Fetch all Labs (Metadata) from REAL Backend
+      const response = await apiClient.get<any>("/academy/labs", {
+        params: { PageSize: 1000 }
+      });
+      const labsList = response.data?.data?.data || [];
+      return labsList as LabData[];
+    },
+  });
+};
+
+export const useGetLab = (labID: string | null) => {
+  return useQuery({
+    queryKey: ["lab", labID],
+    queryFn: async () => {
+      if (!labID) return null;
+      const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+      const beData = response.data?.data?.lab || response.data?.data || response.data;
+
+      let labContent = response.data?.data?.labContent;
+      if (labContent) {
+        let env = labContent.environment;
+        if (typeof env === 'string') {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        labContent.environment = sanitizeEnvironment(env);
+      }
+
+      return {
+        ...beData,
+        labID: beData.labID || beData.id,
+        labContent: labContent
+      } as LabData;
+    },
+    enabled: !!labID,
+  });
+};
+
+export const useCreateLab = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Omit<LabData, "labID" | "createdAt" | "updatedAt">) => {
+      const response = await apiClient.post<any>("/academy/labs", data);
+
+      const newLabData = response.data?.data?.lab || response.data?.data || response.data;
+
+      return {
+        ...newLabData,
+        labID: newLabData.labID
+      } as LabData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Tạo Lab thất bại, vui lòng thử lại!";
+      toast.error(message);
+    }
+  });
+};
+
+export const useUpdateLab = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ labID, data }: { labID: string; data: Partial<LabData> }) => {
+      const metadata = { ...data };
+      delete metadata.labContent;
+      delete (metadata as any).labID;
+      delete (metadata as any).creator;
+      delete (metadata as any).updater;
+      delete (metadata as any).createAt;
+      delete (metadata as any).updateAt;
+      delete (metadata as any).createdAt;
+      delete (metadata as any).updatedAt;
+
+      const response = await apiClient.put<LabData>(`/academy/labs/${labID}`, metadata);
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+      queryClient.invalidateQueries({ queryKey: ["lab", variables.labID] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Cập nhật Lab thất bại!";
+      toast.error(message);
+    }
+  });
+};
+
+export const useDeleteLab = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (labID: string) => {
+      await apiClient.delete(`/academy/labs/${labID}`);
+      return labID;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Xóa Lab thất bại!";
+      toast.error(message);
+    }
+  });
+};
+
+// Lab Content Hooks (Environment/Map Data)
+export const useGetLabContent = (labID: string | null) => {
+  return useQuery({
+    queryKey: ["labContent", labID],
+    queryFn: async () => {
+      if (!labID) return null;
+      const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+      const content = response.data?.data?.labContent;
+      if (content) {
+        let env = content.environment;
+        if (typeof env === 'string') {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        content.environment = sanitizeEnvironment(env);
+      }
+      return (content || null) as LabContent | null;
+    },
+    enabled: !!labID,
+  });
+};
+
+export const useUpsertLabContent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ labID, data, existingId }: { labID: string; data: any; existingId?: string }) => {
+      // API yêu cầu environment là string (JSON string) thay vì object
+      const environmentString = typeof data === 'string' ? data : JSON.stringify(data);
+
+      const response = await apiClient.put<LabContent>(`/academy/labs/${labID}/content`, {
+        environment: environmentString,
+      });
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["labContent", variables.labID] });
+      queryClient.invalidateQueries({ queryKey: ["lab", variables.labID] });
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lưu nội dung Map thất bại!";
+      toast.error(message);
+    }
+  });
+};
+
+export const useLabFull = (labID: string | null) => {
+  const labQuery = useGetLab(labID);
+
+  return {
+    data: labQuery.data,
+    isLoading: labQuery.isLoading,
+    isError: labQuery.isError,
+    contentId: (labQuery.data?.labContent as any)?.id
+  };
+};
+
+export const useSuspenseGetLab = (labID: string) => {
+  return useSuspenseQuery({
+    queryKey: ["lab", labID],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+        const beData = response.data?.data?.lab || response.data?.data || response.data;
+
+        let labContent = response.data?.data?.labContent;
+        if (labContent) {
+          let env = labContent.environment;
+          if (typeof env === 'string') {
+            try { env = JSON.parse(env); } catch (e) { }
+          }
+          labContent.environment = sanitizeEnvironment(env);
+        }
+
+        return {
+          ...beData,
+          labID: beData.labID || beData.id,
+          labContent: labContent
+        } as LabData;
+      } catch (err: any) {
+        if (err.response?.status === 404) return null;
+        throw err;
+      }
+    },
+  });
+};
+
+export const useSuspenseGetLabContent = (labID: string) => {
+  return useSuspenseQuery({
+    queryKey: ["labContent", labID],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+        let content = response.data?.data?.labContent;
+        if (content) {
+          let env = content.environment;
+          if (typeof env === 'string') {
+            try { env = JSON.parse(env); } catch (e) { }
+          }
+          content.environment = sanitizeEnvironment(env);
+        }
+        return (content || null) as LabContent | null;
+      } catch (err: any) {
+        if (err.response?.status === 404) return null;
+        throw err;
+      }
+    },
+  });
+};
+
+export const useSuspenseLabFull = (labID: string) => {
+  const labQuery = useSuspenseGetLab(labID);
+
+  return {
+    data: labQuery.data,
+    contentId: (labQuery.data?.labContent as any)?.id
+  };
+};
+
+export const useUpdateLabFull = () => {
+  const upsertContent = useUpsertLabContent();
+
+  return useMutation({
+    mutationFn: async ({ labID, data, contentId }: { labID: string; data: Partial<LabData>; contentId?: string }) => {
+      // Chỉ lưu Map Nội dung (Rule, Môi trường, Tọa độ) khi đang ở Map Editor.
+      // Không update lại Thông tin cơ bản (Tên, Thể loại...) vì đã tách ra Modal bên ngoài list
+      const labContentData = data.labContent?.environment;
+
+      if (labContentData) {
+        await upsertContent.mutateAsync({
+          labID,
+          data: labContentData,
+          existingId: contentId
+        });
+      }
+
+      return data;
+    }
+  });
+};

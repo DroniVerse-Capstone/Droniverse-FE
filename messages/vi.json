@@ -883,5 +883,204 @@
         }
       }
     }
+  },
+  "Common": {
+    "buttons": {
+      "cancel": "Hủy bỏ",
+      "confirm": "Xác nhận",
+      "save": "Lưu thay đổi",
+      "delete": "Xóa",
+      "close": "Đóng",
+      "edit": "Chỉnh sửa",
+      "create": "Tạo mới"
+    },
+    "status": {
+      "active": "Đang hoạt động",
+      "inactive": "Dừng hoạt động",
+      "draft": "Bản nháp",
+      "loading": "Đang tải...",
+      "noData": "Chưa có dữ liệu"
+    }
+  },
+  "LabManagement": {
+    "title": "Quản lý bài Lab ",
+    "createBtn": "TẠO BÀI LAB",
+    "searchPlaceholder": "Tìm kiếm tên bài Lab...",
+    "filters": {
+      "all": "Tất cả",
+      "draft": "Bản nháp",
+      "active": "Hoạt động",
+      "inactive": "Dừng hoạt động"
+    },
+    "stats": {
+      "total": "TỔNG SỐ LAB",
+      "active": "ĐANG HOẠT ĐỘNG",
+      "draft": "BẢN NHÁP",
+      "inactive": "DỪNG HOẠT ĐỘNG"
+    },
+    "table": {
+      "databaseTitle": "Cơ sở dữ liệu Lab",
+      "empty": "Chưa có dữ liệu bài Lab",
+      "notFound": "Không tìm thấy Bài Lab nào",
+      "emptyDesc": "Hệ thống chưa ghi nhận bài Lab nào. Vui lòng tạo bài Lab mới để tiếp tục.",
+      "notFoundDesc": "Không có bài Lab nào khớp với nội dung hoặc trạng thái tìm kiếm.",
+      "noDescription": "Không có thông tin mô tả chi tiết.",
+      "status": {
+        "active": "ĐANG HOẠT ĐỘNG",
+        "draft": "BẢN NHÁP",
+        "inactive": "TẠM DỪNG"
+      },
+      "actions": {
+        "editInfo": "Sửa Thông Tin",
+        "delete": "Xóa bài lab",
+        "editMap": "Tiến hành thiết kế Map"
+      }
+    },
+    "form": {
+      "createTitle": "Khởi Tạo Lab",
+      "editTitle": "Cấu Hình Lab",
+      "nameVN": "Tên Lab (Tiếng Việt) *",
+      "nameEN": "Tên Lab (English) *",
+      "descVN": "Mô Tả (Tiếng Việt) *",
+      "descEN": "Mô Tả (English) *",
+      "namePlaceholderVN": "VD: Huấn luyện kỹ thuật bay...",
+      "namePlaceholderEN": "Ex: Flight Training...",
+      "descPlaceholderVN": "Nội dung bài lab...",
+      "descPlaceholderEN": "Lab description...",
+      "level": "Độ Khó",
+      "type": "Loại Lab",
+      "status": "Trạng Thái",
+      "publishRequirements": "Yêu cầu để xuất bản",
+      "syncing": "Đang đồng bộ dữ liệu...",
+      "checklist": {
+        "drone": "Drone điểm xuất phát",
+        "objects": "Đối tượng trong Map",
+        "rules": "Luật chơi & Thời gian",
+        "solution": "Giải bài thành công (Solve Test)"
+      }
+    },
+    "confirm": {
+      "deleteTitle": "Xác nhận xóa bài lab?",
+      "deleteDescription": "Hành động này không thể hoàn tác."
+    },
+    "toasts": {
+      "createSuccess": "Khởi tạo Lab thành công!",
+      "updateSuccess": "Cập nhật thông tin Lab thành công!",
+      "deleteSuccess": "Đã xóa bài Lab!",
+      "publishError": "Bài Lab chưa đủ điều kiện để xuất bản. Vui lòng kiểm tra lại yêu cầu!",
+      "droneError": "Drone là object duy nhất, không thể copy."
+    },
+    "pagination": {
+      "page": "Trang"
+    }
+  },
+  "MapEditor": {
+    "categories": {
+      "all": "Tất cả",
+      "drone": "Drone",
+      "obstacle": "Vật cản",
+      "decor": "Trang trí",
+      "bonus": "Phần thưởng",
+      "checkpoint": "Checkpoint",
+      "theme": "Môi trường",
+      "uncategorized": "Khác"
+    },
+    "themes": {
+      "title": "Cài đặt Môi Trường",
+      "default": "Mặc định",
+      "space": "Vũ trụ",
+      "sunset": "Hoàng hôn",
+      "daylight": "Sáng sớm"
+    },
+    "models": {
+      "drone": "Drone",
+      "box": "Khối hộp",
+      "tree": "Cây 1",
+      "tree2": "Cây 2",
+      "grass": "Cỏ",
+      "rock": "Khối đá",
+      "diamond": "Kim cương",
+      "star": "Ngôi sao",
+      "heart": "Trái tim",
+      "checkpoint": "Checkpoint",
+      "pts": "điểm",
+      "loading": "Đang tải...",
+      "add": "Thêm bài {name}"
+    },
+    "toolbar": {
+        "back": "Quay Lại",
+        "save": "Lưu Map",
+        "saving": "Đang lưu...",
+        "saved": "Đã lưu!",
+        "offline": "Mất kết nối",
+        "configureRules": "Cấu hình Rule",
+        "mapSize": "Kích thước bản đồ",
+        "transform": {
+            "translate": "Di chuyển",
+            "rotate": "Xoay",
+            "scale": "Tỷ lệ"
+        }
+    },
+    "hud": {
+        "completed": "HOÀN THÀNH",
+        "failed": "THẤT BẠI"
+    },
+    "status": {
+        "loading": "Đang tải",
+        "saving": "Đang đồng bộ..."
+    },
+    "toasts": {
+        "networkLost": "Mất kết nối mạng. Vui lòng kiểm tra đường truyền để có thể lưu dữ liệu!",
+        "networkRestored": "Đã có kết nối mạng trở lại!",
+        "noNetwork": "Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền!",
+        "saveSuccess": "Đã lưu map!",
+        "publishSuccess": "Đã xuất bản bài lab thành công!",
+        "publishError": "Bài Lab chưa đạt điều kiện để xuất bản. Hãy hoàn thành các mục trong Checklist!",
+        "saveError": "Lưu dữ liệu thất bại!",
+        "genericError": "Có lỗi xảy ra khi lưu dữ liệu",
+        "solutionSuccess": "Giải bài Lab thành công! Bài Lab đã sẵn sàng để xuất bản.",
+        "droneExists": "Drone đã tồn tại trong scene!",
+        "droneCopyError": "Drone là object duy nhất, không thể copy.",
+        "dronePasteError": "Drone là object duy nhất, không thể paste."
+    },
+    "confirm": {
+        "unsavedChanges": "Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?"
+    },
+    "properties": {
+        "title": "Thuộc tính",
+        "color": "Màu sắc",
+        "width": "Chiều rộng (X)",
+        "height": "Chiều cao (Y)",
+        "depth": "Chiều sâu (Z)",
+        "rotateY": "Xoay (Y)",
+        "radius": "Bán kính",
+        "checkpointTitle": "Thuộc tính Checkpoint",
+        "order": "Thứ tự",
+        "remove": "Xóa đối tượng",
+        "removeCheckpoint": "Xóa Checkpoint",
+        "deleteTooltip": "Xóa đối tượng đang chọn (Del / Backspace)"
+    },
+    "rules": {
+      "title": "Cấu hình luật chơi",
+      "description": "Thiết lập điều kiện hoàn thành cho bài lab",
+      "requiredScore": "Điểm cần đạt *",
+      "totalAvailable": "Tổng điểm khả dụng",
+      "scoreError": "⚠ Điểm yêu cầu vượt quá tổng điểm hiện có ({maxScore} điểm)",
+      "timeLimit": "Thời gian (giây) *",
+      "maxBlocks": "Số lượng khối *",
+      "advancedRules": "Quy tắc nâng cao",
+      "sequentialCheckpoints": "Bay theo thứ tự",
+      "sequentialDesc": "Drone phải đi qua các checkpoint theo đúng trình tự 1 → 2 → 3...",
+      "sequentialError": "⚠ Cần tối thiểu 2 checkpoint trên bản đồ để bật quy tắc này",
+      "cancel": "Hủy bỏ",
+      "save": "Lưu cập nhật",
+      "saving": "Đang lưu..."
+    },
+    "error": {
+      "title": "Lỗi Truy Cập Dữ Liệu",
+      "description": "Hệ thống không thể tải dữ liệu bài Lab. Mã số không hợp lệ, dữ liệu đã bị xóa, hoặc kết nối mạng gặp sự cố.",
+      "retry": "Thử lại",
+      "manage": "Quản lý Lab"
+    }
   }
 }
