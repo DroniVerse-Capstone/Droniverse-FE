@@ -13,7 +13,8 @@ const MEMBER_PATHS = ['/member']
 const MANAGER_PATHS = ['/manager']
 const SYSTEM_PATHS = [
   '/dashboard',
-  '/lab-management',
+  // '/lab-management',
+  // '/map-editor',
   '/club-management',
   '/club-requests',
   '/course-management',
@@ -31,7 +32,8 @@ const SYSTEM_PATHS = [
 const ADMIN_PATHS = SYSTEM_PATHS
 const SYSTEM_MANAGER_PATHS = [
   '/dashboard',
-  '/lab-management',
+  // '/lab-management', 
+  // '/map-editor',
   '/club-requests',
   '/course-management',
   '/certificate-management',

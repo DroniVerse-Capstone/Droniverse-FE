@@ -1,13 +1,37 @@
-import { MapObject } from "@/components/map-editor/MapEditor";
+export type MapObject = {
+  id: string;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: [number, number, number];
+  modelUrl: string;
+  scaleLimits?: { min: number; max: number };
+  scalable?: boolean;
+  rotatable?: boolean;
+  collisionRadius?: number;
+  isClamped?: boolean;
+  color?: string;
+  objectType?: "obstacle" | "bonus" | "checkpoint";
+  scoreValue?: number;
+  radius?: number;
+};
 
-export interface LabContentData {
-  objects: MapObject[];
-  mapCells: number;
+export interface LabMap {
+  cells: number;
+  theme?: "default" | "space" | "sunset" | "daylight";
+}
+
+export interface LabRule {
   timeLimit: number;
   requiredScore: number;
   sequentialCheckpoints: boolean;
+  maxBlocks?: number;
+}
+
+export interface LabContentData {
+  objects: MapObject[];
+  map: LabMap;
+  rule: LabRule;
   hasSolution: boolean;
-  mapTheme?: "default" | "space" | "sunset" | "daylight";
 }
 
 export type LabLevel = "EASY" | "MEDIUM" | "HARD";
@@ -34,6 +58,5 @@ export interface LabData {
 
 export interface LabContent {
   id: string;
-  labID: string;
   environment: LabContentData;
 }

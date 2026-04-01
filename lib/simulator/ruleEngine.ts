@@ -1,4 +1,4 @@
-import { MissionSettings } from "@/components/map-editor/MapEditor";
+import { LabRule } from "@/types/lab";
 
 export type MissionState = {
     timeElapsed: number;
@@ -11,7 +11,7 @@ export type MissionState = {
 export type MissionResult = "playing" | "pass" | "fail";
 
 export class RuleEngine {
-    constructor(private settings: MissionSettings) { }
+    constructor(private settings: LabRule) { }
 
     public evaluate(state: MissionState): MissionResult {
         // 1. Check thất bại (Fail conditions)

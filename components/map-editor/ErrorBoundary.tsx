@@ -14,7 +14,11 @@ interface State {
   error: Error | null;
 }
 
+import { useTranslations } from "@/providers/i18n-provider";
+
 export function MapEditorErrorScreen() {
+  const t = useTranslations("MapEditor.error");
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-greyscale-900 text-greyscale-0 select-none">
       {/* Background Elements similar to loading.tsx */}
@@ -49,7 +53,7 @@ export function MapEditorErrorScreen() {
           transition={{ delay: 0.2 }}
           className="text-2xl sm:text-3xl font-black mb-3 tracking-tighter uppercase italic text-red-400"
         >
-          Lỗi Truy Cập Dữ Liệu
+          {t("title")}
         </motion.h1>
 
         <motion.p
@@ -58,7 +62,7 @@ export function MapEditorErrorScreen() {
           transition={{ delay: 0.3 }}
           className="text-greyscale-300 mb-8 leading-relaxed text-sm font-medium tracking-wide"
         >
-          Hệ thống không thể tải dữ liệu bài Lab. Mã số không hợp lệ, dữ liệu đã bị xóa, hoặc kết nối mạng gặp sự cố.
+          {t("description")}
         </motion.p>
 
         <motion.div
@@ -72,7 +76,9 @@ export function MapEditorErrorScreen() {
             className="group relative flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg overflow-hidden transition-all active:scale-95 shadow-lg"
           >
             <FaRedoAlt className="text-greyscale-300 group-hover:text-white transition-colors text-xs" />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-greyscale-300 group-hover:text-white">Thử lại</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-greyscale-300 group-hover:text-white">
+              {t("retry")}
+            </span>
           </button>
 
           <button
@@ -81,7 +87,9 @@ export function MapEditorErrorScreen() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-400/10 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
             <FaHome className="text-red-400 z-10 text-sm" />
-            <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] text-red-400">Quản lý Lab</span>
+            <span className="relative z-10 text-[11px] font-black uppercase tracking-[0.2em] text-red-400">
+              {t("manage")}
+            </span>
           </button>
         </motion.div>
       </motion.div>

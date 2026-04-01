@@ -10,7 +10,7 @@ type Messages = Record<string, any>;
 interface I18nContextType {
   locale: string;
   messages: Messages;
-  t: (key: string) => string;
+  t: (key: string, variables?: Record<string, any>) => string;
   changeLocale: (newLocale: string) => void;
 }
 
@@ -20,8 +20,6 @@ const messagesMap: Record<string, Messages> = {
   vi: viMessages,
   en: enMessages,
 };
-
-
 
 interface I18nProviderProps {
   children: React.ReactNode;
@@ -39,13 +37,21 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
     // Note: Cookie setting is handled in LanguageSwitcher or via explicit call
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, variables?: Record<string, any>): string => {
     const keys = key.split(".");
     let value: any = messages;
 
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) return key;
+    }
+
+    if (typeof value !== "string") return key;
+
+    if (variables) {
+      Object.entries(variables).forEach(([k, v]) => {
+        value = value.replace(new RegExp(`{${k}}`, "g"), v);
+      });
     }
 
     return value || key;
@@ -62,9 +68,9 @@ export function useTranslations(namespace?: string) {
   const context = useContext(I18nContext);
   if (!context) throw new Error("useTranslations must be used within I18nProvider");
 
-  return (key: string) => {
+  return (key: string, variables?: Record<string, any>) => {
     const fullKey = namespace ? `${namespace}.${key}` : key;
-    return context.t(fullKey);
+    return context.t(fullKey, variables);
   };
 }
 

@@ -9,9 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LabData } from "@/types/lab";
 import { getLabValidation } from "@/lib/map-editor/labValidation";
 import { cn } from "@/lib/utils";
-import { useGetLabs, useCreateLab, useUpdateLab, useDeleteLab } from "@/hooks/lab/useLabs";
+import { useGetLabs, useCreateLab, useUpdateLab, useDeleteLab, useLabFull } from "@/hooks/lab/useLabs";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 
-const ITEMS_PER_PAGE = 3;
+
+const ITEMS_PER_PAGE = 4;
 
 const LAB_TRANSLATIONS = {
   level: {
@@ -26,7 +29,12 @@ const LAB_TRANSLATIONS = {
 };
 
 export default function LabManagement() {
+  const t = useTranslations("LabManagement");
+  const tCommon = useTranslations("Common");
+  const locale = useLocale();
+
   const router = useRouter();
+
   const { data: labs = [], isLoading: loading } = useGetLabs();
   const createLab = useCreateLab();
   const updateLab = useUpdateLab();
@@ -38,7 +46,14 @@ export default function LabManagement() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingLabId, setEditingLabId] = useState<string | null>(null);
-  
+
+  // Popover State (controlled by the component itself now)
+  const [isDeleting, setIsDeleting] = useState(false);
+
+
+  // Load chi tiết lab để lấy labContent phục vụ validation
+  const { data: editingLabDetail, isLoading: isLoadingDetail } = useLabFull(editingLabId);
+
   const [newLabStatus, setNewLabStatus] = useState<"DRAFT" | "ACTIVE" | "INACTIVE">("DRAFT");
   const [originalLabStatus, setOriginalLabStatus] = useState<"DRAFT" | "ACTIVE" | "INACTIVE">("DRAFT");
   const [newLabName, setNewLabName] = useState("");
@@ -77,7 +92,7 @@ export default function LabManagement() {
   };
 
   const isDirty = useMemo(() => {
-    if (!editingLabId) return !!newLabName.trim(); 
+    if (!editingLabId) return !!newLabName.trim();
     const lab = labs.find(l => l.labID === editingLabId);
     if (!lab) return false;
 
@@ -98,11 +113,10 @@ export default function LabManagement() {
     if (!newLabName.trim()) return;
 
     if (editingLabId) {
-      const lab = labs.find(l => l.labID === editingLabId);
-      if (lab) {
-        const validation = getLabValidation(lab);
+      if (editingLabDetail) {
+        const validation = getLabValidation(editingLabDetail);
         if (newLabStatus === "ACTIVE" && !validation.isValid) {
-          toast.error("Bài Lab chưa đủ điều kiện để xuất bản. Vui lòng kiểm tra lại yêu cầu!");
+          toast.error(t("toasts.publishError"));
           return;
         }
         updateLab.mutate({
@@ -118,7 +132,7 @@ export default function LabManagement() {
           }
         }, {
           onSuccess: () => {
-            toast.success("Cập nhật thông tin lab thành công!");
+            toast.success(t("toasts.updateSuccess"));
           }
         });
       }
@@ -134,22 +148,26 @@ export default function LabManagement() {
         type: newLabType,
       }, {
         onSuccess: (newLab) => {
+          toast.success(t("toasts.createSuccess"));
           router.push(`/map-editor?id=${newLab.labID}`);
         }
       });
     }
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm("Xác nhận xóa bài lab này?")) {
-      deleteLab.mutate(id, {
-        onSuccess: () => {
-          toast.success("Đã xóa bài lab!");
-        }
-      });
-    }
+
+  const handleConfirmDelete = (id: string) => {
+    setIsDeleting(true);
+    deleteLab.mutate(id, {
+      onSuccess: () => {
+        toast.success(t("toasts.deleteSuccess"));
+      },
+      onSettled: () => {
+        setIsDeleting(false);
+      }
+    });
   };
+
 
   useEffect(() => {
     if (showCreateModal) {
@@ -219,12 +237,15 @@ export default function LabManagement() {
 
   const filteredLabs = useMemo(() => {
     return labs.filter((lab) => {
-      const matchesSearch = lab.nameVN?.toLowerCase().includes(searchQuery.toLowerCase());
       const currentStatus = lab.status;
       const matchesStatus = statusFilter === "all" ? true : currentStatus === statusFilter;
+      const name = locale === 'vi' ? lab.nameVN : (lab.nameEN || lab.nameVN);
+      const matchesSearch = name?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSearch && matchesStatus;
     });
-  }, [labs, searchQuery, statusFilter]);
+  }, [labs, searchQuery, statusFilter, locale]);
+
+
 
   const totalPages = Math.ceil(filteredLabs.length / ITEMS_PER_PAGE);
   const paginatedLabs = useMemo(() => {
@@ -259,13 +280,14 @@ export default function LabManagement() {
               </div>
             </div>
             <div className="flex flex-col gap-2 flex-wrap">
-              <div className="flex items-center gap-3 flex-wrap font-black uppercase tracking-tight">
-                <span className="text-2xl sm:text-3xl text-white drop-shadow-md">LAB</span>
+              <div className="flex items-center gap-3 flex-wrap font-black uppercase tracking-tight text-white">
+                <span className="text-2xl sm:text-3xl drop-shadow-md">
+                  {t("title").split(" ")[0]}
+                </span>
                 <span className="text-primary-300 px-4 py-1.5 bg-primary-300/10 border border-primary-300/20 rounded text-[13px] sm:text-[15px] tracking-widest flex items-center justify-center">
-                  MANAGEMENT
+                  {t("title").split(" ").slice(1).join(" ")}
                 </span>
               </div>
-
             </div>
 
             <Button
@@ -273,10 +295,11 @@ export default function LabManagement() {
               onClick={handleOpenCreateNew}
               className="w-full sm:w-auto px-6 h-8 sm:h-10 bg-primary-300 hover:bg-primary-400 text-white font-black uppercase tracking-widest shadow-[0_6px_25px_-5px_var(--primary-300,rgba(239,68,68,0.4))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all active:scale-95 text-xs sm:text-sm flex items-center gap-2 rounded border border-primary-200 ml-auto"
             >
-              <FaPlus size={14} /> TẠO BÀI LAB
+              <FaPlus size={14} /> {t("createBtn")}
             </Button>
           </div>
         </header>
+
 
         {/* Create Lab Modal */}
         {showCreateModal && (
@@ -294,7 +317,7 @@ export default function LabManagement() {
                   <div className="flex flex-col gap-1">
                     <h3 className="text-base font-black uppercase tracking-widest flex items-center gap-2 text-white">
                       <span className="w-2 h-2 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))]"></span>
-                      {editingLabId ? "Cấu Hình Lab" : "Khởi Tạo Lab"}
+                      {editingLabId ? t("form.editTitle") : t("form.createTitle")}
                     </h3>
                   </div>
                   <button
@@ -311,24 +334,24 @@ export default function LabManagement() {
                     <div className="flex-[1.2] flex flex-col gap-4">
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Tên Lab (Tiếng Việt) *</label>
+                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.nameVN")}</label>
                           <input
                             required
                             autoFocus
                             type="text"
                             className="w-full h-9 bg-black/40 border border-white/5 rounded px-3 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all shadow-inner placeholder:text-greyscale-700"
-                            placeholder="VD: Huấn luyện kỹ thuật bay..."
+                            placeholder={t("form.namePlaceholderVN")}
                             value={newLabName}
                             onChange={(e) => setNewLabName(e.target.value)}
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Tên Lab (English) *</label>
+                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.nameEN")}</label>
                           <input
                             required
                             type="text"
                             className="w-full h-9 bg-black/40 border border-white/5 rounded px-3 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all shadow-inner placeholder:text-greyscale-700"
-                            placeholder="Ex: Flight Training..."
+                            placeholder={t("form.namePlaceholderEN")}
                             value={newLabNameEN}
                             onChange={(e) => setNewLabNameEN(e.target.value)}
                           />
@@ -337,21 +360,21 @@ export default function LabManagement() {
 
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Mô Tả (Tiếng Việt) *</label>
+                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.descVN")}</label>
                           <textarea
                             required
                             className="w-full bg-black/40 border border-white/5 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed"
-                            placeholder="Nội dung bài lab..."
+                            placeholder={t("form.descPlaceholderVN")}
                             value={newLabDesc}
                             onChange={(e) => setNewLabDesc(e.target.value)}
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Mô Tả (English) *</label>
+                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.descEN")}</label>
                           <textarea
                             required
                             className="w-full bg-black/40 border border-white/5 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed"
-                            placeholder="Lab description..."
+                            placeholder={t("form.descPlaceholderEN")}
                             value={newLabDescEN}
                             onChange={(e) => setNewLabDescEN(e.target.value)}
                           />
@@ -364,27 +387,27 @@ export default function LabManagement() {
                       <div className="p-4 bg-white/[0.02] border border-white/5 rounded flex flex-col gap-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Độ Khó</label>
+                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.level")}</label>
                             <Select value={newLabLevel} onValueChange={(val: any) => setNewLabLevel(val)}>
                               <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border">
-                                <SelectValue placeholder="Độ khó" />
+                                <SelectValue placeholder={t("form.level")} />
                               </SelectTrigger>
                               <SelectContent className="bg-[#141418] border-white/10 z-[120]">
-                                <SelectItem value="EASY" className="text-xs font-bold">Dễ</SelectItem>
-                                <SelectItem value="MEDIUM" className="text-xs font-bold">Trung bình</SelectItem>
-                                <SelectItem value="HARD" className="text-xs font-bold">Khó</SelectItem>
+                                <SelectItem value="EASY" className="text-xs font-bold">{LAB_TRANSLATIONS.level.EASY[locale as "vi" | "en"]}</SelectItem>
+                                <SelectItem value="MEDIUM" className="text-xs font-bold">{LAB_TRANSLATIONS.level.MEDIUM[locale as "vi" | "en"]}</SelectItem>
+                                <SelectItem value="HARD" className="text-xs font-bold">{LAB_TRANSLATIONS.level.HARD[locale as "vi" | "en"]}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Loại Lab</label>
+                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.type")}</label>
                             <Select value={newLabType} onValueChange={(val: any) => setNewLabType(val)}>
                               <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border">
-                                <SelectValue placeholder="Thể loại" />
+                                <SelectValue placeholder={t("form.type")} />
                               </SelectTrigger>
                               <SelectContent className="bg-[#141418] border-white/10 z-[120]">
-                                <SelectItem value="LEARNING" className="text-xs font-bold">Học tập</SelectItem>
-                                <SelectItem value="COMPETITION" className="text-xs font-bold">Thi đấu</SelectItem>
+                                <SelectItem value="LEARNING" className="text-xs font-bold">{LAB_TRANSLATIONS.type.LEARNING[locale as "vi" | "en"]}</SelectItem>
+                                <SelectItem value="COMPETITION" className="text-xs font-bold">{LAB_TRANSLATIONS.type.COMPETITION[locale as "vi" | "en"]}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -392,40 +415,40 @@ export default function LabManagement() {
 
                         {editingLabId && (
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">Trạng Thái</label>
+                            <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.status")}</label>
                             <Select value={newLabStatus} onValueChange={(val: any) => setNewLabStatus(val)}>
                               <SelectTrigger className={cn(
                                 "w-full rounded h-9 text-xs focus:ring-0 font-bold shadow-inner transition-all border",
                                 newLabStatus === "ACTIVE" ? "text-emerald-400" : newLabStatus === "INACTIVE" ? "text-rose-400" : "text-amber-500"
                               )}>
-                                <SelectValue placeholder="Trạng thái" />
+                                <SelectValue placeholder={t("form.status")} />
                               </SelectTrigger>
-                               <SelectContent className="bg-[#141418] border-white/10 z-[120]">
+                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
                                 {originalLabStatus === "DRAFT" ? (
                                   <>
-                                    <SelectItem value="DRAFT" className="text-xs text-amber-500 font-bold">Bản nháp</SelectItem>
+                                    <SelectItem value="DRAFT" className="text-xs text-amber-500 font-bold">{t("table.status.draft")}</SelectItem>
                                     <SelectItem
                                       value="ACTIVE"
-                                      disabled={editingLabId ? !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid : false}
+                                      disabled={editingLabId ? (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) : false}
                                       className={cn(
                                         "text-xs font-bold transition-opacity",
-                                        editingLabId && !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid ? "text-emerald-500/30 line-through opacity-50 cursor-not-allowed" : "text-emerald-400"
+                                        editingLabId && (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) ? "text-emerald-500/30 line-through opacity-50 cursor-not-allowed" : "text-emerald-400"
                                       )}>
-                                      Đang hoạt động
+                                      {t("table.status.active")}
                                     </SelectItem>
                                   </>
                                 ) : (
                                   <>
                                     <SelectItem
                                       value="ACTIVE"
-                                      disabled={editingLabId ? !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid : false}
+                                      disabled={editingLabId ? (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) : false}
                                       className={cn(
                                         "text-xs font-bold transition-opacity",
-                                        editingLabId && !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid ? "text-emerald-500/30 line-through opacity-50 cursor-not-allowed" : "text-emerald-400"
+                                        editingLabId && (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) ? "text-emerald-500/30 line-through opacity-50 cursor-not-allowed" : "text-emerald-400"
                                       )}>
-                                      Đang hoạt động
+                                      {t("table.status.active")}
                                     </SelectItem>
-                                    <SelectItem value="INACTIVE" className="text-xs text-rose-400 font-bold">Dừng hoạt động</SelectItem>
+                                    <SelectItem value="INACTIVE" className="text-xs text-rose-400 font-bold">{t("table.status.inactive")}</SelectItem>
                                   </>
                                 )}
                               </SelectContent>
@@ -438,19 +461,20 @@ export default function LabManagement() {
                       {(originalLabStatus === "DRAFT" || newLabStatus === "ACTIVE") && editingLabId && (
                         <div className="p-4 bg-amber-500/[0.03] border border-amber-500/10 rounded flex flex-col gap-3 shadow-inner text-white">
                           <span className="text-[9px] font-black text-amber-500 uppercase tracking-[0.1em] flex items-center gap-2 mb-0.5">
-                            <FaCheckCircle size={11} /> Yêu cầu để xuất bản
+                            <FaCheckCircle size={11} /> {t("form.publishRequirements")}
                           </span>
                           {(() => {
-                            const lab = labs.find(l => l.labID === editingLabId);
+                            if (isLoadingDetail) return <div className="text-[10px] text-amber-500 animate-pulse font-bold tracking-widest uppercase">{t("form.syncing")}</div>;
+                            const lab = editingLabDetail;
                             if (!lab) return null;
                             const v = getLabValidation(lab);
                             return (
                               <div className="flex flex-col gap-2.5">
                                 {[
-                                  { label: "Drone điểm xuất phát", done: v.hasDrone },
-                                  { label: "Đối tượng trong Map", done: v.hasObjects },
-                                  { label: "Luật chơi & Thời gian", done: v.hasRules },
-                                  { label: "Giải bài thành công (Solve Test)", done: v.hasSolution },
+                                  { label: t("form.checklist.drone"), done: v.hasDrone },
+                                  { label: t("form.checklist.objects"), done: v.hasObjects },
+                                  { label: t("form.checklist.rules"), done: v.hasRules },
+                                  { label: t("form.checklist.solution"), done: v.hasSolution },
                                 ].map((item, idx) => (
                                   <div key={idx} className="flex items-center justify-between text-[10px] font-bold">
                                     <span className={cn(item.done ? "text-emerald-400" : "text-greyscale-500")}>{item.label}</span>
@@ -475,19 +499,19 @@ export default function LabManagement() {
                       onClick={() => setShowCreateModal(false)}
                       className="px-5 h-9 rounded text-greyscale-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all"
                     >
-                      Hủy Bỏ
+                      {tCommon("buttons.cancel")}
                     </button>
                     <Button
                       type="submit"
-                      disabled={!isDirty || (editingLabId ? !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid && newLabStatus === "ACTIVE" : false)}
+                      disabled={!isDirty || (editingLabId ? (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) && newLabStatus === "ACTIVE" : false)}
                       className={cn(
                         "uppercase font-black text-[10px] tracking-widest px-7 h-9 rounded transition-all active:scale-95 flex items-center gap-2",
-                        (!isDirty || (editingLabId && !getLabValidation(labs.find(l => l.labID === editingLabId)!).isValid && newLabStatus === "ACTIVE"))
+                        (!isDirty || (editingLabId && (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) && newLabStatus === "ACTIVE"))
                           ? "bg-white/5 text-white/20 border-white/5 cursor-not-allowed"
                           : "bg-primary-300 hover:bg-primary-400 text-white border-primary-200 shadow-[0_8px_16px_-4px_rgba(239,68,68,0.4)]"
                       )}
                     >
-                      {editingLabId ? "LƯU CẬP NHẬT" : "Tiến hành thiết kế Map"}
+                      {editingLabId ? tCommon("buttons.save") : t("table.actions.editMap")}
                       {!editingLabId && <FaChevronRight size={11} />}
                     </Button>
                   </div>
@@ -500,7 +524,7 @@ export default function LabManagement() {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
-              label: "TỔNG SỐ LAB",
+              label: t("stats.total"),
               value: stats.total,
               icon: <FaDatabase />,
               color: "white",
@@ -508,7 +532,7 @@ export default function LabManagement() {
               bg: "from-white/5 to-transparent border-white/10"
             },
             {
-              label: "ĐANG HOẠT ĐỘNG",
+              label: t("stats.active"),
               value: stats.active,
               icon: <FaRocket />,
               color: "emerald-400",
@@ -516,7 +540,7 @@ export default function LabManagement() {
               bg: "from-emerald-500/5 to-transparent border-emerald-500/10"
             },
             {
-              label: "BẢN NHÁP",
+              label: t("stats.draft"),
               value: stats.draft,
               icon: <FaEdit />,
               color: "amber-500",
@@ -524,7 +548,7 @@ export default function LabManagement() {
               bg: "from-amber-500/5 to-transparent border-amber-500/10"
             },
             {
-              label: "DỪNG HOẠT ĐỘNG",
+              label: t("stats.inactive"),
               value: stats.inactive,
               icon: <FaPowerOff />,
               color: "rose-500",
@@ -532,6 +556,7 @@ export default function LabManagement() {
               bg: "from-rose-500/5 to-transparent border-rose-500/10"
             }
           ].map((stat, i) => (
+
             <div key={i} className={cn(
               "relative p-5 sm:p-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border overflow-hidden group transition-all duration-500 hover:-translate-y-1.5 shadow-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#09090b]/80 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]",
               stat.bg
@@ -569,7 +594,7 @@ export default function LabManagement() {
           <div className="flex flex-col xl:flex-row xl:items-center justify-between z-10 gap-6">
             <h2 className="text-sm font-black uppercase tracking-widest text-greyscale-300 flex items-center gap-3 shrink-0">
               <span className="w-2 h-2 rounded bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))]"></span>
-              Lab Database
+              {t("table.databaseTitle")}
             </h2>
 
             {/* Filter and Search Bar */}
@@ -578,7 +603,7 @@ export default function LabManagement() {
                 <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-greyscale-500" size={14} />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm tên bài Lab..."
+                  placeholder={t("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-11 bg-black/40 border border-white/5 rounded pl-11 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-greyscale-600 shadow-inner"
@@ -590,26 +615,26 @@ export default function LabManagement() {
                   onClick={() => setStatusFilter("all")}
                   className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'all' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
-                  Tất cả
+                  {t("filters.all")}
                 </button>
 
                 <button
                   onClick={() => setStatusFilter("DRAFT")}
                   className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'DRAFT' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
-                  Bản nháp
+                  {t("filters.draft")}
                 </button>
                 <button
                   onClick={() => setStatusFilter("ACTIVE")}
                   className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'ACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
-                  Hoạt động
+                  {t("filters.active")}
                 </button>
                 <button
                   onClick={() => setStatusFilter("INACTIVE")}
                   className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'INACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
-                  Dừng hoạt động
+                  {t("filters.inactive")}
                 </button>
               </div>
             </div>
@@ -618,7 +643,7 @@ export default function LabManagement() {
           {loading ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-5 opacity-80 z-10">
               <div className="w-16 h-16 border-b-2 border-primary-300 rounded animate-spin shadow-[0_4px_15px_var(--primary-300,rgba(239,68,68,0.3))]" />
-              <span className="text-xs font-black uppercase tracking-[0.5em] animate-pulse text-white drop-shadow-md">Đang đồng bộ...</span>
+              <span className="text-xs font-black uppercase tracking-[0.5em] animate-pulse text-white drop-shadow-md">{t("form.syncing")}</span>
             </div>
           ) : filteredLabs.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full text-center opacity-50 z-10 transition-all duration-500">
@@ -626,16 +651,19 @@ export default function LabManagement() {
                 {labs.length === 0 ? <FaVial className="text-4xl text-white drop-shadow-lg" /> : <FaSearch className="text-4xl text-white drop-shadow-lg" />}
               </div>
               <h3 className="text-2xl font-black uppercase tracking-widest italic text-white drop-shadow-md">
-                {labs.length === 0 ? "Chưa có dữ liệu" : "Không tìm thấy Bài Lab"}
+                {labs.length === 0 ? t("table.empty") : t("table.notFound")}
               </h3>
               <p className="mt-2 text-sm max-w-sm font-medium tracking-wide text-greyscale-400">
-                {labs.length === 0 ? "Hệ thống chưa ghi nhận bài Lab nào. Vui lòng tạo bài Lab mới để tiếp tục." : "Không có bài Lab nào khớp với nội dung hoặc trạng thái tìm kiếm."}
+                {labs.length === 0 ? t("table.emptyDesc") : t("table.notFoundDesc")}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 z-10 flex-1 content-start">
               {paginatedLabs.map((lab) => {
                 const currentStatus = lab.status;
+                const name = locale === 'vi' ? lab.nameVN : (lab.nameEN || lab.nameVN);
+                const desc = locale === 'vi' ? lab.descriptionVN : (lab.descriptionEN || lab.descriptionVN);
+
                 return (
                   <article
                     key={lab.labID}
@@ -647,7 +675,7 @@ export default function LabManagement() {
                     {/* Thumbnail Container */}
                     <div className="aspect-[4/3] bg-[#09090b] relative overflow-hidden shrink-0 z-10 border-b border-white/5">
                       {lab.thumbnail ? (
-                        <img src={lab.thumbnail} alt={lab.nameVN} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
+                        <img src={lab.thumbnail} alt={name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
                       ) : (
                         <div className="w-full h-full relative group-hover:opacity-100 opacity-70 transition-opacity duration-500">
                           <img src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=1000&auto=format&fit=crop" alt="Default Drone" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -668,7 +696,7 @@ export default function LabManagement() {
                           <div className={cn("w-1.5 h-1.5 rounded",
                             currentStatus === "ACTIVE" ? "bg-emerald-400 shadow-[0_0_10px_var(--emerald-400,rgba(52,211,153,0.8))] animate-pulse"
                               : currentStatus === "DRAFT" ? "bg-amber-500" : "bg-rose-500")} />
-                          {currentStatus === "ACTIVE" ? "ĐANG HOẠT ĐỘNG" : currentStatus === "DRAFT" ? "BẢN NHÁP" : "TẠM DỪNG"}
+                          {t(`table.status.${currentStatus.toLowerCase() as "active" | "draft" | "inactive"}`)}
                         </div>
                       </div>
 
@@ -679,12 +707,12 @@ export default function LabManagement() {
                     <div className="p-4 flex flex-col gap-3 flex-1 z-10 bg-[#141418]/50">
                       <div className="flex justify-between items-start gap-4">
                         <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug line-clamp-2 drop-shadow-sm">
-                          {lab.nameVN}
+                          {name}
                         </h3>
                       </div>
 
                       <p className="text-greyscale-400 text-[11px] leading-relaxed line-clamp-2 min-h-[1.75rem] font-medium opacity-80 group-hover:opacity-100 transition-opacity">
-                        {lab.descriptionVN || "Không có thông tin mô tả chi tiết."}
+                        {desc || t("table.noDescription")}
                       </p>
 
                       <div className="flex flex-col gap-3">
@@ -692,7 +720,7 @@ export default function LabManagement() {
                         <div className="flex flex-wrap items-center gap-2">
                           {lab.type && (
                             <div className="text-[9px] font-black text-indigo-300 uppercase bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 shadow-sm">
-                              {LAB_TRANSLATIONS.type[lab.type as keyof typeof LAB_TRANSLATIONS.type]?.vi || lab.type}
+                              {LAB_TRANSLATIONS.type[lab.type as keyof typeof LAB_TRANSLATIONS.type][locale as "vi" | "en"] || lab.type}
                             </div>
                           )}
                           {lab.level && (
@@ -701,7 +729,7 @@ export default function LabManagement() {
                                 lab.level === "MEDIUM" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
                                   "bg-rose-500/10 text-rose-400 border-rose-500/20"
                             )}>
-                              {LAB_TRANSLATIONS.level[lab.level as keyof typeof LAB_TRANSLATIONS.level]?.vi || lab.level}
+                              {LAB_TRANSLATIONS.level[lab.level as keyof typeof LAB_TRANSLATIONS.level][locale as "vi" | "en"] || lab.level}
                             </div>
                           )}
                         </div>
@@ -712,20 +740,35 @@ export default function LabManagement() {
                         <button
                           onClick={(e) => handleEditBasicInfo(lab, e)}
                           className="flex-1 h-8 px-3 rounded bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 border border-white/5 hover:border-white/10 shadow-sm shrink-0 uppercase tracking-wider"
-                          aria-label="Sửa thông tin lab"
+                          aria-label={t("table.actions.editInfo")}
                         >
-                          <FaPen size={10} /> Sửa Thông Tin
+                          <FaPen size={10} /> {t("table.actions.editInfo")}
                         </button>
 
-                        <button
-                          onClick={(e) => handleDelete(lab.labID, e)}
-                          className="w-8 h-8 rounded bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-all border border-rose-500/20 hover:border-rose-500 shrink-0 shadow-sm"
-                          aria-label="Xóa bài lab"
-                        >
-                          <FaTrash size={10} />
-                        </button>
+                        <div onClick={(e) => e.stopPropagation()}>
+                            <ConfirmActionPopover
+                              trigger={
+                                <button
+                                  className="w-8 h-8 rounded bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-all border border-rose-500/20 hover:border-rose-500 shrink-0 shadow-sm"
+                                  aria-label={t("table.actions.delete")}
+                                >
+                                  <FaTrash size={10} />
+                                </button>
+                              }
+                              title={t("confirm.deleteTitle")}
+                              description={t("confirm.deleteDescription")}
+                              confirmText={tCommon("buttons.delete")}
+                              cancelText={tCommon("buttons.cancel")}
+                              onConfirm={() => handleConfirmDelete(lab.labID)}
+                              isLoading={isDeleting}
+                              side="bottom"
+                              avoidCollisions={false}
+                              widthClassName="w-64"
+                            />
+                        </div>
                       </div>
                     </div>
+
 
                     {/* Subtle Accent */}
                     <div className="h-[2px] w-0 bg-primary-300 group-hover:w-full transition-all duration-700 ease-out absolute bottom-0 left-0" />
@@ -741,7 +784,7 @@ export default function LabManagement() {
             <div className="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 z-10 w-full shrink-0">
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-greyscale-400 whitespace-nowrap">
-                  Console <span className="text-white ml-2">Trang <span className="text-primary-300 text-[12px]">{currentPage}</span> / {totalPages}</span>
+                  Console <span className="text-white ml-2">{t("pagination.page")} <span className="text-primary-300 text-[12px]">{currentPage}</span> / {totalPages}</span>
                 </div>
                 <div className="h-1.5 w-full sm:w-40 bg-white/5 rounded overflow-hidden shrink-0 shadow-inner">
                   <div className="h-full bg-primary-300 transition-all duration-500 shadow-[0_0_12px_var(--primary-300,rgba(239,68,68,0.6))]" style={{ width: `${(currentPage / totalPages) * 100}%` }} />
@@ -753,7 +796,7 @@ export default function LabManagement() {
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
-                  aria-label="Trang trước"
+                  aria-label={tCommon("pagination.previous")}
                 >
                   <FaChevronLeft size={12} />
                 </button>
@@ -780,7 +823,7 @@ export default function LabManagement() {
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
-                  aria-label="Trang sau"
+                  aria-label={tCommon("pagination.next")}
                 >
                   <FaChevronRight size={12} />
                 </button>

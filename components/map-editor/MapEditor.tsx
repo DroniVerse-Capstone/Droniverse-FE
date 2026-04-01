@@ -16,15 +16,17 @@ import { MAP_COLORS, GRID_CONFIG } from "@/lib/models3d/mapConfig";
 import { CAMERA_CONFIG } from "@/lib/config3D/cameraConfig";
 import { WORLD_SCALE } from "@/lib/config3D/constants";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LabData } from "@/types/lab";
+import { LabData, LabRule, LabMap, MapObject } from "@/types/lab";
 import { getLabValidation } from "@/lib/map-editor/labValidation";
 import { useLabFull, useUpdateLabFull, useSuspenseLabFull } from "@/hooks/lab/useLabs";
 import {
   FaSave, FaArrowLeft, FaCheck, FaClock, FaStar, FaExclamationTriangle,
-  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage
+  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes
 } from "react-icons/fa";
 import Loading from "@/app/loading";
 import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
+import { RuleConfigurationModal } from "./RuleConfigurationModal";
+import { useTranslations } from "@/providers/i18n-provider";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   all: <FaGlobe />,
@@ -74,48 +76,22 @@ const EDITOR_CONFIG = {
 
 // @ts-ignore - FBXLoader typing may not be present in this project
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+import { map } from "zod";
+import { LanguageSwitcher } from "../layouts/LanguageSwitcher";
 
 type TransformMode = "translate" | "rotate" | "scale";
 
-export type MapObject = {
-  id: string;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-  modelUrl: string;
-  scaleLimits?: { min: number; max: number };
-  scalable?: boolean;
-  rotatable?: boolean;
-  collisionRadius?: number;
-  isClamped?: boolean;
-  color?: string;
-  objectType?: "obstacle" | "bonus" | "checkpoint";
-  scoreValue?: number;
-  radius?: number;
-};
 
-export type MissionSettings = {
-  labName: string;
-  labNameEN?: string;
-  description: string;
-  descriptionEN?: string;
-  timeLimit: number;
-  requiredScore: number;
-  sequentialCheckpoints: boolean;
-  difficulty?: "easy" | "medium" | "hard";
-  category?: "LEARNING" | "COMPETING";
-  mapTheme?: "default" | "space" | "sunset" | "daylight";
-};
-
-const DEFAULT_MISSION: MissionSettings = {
-  labName: "New Lab",
-  labNameEN: "New Lab (English)",
-  description: "Description",
-  descriptionEN: "Description (English)",
-  timeLimit: 0, // Force intentional setup
-  requiredScore: 0, // Force intentional setup
+const DEFAULT_RULE: LabRule = {
+  timeLimit: 0,
+  requiredScore: 0,
   sequentialCheckpoints: false,
-  mapTheme: "default",
+  maxBlocks: 0,
+};
+
+const DEFAULT_MAP: LabMap = {
+  cells: 20,
+  theme: "default",
 };
 
 function degToRad(deg: number) {
@@ -125,6 +101,23 @@ function degToRad(deg: number) {
 type TransformPayload = Partial<MapObject> & { __final?: boolean };
 
 const MODEL_CATEGORIES = buildModelCategories();
+
+/**
+ * Chuẩn hóa object sang string JSON với các key được sắp xếp để so sánh chính xác.
+ */
+function stableStringify(obj: any): string {
+  if (!obj) return "";
+  return JSON.stringify(obj, (key, value) => {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      return Object.keys(value).sort().reduce((acc: any, k) => {
+        acc[k] = value[k];
+        return acc;
+      }, {});
+    }
+    return value;
+  });
+}
 
 const BONUS_LIGHT_COLOR: Record<string, string> = {
   diamond: "#00eeff",
@@ -748,6 +741,8 @@ function ModelObjectFBX({
   const handleObjectChange = useCallback(() => {
     if (meshRef.current) {
       const position = meshRef.current.position.toArray();
+
+      console.log("position 222", position)
       const rotation = meshRef.current.rotation.toArray().slice(0, 3);
       let scale = meshRef.current.scale.toArray();
 
@@ -1066,13 +1061,13 @@ function ModelObjectWrapper(props: {
 
 const MemoModelObject = memo(ModelObjectWrapper);
 
-function CameraManager({ mapCells, labId, resetToken }: { mapCells: number; labId: string | null; resetToken: number }) {
+function CameraManager({ map, labId, resetToken }: { map: LabMap; labId: string | null; resetToken: number }) {
   const { camera, controls } = useThree();
   const lastLoadedRef = useRef<string | null>(null);
   const targetPos = useRef<THREE.Vector3 | null>(null);
 
   const performReset = useCallback(() => {
-    const worldSize = mapCells * GRID_CONFIG.sectionSize;
+    const worldSize = map.cells * GRID_CONFIG.sectionSize;
     const distance = worldSize * 0.8;
     const height = worldSize * 0.4;
     const newTarget = new THREE.Vector3(distance, height, distance);
@@ -1087,7 +1082,7 @@ function CameraManager({ mapCells, labId, resetToken }: { mapCells: number; labI
     } else {
       targetPos.current = newTarget;
     }
-  }, [camera, controls, mapCells]);
+  }, [camera, controls, map.cells]);
 
   useFrame(() => {
     if (targetPos.current) {
@@ -1118,12 +1113,13 @@ function CameraManager({ mapCells, labId, resetToken }: { mapCells: number; labI
 }
 
 function MapLoading() {
+  const t = useTranslations("MapEditor.status");
   return (
     <Html center>
       <div className="flex flex-col items-center gap-3 backdrop-blur-md bg-greyscale-900/40 p-10 rounded-3xl border border-white/5 shadow-2xl">
         <div className="w-10 h-10 border-3 border-sky-400/20 border-t-sky-400 rounded-full animate-spin" />
         <span className="text-xs text-sky-400 font-black uppercase tracking-[0.3em] drop-shadow-sm">
-          Loading
+          {t("loading")}
         </span>
       </div>
     </Html>
@@ -1139,7 +1135,7 @@ function Scene({
   disableOrbitControls,
   onTransformStart,
   onTransformEnd,
-  mapCells,
+  map,
   labId,
   cameraResetToken,
 }: {
@@ -1151,7 +1147,7 @@ function Scene({
   disableOrbitControls: boolean;
   onTransformStart: (id?: string) => void;
   onTransformEnd: (id?: string) => void;
-  mapCells: number;
+  map: LabMap;
   labId: string | null;
   cameraResetToken: number;
 }) {
@@ -1167,7 +1163,7 @@ function Scene({
 
   return (
     <Suspense fallback={<MapLoading />}>
-      <CameraManager mapCells={mapCells} labId={labId} resetToken={cameraResetToken} />
+      <CameraManager map={map} labId={labId} resetToken={cameraResetToken} />
       <hemisphereLight intensity={1} groundColor="#444444" color="#ffffff" />
       <directionalLight
         position={[10, 10, 5]}
@@ -1180,13 +1176,13 @@ function Scene({
       <ContactShadows
         position={[0, 0, 0]}
         opacity={0.4}
-        scale={mapCells * GRID_CONFIG.sectionSize}
+        scale={map.cells * GRID_CONFIG.sectionSize}
         blur={2.5}
         far={1.5}
       />
 
       {(() => {
-        const worldSize = mapCells * GRID_CONFIG.sectionSize;
+        const worldSize = map.cells * GRID_CONFIG.sectionSize;
         const planeSize: [number, number] = [worldSize, worldSize];
         return (
           <>
@@ -1213,6 +1209,7 @@ function Scene({
 
       {(() => {
         let cpIdx = 0;
+        console.log("objects", objects);
         return objects.map((object) => {
           const isCheckpoint = object.objectType === "checkpoint";
           const order = isCheckpoint ? cpIdx : undefined;
@@ -1228,7 +1225,7 @@ function Scene({
               onTransformStart={onTransformStart}
               onTransformEnd={onTransformEnd}
               isTransforming={disableOrbitControls}
-              mapWorldSize={mapCells * GRID_CONFIG.sectionSize}
+              mapWorldSize={map.cells * GRID_CONFIG.sectionSize}
               checkpointOrder={order}
             />
           );
@@ -1240,10 +1237,11 @@ function Scene({
         enableZoom={!disableOrbitControls}
         enableRotate={!disableOrbitControls}
         maxPolarAngle={Math.PI / 2}
-        maxDistance={mapCells * GRID_CONFIG.sectionSize * 1.5}
+        maxDistance={map.cells * GRID_CONFIG.sectionSize * 1.5}
       />
     </Suspense>
   );
+
 }
 
 export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunset" | "daylight" }) {
@@ -1251,7 +1249,7 @@ export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunse
     return (
       <>
         <color attach="background" args={["#050510"]} />
-        <Stars radius={200} depth={200} count={5000} factor={3} saturation={0} fade speed={1} />
+        <Stars radius={200} depth={200} count={3000} factor={15} saturation={0} fade speed={3} />
         <ambientLight intensity={0.2} />
       </>
     );
@@ -1274,7 +1272,7 @@ export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunse
         <directionalLight
           position={[50, 50, 50]}
           intensity={1.5}
-          color="#ff8c42"
+          color="#291e50ff"
           castShadow
           shadow-mapSize={[1024, 1024]}
         />
@@ -1306,18 +1304,33 @@ function MapEditorContent() {
   const router = useRouter();
   const labId = searchParams.get("id");
   const { data: storedLab, contentId } = useSuspenseLabFull(labId || "");
+  const t = useTranslations("MapEditor");
   const { toasts, dismiss, toast } = useToast();
 
   // -- Core states initialized from suspended data to avoid "jumping" on first render --
   const [objects, setObjects] = useState<MapObject[]>(() =>
     storedLab?.labContent?.environment?.objects || []
   );
-  const [mapCells, setMapCells] = useState(() =>
-    storedLab?.labContent?.environment?.mapCells || 20
-  );
-  const [hasSolution, setHasSolution] = useState(() =>
-    storedLab?.labContent?.environment?.hasSolution || false
-  );
+  const [map, setMap] = useState<LabMap>(() => {
+    if (!storedLab) return DEFAULT_MAP;
+    return {
+      cells: storedLab.labContent?.environment?.map?.cells || 20,
+      theme: storedLab.labContent?.environment?.map?.theme || "default",
+    };
+  });
+
+  const [rule, setRule] = useState<LabRule>(() => {
+    if (!storedLab) return DEFAULT_RULE;
+    return {
+      timeLimit: storedLab.labContent?.environment?.rule?.timeLimit || 0,
+      requiredScore: storedLab.labContent?.environment?.rule?.requiredScore || 0,
+      maxBlocks: storedLab.labContent?.environment?.rule?.maxBlocks || 0,
+      sequentialCheckpoints: storedLab.labContent?.environment?.rule?.sequentialCheckpoints || false,
+    };
+  });
+  const [hasSolution, setHasSolution] = useState<boolean>(() => {
+    return (storedLab?.labContent?.environment?.hasSolution === true) || (storedLab?.labContent?.environment?.rule as any)?.hasSolution === true;
+  });
 
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [transformMode, setTransformMode] =
@@ -1325,27 +1338,12 @@ function MapEditorContent() {
   const [isTransforming, setIsTransforming] = useState(false);
   const [lockedObjectId, setLockedObjectId] = useState<string | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const mapWorldSize = mapCells * GRID_CONFIG.sectionSize;
+  const mapWorldSize = map.cells * GRID_CONFIG.sectionSize;
   const [cameraResetToken, setCameraResetToken] = useState(0);
 
   // -- Persistence & Missions --
   const updateLabFull = useUpdateLabFull();
   const hasLoadedRef = useRef<string | null>(labId);
-  const [missionSettings, setMissionSettings] = useState<MissionSettings>(() => {
-    if (!storedLab) return DEFAULT_MISSION;
-    return {
-      labName: storedLab.nameVN,
-      labNameEN: storedLab.nameEN || "",
-      description: storedLab.descriptionVN,
-      descriptionEN: storedLab.descriptionEN || "",
-      difficulty: (storedLab.level?.toLowerCase() || "easy") as any,
-      category: (storedLab.type === "COMPETITION" ? "COMPETING" : "LEARNING") as any,
-      timeLimit: storedLab.labContent?.environment?.timeLimit || 0,
-      requiredScore: storedLab.labContent?.environment?.requiredScore || 0,
-      sequentialCheckpoints: storedLab.labContent?.environment?.sequentialCheckpoints || false,
-      mapTheme: storedLab.labContent?.environment?.mapTheme || "default",
-    };
-  });
 
 
   // -- UX & Resilience States --
@@ -1374,14 +1372,13 @@ function MapEditorContent() {
     // Only track after initial load from API is successfully applied
     if (!storedLab || hasLoadedRef.current !== labId) return;
 
-    const currentState = JSON.stringify({
+    const currentState = stableStringify({
       objects,
-      mapCells,
-      missionSettings: {
-        timeLimit: missionSettings.timeLimit,
-        requiredScore: missionSettings.requiredScore,
-        sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+      map: {
+        cells: map.cells,
+        theme: map.theme,
       },
+      rule,
       hasSolution
     });
 
@@ -1396,7 +1393,7 @@ function MapEditorContent() {
     if (isDirty !== modified) {
       setIsDirty(modified);
     }
-  }, [objects, mapCells, missionSettings.timeLimit, missionSettings.requiredScore, missionSettings.sequentialCheckpoints, hasSolution, labId, storedLab, isDirty]);
+  }, [objects, map, rule, hasSolution, labId, storedLab]);
 
   // 3. Navigation Guard
   useEffect(() => {
@@ -1404,7 +1401,7 @@ function MapEditorContent() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = "Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?";
+        e.returnValue = t("confirm.unsavedChanges");
       }
     };
 
@@ -1421,7 +1418,7 @@ function MapEditorContent() {
           const isDifferentPath = url.pathname !== window.location.pathname || url.search !== window.location.search;
 
           if (isInternal && isDifferentPath) {
-            if (!window.confirm("Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?")) {
+            if (!window.confirm(t("confirm.unsavedChanges"))) {
               e.preventDefault();
               e.stopPropagation();
             }
@@ -1443,7 +1440,7 @@ function MapEditorContent() {
 
   const handleBack = useCallback(() => {
     if (isDirty) {
-      if (window.confirm("Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời đi?")) {
+      if (window.confirm(t("confirm.unsavedChanges"))) {
         router.push("/lab-management");
       }
     } else {
@@ -1454,96 +1451,97 @@ function MapEditorContent() {
 
 
 
-  const saveToStorage = useCallback(async (publish: boolean = false) => {
+  /**
+   * HÀM LƯU MAP CHÍNH (SAVE MAP FUNCTION)
+   * Hàm này xử lý việc thu thập toàn bộ objects, mission settings và gửi lên API để lưu trữ.
+   */
+  const saveToStorage = useCallback(async (publish: boolean = false, ruleOverride?: LabRule, objectsOverride?: MapObject[]): Promise<boolean> => {
     setIsSaving(true);
     setSaveSuccess(false);
 
     if (!isOnline) {
-      toast.error("Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền!");
+      toast.error(t("toasts.noNetwork"));
       setIsSaving(false);
-      return;
+      return false;
     }
+
+    // Sync state if provided as override
+    if (ruleOverride) setRule(ruleOverride);
+    if (objectsOverride) setObjects(objectsOverride);
+
+    const currentRule = ruleOverride || rule;
+    const currentObjects = objectsOverride || objects;
 
     try {
       // Small delay for psychological feedback (feel premium)
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const labDataUpdate: Partial<LabData> = {
-        nameVN: missionSettings.labName,
-        nameEN: missionSettings.labNameEN,
-        descriptionVN: missionSettings.description,
-        descriptionEN: missionSettings.descriptionEN,
-        level: (missionSettings.difficulty?.toUpperCase() || "EASY") as any,
-        type: (missionSettings.category === "COMPETING" ? "COMPETITION" : "LEARNING") as any,
-        status: (publish ? "ACTIVE" : (storedLab?.status || "DRAFT")),
-      };
+      // Map Editor only manages map/rule data, so we strictly update labContent. 
+      // Basic info (name, description, etc.) is handled in the Lab Management modal.
+      const labDataUpdate: Partial<LabData> = {};
+      console.log("Saving environment data:", { objects: currentObjects, rule: currentRule });
 
       const labContentData: any = {
-        environment: {
-          objects,
-          mapCells,
-          timeLimit: missionSettings.timeLimit,
-          requiredScore: missionSettings.requiredScore,
-          sequentialCheckpoints: missionSettings.sequentialCheckpoints,
-          hasSolution,
-          mapTheme: missionSettings.mapTheme,
-        }
+        objects: currentObjects,
+        map: {
+          cells: map.cells,
+          theme: map.theme,
+        },
+        rule: currentRule,
+        hasSolution
       };
 
       if (publish) {
         const validation = getLabValidation({
           ...storedLab,
           ...labDataUpdate,
-          labContent: labContentData
+          labContent: { environment: labContentData }
         } as any);
 
         if (!validation.isValid) {
-          toast.error("Bài Lab chưa đạt điều kiện để xuất bản. Hãy hoàn thành các mục trong Checklist!");
+          toast.error(t("toasts.publishError"));
           setIsSaving(false);
-          return;
+          return false;
         }
       }
 
       if (labId) {
-        updateLabFull.mutate({
-          labID: labId,
-          data: { ...labDataUpdate, labContent: labContentData },
-          contentId
-        }, {
-          onSuccess: () => {
-            setSaveSuccess(true);
-            setIsDirty(false);
-            // Snapshot new state as the reference
-            lastSavedStateRef.current = JSON.stringify({
-              objects,
-              mapCells,
-              missionSettings: {
-                timeLimit: missionSettings.timeLimit,
-                requiredScore: missionSettings.requiredScore,
-                sequentialCheckpoints: missionSettings.sequentialCheckpoints,
-              },
-              hasSolution
-            });
+        return new Promise<boolean>((resolve) => {
+          updateLabFull.mutate({
+            labID: labId,
+            data: { ...labDataUpdate, labContent: { environment: labContentData } },
+            contentId
+          }, {
+            onSuccess: () => {
+              setSaveSuccess(true);
+              setIsDirty(false);
+              // Snapshot new state as the reference
+              lastSavedStateRef.current = stableStringify(labContentData);
 
-            toast.success(publish ? "Đã xuất bản bài lab thành công!" : "Đã lưu map!");
-            if (publish) {
-              setTimeout(() => router.push("/lab-management"), 1200);
+              toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              if (publish) {
+                setTimeout(() => router.push("/lab-management"), 1200);
+              }
+              setTimeout(() => setSaveSuccess(false), 2000);
+              resolve(true);
+            },
+            onError: () => {
+              toast.error(t("toasts.saveError"));
+              resolve(false);
+            },
+            onSettled: () => {
+              setIsSaving(false);
             }
-            setTimeout(() => setSaveSuccess(false), 2000);
-          },
-          onError: () => {
-            toast.error("Lưu dữ liệu thất bại!");
-          },
-          onSettled: () => {
-            setIsSaving(false);
-          }
+          });
         });
       }
+      return false;
     } catch (err) {
-      toast.error("An error occurred while saving");
+      toast.error(t("toasts.genericError"));
       setIsSaving(false);
+      return false;
     }
-  }, [labId, missionSettings, objects, router, toast, mapCells, hasSolution, storedLab, updateLabFull, contentId]);
+  }, [labId, map, rule, objects, router, toast, updateLabFull, contentId, storedLab]);
 
   const [missionRunning, setMissionRunning] = useState(false);
   const [missionTimeLeft, setMissionTimeLeft] = useState(0);
@@ -1582,32 +1580,32 @@ function MapEditorContent() {
       checkpoints.length === 0 ||
       collectedCheckpoints.size === checkpoints.length;
     const scoreCondition =
-      missionSettings.requiredScore <= 0 ||
-      currentScore >= missionSettings.requiredScore;
+      rule.requiredScore <= 0 ||
+      currentScore >= rule.requiredScore;
     const hasWinCondition =
-      checkpoints.length > 0 || missionSettings.requiredScore > 0;
+      checkpoints.length > 0 || rule.requiredScore > 0;
     if (hasWinCondition && cpCondition && scoreCondition) {
       clearInterval(missionTimerRef.current!);
       setMissionRunning(false);
       setMissionResult("pass");
       setHasSolution(true);
-      toast.success("Giải bài Lab thành công! Bài Lab đã sẵn sàng để xuất bản.");
+      toast.success(t("toasts.solutionSuccess"));
     }
   }, [
     collectedCheckpoints,
     currentScore,
     missionRunning,
     objects,
-    missionSettings.requiredScore,
+    rule.requiredScore,
   ]);
 
   const lastOnlineToastRef = useRef<boolean>(isOnline);
   useEffect(() => {
     if (lastOnlineToastRef.current !== isOnline) {
       if (!isOnline) {
-        toast.warning("Mất kết nối mạng. Vui lòng kiểm tra đường truyền để có thể lưu dữ liệu!");
+        toast.warning(t("toasts.networkLost"));
       } else {
-        toast.success("Đã có kết nối mạng trở lại!");
+        toast.success(t("toasts.networkRestored"));
       }
       lastOnlineToastRef.current = isOnline;
     }
@@ -1617,9 +1615,9 @@ function MapEditorContent() {
     setCollectedCheckpoints(new Set());
     setCurrentScore(0);
     setMissionResult(null);
-    setMissionTimeLeft(missionSettings.timeLimit);
+    setMissionTimeLeft(rule.timeLimit);
     setMissionRunning(true);
-  }, [missionSettings.timeLimit]);
+  }, [rule.timeLimit]);
 
   const stopMission = useCallback(() => {
     if (missionTimerRef.current) clearInterval(missionTimerRef.current);
@@ -1657,7 +1655,7 @@ function MapEditorContent() {
           if (obj) {
             const isDrone = obj.modelUrl?.startsWith("primitive:drone");
             if (isDrone && e.key === "c") {
-              toast.error("Drone là object duy nhất, không thể copy.");
+              toast.error(t("toasts.droneCopyError"));
               return;
             }
             if (!isDrone) {
@@ -1678,7 +1676,7 @@ function MapEditorContent() {
           e.preventDefault();
           if (!clipboardObject) return;
           if (clipboardObject.modelUrl?.startsWith("primitive:drone")) {
-            toast.warning("Drone là object duy nhất, không thể paste.");
+            toast.warning(t("toasts.dronePasteError"));
             return;
           }
           const newObj: MapObject = {
@@ -1711,7 +1709,7 @@ function MapEditorContent() {
         return obj;
       }),
     );
-  }, [mapCells, mapWorldSize]);
+  }, [map.cells, mapWorldSize]);
 
   const handleObjectTransform = useCallback(
     (id: string, transform: TransformPayload) => {
@@ -1721,8 +1719,7 @@ function MapEditorContent() {
           const merged = { ...obj, ...transform };
           if (transform.scale) {
             if (obj.scalable === false) {
-              // --
-              return { ...obj, scale: obj.scale };
+              merged.scale = obj.scale;
             } else if (obj.scaleLimits) {
               const incoming = transform.scale ?? obj.scale;
               const min = obj.scaleLimits.min;
@@ -1831,7 +1828,7 @@ function MapEditorContent() {
           (o.modelUrl || "").startsWith("primitive:drone"),
         );
         if (existingDrone) {
-          toast.error("Drone đã tồn tại trong scene!");
+          toast.error(t("toasts.droneExists"));
           setSelectedObjectId(existingDrone.id);
           return;
         }
@@ -1934,126 +1931,127 @@ function MapEditorContent() {
 
   const categories = useMemo(() => [
     ...MODEL_CATEGORIES,
-    { id: "theme", name: "Environment", models: [] }
-  ], []);
+    { id: "theme", name: t("categories.theme"), models: [] }
+  ], [t]);
 
   // Export / Import
-  const exportLabData = useCallback(() => {
-    const checkpoints = objects.filter((o) => o.objectType === "checkpoint");
-    const bonusItems = objects.filter((o) => o.objectType === "bonus");
-    const obstacles = objects.filter(
-      (o) =>
-        o.objectType === "obstacle" ||
-        (!o.objectType && o.modelUrl !== "primitive:checkpoint"),
-    );
+  // const exportLabData = useCallback(() => {
+  //   const checkpoints = objects.filter((o) => o.objectType === "checkpoint");
+  //   console.log("checkpoints", checkpoints);
+  //   const bonusItems = objects.filter((o) => o.objectType === "bonus");
+  //   const obstacles = objects.filter(
+  //     (o) =>
+  //       o.objectType === "obstacle" ||
+  //       (!o.objectType && o.modelUrl !== "primitive:checkpoint"),
+  //   );
 
-    const labData = {
-      labName: missionSettings.labName,
-      description: missionSettings.description,
-      timeLimit: missionSettings.timeLimit,
-      requiredScore: missionSettings.requiredScore,
-      sequentialCheckpoints: missionSettings.sequentialCheckpoints,
-      obstacles: obstacles.map((o) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        scale: o.scale,
-        color: o.color,
-      })),
-      bonusItems: bonusItems.map((o) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        scale: o.scale,
-        scoreValue: o.scoreValue ?? 10,
-      })),
-      checkpoints: checkpoints.map((o, idx) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        radius: o.radius ?? 2,
-        order: idx,
-      })),
-    };
-    const blob = new Blob([JSON.stringify(labData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${missionSettings.labName || "lab"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [objects, missionSettings]);
+  //   const labData = {
+  //     labName: missionSettings.labName,
+  //     description: missionSettings.description,
+  //     timeLimit: missionSettings.timeLimit,
+  //     requiredScore: missionSettings.requiredScore,
+  //     sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+  //     obstacles: obstacles.map((o) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       scale: o.scale,
+  //       color: o.color,
+  //     })),
+  //     bonusItems: bonusItems.map((o) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       scale: o.scale,
+  //       scoreValue: o.scoreValue ?? 10,
+  //     })),
+  //     checkpoints: checkpoints.map((o, idx) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       radius: o.radius ?? 2,
+  //       order: idx,
+  //     })),
+  //   };
+  //   const blob = new Blob([JSON.stringify(labData, null, 2)], {
+  //     type: "application/json",
+  //   });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${missionSettings.labName || "lab"}.json`;
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // }, [objects, missionSettings]);
 
-  const loadLabData = useCallback(
-    (json: any) => {
-      try {
-        setMissionSettings({
-          labName: json.labName ?? "",
-          description: json.description ?? "",
-          timeLimit: json.timeLimit ?? 120,
-          requiredScore: json.requiredScore ?? 0,
-          sequentialCheckpoints: json.sequentialCheckpoints ?? false,
-        });
+  // const loadLabData = useCallback(
+  //   (json: any) => {
+  //     try {
+  //       setMissionSettings({
+  //         labName: json.labName ?? "",
+  //         description: json.description ?? "",
+  //         timeLimit: json.timeLimit ?? 120,
+  //         requiredScore: json.requiredScore ?? 0,
+  //         sequentialCheckpoints: json.sequentialCheckpoints ?? false,
+  //       });
 
-        const spawned: MapObject[] = [];
+  //       const spawned: MapObject[] = [];
 
-        for (const o of json.obstacles ?? []) {
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: o.modelUrl,
-            position: o.position,
-            rotation: o.rotation,
-            scale: o.scale,
-            color: o.color,
-            objectType: "obstacle",
-            scalable: true,
-            rotatable: true,
-          });
-        }
+  //       for (const o of json.obstacles ?? []) {
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: o.modelUrl,
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: o.scale,
+  //           color: o.color,
+  //           objectType: "obstacle",
+  //           scalable: true,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        for (const o of json.bonusItems ?? []) {
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: o.modelUrl,
-            position: o.position,
-            rotation: o.rotation,
-            scale: o.scale,
-            objectType: "bonus",
-            scoreValue: o.scoreValue ?? 10,
-            scalable: true,
-            rotatable: true,
-          });
-        }
+  //       for (const o of json.bonusItems ?? []) {
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: o.modelUrl,
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: o.scale,
+  //           objectType: "bonus",
+  //           scoreValue: o.scoreValue ?? 10,
+  //           scalable: true,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        for (let idx = 0; idx < (json.checkpoints ?? []).length; idx++) {
-          const o = json.checkpoints[idx];
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: "primitive:checkpoint",
-            position: o.position,
-            rotation: o.rotation,
-            scale: [1, 1, 1],
-            objectType: "checkpoint",
-            radius: o.radius ?? 2,
-            scalable: false,
-            rotatable: true,
-          });
-        }
+  //       for (let idx = 0; idx < (json.checkpoints ?? []).length; idx++) {
+  //         const o = json.checkpoints[idx];
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: "primitive:checkpoint",
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: [1, 1, 1],
+  //           objectType: "checkpoint",
+  //           radius: o.radius ?? 2,
+  //           scalable: false,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        setObjects(spawned);
-        setSelectedObjectId(null);
-        stopMission();
-      } catch (err) {
-        alert("Tải dữ liệu bài Lab thất bại: " + (err as any)?.message);
-      }
-    },
-    [stopMission],
-  );
+  //       setObjects(spawned);
+  //       setSelectedObjectId(null);
+  //       stopMission();
+  //     } catch (err) {
+  //       alert("Tải dữ liệu bài Lab thất bại: " + (err as any)?.message);
+  //     }
+  //   },
+  //   [stopMission],
+  // );
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [previewModelId, setPreviewModelId] = useState<string | null>(null);
@@ -2099,7 +2097,7 @@ function MapEditorContent() {
               <button
                 key={cat.id}
                 onClick={() => handleSetCategory(cat.id)}
-                title={cat.name}
+                title={t(`categories.${cat.id}`)}
                 className={`
             relative w-10 h-10 sm:w-12 sm:h-12 rounded  
             flex items-center justify-center
@@ -2122,19 +2120,19 @@ function MapEditorContent() {
         <div className="flex-1 px-4 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {selectedCategory === "theme" ? (
             <div className="flex flex-col gap-4">
-              <h3 className="text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-1 opacity-60">Cài đặt Môi Trường</h3>
+              {/* <h3 className="text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-1 opacity-60">Cài đặt Môi Trường</h3> */}
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { id: 'default', name: 'Mặc định', img: '/images/enviroment/default.jpg' },
-                  { id: 'space', name: 'Vũ trụ', img: '/images/enviroment/space.jpg' },
-                  { id: 'sunset', name: 'Hoàng hôn', img: '/images/enviroment/sunset.jpg' },
-                  { id: 'daylight', name: 'Sáng sớm', img: '/images/enviroment/daylight.jpg' }
+                  { id: 'default', name: t('themes.default'), img: '/images/enviroment/default.jpg' },
+                  { id: 'space', name: t('themes.space'), img: '/images/enviroment/space.jpg' },
+                  { id: 'sunset', name: t('themes.sunset'), img: '/images/enviroment/sunset.jpg' },
+                  { id: 'daylight', name: t('themes.daylight'), img: '/images/enviroment/daylight.jpg' }
                 ].map(theme => {
-                  const isActive = missionSettings.mapTheme === theme.id;
+                  const isActive = map.theme === theme.id;
                   return (
                     <div
                       key={theme.id}
-                      onClick={() => setMissionSettings(s => ({ ...s, mapTheme: theme.id as any }))}
+                      onClick={() => setMap((s: LabMap) => ({ ...s, theme: theme.id as any }))}
                       className={`group relative flex flex-col rounded overflow-hidden border transition-all duration-200 ${isActive
                         ? 'border-sky-400/40 shadow-[0_0_24px_rgba(56,189,248,0.15)] bg-sky-500/5'
                         : 'border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] hover:shadow-[0_0_24px_rgba(56,189,248,0.1)]'
@@ -2194,7 +2192,7 @@ function MapEditorContent() {
                   <div className="relative h-28 sm:h-36 overflow-hidden">
                     {m.defaultScoreValue && (
                       <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-semibold">
-                        ✦ {m.defaultScoreValue} pts
+                        ✦ {m.defaultScoreValue} {t("models.pts")}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
@@ -2206,11 +2204,11 @@ function MapEditorContent() {
                   {/* Footer */}
                   <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
                     <span className="text-[13px] font-semibold text-white truncate flex-1 tracking-tight">
-                      {m.name}
+                      {t(`models.${m.id}`)}
                     </span>
                     <button
                       onClick={() => addPredefinedModel(m)}
-                      aria-label={`Add ${m.name}`}
+                      aria-label={t("models.add", { name: t(`models.${m.id}`) })}
                       className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
                     >
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
@@ -2263,12 +2261,12 @@ function MapEditorContent() {
               min={10}
               max={50}
               step={5}
-              value={mapCells}
-              onChange={(e) => setMapCells(Number(e.target.value))}
+              value={map.cells}
+              onChange={(e) => setMap((s: LabMap) => ({ ...s, cells: Number(e.target.value) }))}
               className="w-20 h-0.5 accent-sky-400 cursor-pointer"
             />
             <span className="text-[11px] text-slate-400 font-mono tabular-nums">
-              {mapCells}×{mapCells}m
+              {map.cells}×{map.cells}m
             </span>
           </div>
 
@@ -2281,7 +2279,7 @@ function MapEditorContent() {
               className="group flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold rounded bg-greyscale-700 text-greyscale-0 border-2 border-greyscale-600 hover:bg-white/5 transition-all shadow-sm"
             >
               <FaArrowLeft className="text-[10px] group-hover:-translate-x-0.5 transition-transform text-primary-300" />
-              Quay Lại
+              {t("toolbar.back")}
             </button>
 
             <button
@@ -2307,7 +2305,7 @@ function MapEditorContent() {
               ) : (
                 <FaSave className="text-[10px]" />
               )}
-              {saveSuccess ? "Đã lưu!" : isSaving ? "Đang lưu..." : !isOnline ? "Mất kết nối" : "Lưu Map"}
+              {saveSuccess ? t("toolbar.saved") : isSaving ? t("toolbar.saving") : !isOnline ? t("toolbar.offline") : t("toolbar.save")}
 
               {isDirty && !saveSuccess && !isSaving && isOnline && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-400 rounded-full border-2 border-greyscale-900 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
@@ -2318,7 +2316,7 @@ function MapEditorContent() {
               onClick={() => setShowMissionModal(true)}
               className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-primary-300 text-white border border-primary-200 hover:bg-primary-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300 ml-1"
             >
-              Cấu Hình Rule <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              {t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
 
 
@@ -2342,12 +2340,12 @@ function MapEditorContent() {
           )}
           {missionResult === "pass" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-semibold tracking-wide">
-              HOÀN THÀNH
+              {t("hud.completed")}
             </span>
           )}
           {missionResult === "fail" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 font-semibold tracking-wide">
-              THẤT BẠI
+              {t("hud.failed")}
             </span>
           )}
 
@@ -2414,7 +2412,7 @@ function MapEditorContent() {
                     }`}
                 >
                   {icon}
-                  {label}
+                  {t(`toolbar.transform.${mode}`)}
                 </button>
               ))}
             </div>
@@ -2422,6 +2420,8 @@ function MapEditorContent() {
               Tab
             </kbd>
           </div>
+
+          <LanguageSwitcher />
         </div>
 
         {/* 3D Canvas */}
@@ -2440,14 +2440,10 @@ function MapEditorContent() {
                 aria-hidden="true"
               >
                 <path
-                  d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
-              Xóa
+              {t("properties.remove")}
               <kbd className="ml-0.5 px-1 py-px bg-red-950/60 rounded text-[9px] font-mono border border-red-700/50 leading-tight text-red-500 group-hover:border-red-500/50 group-hover:text-red-300 transition-colors">
                 Del
               </kbd>
@@ -2455,7 +2451,7 @@ function MapEditorContent() {
           )}
           {selectedObject && transformMode === "rotate" && (
             <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40">
-              <div className="text-sm font-medium mb-2">Rotate (Y)</div>
+              <div className="text-sm font-medium mb-2">{t("properties.rotateY")}</div>
               <div className="flex gap-2 items-center">
                 <button
                   title="Rotate +90°"
@@ -2504,16 +2500,16 @@ function MapEditorContent() {
               if (!hasAnyScale) return null;
               const modelCfg = getModelConfig(selectedObject.modelUrl);
               const axes = [
-                { key: "x" as const, label: "Width (X)", idx: 0 },
-                { key: "y" as const, label: "Height (Y)", idx: 1 },
-                { key: "z" as const, label: "Depth (Z)", idx: 2 },
+                { key: "x" as const, label: t("properties.width"), idx: 0 },
+                { key: "y" as const, label: t("properties.height"), idx: 1 },
+                { key: "z" as const, label: t("properties.depth"), idx: 2 },
               ];
               return (
                 <div className="absolute right-6 top-6 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48">
-                  <div className="text-sm font-medium mb-2">Properties</div>
+                  <div className="text-sm font-medium mb-2">{t("properties.title")}</div>
                   {modelCfg?.hasColor && (
                     <>
-                      <label className="text-xs">Color</label>
+                      <label className="text-xs">{t("properties.color")}</label>
                       <input
                         type="color"
                         value={(selectedObject as any).color ?? "#00d9ff"}
@@ -2600,7 +2596,7 @@ function MapEditorContent() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      Remove Object
+                      {t("properties.remove")}
                     </button>
                   </div>
                 </div>
@@ -2634,13 +2630,13 @@ function MapEditorContent() {
               return (
                 <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52">
                   <div className="text-sm font-medium mb-2">
-                    🔵 Checkpoint Properties
+                    🔵 {t("properties.checkpointTitle")}
                   </div>
                   <div className="text-xs text-gray-400 mb-1">
-                    Order:{" "}
+                    {t("properties.order")}:{" "}
                     <span className="text-white font-mono">#{cpIndex + 1}</span>
                   </div>
-                  <label className="text-xs text-gray-400">Radius</label>
+                  <label className="text-xs text-gray-400">{t("properties.radius")}</label>
                   <input
                     type="range"
                     min={4}
@@ -2676,147 +2672,27 @@ function MapEditorContent() {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    Remove Checkpoint
+                    {t("properties.removeCheckpoint")}
                   </button>
                 </div>
               );
             })()}
 
-          {/* ── Mission Settings Modal ────────────────────────────────── */}
-          {showMissionModal && (
-            <div
-              className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setShowMissionModal(false);
-              }}
-            >
-              <div className="bg-greyscale-900 border border-white/[0.08] rounded-xl p-6 sm:p-8 w-full max-w-lg shadow-xl relative overflow-hidden">
-                <div className="relative z-10 flex flex-col gap-8">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold uppercase tracking-widest flex items-center gap-3 text-white">
-                        <span className="w-2.5 h-2.5 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))] animate-pulse"></span>
-                        Cấu hình Luật & Logic
-                      </h3>
-                      <p className="text-greyscale-400 text-xs font-bold tracking-widest uppercase mt-2">Bước 3: Cấu Hình Luật Chơi</p>
-                    </div>
-                    <button
-                      onClick={() => setShowMissionModal(false)}
-                      className="text-greyscale-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col gap-6">
-                    <div className="grid grid-cols-2 gap-5">
-                      <div className="flex flex-col gap-2 p-4 rounded-xl bg-black/40 border border-white/5 relative group hover:border-primary-300/30 transition-colors">
-                        <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                          <FaClock className="text-xl text-primary-300" />
-                        </div>
-                        <label className="text-xs font-bold text-greyscale-400 uppercase tracking-widest">Thời gian cho phép (giây)</label>
-                        <input
-                          type="number"
-                          min={10}
-                          step={5}
-                          className="w-full bg-transparent text-3xl font-black text-white focus:outline-none select-auto"
-                          value={missionSettings.timeLimit}
-                          onChange={(e) =>
-                            setMissionSettings((s) => ({
-                              ...s,
-                              timeLimit: Math.max(10, Number(e.target.value)),
-                            }))
-                          }
-                        />
-                      </div>
-
-                      <div className="flex flex-col gap-2 p-4 rounded-xl bg-black/40 border border-white/5 relative group hover:border-primary-300/30 transition-colors">
-                        <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
-                          <FaStar className="text-xl text-primary-300" />
-                        </div>
-                        <label className="text-xs font-bold text-greyscale-400 uppercase tracking-widest">Điểm yêu cầu (Score)</label>
-                        <input
-                          type="number"
-                          min={0}
-                          className="w-full bg-transparent text-3xl font-black text-white focus:outline-none select-auto"
-                          value={missionSettings.requiredScore}
-                          onChange={(e) =>
-                            setMissionSettings((s) => ({
-                              ...s,
-                              requiredScore: Math.max(0, Number(e.target.value)),
-                            }))
-                          }
-                        />
-                      </div>
-                    </div>
-
-
-
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-sky-500/10 to-transparent border border-sky-500/20">
-                      <input
-                        id="seq-cp"
-                        type="checkbox"
-                        checked={missionSettings.sequentialCheckpoints}
-                        onChange={(e) =>
-                          setMissionSettings((s) => ({
-                            ...s,
-                            sequentialCheckpoints: e.target.checked,
-                          }))
-                        }
-                        className="w-5 h-5 accent-sky-400 rounded cursor-pointer"
-                      />
-                      <div className="flex flex-col">
-                        <label
-                          htmlFor="seq-cp"
-                          className="text-sm font-bold text-sky-100 cursor-pointer uppercase tracking-widest"
-                        >
-                          Kiểm Tra Checkpoint Tuần Tự
-                        </label>
-                        <span className="text-xs text-sky-400/60 font-medium">Bắt buộc người chơi bay qua các điểm đánh dấu theo đúng thứ tự 1, 2, 3...</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-6 border-t border-white/10 flex justify-between items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      {!missionRunning ? (
-                        <button
-                          onClick={() => {
-                            setShowMissionModal(false);
-                            startMission();
-                          }}
-                          className="flex items-center gap-2 px-5 py-2.5 text-xs rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-black uppercase tracking-widest border border-indigo-500/30 transition-all"
-                        >
-                          ▶ Chạy Thử UI Map
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setShowMissionModal(false);
-                            stopMission();
-                          }}
-                          className="flex items-center gap-2 px-5 py-2.5 text-xs rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-black uppercase tracking-widest border border-rose-500/30 transition-all"
-                        >
-                          ■ Dừng Chạy Thử
-                        </button>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={async () => {
-                        setShowMissionModal(false);
-                        await saveToStorage(false);
-                        router.push("/lab-management");
-                      }}
-                      className="px-6 py-2.5 rounded-lg bg-primary-300 hover:bg-primary-400 text-white font-black uppercase tracking-widest shadow-[0_6px_25px_-5px_var(--primary-300,rgba(239,68,68,0.4))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all active:scale-95 text-xs"
-                    >
-                      Lưu
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* ── Rule Configuration Modal ─────────────────────────────── */}
+          <RuleConfigurationModal
+            show={showMissionModal}
+            onClose={() => setShowMissionModal(false)}
+            rule={rule}
+            onChange={setRule}
+            objects={objects}
+            isSaving={isSaving}
+            onSave={async (draftRule) => {
+              const success = await saveToStorage(false, draftRule);
+              if (success) {
+                setShowMissionModal(false);
+              }
+            }}
+          />
 
           {mountedNode && (
             <Canvas
@@ -2836,7 +2712,7 @@ function MapEditorContent() {
               }}
               className="w-full h-full"
             >
-              <MapEnvironment theme={missionSettings.mapTheme} />
+              <MapEnvironment theme={map.theme} />
               <Scene
                 objects={objects}
                 selectedObjectId={selectedObjectId}
@@ -2846,7 +2722,7 @@ function MapEditorContent() {
                 disableOrbitControls={isTransforming}
                 onTransformStart={handleTransformStart}
                 onTransformEnd={handleTransformEnd}
-                mapCells={mapCells}
+                map={map}
                 labId={labId}
                 cameraResetToken={cameraResetToken}
               />

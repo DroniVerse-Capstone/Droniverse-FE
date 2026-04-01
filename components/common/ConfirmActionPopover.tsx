@@ -18,7 +18,10 @@ type ConfirmActionPopoverProps = {
   isLoading?: boolean;
   onConfirm: () => void;
   align?: "start" | "center" | "end";
+  side?: "top" | "right" | "bottom" | "left";
+  sideOffset?: number;
   widthClassName?: string;
+  avoidCollisions?: boolean;
 };
 
 export default function ConfirmActionPopover({
@@ -30,7 +33,10 @@ export default function ConfirmActionPopover({
   isLoading = false,
   onConfirm,
   align = "end",
+  side = "bottom",
+  sideOffset = 4,
   widthClassName = "w-72",
+  avoidCollisions = true,
 }: ConfirmActionPopoverProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -40,7 +46,13 @@ export default function ConfirmActionPopover({
         <span className="inline-flex">{trigger}</span>
       </PopoverTrigger>
 
-      <PopoverContent align={align} className={`${widthClassName} space-y-3`}>
+      <PopoverContent
+        align={align}
+        side={side}
+        sideOffset={sideOffset}
+        avoidCollisions={avoidCollisions}
+        className={`${widthClassName} space-y-3 z-[150]`}
+      >
         <div className="space-y-1">
           <p className="text-md font-medium text-greyscale-0">{title}</p>
           {description ? (

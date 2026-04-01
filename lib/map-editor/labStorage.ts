@@ -15,26 +15,31 @@
 //       // Migration & Validation Logic
 //       return parsed.map((lab: any): LabData => {
 //         // If it's old format (has missionSettings), migrate it
-//         if (lab.missionSettings) {
-//           const rawDiff = (lab.missionSettings.difficulty || "easy").toUpperCase() as "EASY" | "MEDIUM" | "HARD";
-//           const rawCat = (lab.missionSettings.category || "LEARNING") === "COMPETING" ? "COMPETITION" : "LEARNING";
+//         if (lab.rule) {
+//           const rawDiff = (lab.rule.difficulty || "easy").toUpperCase() as "EASY" | "MEDIUM" | "HARD";
+//           const rawCat = (lab.rule.category || "LEARNING") === "COMPETING" ? "COMPETITION" : "LEARNING";
 //           const rawStatus = lab.isActive ? "ACTIVE" : "DRAFT";
 //           const migrated: LabData = {
 //             id: lab.id,
-//             nameVN: lab.missionSettings.labName || "New Lab",
-//             nameEN: lab.missionSettings.labNameEN || "",
-//             descriptionVN: lab.missionSettings.description || "",
-//             descriptionEN: lab.missionSettings.descriptionEN || "",
+//             nameVN: lab.rule.labName || "New Lab",
+//             nameEN: lab.rule.labNameEN || "",
+//             descriptionVN: lab.rule.description || "",
+//             descriptionEN: lab.rule.descriptionEN || "",
 //             level: rawDiff,
 //             type: rawCat,
 //             status: rawStatus,
 //             labContent: {
 //               objects: lab.objects || [],
-//               mapCells: lab.mapCells || 20,
-//               timeLimit: lab.missionSettings.timeLimit || 0,
-//               requiredScore: lab.missionSettings.requiredScore || 0,
-//               sequentialCheckpoints: lab.missionSettings.sequentialCheckpoints || false,
-//               hasSolution: lab.hasSolution || false,
+//               map: {
+//                 cells: lab.mapCells || 20,
+//                 theme: lab.rule.mapTheme || "default",
+//               },
+//               rule: {
+//                 timeLimit: lab.rule.timeLimit || 0,
+//                 requiredScore: lab.rule.requiredScore || 0,
+//                 sequentialCheckpoints: lab.rule.sequentialCheckpoints || false,
+//                 hasSolution: lab.hasSolution || false,
+//               },
 //             },
 //             createdAt: lab.createdAt || new Date().toISOString(),
 //             updatedAt: lab.updatedAt || new Date().toISOString(),

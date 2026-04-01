@@ -1,31 +1,42 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import mockClient from "@/lib/api/mock-client";
+import apiClient from "@/lib/api/client";
 import { LabData, LabContent } from "@/types/lab";
+import toast from "react-hot-toast";
+
+// Helpers to avoid crash when BE returns {}
+const sanitizeEnvironment = (env: any) => {
+  if (!env || Object.keys(env).length === 0) {
+    return {
+      objects: [],
+      map: { cells: 20, theme: "default" },
+      rule: { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
+      hasSolution: false
+    };
+  }
+  return {
+    objects: env.objects || [],
+    map: env.map || { cells: 20, theme: "default" },
+    rule: env.rule ? {
+      timeLimit: env.rule.timeLimit || 0,
+      requiredScore: env.rule.requiredScore || 0,
+      sequentialCheckpoints: !!env.rule.sequentialCheckpoints,
+      maxBlocks: env.rule.maxBlocks || 0
+    } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
+    hasSolution: env.hasSolution || env.rule?.hasSolution || false
+  };
+};
 
 export const useGetLabs = () => {
   return useQuery({
     queryKey: ["labs"],
     queryFn: async () => {
-      // 1. Fetch all Labs (Metadata)
-      const response = await mockClient.get<any[]>("/lab");
-      const labs = response.data;
-      
-      // 2. Fetch all LabContent entries (Simulate BE Join/Merge)
-      // Note: We fetch all and map them locally to maintain performance on MockAPI
-      const contentsRes = await mockClient.get<any[]>("/LabContent");
-      const contents = contentsRes.data;
-
-      // 3. Map MockAPI auto-id to labID and merge the content
-      return labs.map(lab => {
-        const labID = lab.labID || lab.id;
-        const linkedContent = contents.find(c => c.labID === labID);
-        return {
-          ...lab,
-          labID,
-          labContent: linkedContent ? { environment: linkedContent.environment } : null
-        };
-      }) as LabData[];
+      // Fetch all Labs (Metadata) from REAL Backend
+      const response = await apiClient.get<any>("/academy/labs", {
+        params: { PageSize: 1000 }
+      });
+      const labsList = response.data?.data?.data || [];
+      return labsList as LabData[];
     },
   });
 };
@@ -35,11 +46,22 @@ export const useGetLab = (labID: string | null) => {
     queryKey: ["lab", labID],
     queryFn: async () => {
       if (!labID) return null;
-      const response = await mockClient.get<any>(`/lab/${labID}`);
-      const lab = response.data;
+      const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+      const beData = response.data?.data?.lab || response.data?.data || response.data;
+
+      let labContent = response.data?.data?.labContent;
+      if (labContent) {
+        let env = labContent.environment;
+        if (typeof env === 'string') {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        labContent.environment = sanitizeEnvironment(env);
+      }
+
       return {
-        ...lab,
-        labID: lab.labID || lab.id // Ensure labID is available
+        ...beData,
+        labID: beData.labID || beData.id,
+        labContent: labContent
       } as LabData;
     },
     enabled: !!labID,
@@ -48,40 +70,25 @@ export const useGetLab = (labID: string | null) => {
 
 export const useCreateLab = () => {
   const queryClient = useQueryClient();
-  const upsertContent = useUpsertLabContent();
 
   return useMutation({
     mutationFn: async (data: Omit<LabData, "labID" | "createdAt" | "updatedAt">) => {
-      // 1. Prepare metadata by removing nested labContent if present
-      const metadata = { ...data };
-      const initialContent = {
-        objects: [],
-        mapCells: 20,
-        timeLimit: 0,
-        requiredScore: 0,
-        sequentialCheckpoints: false,
-        hasSolution: false,
-      };
-      delete (metadata as any).labContent;
+      const response = await apiClient.post<any>("/academy/labs", data);
 
-      // 2. Create the Lab Metadata
-      const response = await mockClient.post<any>("/lab", metadata);
-      const newLab = {
-        ...response.data,
-        labID: response.data.labID || response.data.id
+      const newLabData = response.data?.data?.lab || response.data?.data || response.data;
+
+      return {
+        ...newLabData,
+        labID: newLabData.labID
       } as LabData;
-
-      // 3. Create the Initial LabContent linked to the new labID
-      await upsertContent.mutateAsync({
-        labID: newLab.labID,
-        data: initialContent,
-      });
-
-      return newLab;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["labs"] });
     },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Tạo Lab thất bại, vui lòng thử lại!";
+      toast.error(message);
+    }
   });
 };
 
@@ -89,18 +96,27 @@ export const useUpdateLab = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ labID, data }: { labID: string; data: Partial<LabData> }) => {
-      // Strictly filter metadata to avoid huge payloads to the /lab endpoint
       const metadata = { ...data };
       delete metadata.labContent;
-      delete (metadata as any).labID; // Don't send the ID in the body for MockAPI metadata
-      
-      const response = await mockClient.put<LabData>(`/lab/${labID}`, metadata);
+      delete (metadata as any).labID;
+      delete (metadata as any).creator;
+      delete (metadata as any).updater;
+      delete (metadata as any).createAt;
+      delete (metadata as any).updateAt;
+      delete (metadata as any).createdAt;
+      delete (metadata as any).updatedAt;
+
+      const response = await apiClient.put<LabData>(`/academy/labs/${labID}`, metadata);
       return response.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["labs"] });
       queryClient.invalidateQueries({ queryKey: ["lab", variables.labID] });
     },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Cập nhật Lab thất bại!";
+      toast.error(message);
+    }
   });
 };
 
@@ -108,22 +124,16 @@ export const useDeleteLab = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (labID: string) => {
-      // 1. Find the associated LabContent first
-      const contentRes = await mockClient.get<LabContent[]>(`/LabContent?labID=${labID}`);
-      const content = contentRes.data[0];
-
-      // 2. Delete LabContent if it exists
-      if (content) {
-        await mockClient.delete(`/LabContent/${content.id}`);
-      }
-
-      // 3. Delete Lab Metadata
-      await mockClient.delete(`/lab/${labID}`);
+      await apiClient.delete(`/academy/labs/${labID}`);
       return labID;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["labs"] });
     },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Xóa Lab thất bại!";
+      toast.error(message);
+    }
   });
 };
 
@@ -133,8 +143,16 @@ export const useGetLabContent = (labID: string | null) => {
     queryKey: ["labContent", labID],
     queryFn: async () => {
       if (!labID) return null;
-      const response = await mockClient.get<LabContent[]>(`/LabContent?labID=${labID}`);
-      return response.data[0] || null;
+      const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+      const content = response.data?.data?.labContent;
+      if (content) {
+        let env = content.environment;
+        if (typeof env === 'string') {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        content.environment = sanitizeEnvironment(env);
+      }
+      return (content || null) as LabContent | null;
     },
     enabled: !!labID,
   });
@@ -144,45 +162,34 @@ export const useUpsertLabContent = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ labID, data, existingId }: { labID: string; data: any; existingId?: string }) => {
-      if (existingId) {
-        const response = await mockClient.put<LabContent>(`/LabContent/${existingId}`, {
-          labID,
-          environment: data,
-        });
-        return response.data;
-      } else {
-        const response = await mockClient.post<LabContent>("/LabContent", {
-          labID,
-          environment: data,
-        });
-        return response.data;
-      }
+      // API yêu cầu environment là string (JSON string) thay vì object
+      const environmentString = typeof data === 'string' ? data : JSON.stringify(data);
+
+      const response = await apiClient.put<LabContent>(`/academy/labs/${labID}/content`, {
+        environment: environmentString,
+      });
+      return response.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["labContent", variables.labID] });
       queryClient.invalidateQueries({ queryKey: ["lab", variables.labID] });
       queryClient.invalidateQueries({ queryKey: ["labs"] });
     },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Lưu nội dung Map thất bại!";
+      toast.error(message);
+    }
   });
 };
 
 export const useLabFull = (labID: string | null) => {
   const labQuery = useGetLab(labID);
-  const contentQuery = useGetLabContent(labID);
-
-  const labFull = useMemo(() => {
-    if (!labQuery.data) return null;
-    return {
-      ...labQuery.data,
-      labContent: contentQuery.data ? { environment: contentQuery.data.environment } : undefined
-    } as LabData;
-  }, [labQuery.data, contentQuery.data]);
 
   return {
-    data: labFull,
-    isLoading: labQuery.isLoading || contentQuery.isLoading,
-    isError: labQuery.isError || contentQuery.isError,
-    contentId: contentQuery.data?.id
+    data: labQuery.data,
+    isLoading: labQuery.isLoading,
+    isError: labQuery.isError,
+    contentId: (labQuery.data?.labContent as any)?.id
   };
 };
 
@@ -191,11 +198,22 @@ export const useSuspenseGetLab = (labID: string) => {
     queryKey: ["lab", labID],
     queryFn: async () => {
       try {
-        const response = await mockClient.get<any>(`/lab/${labID}`);
-        const lab = response.data;
+        const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+        const beData = response.data?.data?.lab || response.data?.data || response.data;
+
+        let labContent = response.data?.data?.labContent;
+        if (labContent) {
+          let env = labContent.environment;
+          if (typeof env === 'string') {
+            try { env = JSON.parse(env); } catch (e) { }
+          }
+          labContent.environment = sanitizeEnvironment(env);
+        }
+
         return {
-          ...lab,
-          labID: lab.labID || lab.id
+          ...beData,
+          labID: beData.labID || beData.id,
+          labContent: labContent
         } as LabData;
       } catch (err: any) {
         if (err.response?.status === 404) return null;
@@ -210,8 +228,16 @@ export const useSuspenseGetLabContent = (labID: string) => {
     queryKey: ["labContent", labID],
     queryFn: async () => {
       try {
-        const response = await mockClient.get<LabContent[]>(`/LabContent?labID=${labID}`);
-        return response.data[0] || null;
+        const response = await apiClient.get<any>(`/academy/labs/${labID}`);
+        let content = response.data?.data?.labContent;
+        if (content) {
+          let env = content.environment;
+          if (typeof env === 'string') {
+            try { env = JSON.parse(env); } catch (e) { }
+          }
+          content.environment = sanitizeEnvironment(env);
+        }
+        return (content || null) as LabContent | null;
       } catch (err: any) {
         if (err.response?.status === 404) return null;
         throw err;
@@ -222,36 +248,22 @@ export const useSuspenseGetLabContent = (labID: string) => {
 
 export const useSuspenseLabFull = (labID: string) => {
   const labQuery = useSuspenseGetLab(labID);
-  const contentQuery = useSuspenseGetLabContent(labID);
-
-  const labFull = useMemo(() => {
-    if (!labQuery.data) return null;
-    return {
-      ...labQuery.data,
-      labContent: contentQuery.data ? { environment: contentQuery.data.environment } : undefined
-    } as LabData;
-  }, [labQuery.data, contentQuery.data]);
 
   return {
-    data: labFull,
-    contentId: contentQuery.data?.id
+    data: labQuery.data,
+    contentId: (labQuery.data?.labContent as any)?.id
   };
 };
 
 export const useUpdateLabFull = () => {
-  const updateLab = useUpdateLab();
   const upsertContent = useUpsertLabContent();
 
   return useMutation({
     mutationFn: async ({ labID, data, contentId }: { labID: string; data: Partial<LabData>; contentId?: string }) => {
-      // 1. Update Metadata
-      const metadataToUpdate = { ...data };
-      const labContentData = metadataToUpdate.labContent?.environment;
-      delete metadataToUpdate.labContent;
+      // Chỉ lưu Map Nội dung (Rule, Môi trường, Tọa độ) khi đang ở Map Editor.
+      // Không update lại Thông tin cơ bản (Tên, Thể loại...) vì đã tách ra Modal bên ngoài list
+      const labContentData = data.labContent?.environment;
 
-      const labResponse = await updateLab.mutateAsync({ labID, data: metadataToUpdate });
-
-      // 2. Update Content if provided
       if (labContentData) {
         await upsertContent.mutateAsync({
           labID,
@@ -260,7 +272,7 @@ export const useUpdateLabFull = () => {
         });
       }
 
-      return labResponse;
+      return data;
     }
   });
 };

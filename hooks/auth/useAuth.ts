@@ -47,7 +47,7 @@ export const useMe = (options?: UseMeOptions) => {
     queryKey: ['auth', 'me'],
     enabled: options?.enabled,
     queryFn: async () => {
-      const response = await apiClient.get<MeResponse>('/auth/me')
+      const response = await apiClient.get<MeResponse>('/identity/auth/me')
 
       return meResponseSchema.parse(response.data)
     }
@@ -82,7 +82,7 @@ export const useLogin = (options?: UseLoginOptions) => {
   return useMutation<LoginResponse, AxiosError<ApiError>, LoginRequest>({
     mutationFn: async (credentials: LoginRequest) => {
       const response = await apiClient.post<LoginResponse>(
-        '/auth/login',
+        '/identity/auth/login',
         credentials
       )
 
