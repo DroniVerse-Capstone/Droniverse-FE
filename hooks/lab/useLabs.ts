@@ -27,16 +27,63 @@ const sanitizeEnvironment = (env: any) => {
   };
 };
 
-export const useGetLabs = () => {
-  return useQuery({
-    queryKey: ["labs"],
+type LabStatus = "DRAFT" | "ACTIVE" | "INACTIVE" | "LOCKED" | "DELETED";
+
+type UseGetLabsOptions = {
+  type?: "LEARNING" | "COMPETITION";
+  status?: LabStatus;
+  searchTerm?: string;
+  pageIndex?: number;
+  pageSize?: number;
+  withPaginationMeta?: boolean;
+};
+
+type LabsPaginationData = {
+  data: LabData[];
+  totalRecords: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export const useGetLabs = (options?: UseGetLabsOptions) => {
+  return useQuery<LabData[] | LabsPaginationData>({
+    queryKey: [
+      "labs",
+      options?.type,
+      options?.status,
+      options?.searchTerm,
+      options?.pageIndex,
+      options?.pageSize,
+    ],
     queryFn: async () => {
       // Fetch all Labs (Metadata) from REAL Backend
       const response = await apiClient.get<any>("/academy/labs", {
-        params: { PageSize: 1000 }
+        params: {
+          ...(options?.status && { Status: options.status }),
+          ...(options?.searchTerm && { SearchTerm: options.searchTerm }),
+          ...(options?.type && { Type: options.type }),
+          ...(options?.pageIndex !== undefined && { PageIndex: options.pageIndex }),
+          ...(options?.pageSize !== undefined
+            ? { PageSize: options.pageSize }
+            : { PageSize: 1000 }),
+        }
       });
-      const labsList = response.data?.data?.data || [];
-      return labsList as LabData[];
+      const responseData = response.data?.data;
+      const labsList = responseData?.data || [];
+      const paginationData: LabsPaginationData = {
+        data: labsList as LabData[],
+        totalRecords: responseData?.totalRecords || 0,
+        pageIndex: responseData?.pageIndex || options?.pageIndex || 1,
+        pageSize: responseData?.pageSize || options?.pageSize || labsList.length || 0,
+        totalPages: responseData?.totalPages || 1,
+      };
+
+      if (options?.withPaginationMeta) {
+        return paginationData;
+      }
+
+      return paginationData.data;
     },
   });
 };

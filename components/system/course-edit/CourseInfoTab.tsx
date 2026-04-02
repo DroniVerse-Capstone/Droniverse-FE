@@ -7,6 +7,8 @@ import { GoZap } from "react-icons/go";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import CourseVersionStatusBadge from "@/components/course/CourseVersionStatusBadge";
+import AssignCourseVersionCategoriesDialog from "@/components/system/course-edit/AssignCourseVersionCategoriesDialog";
+import AssignCourseVersionRequiredDronesDialog from "@/components/system/course-edit/AssignCourseVersionRequiredDronesDialog";
 import UpdateCourseVersionDialog from "@/components/system/course-edit/UpdateCourseVersionDialog";
 import { Empty } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
@@ -81,6 +83,7 @@ export default function CourseInfoTab({
       ? version.contextEN || version.contextVN || "<p>—</p>"
       : version.contextVN || version.contextEN || "<p>—</p>";
   const hasChangeLog = Boolean(version.changeLog?.trim());
+  const isDraftVersion = version.status === "DRAFT";
   const canUpdateVersion = version.status === "DRAFT";
   const canShowVersionActions =
     version.status === "DRAFT" || version.status === "DEPRECATED";
@@ -90,6 +93,11 @@ export default function CourseInfoTab({
   const isDeleting = deleteCourseVersionMutation.isPending;
 
   const handleActivateVersion = async () => {
+    if (version.categories.length === 0 || version.requiredDrones.length === 0) {
+      toast.error("Vui lòng gán danh mục và drone yêu cầu trước khi kích hoạt.");
+      return;
+    }
+
     try {
       await activateCourseVersionMutation.mutateAsync({
         courseId,
@@ -121,18 +129,6 @@ export default function CourseInfoTab({
           t("toast.deleteError")
       );
     }
-  };
-
-  const getDroneStatusClassName = (status: string) => {
-    if (status === "ACTIVE") {
-      return "bg-secondary/15 text-secondary border-secondary/40";
-    }
-
-    if (status === "DRAFT") {
-      return "bg-tertiary/15 text-tertiary border-tertiary/40";
-    }
-
-    return "bg-greyscale-700 text-greyscale-100 border-greyscale-600";
   };
 
   return (
@@ -227,7 +223,16 @@ export default function CourseInfoTab({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <h3 className="text-sm font-semibold text-greyscale-0">{t("category.label")}</h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-greyscale-0">{t("category.label")}</h3>
+            {isDraftVersion ? (
+              <AssignCourseVersionCategoriesDialog
+                courseId={courseId}
+                versionId={version.courseVersionID}
+                defaultCategoryIDs={version.categories.map((category) => category.categoryID)}
+              />
+            ) : null}
+          </div>
           {version.categories.length === 0 ? (
             <p className="text-sm text-greyscale-300">{t("category.empty")}</p>
           ) : (
@@ -258,9 +263,18 @@ export default function CourseInfoTab({
           )}
         </div>
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <h3 className="text-sm font-semibold text-greyscale-0">
-            {t("drone.label")}
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-greyscale-0">
+              {t("drone.label")}
+            </h3>
+            {isDraftVersion ? (
+              <AssignCourseVersionRequiredDronesDialog
+                courseId={courseId}
+                versionId={version.courseVersionID}
+                defaultDroneIDs={version.requiredDrones.map((drone) => drone.droneID)}
+              />
+            ) : null}
+          </div>
           {version.requiredDrones.length === 0 ? (
             <p className="text-sm text-greyscale-300">{t("drone.empty")}</p>
           ) : (
@@ -350,6 +364,7 @@ export default function CourseInfoTab({
           {formatDateTime(version.updateAt || null)}
         </p>
       </div>
+
     </div>
   );
 }

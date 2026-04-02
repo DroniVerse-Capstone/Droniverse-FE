@@ -5,10 +5,16 @@ import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
 	Course,
+	DeleteCourseResponse,
 	GetCoursesData,
+	PublishCourseResponse,
+	UnpublishCourseResponse,
 	createCourseResponseSchema,
+	deleteCourseResponseSchema,
 	getCourseDetailResponseSchema,
 	getCoursesResponseSchema,
+	publishCourseResponseSchema,
+	unpublishCourseResponseSchema,
 } from "@/validations/course/course"
 
 type CourseStatus = "DRAFT" | "PUBLISH" | "UNPUBLISH" | "ARCHIVED" 
@@ -18,6 +24,10 @@ type UseGetCoursesOptions = {
 	pageSize?: number
 	search?: string
 	status?: CourseStatus | null
+}
+
+type CourseActionVariables = {
+	courseId: string
 }
 
 export const useGetCourses = (options?: UseGetCoursesOptions) => {
@@ -77,4 +87,75 @@ export const useCreateCourse = () => {
 	})
 }
 
-export type { CourseStatus, UseGetCoursesOptions }
+export const usePublishCourse = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		PublishCourseResponse,
+		AxiosError<ApiError>,
+		CourseActionVariables
+	>({
+		mutationFn: async ({ courseId }) => {
+			const response = await apiClient.post(`/academy/courses/${courseId}/publish`)
+			return publishCourseResponseSchema.parse(response.data)
+		},
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["course-detail", variables.courseId],
+				}),
+			])
+		},
+	})
+}
+
+export const useUnpublishCourse = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		UnpublishCourseResponse,
+		AxiosError<ApiError>,
+		CourseActionVariables
+	>({
+		mutationFn: async ({ courseId }) => {
+			const response = await apiClient.post(
+				`/academy/courses/${courseId}/unpublish`
+			)
+			return unpublishCourseResponseSchema.parse(response.data)
+		},
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["course-detail", variables.courseId],
+				}),
+			])
+		},
+	})
+}
+
+export const useDeleteCourse = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		DeleteCourseResponse,
+		AxiosError<ApiError>,
+		CourseActionVariables
+	>({
+		mutationFn: async ({ courseId }) => {
+			const response = await apiClient.delete(`/academy/courses/${courseId}`)
+			return deleteCourseResponseSchema.parse(response.data)
+		},
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["course-detail", variables.courseId],
+				}),
+			])
+		},
+	})
+}
+
+export type { CourseActionVariables, CourseStatus, UseGetCoursesOptions }
