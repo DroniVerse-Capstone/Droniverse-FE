@@ -570,7 +570,40 @@
       "unknown": "Unknown",
       "min": "minutes",
       "creator": "Created by",
-      "updater": "Updated by"
+      "updater": "Updated by",
+      "actions": {
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete"
+      },
+      "confirm": {
+        "publish": {
+          "title": "Confirm publishing this course?",
+          "description": "This course will move to published status.",
+          "confirmText": "Publish",
+          "cancelText": "Cancel"
+        },
+        "unpublish": {
+          "title": "Confirm unpublishing this course?",
+          "description": "This course will move to unpublished status.",
+          "confirmText": "Unpublish",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deleting this course?",
+          "description": "This action cannot be undone.",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "publishSuccess": "Course published successfully.",
+        "publishError": "Failed to publish course.",
+        "unpublishSuccess": "Course unpublished successfully.",
+        "unpublishError": "Failed to unpublish course.",
+        "deleteSuccess": "Course deleted successfully.",
+        "deleteError": "Failed to delete course."
+      }
     },
     "CourseEdit": {
       "courseInfo": "Course Information",
@@ -751,6 +784,13 @@
           "titleEN": "English Title",
           "titleVNPlaceholder": "Enter Vietnamese title",
           "titleENPlaceholder": "Enter English title",
+          "labSearch": "Search labs",
+          "labSearchPlaceholder": "Enter lab name or description",
+          "labType": "Type",
+          "labNoDescription": "No description",
+          "labEmpty": "No matching labs found.",
+          "labSelectHint": "Please select one lab to create a lesson.",
+          "labSelected": "Lab selected.",
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "theoryContentVNPlaceholder": "Enter Vietnamese theory content",
@@ -773,15 +813,17 @@
           "cancel": "Cancel"
         },
         "toast": {
-          "labComingSoon": "Lab creation feature will be available soon."
+          "importLabSuccess": "Lesson created from lab successfully."
         },
         "error": {
           "missingTitle": "Please enter both Vietnamese and English titles.",
           "missingTheory": "Please fill in all required theory fields.",
           "missingQuiz": "Please fill in all required quiz fields.",
+          "missingLab": "Please select one lab.",
           "invalidPassScore": "Pass score cannot be greater than total score.",
           "createTheoryFailed": "Failed to create theory lesson.",
-          "createQuizFailed": "Failed to create quiz lesson."
+          "createQuizFailed": "Failed to create quiz lesson.",
+          "importLabFailed": "Failed to create lesson from lab."
         }
       },
       "UpdateLessonDialog": {
@@ -818,7 +860,8 @@
         "title": "Lesson Details",
         "subtitle": {
           "theory": "Theory Lesson Details",
-          "quiz": "Quiz Lesson Details"
+          "quiz": "Quiz Lesson Details",
+          "lab": "Lab Lesson Details"
         },
         "fields": {
           "titleVN": "Title (Vietnamese)",
@@ -827,6 +870,8 @@
           "timeLimit": "Time: {value} minutes",
           "maxScore": "Max Score: {value}",
           "passScore": "Pass Score: {value}",
+          "labLevel": "Difficulty",
+          "labType": "Lab Type",
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "quizDescriptionVN": "Vietnamese Description",
@@ -834,7 +879,8 @@
         },
         "error": {
           "loadTheoryFailed": "Failed to load theory lesson details.",
-          "loadQuizFailed": "Failed to load quiz lesson details."
+          "loadQuizFailed": "Failed to load quiz lesson details.",
+          "loadLabFailed": "Failed to load lab lesson details."
         }
       },
       "QuizQuestionConfigDialog": {
@@ -884,6 +930,34 @@
           "createFailed": "Failed to create question.",
           "updateFailed": "Failed to update question.",
           "deleteFailed": "Failed to delete question."
+        }
+      }
+    },
+    "AssignCourseVersionDialog": {
+      "category": {
+        "title": "Assign Categories",
+        "description": "Select one or more categories to assign to this course version.",
+        "selectPlaceholder": "Select categories",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Categories assigned successfully.",
+          "error": "Failed to assign categories to the course version."
+        }
+      },
+      "drone": {
+        "title": "Assign Drones",
+        "description": "Select one or more drones to assign to this course version.",
+        "selectPlaceholder": "Select drones",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Drones assigned successfully.",
+          "error": "Failed to assign drones to the course version."
         }
       }
     }

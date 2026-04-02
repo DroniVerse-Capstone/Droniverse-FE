@@ -1,12 +1,24 @@
 "use client";
 
+import { AxiosError } from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { GoZap } from "react-icons/go";
+import { MdDeleteOutline } from "react-icons/md";
 
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
+import { Button } from "@/components/ui/button";
+import {
+  useDeleteCourse,
+  usePublishCourse,
+  useUnpublishCourse,
+} from "@/hooks/course/useCourse";
 import { formatDateTime } from "@/lib/utils/format-date";
 import { slugify } from "@/lib/utils/slugify";
+import { ApiError } from "@/types/api/common";
 import { Course } from "@/validations/course/course";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
@@ -18,6 +30,9 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const t = useTranslations("CourseManagement.AdminCourseCard");
   const locale = useLocale();
   const router = useRouter();
+  const publishCourseMutation = usePublishCourse();
+  const unpublishCourseMutation = useUnpublishCourse();
+  const deleteCourseMutation = useDeleteCourse();
   const version = course.currentVersion;
   const title = locale === "en" ? version?.titleEN || version?.titleVN || t("title") : version?.titleVN || version?.titleEN || t("title");
   const titleVN = version?.titleVN || "";
@@ -31,6 +46,74 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const updaterDisplay = version?.updater?.fullName
     ? `${version.updater.fullName}${version.updater.email ? ` (${version.updater.email})` : ""}`
     : version?.updater?.email || "—";
+  const isDraft = course.status === "DRAFT";
+  const isPublish = course.status === "PUBLISH";
+  const isUnpublish = course.status === "UNPUBLISH";
+  const isPublishing = publishCourseMutation.isPending;
+  const isUnpublishing = unpublishCourseMutation.isPending;
+  const isDeleting = deleteCourseMutation.isPending;
+  const isActionLoading = isPublishing || isUnpublishing || isDeleting;
+  const showUnpublishAction = isPublish;
+  const showPublishAction = isUnpublish || isDraft;
+  const showDeleteAction = isDraft || isUnpublish;
+  const actionCount = [showUnpublishAction, showPublishAction, showDeleteAction].filter(Boolean).length;
+  const isTwoActions = actionCount === 2;
+  const isOneAction = actionCount === 1;
+  const actionContainerClassName = isTwoActions
+    ? "mt-3 grid grid-cols-2 gap-2 border-t border-greyscale-700 pt-3"
+    : isOneAction
+      ? "mt-3 flex items-center justify-center border-t border-greyscale-700 pt-3"
+      : "mt-3 flex items-center justify-end gap-2 border-t border-greyscale-700 pt-3";
+  const triggerClassName = isTwoActions ? "w-full" : isOneAction ? "w-1/2" : undefined;
+  const actionButtonClassName = isTwoActions || isOneAction ? "w-full justify-center" : undefined;
+
+  const handlePublishCourse = async () => {
+    try {
+      const response = await publishCourseMutation.mutateAsync({
+        courseId: course.courseID,
+      });
+      toast.success(response.message || t("toast.publishSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("toast.publishError")
+      );
+    }
+  };
+
+  const handleUnpublishCourse = async () => {
+    try {
+      const response = await unpublishCourseMutation.mutateAsync({
+        courseId: course.courseID,
+      });
+      toast.success(response.message || t("toast.unpublishSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("toast.unpublishError")
+      );
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    try {
+      const response = await deleteCourseMutation.mutateAsync({
+        courseId: course.courseID,
+      });
+      toast.success(response.message || t("toast.deleteSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("toast.deleteError")
+      );
+    }
+  };
 
   return (
     <article
@@ -89,6 +172,84 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
             {formatDateTime(version?.updateAt ?? null)}
           </span>
         </div>
+      </div>
+
+      <div
+        className={actionContainerClassName}
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        {showUnpublishAction ? (
+          <ConfirmActionPopover
+            triggerClassName={triggerClassName}
+            trigger={
+              <Button
+                type="button"
+                size="sm"
+                variant="deleteIcon"
+                className={actionButtonClassName}
+                icon={<GoZap size={18} />}
+                disabled={isActionLoading}
+              >
+                {t("actions.unpublish")}
+              </Button>
+            }
+            title={t("confirm.unpublish.title")}
+            description={t("confirm.unpublish.description")}
+            confirmText={t("confirm.unpublish.confirmText")}
+            cancelText={t("confirm.unpublish.cancelText")}
+            isLoading={isUnpublishing}
+            onConfirm={handleUnpublishCourse}
+          />
+        ) : null}
+
+        {showPublishAction ? (
+          <ConfirmActionPopover
+            triggerClassName={triggerClassName}
+            trigger={
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className={actionButtonClassName}
+                icon={<GoZap size={18} />}
+                disabled={isActionLoading}
+              >
+                {t("actions.publish")}
+              </Button>
+            }
+            title={t("confirm.publish.title")}
+            description={t("confirm.publish.description")}
+            confirmText={t("confirm.publish.confirmText")}
+            cancelText={t("confirm.publish.cancelText")}
+            isLoading={isPublishing}
+            onConfirm={handlePublishCourse}
+          />
+        ) : null}
+
+        {showDeleteAction ? (
+          <ConfirmActionPopover
+            triggerClassName={triggerClassName}
+            trigger={
+              <Button
+                type="button"
+                size="sm"
+                variant="default"
+                className={actionButtonClassName}
+                icon={<MdDeleteOutline size={18} />}
+                disabled={isActionLoading}
+              >
+                {t("actions.delete")}
+              </Button>
+            }
+            title={t("confirm.delete.title")}
+            description={t("confirm.delete.description")}
+            confirmText={t("confirm.delete.confirmText")}
+            cancelText={t("confirm.delete.cancelText")}
+            isLoading={isDeleting}
+            onConfirm={handleDeleteCourse}
+          />
+        ) : null}
       </div>
     </article>
   );

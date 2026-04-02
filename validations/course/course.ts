@@ -55,6 +55,21 @@ export const createCourseResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const publishCourseResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const unpublishCourseResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const deleteCourseResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export const getCourseDetailResponseSchema = z.object({
 	data: courseSchema,
 	isSuccess: z.boolean(),
@@ -66,4 +81,7 @@ export type Course = z.infer<typeof courseSchema>
 export type GetCoursesData = z.infer<typeof getCoursesDataSchema>
 export type GetCoursesResponse = z.infer<typeof getCoursesResponseSchema>
 export type CreateCourseResponse = z.infer<typeof createCourseResponseSchema>
+export type PublishCourseResponse = z.infer<typeof publishCourseResponseSchema>
+export type UnpublishCourseResponse = z.infer<typeof unpublishCourseResponseSchema>
+export type DeleteCourseResponse = z.infer<typeof deleteCourseResponseSchema>
 export type GetCourseDetailResponse = z.infer<typeof getCourseDetailResponseSchema>

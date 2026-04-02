@@ -8,7 +8,9 @@ import { MdOutlineAddCircleOutline } from "react-icons/md";
 import CommonDropdown, {
   CommonDropdownOption,
 } from "@/components/common/CommonDropdown";
+import AppPagination from "@/components/common/AppPagination";
 import QuillEditor from "@/components/common/QuillEditor";
+import SelectLabCard from "@/components/system/course-edit/course-settings/SelectLabCard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,11 +26,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { useImportLabLesson } from "@/hooks/lesson/useLesson";
+import { useGetLabs } from "@/hooks/lab/useLabs";
 import { useCreateQuiz } from "@/hooks/quiz/useQuiz";
 import { useCreateTheory } from "@/hooks/theory/useTheory";
 import { ApiError } from "@/types/api/common";
 import { Lesson, LessonType } from "@/validations/lesson/lesson";
 import { useTranslations } from "@/providers/i18n-provider";
+import EmptyState from "@/components/common/EmptyState";
 
 type CreateLessonDialogProps = {
   moduleId: string;
@@ -42,6 +47,9 @@ export default function CreateLessonDialog({
   const t = useTranslations("CourseManagement.CourseSettings.CreateLessonDialog");
   const [open, setOpen] = React.useState(false);
   const [lessonType, setLessonType] = React.useState<LessonType>("THEORY");
+  const [selectedLabId, setSelectedLabId] = React.useState("");
+  const [labSearchTerm, setLabSearchTerm] = React.useState("");
+  const [labPageIndex, setLabPageIndex] = React.useState(1);
 
   const [titleVN, setTitleVN] = React.useState("");
   const [titleEN, setTitleEN] = React.useState("");
@@ -86,6 +94,40 @@ export default function CreateLessonDialog({
     },
   });
 
+  const importLabLessonMutation = useImportLabLesson({
+    onSuccess: (data) => {
+      toast.success(data.message || t("toast.importLabSuccess"));
+      setOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("error.importLabFailed"),
+      );
+    },
+  });
+
+  const labPageSize = 6;
+
+  const { data: activeLabsResponse, isLoading: isLabsLoading } = useGetLabs({
+    type: "LEARNING",
+    status: "ACTIVE",
+    searchTerm: labSearchTerm,
+    pageIndex: labPageIndex,
+    pageSize: labPageSize,
+    withPaginationMeta: true,
+  });
+
+  const activeLabsData =
+    activeLabsResponse && !Array.isArray(activeLabsResponse)
+      ? activeLabsResponse
+      : null;
+  const activeLabs = activeLabsData?.data || [];
+  const labTotalPages = activeLabsData?.totalPages || 1;
+
   const lessonTypeOptions: CommonDropdownOption[] = [
     { value: "THEORY", label: t("lessonTypes.theory") },
     { value: "QUIZ", label: t("lessonTypes.quiz") },
@@ -93,7 +135,19 @@ export default function CreateLessonDialog({
   ];
 
   const isSubmitting =
-    createTheoryMutation.isPending || createQuizMutation.isPending;
+    createTheoryMutation.isPending ||
+    createQuizMutation.isPending ||
+    importLabLessonMutation.isPending;
+
+  React.useEffect(() => {
+    setLabPageIndex(1);
+  }, [labSearchTerm]);
+
+  React.useEffect(() => {
+    if (labPageIndex > labTotalPages) {
+      setLabPageIndex(labTotalPages);
+    }
+  }, [labPageIndex, labTotalPages]);
 
   const nextOrderIndex =
     lessons.length > 0
@@ -112,6 +166,9 @@ export default function CreateLessonDialog({
     setTimeLimit("");
     setTotalScore("");
     setPassScore("");
+    setSelectedLabId("");
+    setLabSearchTerm("");
+    setLabPageIndex(1);
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -144,8 +201,9 @@ export default function CreateLessonDialog({
   const handleSubmit = async () => {
     const normalizedTitleVN = titleVN.trim();
     const normalizedTitleEN = titleEN.trim();
+    const isTheoryOrQuiz = lessonType === "THEORY" || lessonType === "QUIZ";
 
-    if (!normalizedTitleVN || !normalizedTitleEN) {
+    if (isTheoryOrQuiz && (!normalizedTitleVN || !normalizedTitleEN)) {
       toast.error(t("error.missingTitle"));
       return;
     }
@@ -211,7 +269,18 @@ export default function CreateLessonDialog({
       return;
     }
 
-    toast(t("toast.labComingSoon"));
+    if (!selectedLabId) {
+      toast.error(t("error.missingLab"));
+      return;
+    }
+
+    await importLabLessonMutation.mutateAsync({
+      labId: selectedLabId,
+      payload: {
+        moduleID: moduleId,
+        orderIndex: nextOrderIndex,
+      },
+    });
   };
 
   return (
@@ -240,29 +309,31 @@ export default function CreateLessonDialog({
             disabled={isSubmitting}
           />
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="create-lesson-title-vn">{t("fields.titleVN")}</Label>
-              <Input
-                id="create-lesson-title-vn"
-                value={titleVN}
-                onChange={(event) => setTitleVN(event.target.value)}
-                placeholder={t("fields.titleVNPlaceholder")}
-                disabled={isSubmitting}
-              />
-            </div>
+          {lessonType !== "LAB" ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="create-lesson-title-vn">{t("fields.titleVN")}</Label>
+                <Input
+                  id="create-lesson-title-vn"
+                  value={titleVN}
+                  onChange={(event) => setTitleVN(event.target.value)}
+                  placeholder={t("fields.titleVNPlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="create-lesson-title-en">{t("fields.titleEN")}</Label>
-              <Input
-                id="create-lesson-title-en"
-                value={titleEN}
-                onChange={(event) => setTitleEN(event.target.value)}
-                placeholder={t("fields.titleENPlaceholder")}
-                disabled={isSubmitting}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="create-lesson-title-en">{t("fields.titleEN")}</Label>
+                <Input
+                  id="create-lesson-title-en"
+                  value={titleEN}
+                  onChange={(event) => setTitleEN(event.target.value)}
+                  placeholder={t("fields.titleENPlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
 
           {lessonType === "THEORY" ? (
             <div className="space-y-4">
@@ -369,8 +440,60 @@ export default function CreateLessonDialog({
           ) : null}
 
           {lessonType === "LAB" ? (
-            <div className="rounded border border-greyscale-700 bg-greyscale-900/70 p-3 text-sm text-greyscale-200">
-              {t("toast.labComingSoon")}
+            <div className="space-y-4 rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
+              <div className="space-y-2">
+                <Label htmlFor="lab-search">{t("fields.labSearch")}</Label>
+                <Input
+                  type="search"
+                  id="lab-search"
+                  value={labSearchTerm}
+                  onChange={(event) => setLabSearchTerm(event.target.value)}
+                  placeholder={t("fields.labSearchPlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <p className="text-xs text-greyscale-300">
+                {selectedLabId
+                  ? t("fields.labSelected")
+                  : t("fields.labSelectHint")}
+              </p>
+
+              {isLabsLoading ? (
+                <div className="flex min-h-24 items-center justify-center">
+                  <Spinner className="h-5 w-5" />
+                </div>
+              ) : null}
+
+              {!isLabsLoading && activeLabs.length === 0 ? (
+                <EmptyState title={t("fields.labEmpty")} />
+              ) : null}
+
+              {!isLabsLoading && activeLabs.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {activeLabs.map((lab) => {
+                    return (
+                      <SelectLabCard
+                        key={lab.labID}
+                        lab={lab}
+                        isSelected={selectedLabId === lab.labID}
+                        onSelect={setSelectedLabId}
+                        disabled={isSubmitting}
+                      />
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {!isLabsLoading ? (
+                <AppPagination
+                  currentPage={labPageIndex}
+                  totalPages={labTotalPages}
+                  onPageChange={setLabPageIndex}
+                  disabled={isSubmitting}
+                  className="justify-center"
+                />
+              ) : null}
             </div>
           ) : null}
         </div>
