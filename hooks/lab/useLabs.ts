@@ -46,7 +46,13 @@ type LabsPaginationData = {
   totalPages: number;
 };
 
-export const useGetLabs = (options?: UseGetLabsOptions) => {
+export function useGetLabs(
+  options: UseGetLabsOptions & { withPaginationMeta: true }
+): ReturnType<typeof useQuery<LabsPaginationData>>;
+export function useGetLabs(
+  options?: UseGetLabsOptions
+): ReturnType<typeof useQuery<LabData[]>>;
+export function useGetLabs(options?: UseGetLabsOptions) {
   return useQuery<LabData[] | LabsPaginationData>({
     queryKey: [
       "labs",
@@ -55,6 +61,7 @@ export const useGetLabs = (options?: UseGetLabsOptions) => {
       options?.searchTerm,
       options?.pageIndex,
       options?.pageSize,
+      options?.withPaginationMeta,
     ],
     queryFn: async () => {
       // Fetch all Labs (Metadata) from REAL Backend
@@ -80,13 +87,13 @@ export const useGetLabs = (options?: UseGetLabsOptions) => {
       };
 
       if (options?.withPaginationMeta) {
-        return paginationData;
+        return paginationData as LabsPaginationData;
       }
 
-      return paginationData.data;
+      return paginationData.data as LabData[];
     },
   });
-};
+}
 
 export const useGetLab = (labID: string | null) => {
   return useQuery({
