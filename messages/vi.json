@@ -404,9 +404,9 @@
     "myRequests": "Yêu cầu của tôi",
     "status": {
       "all": "Tất cả",
-      "active": "Đang hoạt động",
+      "active": "Hoạt động",
       "inactive": "Dừng hoạt động",
-      "suspended": "Bị cấm",
+      "suspended": "Đình chỉ",
       "archived": "Lưu trữ",
       "pending": "Chờ duyệt",
       "rejected": "Từ chối",
@@ -434,7 +434,9 @@
         "approver": "Người duyệt",
         "rejectReason": "Lý do từ chối",
         "status": "Trạng thái",
-        "actions": "Thao tác"
+        "actions": "Thao tác",
+        "managers": "Quản lý",
+        "members": "Thành viên"
       },
       "actions": {
         "view": "Xem chi tiết",

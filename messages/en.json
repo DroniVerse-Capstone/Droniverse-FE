@@ -438,7 +438,9 @@
         "approver": "Approver",
         "rejectReason": "Reject Reason",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "managers": "Manager",
+        "members": "Members"
       },
       "actions": {
         "view": "View Details",
