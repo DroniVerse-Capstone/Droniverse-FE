@@ -4,7 +4,6 @@ import React from "react";
 import { useParams } from "next/navigation";
 
 import ManagerCompetitionCard from "@/components/competition/ManagerCompetitionCard";
-import CompetitonStatusBadge from "@/components/competition/CompetitonStatusBadge";
 import EmptyState from "@/components/common/EmptyState";
 import { Empty } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
@@ -102,8 +101,8 @@ export default function ManagerCompetitons() {
               className={cn(
                 "rounded border px-2.5 py-1 text-sm transition-colors",
                 selectedStatus === statusOption.value
-                  ? "border-primary bg-primary/15 text-primary"
-                  : "border-greyscale-600 bg-greyscale-800 text-greyscale-100 hover:border-greyscale-500",
+                  ? "border-primary bg-primary/15 text-primary hover:bg-primary/25"
+                  : "border-greyscale-600 bg-greyscale-800 text-greyscale-100 hover:border-greyscale-500 hover:bg-greyscale-700",
               )}
             >
               {t(`status.${statusOption.label}`)}

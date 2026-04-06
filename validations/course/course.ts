@@ -6,6 +6,43 @@ export const courseUserSchema = z.object({
 	email: z.string(),
 })
 
+export const miniProductSchema = z.object({
+	productId: z.string(),
+	referenceId: z.string(),
+	price: z.number().int().nonnegative(),
+	currency: z.enum(["USD", "VND"]),
+	status: z.enum(["Active", "Inactive"]),
+})
+
+export const courseProductStatusSchema = z.enum(["ACTIVE", "INACTIVE"])
+
+export const createCourseProductRequestSchema = z.object({
+	productNameVN: z.string().min(1),
+	productNameEN: z.string().min(1),
+	descriptionVN: z.string().min(1),
+	descriptionEN: z.string().min(1),
+	referenceId: z.string().uuid(),
+	price: z.number().int().nonnegative(),
+	currency: z.enum(["USD", "VND"]),
+	status: courseProductStatusSchema,
+})
+
+export const updateCourseProductRequestSchema = createCourseProductRequestSchema
+
+export const courseProductSchema = z.object({
+	productId: z.string(),
+	referenceId: z.string(),
+	productNameVN: z.string(),
+	productNameEN: z.string(),
+	descriptionVN: z.string(),
+	descriptionEN: z.string(),
+	price: z.number().int().nonnegative(),
+	currency: z.enum(["USD", "VND"]),
+	status: courseProductStatusSchema,
+	createAt: z.string(),
+	updateAt: z.string(),
+})
+
 export const courseVersionSchema = z.object({
 	courseVersionID: z.string(),
 	titleVN: z.string(),
@@ -33,6 +70,7 @@ export const courseSchema = z.object({
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
 	currentVersion: courseVersionSchema.nullable(),
 	courseVersions: z.array(courseVersionSchema).default([]),
+	miniProduct: miniProductSchema.nullable(),
 })
 
 export const getCoursesDataSchema = z.object({
@@ -76,11 +114,28 @@ export const getCourseDetailResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const createCourseProductResponseSchema = courseProductSchema
+export const updateCourseProductResponseSchema = courseProductSchema
+
 export type CourseVersion = z.infer<typeof courseVersionSchema>
 export type Course = z.infer<typeof courseSchema>
+export type CourseProductStatus = z.infer<typeof courseProductStatusSchema>
+export type CreateCourseProductRequest = z.infer<
+	typeof createCourseProductRequestSchema
+>
+export type UpdateCourseProductRequest = z.infer<
+	typeof updateCourseProductRequestSchema
+>
+export type CourseProduct = z.infer<typeof courseProductSchema>
 export type GetCoursesData = z.infer<typeof getCoursesDataSchema>
 export type GetCoursesResponse = z.infer<typeof getCoursesResponseSchema>
 export type CreateCourseResponse = z.infer<typeof createCourseResponseSchema>
+export type CreateCourseProductResponse = z.infer<
+	typeof createCourseProductResponseSchema
+>
+export type UpdateCourseProductResponse = z.infer<
+	typeof updateCourseProductResponseSchema
+>
 export type PublishCourseResponse = z.infer<typeof publishCourseResponseSchema>
 export type UnpublishCourseResponse = z.infer<typeof unpublishCourseResponseSchema>
 export type DeleteCourseResponse = z.infer<typeof deleteCourseResponseSchema>
