@@ -38,7 +38,8 @@ const getClubSlugFromPathname = (pathname: string): string => {
   return segments[1] || "";
 };
 
-const isActivePath = (pathname: string, href: string) => {
+const isActivePath = (pathname: string, href: string, key: NavKey) => {
+  if (key === "overview") return pathname === href;
   if (pathname === href) return true;
   return pathname.startsWith(`${href}/`);
 };
@@ -83,7 +84,7 @@ export default function ClubDetailNav({
       <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded border border-greyscale-700 bg-greyscale-800 p-1">
         {navKeys.map((key) => {
           const href = finalLinks[key];
-          const active = isActivePath(pathname || "", href);
+          const active = isActivePath(pathname || "", href, key);
 
           return (
             <Link

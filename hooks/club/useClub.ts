@@ -6,7 +6,9 @@ import { ApiError } from "@/types/api/common"
 import {
   Club,
   GetAllClubsData,
+  GetClubParticipationsData,
   getAllClubsResponseSchema,
+  getClubParticipationsResponseSchema,
   getClubDetailResponseSchema,
   getMyClubsResponseSchema,
   UpdateClubStatus,
@@ -24,6 +26,13 @@ type UseGetMyClubsOptions = {
 type UseGetAllClubsOptions = {
   clubName?: string
   clubStatus?: ClubStatus | null
+  currentPage?: number
+  pageSize?: number
+}
+
+type UseGetClubParticipationsOptions = {
+  participationName?: string
+  dateOfBirth?: string
   currentPage?: number
   pageSize?: number
 }
@@ -104,6 +113,41 @@ export const useGetClubDetailById = (clubId?: string) => {
     },
   });
 };
+
+export const useGetClubParticipations = (
+  clubId?: string,
+  options?: UseGetClubParticipationsOptions,
+) => {
+  return useQuery<GetClubParticipationsData, AxiosError<ApiError>>({
+    queryKey: [
+      "club-participations",
+      clubId,
+      options?.participationName,
+      options?.dateOfBirth,
+      options?.currentPage,
+      options?.pageSize,
+    ],
+    enabled: !!clubId,
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/community/clubs/${clubId}/participants`,
+        {
+          params: {
+            ...(options?.participationName && {
+              ParticipantName: options.participationName,
+            }),
+            ...(options?.dateOfBirth && { DateOfBirth: options.dateOfBirth }),
+            CurrentPage: options?.currentPage ?? 1,
+            PageSize: options?.pageSize ?? 5,
+          },
+        }
+      )
+
+      const parsed = getClubParticipationsResponseSchema.parse(response.data)
+      return parsed.data
+    },
+  })
+}
 
 export const useUploadTempClubImage = (
   options?: UseUploadTempClubImageOptions

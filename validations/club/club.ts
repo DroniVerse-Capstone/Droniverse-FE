@@ -19,6 +19,18 @@ export const creatorSchema = z.object({
   roleName: z.string(),
 })
 
+export const clubParticipationSchema = z.object({
+  userId: z.string(),
+  username: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  dateOfBirth: z.string().nullable(),
+  imageUrl: z.string().nullable().optional(),
+  gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).nullable().optional(),
+  joinDate: z.string().nullable().optional(),
+})
+
 export const clubSchema = z.object({
   clubID: z.string(),
   nameVN: z.string(),
@@ -28,7 +40,7 @@ export const clubSchema = z.object({
   clubCode: z.string(),
   status: clubStatusSchema,
   isPublic: z.boolean(),
-  imageUrl: z.string(). nullable(),
+  imageUrl: z.string().nullable(),
   limitParticipation: z.number().int().nonnegative(),
   limitClubManagers: z.number().int().nonnegative(),
   totalMembers: z.number().int().nonnegative(),
@@ -54,6 +66,20 @@ export const getAllClubsDataSchema = z.object({
 
 export const getAllClubsResponseSchema = z.object({
   data: getAllClubsDataSchema,
+  isSuccess: z.boolean(),
+  message: z.string(),
+})
+
+export const getClubParticipationsDataSchema = z.object({
+  data: z.array(clubParticipationSchema),
+  totalRecords: z.number().int().nonnegative(),
+  pageIndex: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+})
+
+export const getClubParticipationsResponseSchema = z.object({
+  data: getClubParticipationsDataSchema,
   isSuccess: z.boolean(),
   message: z.string(),
 })
@@ -87,8 +113,15 @@ export const updateClubStatusResponseSchema = z.object({
 
 export type Club = z.infer<typeof clubSchema>
 export type ClubStatus = z.infer<typeof clubStatusSchema>
+export type ClubParticipation = z.infer<typeof clubParticipationSchema>
 export type GetAllClubsData = z.infer<typeof getAllClubsDataSchema>
 export type GetAllClubsResponse = z.infer<typeof getAllClubsResponseSchema>
+export type GetClubParticipationsData = z.infer<
+  typeof getClubParticipationsDataSchema
+>
+export type GetClubParticipationsResponse = z.infer<
+  typeof getClubParticipationsResponseSchema
+>
 export type GetMyClubsResponse = z.infer<typeof getMyClubsResponseSchema>
 export type GetClubDetailResponse = z.infer<typeof getClubDetailResponseSchema>
 export type UpdateClubStatus = z.infer<typeof updateClubStatusSchema>

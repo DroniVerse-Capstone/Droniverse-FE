@@ -1162,5 +1162,104 @@
       "retry": "Try Again",
       "manage": "Manage Labs"
     }
+  },
+  "ManagerCompetitions": {
+    "errors": {
+      "resolveClub": "Unable to resolve current club.",
+      "loadCompetitions": "Unable to load competitions."
+    },
+    "empty": {
+      "title": "No competitions yet",
+      "description": "Competitions created by this club will appear here."
+    },
+    "summary": {
+      "total": "{{count}} competitions in total"
+    },
+    "filters": {
+      "label": "Filter by status",
+      "all": "All"
+    },
+    "fallback": {
+      "noDescription": "No description"
+    },
+    "status": {
+      "ALL": "All",
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "REGISTRATION_OPEN": "Registration Open",
+      "REGISTRATION_CLOSED": "Registration Closed",
+      "ONGOING": "Ongoing",
+      "FINISHED": "Finished",
+      "RESULT_PUBLISHED": "Result Published",
+      "CANCELLED": "Cancelled",
+      "INVALID": "Invalid"
+    },
+    "metrics": {
+      "rounds": "Rounds",
+      "competitors": "Competitors",
+      "prizes": "Prizes",
+      "visible": "Visible"
+    },
+    "timeline": {
+      "registration": "Registration",
+      "competition": "Competition"
+    },
+    "meta": {
+      "createdAt": "Created at",
+      "invalidReason": "Invalid reason"
+    }
+  },
+  "ManagerMembers": {
+    "errors": "Unable to determine the current club.",
+    "memberlist": "Member List",
+    "requests": "Join Requests",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "approved": "Approved"
+    },
+    "headers": {
+      "stt": "No.",
+      "avatar": "Avatar",
+      "name": "Member Name",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "joinDate": "Join Date",
+      "status": "Status",
+      "actions": "Actions",
+      "requester": "Requester",
+      "requestedAt": "Requested At",
+      "approvedAt": "Approved At"
+    },
+    "searchPlaceholder": "Search by name",
+    "total": "Total",
+    "member": "members",
+    "error": {
+      "loadMembers": "Failed to load member list.",
+      "loadRequests": "Failed to load join requests."
+    },
+    "empty": {
+      "members": "No members in this club yet.",
+      "requests": "No join requests available."
+    },
+    "approved": {
+      "title": "Approve this request?",
+      "description": "The member will be added to the club after approval.",
+      "confirmText": "Approve",
+      "cancelText": "Cancel",
+      "toast": "Join request approved."
+    },
+    "rejected": {
+      "title": "Reject this request?",
+      "description": "The request will be rejected and the user will not be added to the club.",
+      "confirmText": "Reject",
+      "cancelText": "Cancel",
+      "toast": "Join request rejected."
+    },
+    "done": "Processed"
   }
 }
