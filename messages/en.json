@@ -1261,5 +1261,41 @@
       "toast": "Join request rejected."
     },
     "done": "Processed"
+  },
+  "ManagerCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "sort": {
+      "label": "Number of learners:",
+      "mostPopular": "Most popular",
+      "leastPopular": "Least popular"
+    },
+    "owner": {
+      "label": "Owning club:",
+      "all": "All",
+      "owned": "Owned",
+      "notOwned": "Not owned"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load course list."
+    },
+    "searchPlaceholder": "Enter course name...",
+    "search": "Search",
+    "clearSearch": "Clear",
+    "empty": "No matching courses found"
+  },
+  "ClubCourseCard": {
+    "minutes": "minutes",
+    "sponsored": "Sponsored",
+    "remaining": "codes remaining",
+    "notOwned": "Not owned",
+    "learners": "learners"
   }
 }

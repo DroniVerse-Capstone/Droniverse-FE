@@ -152,7 +152,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
           {version?.level ? (
             <CourseLevelBadge level={version.level} />
           ) : null}
-          <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary/40">
+          <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {version?.estimatedDuration ?? t("unknown")} {t("min")}
           </div>
         </div>

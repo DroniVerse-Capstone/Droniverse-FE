@@ -1257,5 +1257,41 @@
       "toast": "Đã từ chối yêu cầu tham gia."
     },
     "done": "Đã xử lý"
+  },
+  "ManagerCourse": {
+     "filter": "Bộ lọc",
+     "level": {
+      "label": "Cấp độ:",
+      "all": "Tất cả",
+      "easy": "Cơ bản",
+      "medium": "Trung bình",
+      "hard": "Nâng cao"
+    },
+    "sort": {
+      "label": "Số người học:",
+      "mostPopular": "Nhiều nhất",
+      "leastPopular": "Ít nhất"
+    },
+    "owner": {
+      "label": "Club sở hữu:",
+      "all": "Tất cả",
+      "owned": "Đã sở hữu",
+      "notOwned": "Chưa sở hữu"
+    },
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCourses": "Không thể tải danh sách khóa học."
+    },
+    "searchPlaceholder": "Nhập tên khóa học...",
+    "search": "Tìm kiếm",
+    "clearSearch": "Xóa",
+    "empty": "Không có khóa học phù hợp"
+  },
+  "ClubCourseCard": {
+    "minutes": "phút",
+    "sponsored": "Được tài trợ",
+    "remaining": "mã còn lại",
+    "notOwned": "Chưa sở hữu",
+    "learners": "người học"
   }
 }
