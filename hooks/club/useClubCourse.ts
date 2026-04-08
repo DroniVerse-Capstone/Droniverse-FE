@@ -5,13 +5,28 @@ import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
 	GetClubCoursesData,
+	ClubCourseOverview,
+	GetClubHotCoursesData,
+	getClubCourseOverviewQuerySchema,
+	getClubCourseOverviewResponseSchema,
 	getClubCoursesQuerySchema,
 	getClubCoursesResponseSchema,
+	getClubHotCoursesQuerySchema,
+	getClubHotCoursesResponseSchema,
 	GetClubCoursesQuery,
+	GetClubHotCoursesQuery,
 } from "@/validations/club/club-course"
 
 type UseGetClubCoursesOptions = Omit<
 	GetClubCoursesQuery,
+	"currentPage" | "pageSize"
+> & {
+	currentPage?: number
+	pageSize?: number
+}
+
+type UseGetClubHotCoursesOptions = Omit<
+	GetClubHotCoursesQuery,
 	"currentPage" | "pageSize"
 > & {
 	currentPage?: number
@@ -62,4 +77,63 @@ export const useGetClubCourses = (
 	})
 }
 
+export const useGetClubHotCourses = (
+	clubId?: string,
+	options?: UseGetClubHotCoursesOptions
+) => {
+	return useQuery<GetClubHotCoursesData, AxiosError<ApiError>>({
+		queryKey: ["club-hot-courses", clubId, options?.currentPage, options?.pageSize],
+		enabled: !!clubId,
+		queryFn: async () => {
+			if (!clubId) {
+				throw new Error("clubId is required")
+			}
+
+			const parsedOptions = getClubHotCoursesQuerySchema.parse(options ?? {})
+
+			const response = await apiClient.get(
+				`/community/clubs/${clubId}/courses/hot`,
+				{
+					params: {
+						CurrentPage: parsedOptions.currentPage,
+						PageSize: parsedOptions.pageSize,
+					},
+				}
+			)
+
+			const parsed = getClubHotCoursesResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetClubCourseOverview = (
+	clubId?: string,
+	courseVersionId?: string
+) => {
+	return useQuery<ClubCourseOverview, AxiosError<ApiError>>({
+		queryKey: ["club-course-overview", clubId, courseVersionId],
+		enabled: !!clubId && !!courseVersionId,
+		queryFn: async () => {
+			const parsedQuery = getClubCourseOverviewQuerySchema.parse({
+				clubId,
+				courseVersionId,
+			})
+
+			const response = await apiClient.get(
+				`/academy/courses/${parsedQuery.courseVersionId}/overview`,
+				{
+					params: {
+						clubId: parsedQuery.clubId,
+					},
+				}
+			)
+
+			const parsed = getClubCourseOverviewResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
 export type { UseGetClubCoursesOptions }
+export type { UseGetClubHotCoursesOptions }

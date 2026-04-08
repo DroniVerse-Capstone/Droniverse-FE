@@ -490,6 +490,15 @@
         "description": "The club link is invalid or you don't have permission to access it."
       },
       "error": "Failed to load club information"
+    },
+    "ClubHotCourse": {
+      "title": "Hot courses",
+      "viewAll": "View all",
+      "empty": "No hot courses available",
+      "errors": {
+        "resolveClub": "Unable to determine the current club.",
+        "loadCourses": "Failed to load hot course list."
+      }
     }
   },
   "CourseManagement": {

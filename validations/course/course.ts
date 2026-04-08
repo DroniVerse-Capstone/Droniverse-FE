@@ -70,7 +70,7 @@ export const courseSchema = z.object({
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
 	currentVersion: courseVersionSchema.nullable(),
 	courseVersions: z.array(courseVersionSchema).default([]),
-	miniProduct: miniProductSchema.nullable(),
+	miniProduct: miniProductSchema.nullable().optional(),
 })
 
 export const getCoursesDataSchema = z.object({

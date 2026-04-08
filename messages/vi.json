@@ -486,6 +486,15 @@
         "description": "Đường dẫn câu lạc bộ không hợp lệ hoặc bạn không có quyền truy cập."
       },
       "error": "Không tải được thông tin câu lạc bộ"
+    },
+    "ClubHotCourse": {
+      "title": "Khóa học đang hot",
+      "viewAll": "Xem tất cả",
+      "empty": "Chưa có khóa học hot nào",
+      "errors": {
+        "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+        "loadCourses": "Không thể tải danh sách khóa học hot."
+      }
     }
   },
   "CourseManagement": {

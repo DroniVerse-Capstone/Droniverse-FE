@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
 import AppPagination from "@/components/common/AppPagination";
@@ -28,6 +28,7 @@ const UUID_SUFFIX_REGEX =
 
 export default function ManagerCourse() {
   const t = useTranslations("ManagerCourse");
+  const router = useRouter();
   const params = useParams<{ clubSlug?: string }>();
   const clubSlug = params?.clubSlug;
 
@@ -210,7 +211,14 @@ const ownerOptions: InlineFilterOption<CourseOwner>[] = [
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {courses.map((course) => (
-                <ClubCourseCard key={course.courseVersionId} course={course} />
+                <ClubCourseCard
+                  key={course.courseVersionId}
+                  course={course}
+                  onClick={() => {
+                    if (!clubSlug) return;
+                    router.push(`/manager/${clubSlug}/${course.courseVersionId}`);
+                  }}
+                />
               ))}
             </div>
           )}

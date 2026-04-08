@@ -11,11 +11,12 @@ import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type ClubCourseCardProps = {
   course: ClubCourse;
+  onClick?: () => void;
 };
 
 const formatVnd = (value: number) => `${value.toLocaleString("vi-VN")} VND`;
 
-export default function ClubCourseCard({ course }: ClubCourseCardProps) {
+export default function ClubCourseCard({ course, onClick }: ClubCourseCardProps) {
   const t = useTranslations("ClubCourseCard");
   const roleName = useAuthStore((state) => state.user?.roleName);
   const locale = useLocale();
@@ -25,7 +26,19 @@ export default function ClubCourseCard({ course }: ClubCourseCardProps) {
     course.clubCourseOwned?.profitType === "NONPROFIT";
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm transition-colors hover:bg-greyscale-800">
+    <article
+      className="flex h-full flex-col overflow-hidden rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm transition-colors hover:bg-greyscale-800"
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className="relative mb-3 h-42 overflow-hidden rounded border border-greyscale-700">
         <Image
           src={course.imageUrl || "/images/club-placeholder.jpg"}
