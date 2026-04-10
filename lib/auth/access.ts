@@ -9,7 +9,7 @@ export const SYSTEM_MANAGER_ROLE = 'SYSTEM_MANAGER'
 
 const AUTH_PATHS = ['/auth/login', '/auth/register']
 const PUBLIC_PATHS = ['/', '/about', '/contact']
-const MEMBER_PATHS = ['/member']
+const MEMBER_PATHS = ['/member', '/learn']
 const MANAGER_PATHS = ['/manager']
 const SYSTEM_PATHS = [
   '/dashboard',

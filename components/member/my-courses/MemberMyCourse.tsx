@@ -4,27 +4,24 @@ import React from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import AppPagination from "@/components/common/AppPagination";
-import ClubCourseCard from "@/components/club/ClubCourseCard";
-import InlineFilterRow, {
-  InlineFilterOption,
-} from "@/components/common/InlineFilterRow";
 import EmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useGetClubCourses } from "@/hooks/club/useClubCourse";
-import { COURSE_LEVELS } from "@/lib/constants/course";
+import { useGetUserEnrollments } from "@/hooks/enrollment/useUserEnrollment";
 import { useTranslations } from "@/providers/i18n-provider";
-import {
-  ClubCourseLevel,
-  ParticipationSort,
-} from "@/validations/club/club-course";
+import { CourseLevel, EnrollmentStatus } from "@/validations/enrollment/user-enrollment";
+import InlineFilterRow, {
+  InlineFilterOption,
+} from "@/components/common/InlineFilterRow";
+import { COURSE_LEVELS } from "@/lib/constants/course";
 import { IoFilterSharp } from "react-icons/io5";
+import UserEnrollmentCard from "@/components/member/UserEnrollmentCard";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export default function MemberCourse() {
+export default function MemberMyCourse() {
   const t = useTranslations("ManagerCourse");
   const router = useRouter();
   const params = useParams<{ clubSlug?: string }>();
@@ -37,27 +34,26 @@ export default function MemberCourse() {
     return uuidMatch?.[0];
   }, [clubSlug]);
 
-  const sortOptions: InlineFilterOption<ParticipationSort>[] = [
-    { value: "MostPopular", label: t("sort.mostPopular") },
-    { value: "LeastPopular", label: t("sort.leastPopular") },
-  ];
-
-  const [selectedLevel, setSelectedLevel] =
-    React.useState<ClubCourseLevel | null>(null);
-  const [selectedSort, setSelectedSort] =
-    React.useState<ParticipationSort | null>(null);
+  const [selectedLevel, setSelectedLevel] = React.useState<CourseLevel | null>(null);
+  const [selectedStatus, setSelectedStatus] =
+    React.useState<EnrollmentStatus | null>(null);
   const [searchInput, setSearchInput] = React.useState("");
   const [searchKeyword, setSearchKeyword] = React.useState<string | undefined>(
     undefined,
   );
   const [currentPage, setCurrentPage] = React.useState(1);
 
-  const { data, isLoading, isError, error, isFetching } = useGetClubCourses(
+  const statusOptions: InlineFilterOption<EnrollmentStatus>[] = [
+    { value: "ACTIVE", label: "Đang học" },
+    { value: "COMPLETED", label: "Hoàn thành" },
+  ];
+
+  const { data, isLoading, isError, error, isFetching } = useGetUserEnrollments(
     clubId,
     {
       level: selectedLevel,
-      participationSort: selectedSort,
-      courseName: searchKeyword,
+      courseSearchName: searchKeyword,
+      enrollmentStatus: selectedStatus,
       currentPage,
       pageSize: 12,
     },
@@ -66,10 +62,10 @@ export default function MemberCourse() {
   const courses = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
 
-  const levelOptions = React.useMemo<InlineFilterOption<ClubCourseLevel>[]>(
+  const levelOptions = React.useMemo<InlineFilterOption<CourseLevel>[]>(
     () =>
       COURSE_LEVELS.filter((level) => level.value !== null).map((level) => ({
-        value: level.value as ClubCourseLevel,
+        value: level.value as CourseLevel,
         label: t(level.label),
       })),
     [t],
@@ -87,13 +83,13 @@ export default function MemberCourse() {
     setCurrentPage(1);
   }, []);
 
-  const updateLevel = React.useCallback((value: ClubCourseLevel | null) => {
+  const updateLevel = React.useCallback((value: CourseLevel | null) => {
     setSelectedLevel(value);
     setCurrentPage(1);
   }, []);
 
-  const updateSort = React.useCallback((value: ParticipationSort | null) => {
-    setSelectedSort(value);
+  const updateStatus = React.useCallback((value: EnrollmentStatus | null) => {
+    setSelectedStatus(value);
     setCurrentPage(1);
   }, []);
 
@@ -124,11 +120,11 @@ export default function MemberCourse() {
             />
 
             <InlineFilterRow
-              label={t("sort.label")}
-              selectedValue={selectedSort}
-              options={sortOptions}
+              label="Trạng thái"
+              selectedValue={selectedStatus}
+              options={statusOptions}
+              onChange={updateStatus}
               allLabel={t("level.all")}
-              onChange={updateSort}
             />
           </div>
 
@@ -191,13 +187,13 @@ export default function MemberCourse() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {courses.map((course) => (
-                <ClubCourseCard
-                  key={course.courseVersionId}
-                  course={course}
+                <UserEnrollmentCard
+                  key={course.enrollmentId}
+                  enrollment={course}
                   onClick={() => {
                     if (!clubSlug) return;
                     router.push(
-                      `/member/${clubSlug}/${course.courseVersionId}`,
+                      `/learn/${clubSlug}/${course.enrollmentId}`,
                     );
                   }}
                 />
