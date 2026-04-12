@@ -1,47 +1,30 @@
-export const AMBIENT_COLOR = "#030712";
+import { SIMULATOR_CONFIG } from "../simulator/config";
 
+export const AMBIENT_COLOR = SIMULATOR_CONFIG.mapVisuals.ambientColor;
 
 export const MAP_COLORS = {
-  // Màu mặt phẳng chính
-  GROUND: {
-    color: "#030712",
-    roughness: 0.9,
-    metalness: 1,
-  },
-
-  // Màu grid 
-  GRID: {
-    sectionColor: "#0170A7",
-    cellColor: "#86134dff",
-  },
-
-  // Màu border 
-  BORDER: {
-    color: "#38bdf8",
-    lineWidth: 4,
-    opacity: 0.9,
-    transparent: true,
-  },
+  GROUND: SIMULATOR_CONFIG.mapVisuals.colors.ground,
+  GRID: SIMULATOR_CONFIG.mapVisuals.colors.grid,
+  BORDER: SIMULATOR_CONFIG.mapVisuals.colors.border,
 };
 
 export const GRID_CONFIG = {
-  cellSize: 10,
-  cellThickness: 0.6,
-  sectionThickness: 1.2,
-  sectionSize: 20,
-  infiniteGrid: false,
-  fadeStrength: 0,
-  position: [0, 0.15, 0] as [number, number, number],
+  cellSize: SIMULATOR_CONFIG.mapVisuals.grid.cellSize,
+  cellThickness: SIMULATOR_CONFIG.mapVisuals.grid.cellThickness,
+  sectionThickness: SIMULATOR_CONFIG.mapVisuals.grid.sectionThickness,
+  sectionSize: SIMULATOR_CONFIG.mapVisuals.grid.sectionSize,
+  infiniteGrid: SIMULATOR_CONFIG.mapVisuals.grid.infinite,
+  fadeStrength: SIMULATOR_CONFIG.mapVisuals.grid.fadeStrength,
+  position: SIMULATOR_CONFIG.mapVisuals.grid.pos,
 };
 
 export const BORDER_CONFIG = {
-  height: 0.02,
+  height: SIMULATOR_CONFIG.mapVisuals.border.height,
 };
 
 export const TERRAIN_MODEL_CONFIG = {
-  useCustomTerrain: false,
-  terrainPath: "",
-  scale: 1,
-  position: [0, 0, 0] as [number, number, number],
+  useCustomTerrain: SIMULATOR_CONFIG.mapVisuals.terrain.useCustom,
+  terrainPath: SIMULATOR_CONFIG.mapVisuals.terrain.path,
+  scale: SIMULATOR_CONFIG.mapVisuals.terrain.scale,
+  position: SIMULATOR_CONFIG.mapVisuals.terrain.pos,
 };
-

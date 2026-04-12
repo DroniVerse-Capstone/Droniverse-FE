@@ -23,23 +23,71 @@ const sanitizeEnvironment = (env: any) => {
       sequentialCheckpoints: !!env.rule.sequentialCheckpoints,
       maxBlocks: env.rule.maxBlocks || 0
     } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
-    hasSolution: env.hasSolution || env.rule?.hasSolution || false
+    hasSolution: env.hasSolution || env.rule?.hasSolution || false,
+    solution: env.solution
   };
 };
 
-export const useGetLabs = () => {
-  return useQuery({
-    queryKey: ["labs"],
+export type LabStatus = "DRAFT" | "ACTIVE" | "INACTIVE" | "LOCKED" | "DELETED";
+
+export type UseGetLabsOptions = {
+  type?: "LEARNING" | "COMPETITION";
+  status?: LabStatus;
+  searchTerm?: string;
+  pageIndex?: number;
+  pageSize?: number;
+  withPaginationMeta?: boolean;
+};
+
+export type LabsPaginationData = {
+  data: LabData[];
+  totalRecords: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export function useGetLabs(options?: UseGetLabsOptions) {
+  return useQuery<LabData[] | LabsPaginationData>({
+    queryKey: [
+      "labs",
+      options?.type,
+      options?.status,
+      options?.searchTerm,
+      options?.pageIndex,
+      options?.pageSize,
+      options?.withPaginationMeta,
+    ],
     queryFn: async () => {
-      // Fetch all Labs (Metadata) from REAL Backend
       const response = await apiClient.get<any>("/academy/labs", {
-        params: { PageSize: 1000 }
+        params: {
+          ...(options?.status && { Status: options.status }),
+          ...(options?.searchTerm && { SearchTerm: options.searchTerm }),
+          ...(options?.type && { Type: options.type }),
+          ...(options?.pageIndex !== undefined && { PageIndex: options.pageIndex }),
+          ...(options?.pageSize !== undefined
+            ? { PageSize: options.pageSize }
+            : { PageSize: 1000 }),
+        }
       });
-      const labsList = response.data?.data?.data || [];
-      return labsList as LabData[];
+      const responseData = response.data?.data;
+      const labsList = responseData?.data || [];
+      const paginationData: LabsPaginationData = {
+        data: labsList as LabData[],
+        totalRecords: responseData?.totalRecords || 0,
+        pageIndex: responseData?.pageIndex || options?.pageIndex || 1,
+        pageSize: responseData?.pageSize || options?.pageSize || labsList.length || 0,
+        totalPages: responseData?.totalPages || 1,
+      };
+
+      if (options?.withPaginationMeta) {
+        return paginationData as LabsPaginationData;
+      }
+
+      return paginationData.data as LabData[];
     },
   });
-};
+}
 
 export const useGetLab = (labID: string | null) => {
   return useQuery({
@@ -260,8 +308,6 @@ export const useUpdateLabFull = () => {
 
   return useMutation({
     mutationFn: async ({ labID, data, contentId }: { labID: string; data: Partial<LabData>; contentId?: string }) => {
-      // Chỉ lưu Map Nội dung (Rule, Môi trường, Tọa độ) khi đang ở Map Editor.
-      // Không update lại Thông tin cơ bản (Tên, Thể loại...) vì đã tách ra Modal bên ngoài list
       const labContentData = data.labContent?.environment;
 
       if (labContentData) {

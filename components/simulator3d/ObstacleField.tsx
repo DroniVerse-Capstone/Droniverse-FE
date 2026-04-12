@@ -33,10 +33,10 @@ export default function ObstacleField({ obstacles }: Props) {
       {obstacles.map((ob) => {
         switch ((ob.type || "box").toLowerCase()) {
           case "cylinder":
-            return <CylinderObstacle key={ob.id} ob={ob} />;
+            return <CylinderObstacle key={ob.id} color={ob.color} size={ob.size} />;
           case "box":
           default:
-            return <BoxObstacle key={ob.id} ob={ob} />;
+            return <BoxObstacle key={ob.id} color={ob.color} size={ob.size} />;
         }
       })}
     </group>

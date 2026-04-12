@@ -249,9 +249,9 @@ const BOX_CONSTRAINTS: ModelConstraints = {
     },
     scale: {
         uniform: false,
-        x: { enabled: true, min: 2, max: 4.5 },
-        y: { enabled: true, min: 2, max: 4.5 },
-        z: { enabled: true, min: 2, max: 4.5 },
+        x: { enabled: true, min: 5, max: 50 },
+        y: { enabled: true, min: 5, max: 50 },
+        z: { enabled: true, min: 5, max: 50 },
     },
 };
 
@@ -313,10 +313,10 @@ export const PREDEFINED_MODELS: PredefinedModel[] = [
         id: "box",
         name: "Box",
         url: "primitive:box",
-        defaultScale: 2,
-        previewScale: 0.3,
-        minScale: 2,
-        maxScale: 4.5,
+        defaultScale: 10,
+        previewScale: 0.07,
+        minScale: 5,
+        maxScale: 50,
         scalable: true,
         rotatable: true,
         hasColor: true,

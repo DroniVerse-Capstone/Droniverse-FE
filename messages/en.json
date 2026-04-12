@@ -899,7 +899,7 @@
       "create": "Create New"
     },
     "status": {
-      "active": "Active",
+      "active": "Published",
       "inactive": "Inactive",
       "draft": "Draft",
       "loading": "Loading...",
@@ -913,12 +913,21 @@
     "filters": {
       "all": "All",
       "draft": "Draft",
-      "active": "Active",
+      "active": "Published",
       "inactive": "Inactive"
+    },
+    "level": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "type": {
+      "learning": "Learning",
+      "competition": "Competition"
     },
     "stats": {
       "total": "TOTAL LABS",
-      "active": "ACTIVE",
+      "active": "PUBLISHED",
       "draft": "DRAFT",
       "inactive": "INACTIVE"
     },
@@ -930,9 +939,11 @@
       "notFoundDesc": "No Labs match your search content or status.",
       "noDescription": "No detailed description available.",
       "status": {
-        "active": "ACTIVE",
+        "active": "PUBLISHED",
         "draft": "DRAFT",
-        "inactive": "INACTIVE"
+        "inactive": "INACTIVE",
+        "locked": "LOCKED",
+        "deleted": "DELETED"
       },
       "actions": {
         "editInfo": "Edit Information",
@@ -953,7 +964,9 @@
       "descPlaceholderEN": "Lab description...",
       "level": "Difficulty",
       "type": "Lab Type",
+      "estimatedTime": "Estimated duration (min) *",
       "status": "Status",
+      "required": "This field is required",
       "publishRequirements": "Requirements for publication",
       "syncing": "Syncing data...",
       "checklist": {
@@ -1068,10 +1081,23 @@
       "title": "Rule Configuration",
       "description": "Set completion conditions for the lab",
       "requiredScore": "Required Score *",
+      "goalLimit": "Goal score limit",
+      "useMax": "Use Max",
       "totalAvailable": "Total score available",
+      "noBonusItems": "No bonus items found on current map",
       "scoreError": "⚠ Required score exceeds current total available ({maxScore} pts)",
       "timeLimit": "Time Limit (sec) *",
       "maxBlocks": "Max Blocks *",
+      "fuelLimit": "Max Energy (Fuel)",
+      "fuelLimitDesc": "Limit energy to force optimal flight paths",
+      "constraints": "Mission Constraints",
+      "checklistTitle": "COMPLETION REQUIREMENTS",
+      "checklist": {
+        "drone": "Drone starting point",
+        "objects": "Objects in Map",
+        "rules": "Rules & Constraints",
+        "solution": "Solve Test Result"
+      },
       "advancedRules": "Advanced Rules",
       "sequentialCheckpoints": "Sequential Fly",
       "sequentialDesc": "Drone must pass through checkpoints in order 1 → 2 → 3...",

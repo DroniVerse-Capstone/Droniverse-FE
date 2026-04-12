@@ -51,23 +51,24 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         playSound: { message: t("blockly.blocks.playSound.message"), tooltip: t("blockly.blocks.playSound.tooltip") },
         inputNumber: { message: t("blockly.blocks.inputNumber.message"), tooltip: t("blockly.blocks.inputNumber.tooltip") },
       });
-      const blocklyDiv = blocklyDivRef.current!;
+      const blocklyDiv = blocklyDivRef.current;
+      if (!mounted || !blocklyDiv || !document.body.contains(blocklyDiv)) return;
 
       const DarkTheme = Blockly.Theme.defineTheme("droneDark", {
         name: "droneDark",
         base: Blockly.Themes.Classic,
         componentStyles: {
-          workspaceBackgroundColour: "#0F172B", 
-          toolboxBackgroundColour: "#111122", 
-          toolboxForegroundColour: "#ff7bff", 
-          flyoutBackgroundColour: "#1a1a2e", 
-          flyoutForegroundColour: "#6effff", 
+          workspaceBackgroundColour: "#0F172B",
+          toolboxBackgroundColour: "#111122",
+          toolboxForegroundColour: "#ff7bff",
+          flyoutBackgroundColour: "#1a1a2e",
+          flyoutForegroundColour: "#6effff",
           flyoutOpacity: 0.95,
 
-          scrollbarColour: "#a855f7", 
+          scrollbarColour: "#a855f7",
           scrollbarOpacity: 0.7,
 
-          insertionMarkerColour: "#00f0ff", 
+          insertionMarkerColour: "#00f0ff",
           insertionMarkerOpacity: 0.8,
         },
         blockStyles: {
@@ -134,6 +135,7 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         collapse: false,
       } as any);
 
+      // ... rest of the code remains same ...
       let currentSelectedItem: any = null;
 
       const checkBlocksChange = () => {
@@ -251,10 +253,10 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
                 }
               }
             };
-            
+
             if (typeof flyout.show === 'function') {
               const originalShow = flyout.show.bind(flyout);
-              flyout.show = function(category: any) {
+              flyout.show = function (category: any) {
                 const result = originalShow(category);
                 setTimeout(() => {
                   setBlocksMinWidth();
@@ -268,8 +270,22 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
 
       workspaceRef.current = workspace;
       if (onWorkspaceReady) onWorkspaceReady({ Blockly, workspace });
-      
+
       checkBlocksChange();
+
+      // Resize Observer: Cập nhật kích thước workspace khi container thay đổi
+      const resizeObserver = new ResizeObserver(() => {
+        if (workspaceRef.current) {
+          Blockly.svgResize(workspaceRef.current);
+        }
+      });
+      if (blocklyDivRef.current) {
+        resizeObserver.observe(blocklyDivRef.current);
+      }
+
+      return () => {
+        resizeObserver.disconnect();
+      };
     })();
 
     return () => {
@@ -279,7 +295,7 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         workspaceRef.current = null;
       }
     };
-  }, [onWorkspaceReady, toolboxXml, onBlocksChange]);
+  }, []); // Chỉ chạy 1 lần duy nhất khi mount - không phụ thuộc vào callbacks để tránh dispose/reinit
 
   useEffect(() => {
     if (workspaceRef.current && toolboxXml) {
@@ -289,9 +305,8 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
 
   return (
     <div
-      className={`h-full w-full relative ${
-        panelsCollapsed ? "blockly-panels-collapsed" : ""
-      }`}
+      className={`h-full w-full relative ${panelsCollapsed ? "blockly-panels-collapsed" : ""
+        }`}
     >
       <button
         type="button"

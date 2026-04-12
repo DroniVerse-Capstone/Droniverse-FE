@@ -28,11 +28,10 @@ export default function PreviewModel({ model }: { model: any }) {
       );
     }
     if (t === "box") {
-      const size = [model.defaultScale * 2, model.defaultScale * 2, model.defaultScale * 2];
-      const ob = { id: "preview-box", position: [0, 0, 0], size, color: "#00d9ff" };
+      const size: [number, number, number] = [model.defaultScale * 2, model.defaultScale * 2, model.defaultScale * 2];
       return (
         <group scale={[previewScale, previewScale, previewScale]}>
-          <BoxObstacle ob={ob as any} />
+          <BoxObstacle size={size} color="#00d9ff" />
         </group>
       );
     }

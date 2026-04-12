@@ -25,6 +25,17 @@ export interface LabRule {
   requiredScore: number;
   sequentialCheckpoints: boolean;
   maxBlocks?: number;
+  fuelLimit?: number;
+}
+
+export interface LabSolution {
+  xml: string;
+  metrics: {
+    timeSpent: number;
+    fuelConsumed: number;
+    logicalDistance: number;
+    blockCount: number;
+  };
 }
 
 export interface LabContentData {
@@ -32,6 +43,7 @@ export interface LabContentData {
   map: LabMap;
   rule: LabRule;
   hasSolution: boolean;
+  solution?: LabSolution;
 }
 
 export type LabLevel = "EASY" | "MEDIUM" | "HARD";
@@ -54,6 +66,13 @@ export interface LabData {
   updatedAt?: string;
   thumbnail?: string;
   isActive?: boolean;
+  estimatedTime?: number;
+  creator?: {
+    userId: string;
+    fullName: string;
+    email: string;
+    avatarUrl: string | null;
+  };
 }
 
 export interface LabContent {

@@ -20,8 +20,8 @@ import { LabData, LabRule, LabMap, MapObject } from "@/types/lab";
 import { getLabValidation } from "@/lib/map-editor/labValidation";
 import { useLabFull, useUpdateLabFull, useSuspenseLabFull } from "@/hooks/lab/useLabs";
 import {
-  FaSave, FaArrowLeft, FaCheck, FaClock, FaStar, FaExclamationTriangle,
-  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes
+  FaSave, FaArrowLeft, FaCheck, FaClock, FaStar, FaExclamationTriangle, FaEye,
+  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes, FaPlay
 } from "react-icons/fa";
 import Loading from "@/app/loading";
 import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
@@ -62,6 +62,7 @@ import CheckpointRing from "../simulator3d/checkpoint/CheckpointBeacon";
 import RockGLB from "../simulator3d/obstacles/RockGLB";
 import GrassGLB from "../simulator3d/decor/GrassGLB";
 import Tree2GLB from "../simulator3d/decor/Tree2GLB";
+import { MapEnvironment } from "../simulator3d/MapEnvironment";
 import {
   buildModelCategories,
   getConstraintsForModel,
@@ -444,12 +445,13 @@ function ModelObject({
             castShadow
             receiveShadow
             position={object.position}
+            rotation={object.rotation}
             scale={object.scale}
           >
             <DroneBody
               state={{
                 position: [0, 0, 0],
-                headingRad: object.rotation[1] ?? 0,
+                headingRad: 0,
                 isFlying: false,
               }}
             />
@@ -465,16 +467,8 @@ function ModelObject({
             scale={object.scale}
           >
             <BoxObstacle
-              ob={{
-                id: object.id,
-                position: [0, 0, 0],
-                size: [
-                  object.scale[0] * 2,
-                  object.scale[1] * 2,
-                  object.scale[2] * 2,
-                ],
-                color: object.color,
-              }}
+              color={object.color}
+              size={[1, 1, 1]}
             />
           </group>
         ) : primitiveType === "tree" ? (
@@ -1244,51 +1238,6 @@ function Scene({
 
 }
 
-export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunset" | "daylight" }) {
-  if (theme === "space") {
-    return (
-      <>
-        <color attach="background" args={["#050510"]} />
-        <Stars radius={200} depth={200} count={3000} factor={15} saturation={0} fade speed={3} />
-        <ambientLight intensity={0.2} />
-      </>
-    );
-  }
-  if (theme === "sunset") {
-    return (
-      <>
-        <Sky
-          sunPosition={[100, 10, 100]}
-          turbidity={10}
-          rayleigh={1}
-          mieCoefficient={0.005}
-          mieDirectionalG={0.8}
-        />
-
-        <Environment preset="sunset" />
-        <ambientLight intensity={0.5} />
-
-        {/* Clear Golden Hour Sunlight */}
-        <directionalLight
-          position={[50, 50, 50]}
-          intensity={1.5}
-          color="#291e50ff"
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-        />
-      </>
-    );
-  }
-  if (theme === "daylight") {
-    return (
-      <>
-        <Sky sunPosition={[100, 20, 100]} />
-        <ambientLight intensity={0.8} />
-      </>
-    );
-  }
-  return <color attach="background" args={["#071427"]} />;
-}
 
 function MapEditorContent() {
   const mainCanvasContainerRef = useRef<HTMLDivElement>(null);
@@ -1325,6 +1274,7 @@ function MapEditorContent() {
       timeLimit: storedLab.labContent?.environment?.rule?.timeLimit || 0,
       requiredScore: storedLab.labContent?.environment?.rule?.requiredScore || 0,
       maxBlocks: storedLab.labContent?.environment?.rule?.maxBlocks || 0,
+      fuelLimit: storedLab.labContent?.environment?.rule?.fuelLimit || 0,
       sequentialCheckpoints: storedLab.labContent?.environment?.rule?.sequentialCheckpoints || false,
     };
   });
@@ -1395,6 +1345,23 @@ function MapEditorContent() {
     }
   }, [objects, map, rule, hasSolution, labId, storedLab]);
 
+  // 2.5 Real-time Validation for UI
+  const currentValidation = useMemo(() => {
+    // Construct a virtual LabData for validation purposes
+    const virtualLab = {
+      ...storedLab,
+      labContent: {
+        environment: {
+          objects,
+          map,
+          rule,
+          hasSolution
+        }
+      }
+    } as any;
+    return getLabValidation(virtualLab);
+  }, [objects, map, rule, hasSolution, storedLab]);
+
   // 3. Navigation Guard
   useEffect(() => {
     // A. External Navigation (Browser Refresh/Close)
@@ -1441,10 +1408,14 @@ function MapEditorContent() {
   const handleBack = useCallback(() => {
     if (isDirty) {
       if (window.confirm(t("confirm.unsavedChanges"))) {
-        router.push("/lab-management");
+        // router.push("/lab-management");
+        router.back()
+
       }
     } else {
-      router.push("/lab-management");
+      // router.push("/lab-management");
+      router.back()
+
     }
   }, [isDirty, router]);
 
@@ -1469,8 +1440,28 @@ function MapEditorContent() {
     if (ruleOverride) setRule(ruleOverride);
     if (objectsOverride) setObjects(objectsOverride);
 
-    const currentRule = ruleOverride || rule;
     const currentObjects = objectsOverride || objects;
+
+    // --- Rule Sanitization (Teacher-Proofing) ---
+    // This part ensures that even if the user deletes items after setting rules, 
+    // the saved lab is ALWAYS possible to finish.
+    const actualMaxScore = currentObjects.reduce((acc, o) => acc + (o.scoreValue || 0), 0);
+    const actualCPCount = currentObjects.filter(o => o.objectType === "checkpoint").length;
+
+    let currentRule = ruleOverride || rule;
+
+    // If the required score is higher than what's available on the map, we auto-fix it.
+    if (currentRule.requiredScore > actualMaxScore) {
+      currentRule = { ...currentRule, requiredScore: actualMaxScore };
+    }
+
+    // If sequential is ON but we don't have at least 2 checkpoints, we auto-off it.
+    if (currentRule.sequentialCheckpoints && actualCPCount < 2) {
+      currentRule = { ...currentRule, sequentialCheckpoints: false };
+    }
+
+    setRule(currentRule);
+    // --------------------------------------------
 
     try {
       // Small delay for psychological feedback (feel premium)
@@ -1488,8 +1479,13 @@ function MapEditorContent() {
           theme: map.theme,
         },
         rule: currentRule,
-        hasSolution
+        hasSolution: isDirty ? false : hasSolution,
+        solution: isDirty ? undefined : (storedLab?.labContent?.environment?.solution)
       };
+
+      if (isDirty && hasSolution) {
+        console.log("Map/Rules changed. Invalidating existing solution.");
+      }
 
       if (publish) {
         const validation = getLabValidation({
@@ -1514,11 +1510,17 @@ function MapEditorContent() {
           }, {
             onSuccess: () => {
               setSaveSuccess(true);
-              setIsDirty(false);
-              // Snapshot new state as the reference
-              lastSavedStateRef.current = stableStringify(labContentData);
+              
+              if (isDirty && hasSolution) {
+                setHasSolution(false);
+                toast.warning("Bản đồ đã thay đổi. Lời giải mẫu cũ đã bị xóa để đảm bảo tính chính xác.");
+              } else {
+                toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              }
 
-              toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              // Snapshot new state as the reference point for isDirty
+              lastSavedStateRef.current = stableStringify(labContentData);
+              setIsDirty(false);
               if (publish) {
                 setTimeout(() => router.push("/lab-management"), 1200);
               }
@@ -1542,6 +1544,18 @@ function MapEditorContent() {
       return false;
     }
   }, [labId, map, rule, objects, router, toast, updateLabFull, contentId, storedLab]);
+
+  /**
+   * Chuyển hướng sang trang Solver để Admin giải đố và lưu lời giải mẫu.
+   * Tự động lưu Map hiện tại nếu có thay đổi.
+   */
+  const handleTestFlight = useCallback(async () => {
+    if (isDirty) {
+      const success = await saveToStorage(false);
+      if (!success) return; // Abort if save failed
+    }
+    router.push(`/lab-management/${labId}/solve`);
+  }, [isDirty, saveToStorage, router, labId]);
 
   const [missionRunning, setMissionRunning] = useState(false);
   const [missionTimeLeft, setMissionTimeLeft] = useState(0);
@@ -2230,9 +2244,10 @@ function MapEditorContent() {
 
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap gap-y-2">
+        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap ">
           {/* Map size */}
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
+          <div className="flex items-center gap-2
+           px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
             <svg
               width="13"
               height="13"
@@ -2284,7 +2299,7 @@ function MapEditorContent() {
 
             <button
               onClick={() => saveToStorage(false)}
-              disabled={isSaving || !isOnline}
+              disabled={isSaving || !isOnline || !isDirty}
               className={`
                 relative flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded transition-all duration-300 border
                 ${saveSuccess
@@ -2319,7 +2334,19 @@ function MapEditorContent() {
               {t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
 
-
+            {currentValidation.hasDrone && currentValidation.hasObjects && currentValidation.hasRules && (
+              <button
+                onClick={handleTestFlight}
+                className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-emerald-500 text-black border border-emerald-400 hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 ml-1"
+              >
+                {hasSolution ? (
+                  <FaEye className="text-[10px] group-hover:scale-110 transition-transform" />
+                ) : (
+                  <FaPlay className="text-[10px] group-hover:scale-110 transition-transform" />
+                )}
+                {hasSolution ? "Xem lời giải" : "Giải thử"}
+              </button>
+            )}
           </div>
 
           <div className="h-5 w-px bg-white/10" />
@@ -2429,6 +2456,14 @@ function MapEditorContent() {
           {selectedObject && (
             <button
               onClick={handleDeleteSelected}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
               title="Delete selected object (Del / Backspace)"
               className="absolute left-4 top-4 z-40 group flex items-center gap-2 px-3 py-2 rounded-lg bg-red-950/80 hover:bg-red-700/90 border border-red-500/30 hover:border-red-400/60 text-red-400 hover:text-white text-[12px] font-medium backdrop-blur-sm shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
             >
@@ -2450,7 +2485,17 @@ function MapEditorContent() {
             </button>
           )}
           {selectedObject && transformMode === "rotate" && (
-            <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40">
+            <div 
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
+              className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40"
+            >
               <div className="text-sm font-medium mb-2">{t("properties.rotateY")}</div>
               <div className="flex gap-2 items-center">
                 <button
@@ -2505,7 +2550,17 @@ function MapEditorContent() {
                 { key: "z" as const, label: t("properties.depth"), idx: 2 },
               ];
               return (
-                <div className="absolute right-6 top-6 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48">
+                <div 
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48"
+                >
                   <div className="text-sm font-medium mb-2">{t("properties.title")}</div>
                   {modelCfg?.hasColor && (
                     <>
@@ -2628,7 +2683,17 @@ function MapEditorContent() {
                 .filter((o) => o.objectType === "checkpoint")
                 .findIndex((o) => o.id === selectedObject.id);
               return (
-                <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52">
+                <div 
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52"
+                >
                   <div className="text-sm font-medium mb-2">
                     🔵 {t("properties.checkpointTitle")}
                   </div>
@@ -2686,7 +2751,8 @@ function MapEditorContent() {
             onChange={setRule}
             objects={objects}
             isSaving={isSaving}
-            onSave={async (draftRule) => {
+            hasSolution={hasSolution}
+            onSave={async (draftRule: any) => {
               const success = await saveToStorage(false, draftRule);
               if (success) {
                 setShowMissionModal(false);

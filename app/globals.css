@@ -103,22 +103,26 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-2xl: 32px;
-  --radius: 8px; /* Default radius */
+  --radius: 8px;
+  /* Default radius */
 }
 
 /* Blockly UX tweaks (Scratch-like) */
 .blocklyToolboxDiv {
   width: 220px;
 }
+
 .blocklyFlyoutBackground {
   fill: #f3f4f6 !important;
   fill-opacity: 1 !important;
 }
+
 .blocklyTreeLabel {
   font-size: 13px !important;
 }
-.blocklyZoom > image,
-.blocklyTrash > image {
+
+.blocklyZoom>image,
+.blocklyTrash>image {
   opacity: 0.9;
 }
 
@@ -203,10 +207,12 @@ body {
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
