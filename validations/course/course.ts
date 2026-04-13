@@ -1,3 +1,4 @@
+import { certificateInfoSchema } from "@/validations/course-version/course-version"
 import { z } from "zod"
 
 export const courseUserSchema = z.object({
@@ -59,6 +60,7 @@ export const courseVersionSchema = z.object({
 	updateAt: z.string().nullable(),
 	contextVN: z.string(),
 	contextEN: z.string(),
+	certificate: certificateInfoSchema.nullable(),
 	categories: z.array(z.unknown()),
 	requiredDrones: z.array(z.unknown()),
 })

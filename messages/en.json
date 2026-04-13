@@ -656,6 +656,18 @@
       "image": {
         "empty": "No image available"
       },
+      "certificate": {
+        "label": "Certificate",
+        "empty": "No certificate image",
+        "actions": {
+          "create": "Create certificate",
+          "creating": "Creating..."
+        },
+        "toast": {
+          "createSuccess": "Certificate created successfully.",
+          "createError": "Failed to create certificate."
+        }
+      },
       "meta": {
         "createdBy": "Created by",
         "createdAt": "Created at",
@@ -1299,6 +1311,47 @@
     "search": "Search",
     "clearSearch": "Clear",
     "empty": "No matching courses found"
+  },
+  "ManagerMyCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "profitType": {
+      "label": "Profit type:",
+      "all": "All",
+      "profit": "For-profit",
+      "nonprofit": "Non-profit"
+    },
+    "sortBy": {
+      "label": "Sort by:",
+      "all": "All",
+      "totalCodes": "Total codes",
+      "remainingCodes": "Remaining codes",
+      "participants": "Participants"
+    },
+    "sortDirection": {
+      "label": "Direction:",
+      "all": "None",
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load club course list."
+    },
+    "empty": "No courses available"
+  },
+  "ManagerMyCourseCard": {
+    "minutes": "minutes",
+    "learners": "learners",
+    "codes": "codes remaining",
+    "profit": "For-profit",
+    "nonProfit": "Non-profit"
   },
   "ClubCourseCard": {
     "minutes": "minutes",

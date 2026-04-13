@@ -47,8 +47,59 @@ export const getUserLearningPathResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const userLessonStatusSchema = z.enum([
+	"INCOMPLETED",
+	"IN_PROGRESS",
+	"COMPLETED",
+])
+
+export const userLessonSchema = z.object({
+	userLessonID: z.string().uuid(),
+	lessonID: z.string().uuid(),
+	userID: z.string().uuid(),
+	status: userLessonStatusSchema,
+	progress: z.number().min(0).max(100),
+	lastAccessDate: z.string().nullable(),
+})
+
+export const createUserLessonDataParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	lessonId: z.string().uuid(),
+})
+
+export const createUserLessonDataResponseSchema = z.object({
+	data: userLessonSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const checkUserLessonExistsParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	lessonId: z.string().uuid(),
+})
+
+export const checkUserLessonExistsResponseSchema = z.object({
+	data: z.boolean(),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type Lesson = z.infer<typeof lessonSchema>
 export type Module = z.infer<typeof moduleSchema>
 export type UserLearningPath = z.infer<typeof userLearningPathSchema>
 export type GetUserLearningPathResponse = z.infer<typeof getUserLearningPathResponseSchema>
 export type LessonType = z.infer<typeof lessonTypeSchema>
+export type UserLessonStatus = z.infer<typeof userLessonStatusSchema>
+export type UserLesson = z.infer<typeof userLessonSchema>
+export type CreateUserLessonDataParams = z.infer<
+	typeof createUserLessonDataParamsSchema
+>
+export type CreateUserLessonDataResponse = z.infer<
+	typeof createUserLessonDataResponseSchema
+>
+export type CheckUserLessonExistsParams = z.infer<
+	typeof checkUserLessonExistsParamsSchema
+>
+export type CheckUserLessonExistsResponse = z.infer<
+	typeof checkUserLessonExistsResponseSchema
+>

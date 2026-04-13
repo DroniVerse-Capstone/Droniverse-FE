@@ -652,6 +652,18 @@
       "image": {
         "empty": "Không có hình ảnh"
       },
+      "certificate": {
+        "label": "Chứng chỉ",
+        "empty": "Không có ảnh chứng chỉ",
+        "actions": {
+          "create": "Tạo chứng chỉ",
+          "creating": "Đang tạo..."
+        },
+        "toast": {
+          "createSuccess": "Đã tạo chứng chỉ thành công.",
+          "createError": "Không thể tạo chứng chỉ."
+        }
+      },
       "meta": {
         "createdBy": "Người tạo",
         "createdAt": "Ngày tạo",
@@ -1295,6 +1307,47 @@
     "search": "Tìm kiếm",
     "clearSearch": "Xóa",
     "empty": "Không có khóa học phù hợp"
+  },
+  "ManagerMyCourse": {
+    "filter": "Bộ lọc",
+    "level": {
+      "label": "Cấp độ:",
+      "all": "Tất cả",
+      "easy": "Cơ bản",
+      "medium": "Trung bình",
+      "hard": "Nâng cao"
+    },
+    "profitType": {
+      "label": "Loại lợi nhuận:",
+      "all": "Tất cả",
+      "profit": "Có lợi nhuận",
+      "nonprofit": "Phi lợi nhuận"
+    },
+    "sortBy": {
+      "label": "Sắp xếp theo:",
+      "all": "Tất cả",
+      "totalCodes": "Tổng số mã",
+      "remainingCodes": "Số mã còn lại",
+      "participants": "Số thành viên học"
+    },
+    "sortDirection": {
+      "label": "Thứ tự:",
+      "all": "Không có",
+      "asc": "Tăng dần",
+      "desc": "Giảm dần"
+    },
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCourses": "Không thể tải danh sách khóa học của câu lạc bộ."
+    },
+    "empty": "Chưa có khóa học nào"
+  },
+  "ManagerMyCourseCard": {
+    "minutes": "phút",
+    "learners": "thành viên học",
+    "codes": "mã còn lại",
+    "profit": "Có lợi nhuận",
+    "nonProfit": "Phi lợi nhuận"
   },
   "ClubCourseCard": {
     "minutes": "phút",
