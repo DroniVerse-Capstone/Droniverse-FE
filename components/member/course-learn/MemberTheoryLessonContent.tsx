@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import toast from "react-hot-toast";
 
 import { Spinner } from "@/components/ui/spinner";
+import { useCompleteUserLesson } from "@/hooks/learning/useUserLearning";
 import { useGetTheoryDetail } from "@/hooks/theory/useTheory";
 import { useLocale } from "@/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
@@ -10,13 +12,45 @@ import { FaRegCheckCircle } from "react-icons/fa";
 
 type MemberTheoryLessonContentProps = {
   referenceId: string;
+  enrollmentId?: string;
+  lessonId: string;
+  isCompleted: boolean;
 };
 
 export default function MemberTheoryLessonContent({
   referenceId,
+  enrollmentId,
+  lessonId,
+  isCompleted,
 }: MemberTheoryLessonContentProps) {
   const locale = useLocale();
   const theoryDetailQuery = useGetTheoryDetail(referenceId);
+  const completeLessonMutation = useCompleteUserLesson();
+  const [completed, setCompleted] = React.useState(isCompleted);
+
+  React.useEffect(() => {
+    setCompleted(isCompleted);
+  }, [isCompleted]);
+
+  const handleCompleteLesson = async () => {
+    if (!enrollmentId || completed || completeLessonMutation.isPending) {
+      return;
+    }
+
+    try {
+      await completeLessonMutation.mutateAsync({
+        enrollmentId,
+        lessonId,
+      });
+      setCompleted(true);
+      toast.success("Hoàn thành bài học thành công.");
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? "Không thể hoàn thành bài học. Vui lòng thử lại.";
+      toast.error(message);
+    }
+  };
 
   if (theoryDetailQuery.isLoading) {
     return (
@@ -55,7 +89,17 @@ export default function MemberTheoryLessonContent({
       />
 
       <div className="flex w-full justify-end">
-        <Button icon={<FaRegCheckCircle />}>Hoàn thành</Button>
+        <Button
+          icon={<FaRegCheckCircle />}
+          disabled={completed || completeLessonMutation.isPending || !enrollmentId}
+          onClick={handleCompleteLesson}
+        >
+          {completed
+            ? "Đã hoàn thành"
+            : completeLessonMutation.isPending
+              ? <Spinner />
+              : "Hoàn thành"}
+        </Button>
       </div>
     </div>
   );

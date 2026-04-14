@@ -2,13 +2,13 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import toast from "react-hot-toast";
-import { IoPlayCircleOutline, IoTimeOutline } from "react-icons/io5";
+import { IoTimeOutline } from "react-icons/io5";
 
 import LessonTypeIcon from "@/components/course/LessonTypeIcon";
 import { Button } from "@/components/ui/button";
 import { useCreateUserLessonData } from "@/hooks/learning/useUserLearning";
 import type { Lesson, LessonType } from "@/validations/learning/user-learning";
+import { FiUnlock } from "react-icons/fi";
 
 const LESSON_TYPE_LABEL: Record<LessonType, string> = {
   THEORY: "Bài lý thuyết",
@@ -17,15 +17,10 @@ const LESSON_TYPE_LABEL: Record<LessonType, string> = {
 };
 
 const LESSON_TYPE_DESCRIPTION: Record<LessonType, string> = {
-  THEORY: "Đọc nội dung bài học để nắm kiến thức nền tảng trước khi sang bài tiếp theo.",
+  THEORY:
+    "Đọc nội dung bài học để nắm kiến thức nền tảng trước khi sang bài tiếp theo.",
   QUIZ: "Kiểm tra mức độ hiểu bài bằng các câu hỏi trắc nghiệm trong bài quiz.",
   LAB: "Thực hành các thao tác và tình huống mô phỏng để rèn kỹ năng thực tế.",
-};
-
-const LESSON_TYPE_BUTTON_TEXT: Record<LessonType, string> = {
-  THEORY: "Bắt đầu học",
-  QUIZ: "Bắt đầu làm",
-  LAB: "Bắt đầu làm",
 };
 
 type MemberLessonDetailProps = {
@@ -55,11 +50,15 @@ export default function MemberLessonDetail({
       onStarted?.();
     } catch (error) {
       const message =
-        (error as { response?: { data?: { message?: string } }; message?: string })
-          ?.response?.data?.message ||
+        (
+          error as {
+            response?: { data?: { message?: string } };
+            message?: string;
+          }
+        )?.response?.data?.message ||
         (error as { message?: string })?.message ||
         "Không thể khởi tạo dữ liệu học bài.";
-        console.error(message);
+      console.error(message);
     }
   };
 
@@ -73,20 +72,22 @@ export default function MemberLessonDetail({
         <span className="inline-flex items-center gap-2 rounded border-2 border-tertiary bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
           <IoTimeOutline className="h-3.5 w-3.5" />
           {lesson.duration} phút
-        </span> 
+        </span>
       </div>
 
       <h1 className="text-2xl font-bold text-greyscale-0">{lesson.titleVN}</h1>
 
-      <p className="text-sm text-greyscale-300">{LESSON_TYPE_DESCRIPTION[lesson.type]}</p>
+      <p className="text-sm text-greyscale-300">
+        {LESSON_TYPE_DESCRIPTION[lesson.type]}
+      </p>
 
       <Button
         type="button"
         disabled={lesson.isLocked || createUserLessonDataMutation.isPending}
         onClick={handleStartLesson}
       >
-        <IoPlayCircleOutline size={20} />
-        {LESSON_TYPE_BUTTON_TEXT[lesson.type]}
+        <FiUnlock size={16} />
+        Mở khóa
       </Button>
     </div>
   );

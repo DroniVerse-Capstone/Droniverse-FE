@@ -84,21 +84,22 @@ export default function ManagerCourseCheckout() {
   }, [paymentDetail?.paymentUrl]);
 
   const handleCheckout = React.useCallback(async () => {
-    if (!hasProduct || !data?.miniProduct || isProcessingPayment) return;
+    if (!hasProduct || !data?.miniProduct || !clubId || isProcessingPayment) return;
 
     setPaymentError(null);
 
     try {
       const createdOrder = await createPaymentOrderMutation.mutateAsync({
-        totalAmount: total,
-        paymentMethod,
-        item: {
-          productID: data.miniProduct.productId,
-          productName: title,
-          type: "CODE",
-          unitOfPrice: unitPrice,
-          quantity,
-          total,
+        clubId,
+        data: {
+          paymentMethod,
+          item: {
+            productID: data.miniProduct.productId,
+            productNameVN: data.titleVN,
+            productNameEN: data.titleEN,
+            type: "COURSE",
+            quantity,
+          },
         },
       });
 
@@ -113,14 +114,14 @@ export default function ManagerCourseCheckout() {
     }
   }, [
     createPaymentOrderMutation,
+    clubId,
     data?.miniProduct,
+    data?.titleEN,
+    data?.titleVN,
     hasProduct,
     isProcessingPayment,
     paymentMethod,
     quantity,
-    title,
-    total,
-    unitPrice,
   ]);
 
   if (!clubId || !courseVersionId) {

@@ -4,26 +4,36 @@ import { AxiosError } from "axios"
 import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
+	CreateClubPaymentOrderParams,
 	CreatePaymentOrderRequest,
 	CreatePaymentOrderResponse,
 	PaymentDetailData,
+	createClubPaymentOrderParamsSchema,
 	createPaymentOrderRequestSchema,
 	createPaymentOrderResponseSchema,
 	getPaymentDetailQuerySchema,
 	getPaymentDetailResponseSchema,
 } from "@/validations/payment/payment"
 
+type CreatePaymentOrderVariables = CreateClubPaymentOrderParams & {
+	data: CreatePaymentOrderRequest
+}
+
 
 export const useCreatePaymentOrder = () => {
 	return useMutation<
 		CreatePaymentOrderResponse,
 		AxiosError<ApiError>,
-		CreatePaymentOrderRequest
+		CreatePaymentOrderVariables
 	>({
-		mutationFn: async (data) => {
+		mutationFn: async ({ clubId, data }) => {
+			const parsedParams = createClubPaymentOrderParamsSchema.parse({ clubId })
 			const payload = createPaymentOrderRequestSchema.parse(data)
 
-			const response = await apiClient.post("/community/orders", payload)
+			const response = await apiClient.post(
+				`/community/orders/clubs/${parsedParams.clubId}`,
+				payload
+			)
 
 			return createPaymentOrderResponseSchema.parse(response.data)
 		},

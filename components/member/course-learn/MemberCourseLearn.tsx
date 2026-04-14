@@ -1,23 +1,37 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import MemberLabLessonContent from "@/components/member/course-learn/MemberLabLessonContent";
 import MemberLessonDetail from "@/components/member/course-learn/MemberLessonDetail";
 import MemberQuizLessonContent from "@/components/member/course-learn/MemberQuizLessonContent";
 import MemberTheoryLessonContent from "@/components/member/course-learn/MemberTheoryLessonContent";
+import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
 import LearningPathSideBar from "@/components/member/course-learn/LearningPathSideBar";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useCheckUserLessonExists } from "@/hooks/learning/useUserLearning";
 import type { Lesson } from "@/validations/learning/user-learning";
+import { RiArrowGoBackFill } from "react-icons/ri";
 
 export default function MemberCourseLearn() {
-  const params = useParams<{ enrollmentId?: string }>();
+  const router = useRouter();
+  const params = useParams<{ enrollmentId?: string; clubSlug?: string }>();
+  const clubSlug = params?.clubSlug;
   const enrollmentId = params?.enrollmentId;
   const [selectedLesson, setSelectedLesson] = React.useState<Lesson | null>(
     null,
   );
+
+  const handleExitLearning = () => {
+    if (clubSlug) {
+      router.push(`/member/${clubSlug}/my-courses`);
+      return;
+    }
+
+    router.back();
+  };
 
   const lessonExistsQuery = useCheckUserLessonExists(
     selectedLesson && enrollmentId
@@ -36,6 +50,15 @@ export default function MemberCourseLearn() {
       />
 
       <section className="min-h-screen min-w-0 flex-1 bg-greyscale-950 px-6 py-6">
+        <header className="mb-5">
+          <div className="flex items-center justify-between gap-3">
+            <Button icon={<RiArrowGoBackFill />} variant="outline" onClick={handleExitLearning}>
+              Thoát khỏi chế độ học
+            </Button>
+            <LanguageSwitcher />
+          </div>
+        </header>
+
         {selectedLesson ? (
           lessonExistsQuery.isLoading ? (
             <div className="mx-auto flex min-h-[60vh] w-full max-w-4xl items-center justify-center rounded-lg border border-greyscale-700 bg-greyscale-900/40 p-8">
@@ -55,9 +78,17 @@ export default function MemberCourseLearn() {
               }}
             />
           ) : selectedLesson.type === "THEORY" ? (
-            <MemberTheoryLessonContent referenceId={selectedLesson.referenceID} />
+            <MemberTheoryLessonContent
+              referenceId={selectedLesson.referenceID}
+              enrollmentId={enrollmentId}
+              lessonId={selectedLesson.lessonID}
+              isCompleted={selectedLesson.isCompleted}
+            />
           ) : selectedLesson.type === "QUIZ" ? (
-            <MemberQuizLessonContent referenceId={selectedLesson.referenceID} />
+            <MemberQuizLessonContent
+              quizId={selectedLesson.referenceID}
+              enrollmentId={enrollmentId}
+            />
           ) : (
             <MemberLabLessonContent referenceId={selectedLesson.referenceID} />
           )
