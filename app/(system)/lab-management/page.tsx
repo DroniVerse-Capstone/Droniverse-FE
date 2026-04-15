@@ -3,30 +3,21 @@
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { FaPlus, FaTrash, FaVial, FaClock, FaStar, FaFolderOpen, FaCheckCircle, FaTimesCircle, FaChevronLeft, FaChevronRight, FaTerminal, FaSearch, FaPen, FaPlay, FaPause, FaCheck, FaChevronDown, FaDatabase, FaRocket, FaEdit, FaPowerOff } from "react-icons/fa";
+import { FaPlus, FaTrash, FaVial, FaClock, FaStar, FaFolderOpen, FaCheckCircle, FaTimesCircle, FaChevronLeft, FaChevronRight, FaTerminal, FaSearch, FaPen, FaPlay, FaPause, FaCheck, FaChevronDown, FaDatabase, FaRocket, FaEdit, FaPowerOff, FaMap, FaUser, FaClone } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LabData } from "@/types/lab";
 import { getLabValidation } from "@/lib/map-editor/labValidation";
 import { cn } from "@/lib/utils";
-import { useGetLabs, useCreateLab, useUpdateLab, useDeleteLab, useLabFull } from "@/hooks/lab/useLabs";
+import { useGetLabs, useCreateLab, useUpdateLab, useDeleteLab, useLabFull, LabsPaginationData, UseGetLabsOptions, useDuplicateLab } from "@/hooks/lab/useLabs";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
+import { useDebounce } from "@/hooks/useDebounce";
 
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 8;
 
-const LAB_TRANSLATIONS = {
-  level: {
-    EASY: { vi: "Dễ", en: "Easy" },
-    MEDIUM: { vi: "Trung bình", en: "Medium" },
-    HARD: { vi: "Khó", en: "Hard" },
-  },
-  type: {
-    LEARNING: { vi: "Học tập", en: "Learning" },
-    COMPETITION: { vi: "Thi đấu", en: "Competing" },
-  },
-};
+
 
 export default function LabManagement() {
   const t = useTranslations("LabManagement");
@@ -35,20 +26,39 @@ export default function LabManagement() {
 
   const router = useRouter();
 
-  const { data: labs = [], isLoading: loading } = useGetLabs();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const [statusFilter, setStatusFilter] = useState<"all" | "ACTIVE" | "INACTIVE" | "DRAFT">("all");
+
+  // Global query for overall statistics (fetches all labs metadata)
+  const { data: allLabsData = [] } = useGetLabs();
+  const allLabs = Array.isArray(allLabsData) ? allLabsData : [];
+
+  const { data: labsResponse, isLoading: loading } = useGetLabs({
+    pageIndex: currentPage,
+    pageSize: ITEMS_PER_PAGE,
+    searchTerm: debouncedSearch,
+    status: statusFilter === "all" ? undefined : statusFilter,
+    withPaginationMeta: true
+  });
+
+  const paginationData = labsResponse as LabsPaginationData;
+  const labs = paginationData?.data || [];
+  const totalRecords = paginationData?.totalRecords || 0;
+  const totalPages = paginationData?.totalPages || 1;
+
   const createLab = useCreateLab();
   const updateLab = useUpdateLab();
   const deleteLab = useDeleteLab();
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "ACTIVE" | "INACTIVE" | "DRAFT">("all");
+  const duplicateLab = useDuplicateLab();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingLabId, setEditingLabId] = useState<string | null>(null);
 
   // Popover State (controlled by the component itself now)
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
 
   // Load chi tiết lab để lấy labContent phục vụ validation
@@ -62,6 +72,8 @@ export default function LabManagement() {
   const [newLabDescEN, setNewLabDescEN] = useState("");
   const [newLabLevel, setNewLabLevel] = useState<"EASY" | "MEDIUM" | "HARD">("EASY");
   const [newLabType, setNewLabType] = useState<"LEARNING" | "COMPETITION">("LEARNING");
+  const [newLabEstimatedTime, setNewLabEstimatedTime] = useState<number | "">("");
+  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
 
   const handleOpenCreateNew = () => {
     setEditingLabId(null);
@@ -73,6 +85,8 @@ export default function LabManagement() {
     setNewLabDescEN("");
     setNewLabLevel("EASY");
     setNewLabType("LEARNING");
+    setNewLabEstimatedTime("");
+    setFormErrors({});
     setShowCreateModal(true);
   };
 
@@ -88,6 +102,8 @@ export default function LabManagement() {
     setNewLabDescEN(lab.descriptionEN || "");
     setNewLabLevel(lab.level || "EASY");
     setNewLabType(lab.type || "LEARNING");
+    setNewLabEstimatedTime(lab.estimatedTime ?? "");
+    setFormErrors({});
     setShowCreateModal(true);
   };
 
@@ -103,14 +119,25 @@ export default function LabManagement() {
       newLabDescEN !== (lab.descriptionEN || "") ||
       newLabLevel !== (lab.level || "EASY") ||
       newLabType !== (lab.type || "LEARNING") ||
+      newLabEstimatedTime !== (lab.estimatedTime ?? "") ||
       newLabStatus !== lab.status
     );
-  }, [editingLabId, labs, newLabName, newLabNameEN, newLabDesc, newLabDescEN, newLabLevel, newLabType, newLabStatus]);
+  }, [editingLabId, labs, newLabName, newLabNameEN, newLabDesc, newLabDescEN, newLabLevel, newLabType, newLabEstimatedTime, newLabStatus]);
 
+  const validateForm = () => {
+    const errors: Record<string, boolean> = {};
+    if (!newLabName.trim()) errors.nameVN = true;
+    if (!newLabNameEN.trim()) errors.nameEN = true;
+    if (!newLabDesc.trim()) errors.descVN = true;
+    if (!newLabDescEN.trim()) errors.descEN = true;
+    if (newLabEstimatedTime === "") errors.estimatedTime = true;
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleCreateLabSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLabName.trim()) return;
+    if (!validateForm()) return;
 
     if (editingLabId) {
       if (editingLabDetail) {
@@ -129,6 +156,7 @@ export default function LabManagement() {
             descriptionEN: newLabDescEN,
             level: newLabLevel,
             type: newLabType,
+            estimatedTime: newLabEstimatedTime === "" ? 15 : newLabEstimatedTime,
           }
         }, {
           onSuccess: () => {
@@ -146,6 +174,7 @@ export default function LabManagement() {
         descriptionEN: newLabDescEN,
         level: newLabLevel,
         type: newLabType,
+        estimatedTime: newLabEstimatedTime === "" ? 15 : newLabEstimatedTime,
       }, {
         onSuccess: (newLab) => {
           toast.success(t("toasts.createSuccess"));
@@ -168,6 +197,18 @@ export default function LabManagement() {
     });
   };
 
+  const handleConfirmDuplicate = (id: string) => {
+    setIsDuplicating(true);
+    duplicateLab.mutate(id, {
+      onSuccess: () => {
+        toast.success(t("toasts.duplicateSuccess"));
+      },
+      onSettled: () => {
+        setIsDuplicating(false);
+      }
+    });
+  };
+
 
   useEffect(() => {
     if (showCreateModal) {
@@ -180,120 +221,55 @@ export default function LabManagement() {
     };
   }, [showCreateModal]);
 
-
-
-
-  // const handlePublish = (id: string, e?: React.MouseEvent) => {
-  //   e?.stopPropagation();
-  //   const lab = labs.find((l) => l.id === id);
-  //   if (!lab) return;
-
-  //   const validation = getLabValidation(lab);
-  //   if (!validation.isValid) {
-  //     toast.error("Bài Lab chưa đủ điều kiện để xuất bản. Hãy hoàn thành các yêu cầu trong checklist!");
-  //     return;
-  //   }
-
-  //   updateLab.mutate({
-  //     id,
-  //     data: { status: "ACTIVE" }
-  //   }, {
-  //     onSuccess: () => {
-  //       toast.success("Xuất bản lab thành công!");
-  //     }
-  //   });
-  // };
-
-  // const handleToggleStatus = (id: string, newStatus: "ACTIVE" | "INACTIVE" | "DRAFT", e?: React.SyntheticEvent) => {
-  //   e?.stopPropagation();
-
-  //   const lab = labs.find((l) => l.id === id);
-  //   if (!lab) return;
-
-  //   if (newStatus === "ACTIVE") {
-  //     const validation = getLabValidation(lab);
-  //     if (!validation.isValid) {
-  //       toast.error("Bài Lab chưa đủ điều kiện để hoạt động!");
-  //       return;
-  //     }
-  //   }
-
-  //   updateLab.mutate({
-  //     id,
-  //     data: { status: newStatus }
-  //   });
-  // };
-
   const handleEdit = (id: string) => {
     router.push(`/map-editor?id=${id}`);
   };
 
   const stats = useMemo(() => ({
-    total: labs.length,
-    active: labs.filter(l => l.status === "ACTIVE").length,
-    draft: labs.filter(l => l.status === "DRAFT").length,
-    inactive: labs.filter(l => l.status === "INACTIVE").length,
-  }), [labs]);
+    total: allLabs.length,
+    active: allLabs.filter(l => (l.status || (l as any).Status)?.toString().toUpperCase() === "ACTIVE").length,
+    draft: allLabs.filter(l => (l.status || (l as any).Status)?.toString().toUpperCase() === "DRAFT").length,
+    inactive: allLabs.filter(l => (l.status || (l as any).Status)?.toString().toUpperCase() === "INACTIVE").length,
+  }), [allLabs]);
 
-  const filteredLabs = useMemo(() => {
-    return labs.filter((lab) => {
-      const currentStatus = lab.status;
-      const matchesStatus = statusFilter === "all" ? true : currentStatus === statusFilter;
-      const name = locale === 'vi' ? lab.nameVN : (lab.nameEN || lab.nameVN);
-      const matchesSearch = name?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch && matchesStatus;
-    });
-  }, [labs, searchQuery, statusFilter, locale]);
-
-
-
-  const totalPages = Math.ceil(filteredLabs.length / ITEMS_PER_PAGE);
-  const paginatedLabs = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredLabs.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredLabs, currentPage]);
+  const paginatedLabs = labs;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
-
-  useEffect(() => {
-    const maxPage = Math.max(1, Math.ceil(filteredLabs.length / ITEMS_PER_PAGE));
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-  }, [filteredLabs.length, currentPage]);
+  }, [debouncedSearch, statusFilter]);
 
   return (
     <div className="w-full text-greyscale-0 font-sans min-h-full">
       <div className="w-full mx-auto flex flex-col gap-6 lg:gap-8 pb-10 shadow-inner">
 
         {/* Header - Glassmorphism Darker Style */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border border-white/5 p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border border-white/5 p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none" />
 
-          <div className="flex items-center gap-5 sm:gap-6 relative z-10 w-full">
-            <div className="relative shrink-0">
-              <div className="absolute -inset-2 bg-primary-300/10 rounded blur-xl opacity-0 hover:opacity-100 transition-opacity" />
-              <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-[#141418] border border-white/5 rounded shadow-inner flex items-center justify-center overflow-hidden">
-                <FaTerminal className="text-primary-300 text-xl sm:text-2xl drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 relative z-10 w-full justify-between">
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="relative shrink-0">
+                <div className="absolute -inset-2 bg-primary-300/10 rounded blur-xl opacity-0 hover:opacity-100 transition-opacity" />
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-[#141418] border border-white/5 rounded shadow-inner flex items-center justify-center overflow-hidden">
+                  <FaTerminal className="text-primary-300 text-lg sm:text-2xl drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-2 flex-wrap">
-              <div className="flex items-center gap-3 flex-wrap font-black uppercase tracking-tight text-white">
-                <span className="text-2xl sm:text-3xl drop-shadow-md">
-                  {t("title").split(" ")[0]}
-                </span>
-                <span className="text-primary-300 px-4 py-1.5 bg-primary-300/10 border border-primary-300/20 rounded text-[13px] sm:text-[15px] tracking-widest flex items-center justify-center">
-                  {t("title").split(" ").slice(1).join(" ")}
-                </span>
+              <div className="flex flex-col gap-1 sm:gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap font-black uppercase tracking-tight text-white">
+                  <span className="text-xl sm:text-3xl drop-shadow-md">
+                    {locale === 'vi' ? (t("title").split(" ")[0] + " " + t("title").split(" ")[1]) : t("title").split(" ")[0]}
+                  </span>
+                  <span className="text-primary-300 px-3 py-1 sm:px-4 sm:py-1.5 bg-primary-300/10 border border-primary-300/20 rounded text-[11px] sm:text-[15px] tracking-widest flex items-center justify-center">
+                    {locale === 'vi' ? (t("title").split(" ")[2] + " " + t("title").split(" ")[3]) : t("title").split(" ")[1]}
+                  </span>
+                </div>
               </div>
             </div>
 
             <Button
               size="default"
               onClick={handleOpenCreateNew}
-              className="w-full sm:w-auto px-6 h-8 sm:h-10 bg-primary-300 hover:bg-primary-400 text-white font-black uppercase tracking-widest shadow-[0_6px_25px_-5px_var(--primary-300,rgba(239,68,68,0.4))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all active:scale-95 text-xs sm:text-sm flex items-center gap-2 rounded border border-primary-200 ml-auto"
+              className="w-full sm:w-auto px-6 h-9 sm:h-10 bg-primary-300 hover:bg-primary-400 text-white font-black uppercase tracking-widest shadow-[0_6px_25px_-5px_var(--primary-300,rgba(239,68,68,0.4))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all active:scale-95 text-[10px] sm:text-sm flex items-center justify-center gap-2 rounded border border-primary-200 mt-2 sm:mt-0"
             >
               <FaPlus size={14} /> {t("createBtn")}
             </Button>
@@ -304,57 +280,76 @@ export default function LabManagement() {
         {/* Create Lab Modal */}
         {showCreateModal && (
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#000]/60 backdrop-blur-[4px] p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#000]/60 backdrop-blur-[4px] p-2 sm:p-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowCreateModal(false);
             }}
           >
-            <div className="bg-[#121216] border border-white/10 rounded p-5 w-full max-w-4xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+            <div className="bg-[#121216] border border-white/10 rounded w-full max-w-[calc(100%-1rem)] md:max-w-2xl lg:max-w-4xl max-h-[95vh] sm:max-h-[90vh] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-primary-300/5 to-transparent pointer-events-none" />
 
-              <div className="relative z-10 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-base font-black uppercase tracking-widest flex items-center gap-2 text-white">
-                      <span className="w-2 h-2 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))]"></span>
-                      {editingLabId ? t("form.editTitle") : t("form.createTitle")}
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setShowCreateModal(false)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-greyscale-400 hover:text-white transition-all border border-white/5"
-                  >
-                    <FaTimesCircle className="text-base" />
-                  </button>
+              {/* Fixed Header */}
+              <div className="relative z-20 px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-sm sm:text-base font-black uppercase tracking-widest flex items-center gap-2 text-white">
+                    <span className="w-2 h-2 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))]"></span>
+                    {editingLabId ? (originalLabStatus === "ACTIVE" ? t("viewDetails") : t("form.editTitle")) : t("form.createTitle")}
+                    {originalLabStatus === "ACTIVE" && editingLabId && (
+                      <span className="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[8px] sm:text-[9px] tracking-widest">{t("table.status.readOnly")}</span>
+                    )}
+                  </h3>
                 </div>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-greyscale-400 hover:text-white transition-all border border-white/5 shrink-0"
+                >
+                  <FaTimesCircle className="text-base" />
+                </button>
+              </div>
 
-                <form onSubmit={handleCreateLabSubmit} className="flex flex-col gap-5">
-                  <div className="flex flex-col md:flex-row gap-6">
+              <form onSubmit={handleCreateLabSubmit} noValidate className="flex-1 flex flex-col min-h-0">
+                {/* Scrollable Body */}
+                <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-6 no-scrollbar flex flex-col gap-5 sm:gap-6">
+                  <div className="flex flex-col lg:flex-row gap-5 lg:gap-8">
                     {/* Left Column: Content */}
-                    <div className="flex-[1.2] flex flex-col gap-4">
+                    <div className="flex-1 lg:flex-[1.2] flex flex-col gap-4 sm:gap-5">
                       <div className="grid grid-cols-1 gap-3">
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-1.5 ">
                           <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.nameVN")}</label>
                           <input
-                            required
+                            disabled={originalLabStatus === "ACTIVE" && !!editingLabId}
                             autoFocus
                             type="text"
-                            className="w-full h-9 bg-black/40 border border-white/5 rounded px-3 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all shadow-inner placeholder:text-greyscale-700"
+                            className={cn(
+                              "w-full h-9 bg-black/40 border rounded px-3 text-xs text-white focus:outline-none transition-all shadow-inner placeholder:text-greyscale-700 disabled:opacity-50 disabled:cursor-not-allowed",
+                              formErrors.nameVN ? "border-rose-500/50 focus:border-rose-500" : "border-white/5 focus:border-primary-300/50"
+                            )}
                             placeholder={t("form.namePlaceholderVN")}
                             value={newLabName}
-                            onChange={(e) => setNewLabName(e.target.value)}
+                            onChange={(e) => {
+                              setNewLabName(e.target.value);
+                              if (formErrors.nameVN) setFormErrors(prev => ({ ...prev, nameVN: false }));
+                            }}
                           />
+                          {formErrors.nameVN && <span className="text-[9px] text-rose-500 font-bold ml-1 animate-in fade-in slide-in-from-top-1 duration-200 uppercase tracking-wider">{t("form.required")}</span>}
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.nameEN")}</label>
                           <input
-                            required
+                            disabled={originalLabStatus === "ACTIVE" && !!editingLabId}
                             type="text"
-                            className="w-full h-9 bg-black/40 border border-white/5 rounded px-3 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all shadow-inner placeholder:text-greyscale-700"
+                            className={cn(
+                              "w-full h-9 bg-black/40 border rounded px-3 text-xs text-white focus:outline-none transition-all shadow-inner placeholder:text-greyscale-700 disabled:opacity-50 disabled:cursor-not-allowed",
+                              formErrors.nameEN ? "border-rose-500/50 focus:border-rose-500" : "border-white/5 focus:border-primary-300/50"
+                            )}
                             placeholder={t("form.namePlaceholderEN")}
                             value={newLabNameEN}
-                            onChange={(e) => setNewLabNameEN(e.target.value)}
+                            onChange={(e) => {
+                              setNewLabNameEN(e.target.value);
+                              if (formErrors.nameEN) setFormErrors(prev => ({ ...prev, nameEN: false }));
+                            }}
                           />
+                          {formErrors.nameEN && <span className="text-[9px] text-rose-500 font-bold ml-1 animate-in fade-in slide-in-from-top-1 duration-200 uppercase tracking-wider">{t("form.required")}</span>}
                         </div>
                       </div>
 
@@ -362,63 +357,105 @@ export default function LabManagement() {
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.descVN")}</label>
                           <textarea
-                            required
-                            className="w-full bg-black/40 border border-white/5 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed"
+                            disabled={originalLabStatus === "ACTIVE" && !!editingLabId}
+                            className={cn(
+                              "w-full bg-black/40 border rounded px-3 py-2 text-xs text-white focus:outline-none transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed",
+                              formErrors.descVN ? "border-rose-500/50 focus:border-rose-500" : "border-white/5 focus:border-primary-300/50"
+                            )}
                             placeholder={t("form.descPlaceholderVN")}
                             value={newLabDesc}
-                            onChange={(e) => setNewLabDesc(e.target.value)}
+                            onChange={(e) => {
+                              setNewLabDesc(e.target.value);
+                              if (formErrors.descVN) setFormErrors(prev => ({ ...prev, descVN: false }));
+                            }}
                           />
+                          {formErrors.descVN && <span className="text-[9px] text-rose-500 font-bold ml-1 animate-in fade-in slide-in-from-top-1 duration-200 uppercase tracking-wider">{t("form.required")}</span>}
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.descEN")}</label>
                           <textarea
-                            required
-                            className="w-full bg-black/40 border border-white/5 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-primary-300/50 transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed"
+                            disabled={originalLabStatus === "ACTIVE" && !!editingLabId}
+                            className={cn(
+                              "w-full bg-black/40 border rounded px-3 py-2 text-xs text-white focus:outline-none transition-all resize-none h-20 shadow-inner placeholder:text-greyscale-700 leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed",
+                              formErrors.descEN ? "border-rose-500/50 focus:border-rose-500" : "border-white/5 focus:border-primary-300/50"
+                            )}
                             placeholder={t("form.descPlaceholderEN")}
                             value={newLabDescEN}
-                            onChange={(e) => setNewLabDescEN(e.target.value)}
+                            onChange={(e) => {
+                              setNewLabDescEN(e.target.value);
+                              if (formErrors.descEN) setFormErrors(prev => ({ ...prev, descEN: false }));
+                            }}
                           />
+                          {formErrors.descEN && <span className="text-[9px] text-rose-500 font-bold ml-1 animate-in fade-in slide-in-from-top-1 duration-200 uppercase tracking-wider">{t("form.required")}</span>}
                         </div>
                       </div>
                     </div>
 
                     {/* Right Column: Settings & Validation */}
-                    <div className="flex-1 flex flex-col gap-4">
-                      <div className="p-4 bg-white/[0.02] border border-white/5 rounded flex flex-col gap-4">
+                    <div className="flex-1 flex flex-col gap-4 sm:gap-5">
+                      <div className="p-4 sm:p-5 bg-white/[0.02] border border-white/5 rounded flex flex-col gap-4 sm:gap-5">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.level")}</label>
-                            <Select value={newLabLevel} onValueChange={(val: any) => setNewLabLevel(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border">
+                            <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabLevel} onValueChange={(val: any) => setNewLabLevel(val)}>
+                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.level")} />
                               </SelectTrigger>
                               <SelectContent className="bg-[#141418] border-white/10 z-[120]">
-                                <SelectItem value="EASY" className="text-xs font-bold">{LAB_TRANSLATIONS.level.EASY[locale as "vi" | "en"]}</SelectItem>
-                                <SelectItem value="MEDIUM" className="text-xs font-bold">{LAB_TRANSLATIONS.level.MEDIUM[locale as "vi" | "en"]}</SelectItem>
-                                <SelectItem value="HARD" className="text-xs font-bold">{LAB_TRANSLATIONS.level.HARD[locale as "vi" | "en"]}</SelectItem>
+                                <SelectItem value="EASY" className="text-xs font-bold">{t("level.easy")}</SelectItem>
+                                <SelectItem value="MEDIUM" className="text-xs font-bold">{t("level.medium")}</SelectItem>
+                                <SelectItem value="HARD" className="text-xs font-bold">{t("level.hard")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.type")}</label>
-                            <Select value={newLabType} onValueChange={(val: any) => setNewLabType(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border">
+                            <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabType} onValueChange={(val: any) => setNewLabType(val)}>
+                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.type")} />
                               </SelectTrigger>
                               <SelectContent className="bg-[#141418] border-white/10 z-[120]">
-                                <SelectItem value="LEARNING" className="text-xs font-bold">{LAB_TRANSLATIONS.type.LEARNING[locale as "vi" | "en"]}</SelectItem>
-                                <SelectItem value="COMPETITION" className="text-xs font-bold">{LAB_TRANSLATIONS.type.COMPETITION[locale as "vi" | "en"]}</SelectItem>
+                                <SelectItem value="LEARNING" className="text-xs font-bold">{t("type.learning")}</SelectItem>
+                                <SelectItem value="COMPETITION" className="text-xs font-bold">{t("type.competition")}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
 
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.estimatedTime")}</label>
+                          <input
+                            disabled={originalLabStatus === "ACTIVE" && !!editingLabId}
+                            type="number"
+                            min={1}
+                            max={999}
+                            className={cn(
+                              "w-full h-9 bg-black/40 border rounded px-3 text-xs text-white focus:outline-none transition-all shadow-inner placeholder:text-greyscale-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed",
+                              formErrors.estimatedTime ? "border-rose-500/50 focus:border-rose-500" : "border-white/5 focus:border-primary-300/50"
+                            )}
+                            placeholder="15"
+                            value={newLabEstimatedTime}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "") {
+                                setNewLabEstimatedTime("");
+                              } else {
+                                let num = Number(val);
+                                if (num > 999) num = 999;
+                                setNewLabEstimatedTime(num);
+                              }
+                              if (formErrors.estimatedTime) setFormErrors(prev => ({ ...prev, estimatedTime: false }));
+                            }}
+                          />
+                          {formErrors.estimatedTime && <span className="text-[9px] text-rose-500 font-bold ml-1 animate-in fade-in slide-in-from-top-1 duration-200 uppercase tracking-wider">{t("form.required")}</span>}
+                        </div>
+
                         {editingLabId && (
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.status")}</label>
-                            <Select value={newLabStatus} onValueChange={(val: any) => setNewLabStatus(val)}>
+                            <Select disabled={originalLabStatus === "ACTIVE"} value={newLabStatus} onValueChange={(val: any) => setNewLabStatus(val)}>
                               <SelectTrigger className={cn(
-                                "w-full rounded h-9 text-xs focus:ring-0 font-bold shadow-inner transition-all border",
+                                "w-full rounded h-9 text-xs focus:ring-0 font-bold shadow-inner transition-all border disabled:opacity-50 disabled:cursor-not-allowed",
                                 newLabStatus === "ACTIVE" ? "text-emerald-400" : newLabStatus === "INACTIVE" ? "text-rose-400" : "text-amber-500"
                               )}>
                                 <SelectValue placeholder={t("form.status")} />
@@ -492,20 +529,23 @@ export default function LabManagement() {
                       )}
                     </div>
                   </div>
+                </div>
 
-                  <div className="pt-4 flex justify-end items-center gap-3 mt-1 border-t border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => setShowCreateModal(false)}
-                      className="px-5 h-9 rounded text-greyscale-400 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-all"
-                    >
-                      {tCommon("buttons.cancel")}
-                    </button>
+                {/* Fixed Footer */}
+                <div className="relative z-20 px-4 sm:px-6 py-4 border-t border-white/5 bg-black/20 flex flex-col-reverse sm:flex-row justify-end items-center gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="w-full sm:w-auto px-5 h-10 rounded text-greyscale-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white/5 border border-transparent hover:border-white/10"
+                  >
+                    {originalLabStatus === "ACTIVE" && editingLabId ? tCommon("buttons.close") : tCommon("buttons.cancel")}
+                  </button>
+                  {!(originalLabStatus === "ACTIVE" && editingLabId) && (
                     <Button
                       type="submit"
                       disabled={!isDirty || (editingLabId ? (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) && newLabStatus === "ACTIVE" : false)}
                       className={cn(
-                        "uppercase font-black text-[10px] tracking-widest px-7 h-9 rounded transition-all active:scale-95 flex items-center gap-2",
+                        "w-full sm:w-auto uppercase font-black text-[10px] tracking-widest px-8 h-10 rounded transition-all active:scale-95 flex items-center justify-center gap-2",
                         (!isDirty || (editingLabId && (!editingLabDetail || !getLabValidation(editingLabDetail!).isValid) && newLabStatus === "ACTIVE"))
                           ? "bg-white/5 text-white/20 border-white/5 cursor-not-allowed"
                           : "bg-primary-300 hover:bg-primary-400 text-white border-primary-200 shadow-[0_8px_16px_-4px_rgba(239,68,68,0.4)]"
@@ -514,14 +554,14 @@ export default function LabManagement() {
                       {editingLabId ? tCommon("buttons.save") : t("table.actions.editMap")}
                       {!editingLabId && <FaChevronRight size={11} />}
                     </Button>
-                  </div>
-                </form>
-              </div>
+                  )}
+                </div>
+              </form>
             </div>
           </div>
         )}
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[
             {
               label: t("stats.total"),
@@ -558,25 +598,25 @@ export default function LabManagement() {
           ].map((stat, i) => (
 
             <div key={i} className={cn(
-              "relative p-5 sm:p-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border overflow-hidden group transition-all duration-500 hover:-translate-y-1.5 shadow-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#09090b]/80 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]",
+              "relative p-4 sm:p-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border overflow-hidden group transition-all duration-500 sm:hover:-translate-y-1.5 shadow-lg shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#09090b]/80 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]",
               stat.bg
             )}>
               <div className={cn("absolute inset-0 bg-gradient-to-br opacity-10 group-hover:opacity-20 transition-opacity", stat.bg)} />
 
               <div className="relative flex items-center justify-between z-10 w-full">
-                <div className="flex flex-col gap-2">
-                  <span className="text-greyscale-500 text-[10px] font-bold uppercase tracking-[0.2em] drop-shadow-sm">
+                <div className="flex flex-col gap-1 sm:gap-2">
+                  <span className="text-greyscale-500 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] drop-shadow-sm">
                     {stat.label}
                   </span>
                   <span className={cn(
-                    "text-3xl sm:text-4xl font-bold tabular-nums tracking-tighter drop-shadow-lg transition-colors duration-500",
+                    "text-xl sm:text-3xl xl:text-4xl font-bold tabular-nums tracking-tighter drop-shadow-lg transition-colors duration-500",
                     `text-${stat.color}`
                   )}>
                     {stat.value}
                   </span>
                 </div>
                 <div className={cn(
-                  "w-12 h-12 rounded flex items-center justify-center text-xl transition-all duration-500 group-hover:scale-110 border border-white/5 shadow-inner relative overflow-hidden",
+                  "w-10 h-10 sm:w-12 sm:h-12 rounded flex items-center justify-center text-lg transition-all duration-500 group-hover:scale-110 border border-white/5 shadow-inner relative overflow-hidden",
                   `text-${stat.color}`,
                   stat.glow
                 )}>
@@ -598,8 +638,8 @@ export default function LabManagement() {
             </h2>
 
             {/* Filter and Search Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
-              <div className="relative w-full sm:w-72 xl:w-80">
+            <div className="flex flex-col lg:flex-row items-center gap-3 w-full xl:w-auto">
+              <div className="relative w-full lg:w-72 xl:w-80">
                 <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-greyscale-500" size={14} />
                 <input
                   type="text"
@@ -610,29 +650,29 @@ export default function LabManagement() {
                 />
               </div>
 
-              <div className="flex p-1 bg-black/40 border border-white/5 rounded w-full sm:w-auto shrink-0 shadow-inner h-11 items-center">
+              <div className="flex p-1 bg-black/40 border border-white/5 rounded w-full lg:w-auto shrink-0 shadow-inner h-11 items-center overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => setStatusFilter("all")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'all' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
+                  className={cn("flex-1 lg:flex-none px-4 py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all h-full whitespace-nowrap", statusFilter === 'all' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
                   {t("filters.all")}
                 </button>
 
                 <button
                   onClick={() => setStatusFilter("DRAFT")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'DRAFT' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
+                  className={cn("flex-1 lg:flex-none px-4 py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all h-full whitespace-nowrap", statusFilter === 'DRAFT' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
                   {t("filters.draft")}
                 </button>
                 <button
                   onClick={() => setStatusFilter("ACTIVE")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'ACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
+                  className={cn("flex-1 lg:flex-none px-4 py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all h-full whitespace-nowrap", statusFilter === 'ACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
                   {t("filters.active")}
                 </button>
                 <button
                   onClick={() => setStatusFilter("INACTIVE")}
-                  className={cn("flex-1 sm:flex-none px-4 py-1.5 rounded text-xs font-bold transition-all h-full", statusFilter === 'INACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
+                  className={cn("flex-1 lg:flex-none px-4 py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all h-full whitespace-nowrap", statusFilter === 'INACTIVE' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
                 >
                   {t("filters.inactive")}
                 </button>
@@ -645,7 +685,7 @@ export default function LabManagement() {
               <div className="w-16 h-16 border-b-2 border-primary-300 rounded animate-spin shadow-[0_4px_15px_var(--primary-300,rgba(239,68,68,0.3))]" />
               <span className="text-xs font-black uppercase tracking-[0.5em] animate-pulse text-white drop-shadow-md">{t("form.syncing")}</span>
             </div>
-          ) : filteredLabs.length === 0 ? (
+          ) : labs.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full text-center opacity-50 z-10 transition-all duration-500">
               <div className="w-24 h-24 border border-dashed border-white/10 rounded flex items-center justify-center mb-6 bg-white/[0.01]">
                 {labs.length === 0 ? <FaVial className="text-4xl text-white drop-shadow-lg" /> : <FaSearch className="text-4xl text-white drop-shadow-lg" />}
@@ -658,7 +698,7 @@ export default function LabManagement() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 z-10 flex-1 content-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6 lg:gap-8 z-10 flex-1 content-start">
               {paginatedLabs.map((lab) => {
                 const currentStatus = lab.status;
                 const name = locale === 'vi' ? lab.nameVN : (lab.nameEN || lab.nameVN);
@@ -706,12 +746,12 @@ export default function LabManagement() {
                     {/* Info Panel */}
                     <div className="p-4 flex flex-col gap-3 flex-1 z-10 bg-[#141418]/50">
                       <div className="flex justify-between items-start gap-4">
-                        <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug line-clamp-2 drop-shadow-sm">
+                        <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-snug line-clamp-2 h-10 overflow-hidden drop-shadow-sm">
                           {name}
                         </h3>
                       </div>
 
-                      <p className="text-greyscale-400 text-[11px] leading-relaxed line-clamp-2 min-h-[1.75rem] font-medium opacity-80 group-hover:opacity-100 transition-opacity">
+                      <p className="text-greyscale-400 text-[11px] leading-relaxed line-clamp-2 min-h-[2.5rem] font-medium opacity-80 group-hover:opacity-100 transition-opacity">
                         {desc || t("table.noDescription")}
                       </p>
 
@@ -720,7 +760,7 @@ export default function LabManagement() {
                         <div className="flex flex-wrap items-center gap-2">
                           {lab.type && (
                             <div className="text-[9px] font-black text-indigo-300 uppercase bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 shadow-sm">
-                              {LAB_TRANSLATIONS.type[lab.type as keyof typeof LAB_TRANSLATIONS.type][locale as "vi" | "en"] || lab.type}
+                              {t(`type.${lab.type.toLowerCase() as "learning" | "competition"}`)}
                             </div>
                           )}
                           {lab.level && (
@@ -729,42 +769,95 @@ export default function LabManagement() {
                                 lab.level === "MEDIUM" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
                                   "bg-rose-500/10 text-rose-400 border-rose-500/20"
                             )}>
-                              {LAB_TRANSLATIONS.level[lab.level as keyof typeof LAB_TRANSLATIONS.level][locale as "vi" | "en"] || lab.level}
+                              {t(`level.${lab.level.toLowerCase() as "easy" | "medium" | "hard"}`)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {lab.estimatedTime && (
+                            <div className="flex items-center gap-1.5 text-greyscale-500 text-[10px] font-bold">
+                              <FaClock className="text-primary-300/70" size={10} />
+                              <span>{lab.estimatedTime} {locale === 'vi' ? 'phút' : 'minutes'}</span>
+                            </div>
+                          )}
+                          {lab.creator && (
+                            <div className="flex items-center gap-1.5 text-greyscale-500 text-[10px] font-bold">
+                              <FaUser className="text-primary-300/70" size={10} />
+                              <span className="truncate max-w-[100px]">{lab.creator.fullName}</span>
                             </div>
                           )}
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-2 mt-1 relative z-20">
+                      <div className="flex items-center gap-2 sm:gap-2.5 mt-auto pt-2 relative z-20">
                         <button
                           onClick={(e) => handleEditBasicInfo(lab, e)}
-                          className="flex-1 h-8 px-3 rounded bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 border border-white/5 hover:border-white/10 shadow-sm shrink-0 uppercase tracking-wider"
+                          className={cn(
+                            "flex-1 h-9 px-3 rounded text-white text-[9px] sm:text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 border shadow-sm shrink-0 uppercase tracking-wider",
+                            currentStatus === "ACTIVE"
+                              ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
+                              : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
+                          )}
                           aria-label={t("table.actions.editInfo")}
                         >
-                          <FaPen size={10} /> {t("table.actions.editInfo")}
+                          {currentStatus === "ACTIVE" ? (
+                            <><FaSearch size={10} className="sm:size-3" /> <span className="hidden 2xl:inline">Chi tiết</span></>
+                          ) : (
+                            <><FaPen size={10} className="sm:size-3" /> <span className="hidden 2xl:inline">{t("table.actions.editInfo")}</span></>
+                          )}
                         </button>
 
                         <div onClick={(e) => e.stopPropagation()}>
-                            <ConfirmActionPopover
-                              trigger={
-                                <button
-                                  className="w-8 h-8 rounded bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-all border border-rose-500/20 hover:border-rose-500 shrink-0 shadow-sm"
-                                  aria-label={t("table.actions.delete")}
-                                >
-                                  <FaTrash size={10} />
-                                </button>
-                              }
-                              title={t("confirm.deleteTitle")}
-                              description={t("confirm.deleteDescription")}
-                              confirmText={tCommon("buttons.delete")}
-                              cancelText={tCommon("buttons.cancel")}
-                              onConfirm={() => handleConfirmDelete(lab.labID)}
-                              isLoading={isDeleting}
-                              side="bottom"
-                              avoidCollisions={false}
-                              widthClassName="w-64"
-                            />
+                          <ConfirmActionPopover
+                            trigger={
+                              <button
+                                className="w-9 h-9 rounded bg-primary-300/10 hover:bg-primary-300 text-primary-300 hover:text-white flex items-center justify-center transition-all border border-primary-300/20 hover:border-primary-300 shrink-0 shadow-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                                aria-label={t("table.actions.duplicate")}
+                              >
+                                <FaClone size={12} />
+                              </button>
+                            }
+                            title={t("confirm.duplicateTitle")}
+                            description={
+                              <span className="text-[12px] leading-relaxed block">
+                                {t("confirm.duplicateDescription")}
+                              </span>
+                            }
+                            confirmText={tCommon("buttons.confirm")}
+                            cancelText={tCommon("buttons.cancel")}
+                            onConfirm={() => handleConfirmDuplicate(lab.labID)}
+                            isLoading={isDuplicating}
+                            side="bottom"
+                            avoidCollisions={true}
+                            widthClassName="w-56"
+                          />
+                        </div>
+
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <ConfirmActionPopover
+                            trigger={
+                              <button
+                                className="w-9 h-9 rounded bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-all border border-rose-500/20 hover:border-rose-500 shrink-0 shadow-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                                aria-label={t("table.actions.delete")}
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            }
+                            title={t("confirm.deleteTitle")}
+                            description={
+                              <span className="text-[12px] leading-relaxed block">
+                                {t("confirm.deleteDescription")}
+                              </span>
+                            }
+                            confirmText={tCommon("buttons.delete")}
+                            cancelText={tCommon("buttons.cancel")}
+                            onConfirm={() => handleConfirmDelete(lab.labID)}
+                            isLoading={isDeleting}
+                            side="bottom"
+                            avoidCollisions={true}
+                            widthClassName="w-56"
+                          />
                         </div>
                       </div>
                     </div>
@@ -780,34 +873,34 @@ export default function LabManagement() {
           )}
 
           {/* Pagination Container */}
-          {totalPages > 1 && filteredLabs.length > 0 && !loading && (
-            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 z-10 w-full shrink-0">
-              <div className="flex items-center gap-4 w-full sm:w-auto">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-greyscale-400 whitespace-nowrap">
-                  Console <span className="text-white ml-2">{t("pagination.page")} <span className="text-primary-300 text-[12px]">{currentPage}</span> / {totalPages}</span>
+          {totalPages > 1 && totalRecords > 0 && !loading && (
+            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6 z-10 w-full shrink-0">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full lg:w-auto">
+                <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-greyscale-500 sm:text-greyscale-400 whitespace-nowrap text-center sm:text-left">
+                  <span className="hidden xs:inline">Console</span> <span className="text-white ml-1 sm:ml-2">{t("pagination.page")} <span className="text-primary-300 text-[11px] sm:text-[12px]">{currentPage}</span> / {totalPages}</span>
                 </div>
-                <div className="h-1.5 w-full sm:w-40 bg-white/5 rounded overflow-hidden shrink-0 shadow-inner">
+                <div className="h-1 sm:h-1.5 w-full sm:w-40 bg-white/5 rounded overflow-hidden shrink-0 shadow-inner hidden xs:block">
                   <div className="h-full bg-primary-300 transition-all duration-500 shadow-[0_0_12px_var(--primary-300,rgba(239,68,68,0.6))]" style={{ width: `${(currentPage / totalPages) * 100}%` }} />
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
+              <div className="flex items-center gap-2 w-full lg:w-auto justify-center lg:justify-end py-1">
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
                   aria-label={tCommon("pagination.previous")}
                 >
-                  <FaChevronLeft size={12} />
+                  <FaChevronLeft size={10} className="sm:size-3" />
                 </button>
 
-                <div className="flex items-center gap-1.5 px-3 py-2 bg-white/[0.02] rounded border border-white/5 shadow-sm backdrop-blur-md">
+                <div className="flex items-center gap-1 sm:gap-1.5 px-2.2 sm:px-3 py-1.5 sm:py-2 bg-white/[0.02] rounded border border-white/5 shadow-sm backdrop-blur-md overflow-x-auto no-scrollbar max-w-[60vw] sm:max-w-none">
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setCurrentPage(i + 1)}
                       className={cn(
-                        "w-8 h-8 sm:w-10 sm:h-10 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center outline-none shrink-0 relative overflow-hidden",
+                        "w-7 h-7 sm:w-10 sm:h-10 rounded text-[10px] sm:text-sm font-black transition-all flex items-center justify-center outline-none shrink-0 relative overflow-hidden",
                         currentPage === i + 1
                           ? "bg-primary-300 text-white shadow-[0_4px_15px_var(--primary-300,rgba(239,68,68,0.3))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
                           : "text-greyscale-400 hover:text-white hover:bg-white/5"
@@ -822,10 +915,10 @@ export default function LabManagement() {
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
                   aria-label={tCommon("pagination.next")}
                 >
-                  <FaChevronRight size={12} />
+                  <FaChevronRight size={10} className="sm:size-3" />
                 </button>
               </div>
             </div>

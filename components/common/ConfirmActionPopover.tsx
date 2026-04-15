@@ -67,6 +67,7 @@ export default function ConfirmActionPopover({
           <Button
             type="button"
             variant="outline"
+            size="sm"
             onClick={() => setOpen(false)}
             disabled={isLoading}
           >
@@ -75,6 +76,7 @@ export default function ConfirmActionPopover({
 
           <Button
             type="button"
+            size="sm"
             disabled={isLoading}
             onClick={() => {
               onConfirm();

@@ -378,3 +378,11 @@
   stroke: #e2e8f0 !important;
   stroke-opacity: 0.5 !important;
 }
+
+/* Fix for invisible text in Blockly comments (white text on yellow background) */
+.blocklyCommentTextarea {
+  color: #1e293b !important;
+  font-family: var(--font-family-button) !important;
+  line-height: 1.4 !important;
+  padding: 4px !important;
+}

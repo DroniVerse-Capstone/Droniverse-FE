@@ -20,8 +20,11 @@ import { LabData, LabRule, LabMap, MapObject } from "@/types/lab";
 import { getLabValidation } from "@/lib/map-editor/labValidation";
 import { useLabFull, useUpdateLabFull, useSuspenseLabFull } from "@/hooks/lab/useLabs";
 import {
-  FaSave, FaArrowLeft, FaCheck, FaClock, FaStar, FaExclamationTriangle,
-  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes
+  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes, FaPlay, FaLock, FaRulerCombined,
+  FaCheck,
+  FaArrowLeft,
+  FaSave,
+  FaEye
 } from "react-icons/fa";
 import Loading from "@/app/loading";
 import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
@@ -35,6 +38,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   decor: <FaTree />,
   bonus: <FaGem />,
   checkpoint: <FaMapMarkerAlt />,
+  pattern: <FaRulerCombined />,
   theme: <FaImage />,
   uncategorized: <FaQuestionCircle />
 };
@@ -47,6 +51,7 @@ import {
   Html,
   Stars,
   Sky,
+  Line,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { Box3, Vector3, Quaternion, Euler, Color } from "three";
@@ -62,6 +67,7 @@ import CheckpointRing from "../simulator3d/checkpoint/CheckpointBeacon";
 import RockGLB from "../simulator3d/obstacles/RockGLB";
 import GrassGLB from "../simulator3d/decor/GrassGLB";
 import Tree2GLB from "../simulator3d/decor/Tree2GLB";
+import { MapEnvironment } from "../simulator3d/MapEnvironment";
 import {
   buildModelCategories,
   getConstraintsForModel,
@@ -79,7 +85,7 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { map } from "zod";
 import { LanguageSwitcher } from "../layouts/LanguageSwitcher";
 
-type TransformMode = "translate" | "rotate" | "scale";
+type TransformMode = "translate" | "rotate" | "scale" | null;
 
 
 const DEFAULT_RULE: LabRule = {
@@ -230,6 +236,125 @@ function SidebarModelPreview({ m }: { m: any }) {
     </div>
   );
 }
+
+function FlightPatternVisual({ object, isSelected }: { object: MapObject; isSelected: boolean }) {
+  const { shape } = object;
+  const matRef = useRef<any>(null);
+
+  // Animate the line dash offset to create a "flowing energy" effect
+  useFrame((state, delta) => {
+    if (matRef.current) {
+      matRef.current.dashOffset -= delta * 2;
+    }
+  });
+
+  // Color per shape type — vibrant, super-bright neon palette
+  const shapeColor = useMemo(() => {
+    const map: Record<string, string> = {
+      square: "#00ffff",   // neon cyan
+      circle: "#39ff14",   // alien green
+      zigzag: "#ffea00",   // electric yellow
+    };
+    return map[shape ?? ""] ?? "#00ffff";
+  }, [shape]);
+
+  const coreOpacity = isSelected ? 1.0 : 0.8;
+  const glowOpacity = isSelected ? 0.6 : 0.3;
+
+  // Build flat 2D points, raised slightly in Y so it doesn't sink ("chìm") into the floor grid
+  const points = useMemo(() => {
+    const Y_HEIGHT = 0.2; // Floating above the ground
+    if (shape === "circle") {
+      const pts: THREE.Vector3[] = [];
+      const steps = 64;
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * 0.5, Y_HEIGHT, Math.sin(a) * 0.5));
+      }
+      return pts;
+    }
+    if (shape === "square") {
+      const hw = 0.5, hd = 0.5;
+      return [
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd), // close
+      ];
+    }
+    if (shape === "zigzag") {
+      return [
+        new THREE.Vector3(-0.5, Y_HEIGHT, -0.5),
+        new THREE.Vector3(-0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0, Y_HEIGHT, -0.5),
+        new THREE.Vector3(0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0.5, Y_HEIGHT, -0.5),
+      ];
+    }
+    return [];
+  }, [shape]);
+
+  if (points.length === 0) return null;
+
+  const flatPts = points.map((p) => [p.x, p.y, p.z] as [number, number, number]);
+
+  return (
+    <group>
+      {/* Outer Glow layer — very thick, low opacity */}
+      <Line
+        points={flatPts}
+        color={shapeColor}
+        lineWidth={24}
+        transparent
+        opacity={glowOpacity * 0.4}
+        depthWrite={false}
+      />
+      {/* Middle Glow layer — medium thickness */}
+      <Line
+        points={flatPts}
+        color={shapeColor}
+        lineWidth={10}
+        transparent
+        opacity={glowOpacity}
+        depthWrite={false}
+      />
+      {/* Core line (solid center) */}
+      <Line
+        points={flatPts}
+        color={isSelected ? "#ffffff" : shapeColor}
+        lineWidth={isSelected ? 4 : 2}
+        transparent
+        opacity={coreOpacity}
+        depthWrite={false}
+      />
+
+      {/* Flowing energy dashes on top */}
+      <Line
+        ref={matRef}
+        points={flatPts}
+        color="#ffffff"
+        lineWidth={3}
+        dashed
+        dashSize={0.1}
+        gapSize={0.2}
+        dashScale={2}
+        transparent
+        opacity={isSelected ? 0.9 : 0.4}
+        depthWrite={false}
+      />
+
+      {/* Floor reflection — makes it look like it's glowing onto the ground */}
+      {isSelected && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+          <planeGeometry args={[1.2, 1.2]} />
+          <meshBasicMaterial color={shapeColor} transparent opacity={0.25} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
 
 function ModelObject({
   object,
@@ -444,12 +569,13 @@ function ModelObject({
             castShadow
             receiveShadow
             position={object.position}
+            rotation={object.rotation}
             scale={object.scale}
           >
             <DroneBody
               state={{
                 position: [0, 0, 0],
-                headingRad: object.rotation[1] ?? 0,
+                headingRad: 0,
                 isFlying: false,
               }}
             />
@@ -465,16 +591,8 @@ function ModelObject({
             scale={object.scale}
           >
             <BoxObstacle
-              ob={{
-                id: object.id,
-                position: [0, 0, 0],
-                size: [
-                  object.scale[0] * 2,
-                  object.scale[1] * 2,
-                  object.scale[2] * 2,
-                ],
-                color: object.color,
-              }}
+              color={object.color}
+              size={[1, 1, 1]}
             />
           </group>
         ) : primitiveType === "tree" ? (
@@ -552,6 +670,22 @@ function ModelObject({
               order={checkpointOrder ?? 0}
             />
           </group>
+        ) : primitiveType?.startsWith("pattern_") ? (
+          <group
+            ref={meshRef}
+            onClick={handleClick}
+            position={object.position}
+            rotation={object.rotation}
+            scale={object.scale}
+          >
+            <FlightPatternVisual
+              object={{
+                ...object,
+                shape: primitiveType.replace("pattern_", "") as any
+              }}
+              isSelected={isSelected}
+            />
+          </group>
         ) : null
       ) : (
         <mesh
@@ -581,7 +715,7 @@ function ModelObject({
                 : true;
           const _showZ =
             transformMode === "rotate" ? (_c?.rotate.z.enabled ?? true) : true;
-          return (
+          return transformMode && (
             <TransformControls
               ref={transformRef}
               object={meshRef.current}
@@ -932,11 +1066,11 @@ function ModelObjectFBX({
                 : true;
           const _showZ =
             transformMode === "rotate" ? (_c?.rotate.z.enabled ?? true) : true;
-          return (
+          return transformMode && (
             <TransformControls
               ref={transformRef}
               object={meshRef.current}
-              mode={transformMode}
+              mode={transformMode as any}
               showX={_showX}
               showY={_showY}
               showZ={_showZ}
@@ -1244,51 +1378,6 @@ function Scene({
 
 }
 
-export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunset" | "daylight" }) {
-  if (theme === "space") {
-    return (
-      <>
-        <color attach="background" args={["#050510"]} />
-        <Stars radius={200} depth={200} count={3000} factor={15} saturation={0} fade speed={3} />
-        <ambientLight intensity={0.2} />
-      </>
-    );
-  }
-  if (theme === "sunset") {
-    return (
-      <>
-        <Sky
-          sunPosition={[100, 10, 100]}
-          turbidity={10}
-          rayleigh={1}
-          mieCoefficient={0.005}
-          mieDirectionalG={0.8}
-        />
-
-        <Environment preset="sunset" />
-        <ambientLight intensity={0.5} />
-
-        {/* Clear Golden Hour Sunlight */}
-        <directionalLight
-          position={[50, 50, 50]}
-          intensity={1.5}
-          color="#291e50ff"
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-        />
-      </>
-    );
-  }
-  if (theme === "daylight") {
-    return (
-      <>
-        <Sky sunPosition={[100, 20, 100]} />
-        <ambientLight intensity={0.8} />
-      </>
-    );
-  }
-  return <color attach="background" args={["#071427"]} />;
-}
 
 function MapEditorContent() {
   const mainCanvasContainerRef = useRef<HTMLDivElement>(null);
@@ -1304,6 +1393,7 @@ function MapEditorContent() {
   const router = useRouter();
   const labId = searchParams.get("id");
   const { data: storedLab, contentId } = useSuspenseLabFull(labId || "");
+  const isReadOnly = storedLab?.status === "ACTIVE";
   const t = useTranslations("MapEditor");
   const { toasts, dismiss, toast } = useToast();
 
@@ -1325,6 +1415,7 @@ function MapEditorContent() {
       timeLimit: storedLab.labContent?.environment?.rule?.timeLimit || 0,
       requiredScore: storedLab.labContent?.environment?.rule?.requiredScore || 0,
       maxBlocks: storedLab.labContent?.environment?.rule?.maxBlocks || 0,
+      fuelLimit: storedLab.labContent?.environment?.rule?.fuelLimit || 0,
       sequentialCheckpoints: storedLab.labContent?.environment?.rule?.sequentialCheckpoints || false,
     };
   });
@@ -1395,6 +1486,23 @@ function MapEditorContent() {
     }
   }, [objects, map, rule, hasSolution, labId, storedLab]);
 
+  // 2.5 Real-time Validation for UI
+  const currentValidation = useMemo(() => {
+    // Construct a virtual LabData for validation purposes
+    const virtualLab = {
+      ...storedLab,
+      labContent: {
+        environment: {
+          objects,
+          map,
+          rule,
+          hasSolution
+        }
+      }
+    } as any;
+    return getLabValidation(virtualLab);
+  }, [objects, map, rule, hasSolution, storedLab]);
+
   // 3. Navigation Guard
   useEffect(() => {
     // A. External Navigation (Browser Refresh/Close)
@@ -1441,10 +1549,14 @@ function MapEditorContent() {
   const handleBack = useCallback(() => {
     if (isDirty) {
       if (window.confirm(t("confirm.unsavedChanges"))) {
-        router.push("/lab-management");
+        // router.push("/lab-management");
+        router.back()
+
       }
     } else {
-      router.push("/lab-management");
+      // router.push("/lab-management");
+      router.back()
+
     }
   }, [isDirty, router]);
 
@@ -1469,8 +1581,28 @@ function MapEditorContent() {
     if (ruleOverride) setRule(ruleOverride);
     if (objectsOverride) setObjects(objectsOverride);
 
-    const currentRule = ruleOverride || rule;
     const currentObjects = objectsOverride || objects;
+
+    // --- Rule Sanitization (Teacher-Proofing) ---
+    // This part ensures that even if the user deletes items after setting rules, 
+    // the saved lab is ALWAYS possible to finish.
+    const actualMaxScore = currentObjects.reduce((acc, o) => acc + (o.scoreValue || 0), 0);
+    const actualCPCount = currentObjects.filter(o => o.objectType === "checkpoint").length;
+
+    let currentRule = ruleOverride || rule;
+
+    // If the required score is higher than what's available on the map, we auto-fix it.
+    if (currentRule.requiredScore > actualMaxScore) {
+      currentRule = { ...currentRule, requiredScore: actualMaxScore };
+    }
+
+    // If sequential is ON but we don't have at least 2 checkpoints, we auto-off it.
+    if (currentRule.sequentialCheckpoints && actualCPCount < 2) {
+      currentRule = { ...currentRule, sequentialCheckpoints: false };
+    }
+
+    setRule(currentRule);
+    // --------------------------------------------
 
     try {
       // Small delay for psychological feedback (feel premium)
@@ -1488,8 +1620,13 @@ function MapEditorContent() {
           theme: map.theme,
         },
         rule: currentRule,
-        hasSolution
+        hasSolution: isDirty ? false : hasSolution,
+        solution: isDirty ? undefined : (storedLab?.labContent?.environment?.solution)
       };
+
+      if (isDirty && hasSolution) {
+        console.log("Map/Rules changed. Invalidating existing solution.");
+      }
 
       if (publish) {
         const validation = getLabValidation({
@@ -1514,11 +1651,17 @@ function MapEditorContent() {
           }, {
             onSuccess: () => {
               setSaveSuccess(true);
-              setIsDirty(false);
-              // Snapshot new state as the reference
-              lastSavedStateRef.current = stableStringify(labContentData);
 
-              toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              if (isDirty && hasSolution) {
+                setHasSolution(false);
+                toast.warning("Bản đồ đã thay đổi. Lời giải mẫu cũ đã bị xóa để đảm bảo tính chính xác.");
+              } else {
+                toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              }
+
+              // Snapshot new state as the reference point for isDirty
+              lastSavedStateRef.current = stableStringify(labContentData);
+              setIsDirty(false);
               if (publish) {
                 setTimeout(() => router.push("/lab-management"), 1200);
               }
@@ -1542,6 +1685,18 @@ function MapEditorContent() {
       return false;
     }
   }, [labId, map, rule, objects, router, toast, updateLabFull, contentId, storedLab]);
+
+  /**
+   * Chuyển hướng sang trang Solver để Admin giải đố và lưu lời giải mẫu.
+   * Tự động lưu Map hiện tại nếu có thay đổi.
+   */
+  const handleTestFlight = useCallback(async () => {
+    if (isDirty) {
+      const success = await saveToStorage(false);
+      if (!success) return; // Abort if save failed
+    }
+    router.push(`/lab-management/${labId}/solve`);
+  }, [isDirty, saveToStorage, router, labId]);
 
   const [missionRunning, setMissionRunning] = useState(false);
   const [missionTimeLeft, setMissionTimeLeft] = useState(0);
@@ -1627,10 +1782,12 @@ function MapEditorContent() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      const isInput = tag === "INPUT" || tag === "TEXTAREA";
+      const isInput =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement;
 
       if (e.key === "Tab") {
+        if (isReadOnly) return;
         e.preventDefault();
         setTransformMode((prev) => {
           if (prev === "translate") return "rotate";
@@ -1641,14 +1798,14 @@ function MapEditorContent() {
       }
 
       if ((e.key === "Delete" || e.key === "Backspace") && selectedObjectId) {
-        if (isInput) return;
+        if (isInput || isReadOnly) return;
         e.preventDefault();
         setObjects((prev) => prev.filter((o) => o.id !== selectedObjectId));
         setSelectedObjectId(null);
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && !isInput) {
+      if ((e.ctrlKey || e.metaKey) && !isInput && !isReadOnly) {
         if (e.key === "c" || e.key === "x") {
           e.preventDefault();
           const obj = objects.find((o) => o.id === selectedObjectId);
@@ -1697,7 +1854,7 @@ function MapEditorContent() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedObjectId, clipboardObject, objects]);
+  }, [selectedObjectId, clipboardObject, objects, isReadOnly]);
 
   useEffect(() => {
     setObjects((prev) =>
@@ -1867,6 +2024,15 @@ function MapEditorContent() {
           newObj.scale = [1, 1, 1];
           newObj.scalable = false;
           newObj.position[1] = Math.max(2, newObj.position[1]);
+        } else if (m.category === "pattern") {
+          newObj.objectType = "pattern";
+          newObj.shape = m.id.replace("pattern_", "") as any;
+          newObj.tolerance = 0.5;
+          newObj.showGuide = true;
+          newObj.requireClockwise = true;
+          newObj.width = m.defaultScale;
+          newObj.height = m.defaultScale;
+          newObj.points = [];
         } else if (m.category === "obstacle" || m.category === "decor") {
           newObj.objectType = "obstacle";
         }
@@ -2098,10 +2264,12 @@ function MapEditorContent() {
                 key={cat.id}
                 onClick={() => handleSetCategory(cat.id)}
                 title={t(`categories.${cat.id}`)}
+                disabled={isReadOnly}
                 className={`
             relative w-10 h-10 sm:w-12 sm:h-12 rounded  
             flex items-center justify-center
             transition-all duration-300 ease-out
+            ${isReadOnly ? "opacity-40 cursor-not-allowed" : ""}
             ${active
                     ? "bg-sky-500 text-white shadow-[0_0_20px_rgba(14,165,233,0.4)] scale-105 border border-sky-400/30"
                     : "bg-white/5 text-slate-400 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/10"
@@ -2132,8 +2300,8 @@ function MapEditorContent() {
                   return (
                     <div
                       key={theme.id}
-                      onClick={() => setMap((s: LabMap) => ({ ...s, theme: theme.id as any }))}
-                      className={`group relative flex flex-col rounded overflow-hidden border transition-all duration-200 ${isActive
+                      onClick={() => !isReadOnly && setMap((s: LabMap) => ({ ...s, theme: theme.id as any }))}
+                      className={`group relative flex flex-col rounded overflow-hidden border transition-all duration-200 ${isReadOnly ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'} ${isActive
                         ? 'border-sky-400/40 shadow-[0_0_24px_rgba(56,189,248,0.15)] bg-sky-500/5'
                         : 'border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] hover:shadow-[0_0_24px_rgba(56,189,248,0.1)]'
                         }`}
@@ -2207,9 +2375,10 @@ function MapEditorContent() {
                       {t(`models.${m.id}`)}
                     </span>
                     <button
-                      onClick={() => addPredefinedModel(m)}
+                      onClick={() => !isReadOnly && addPredefinedModel(m)}
                       aria-label={t("models.add", { name: t(`models.${m.id}`) })}
-                      className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
+                      disabled={isReadOnly}
+                      className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                         <path
@@ -2230,9 +2399,10 @@ function MapEditorContent() {
 
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap gap-y-2">
+        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap ">
           {/* Map size */}
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
+          <div className="flex items-center gap-2
+           px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
             <svg
               width="13"
               height="13"
@@ -2262,8 +2432,9 @@ function MapEditorContent() {
               max={50}
               step={5}
               value={map.cells}
+              disabled={isReadOnly}
               onChange={(e) => setMap((s: LabMap) => ({ ...s, cells: Number(e.target.value) }))}
-              className="w-20 h-0.5 accent-sky-400 cursor-pointer"
+              className="w-20 h-0.5 accent-sky-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <span className="text-[11px] text-slate-400 font-mono tabular-nums">
               {map.cells}×{map.cells}m
@@ -2282,44 +2453,58 @@ function MapEditorContent() {
               {t("toolbar.back")}
             </button>
 
-            <button
-              onClick={() => saveToStorage(false)}
-              disabled={isSaving || !isOnline}
-              className={`
-                relative flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded transition-all duration-300 border
-                ${saveSuccess
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                  : !isOnline
-                    ? "bg-red-500/10 text-red-400 border-red-500/20 opacity-70"
-                    : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
-                }
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
-            >
-              {isSaving ? (
-                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : saveSuccess ? (
-                <FaCheck className="animate-in zoom-in duration-300" />
-              ) : !isOnline ? (
-                <span>⚠</span>
-              ) : (
-                <FaSave className="text-[10px]" />
-              )}
-              {saveSuccess ? t("toolbar.saved") : isSaving ? t("toolbar.saving") : !isOnline ? t("toolbar.offline") : t("toolbar.save")}
+            {!isReadOnly && (
+              <button
+                onClick={() => saveToStorage(false)}
+                disabled={isSaving || !isOnline || !isDirty}
+                className={`
+                  relative flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded transition-all duration-300 border
+                  ${saveSuccess
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                    : !isOnline
+                      ? "bg-red-500/10 text-red-400 border-red-500/20 opacity-70"
+                      : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              >
+                {isSaving ? (
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : saveSuccess ? (
+                  <FaCheck className="animate-in zoom-in duration-300" />
+                ) : !isOnline ? (
+                  <span>⚠</span>
+                ) : (
+                  <FaSave className="text-[10px]" />
+                )}
+                {saveSuccess ? t("toolbar.saved") : isSaving ? t("toolbar.saving") : !isOnline ? t("toolbar.offline") : t("toolbar.save")}
 
-              {isDirty && !saveSuccess && !isSaving && isOnline && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-400 rounded-full border-2 border-greyscale-900 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
-              )}
-            </button>
+                {isDirty && !saveSuccess && !isSaving && isOnline && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-400 rounded-full border-2 border-greyscale-900 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                )}
+              </button>
+            )}
 
             <button
               onClick={() => setShowMissionModal(true)}
               className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-primary-300 text-white border border-primary-200 hover:bg-primary-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300 ml-1"
             >
-              {t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              {isReadOnly ? t("toolbar.viewConfig") : t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
 
-
+            {currentValidation.hasDrone && currentValidation.hasObjects && currentValidation.hasRules && (
+              <button
+                onClick={handleTestFlight}
+                className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-emerald-500 text-black border border-emerald-400 hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 ml-1"
+              >
+                {hasSolution ? (
+                  <FaEye className="text-[10px] group-hover:scale-110 transition-transform" />
+                ) : (
+                  <FaPlay className="text-[10px] group-hover:scale-110 transition-transform" />
+                )}
+                {hasSolution ? "Xem lời giải" : "Giải thử"}
+              </button>
+            )}
           </div>
 
           <div className="h-5 w-px bg-white/10" />
@@ -2422,13 +2607,27 @@ function MapEditorContent() {
           </div>
 
           <LanguageSwitcher />
+
+          {isReadOnly && (
+            <div className="ml-4 px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest animate-pulse flex items-center gap-2">
+              <FaLock className="text-[9px]" /> {t("toolbar.readOnlyHUD")}
+            </div>
+          )}
         </div>
 
         {/* 3D Canvas */}
         <div className="flex-1 relative" ref={mainCanvasContainerRef}>
-          {selectedObject && (
+          {selectedObject && !isReadOnly && (
             <button
               onClick={handleDeleteSelected}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
               title="Delete selected object (Del / Backspace)"
               className="absolute left-4 top-4 z-40 group flex items-center gap-2 px-3 py-2 rounded-lg bg-red-950/80 hover:bg-red-700/90 border border-red-500/30 hover:border-red-400/60 text-red-400 hover:text-white text-[12px] font-medium backdrop-blur-sm shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
             >
@@ -2450,45 +2649,60 @@ function MapEditorContent() {
             </button>
           )}
           {selectedObject && transformMode === "rotate" && (
-            <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40">
+            <div
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
+              className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40"
+            >
               <div className="text-sm font-medium mb-2">{t("properties.rotateY")}</div>
-              <div className="flex gap-2 items-center">
-                <button
-                  title="Rotate +90°"
-                  className="w-10 h-8 flex items-center justify-center bg-gray-700 rounded"
-                  onClick={() => {
-                    const d = degToRad(90);
-                    const y = (selectedObject.rotation[1] ?? 0) + d;
-                    finalizingRef.current = true;
-                    updateObjectProps(selectedObject.id, {
-                      rotation: [
-                        selectedObject.rotation[0],
-                        y,
-                        selectedObject.rotation[2],
-                      ],
-                    });
-                    setTimeout(() => {
-                      finalizingRef.current = false;
-                    }, 80);
-                  }}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+              {!isReadOnly && (
+                <div className="flex gap-2 items-center">
+                  <button
+                    title="Rotate +90°"
+                    className="w-10 h-8 flex items-center justify-center bg-gray-700 rounded"
+                    onClick={() => {
+                      const d = degToRad(90);
+                      const y = (selectedObject.rotation[1] ?? 0) + d;
+                      finalizingRef.current = true;
+                      handleObjectTransform(selectedObject.id, {
+                        rotation: [
+                          selectedObject.rotation[0],
+                          y,
+                          selectedObject.rotation[2],
+                        ],
+                      });
+                      setTimeout(() => {
+                        finalizingRef.current = false;
+                      }, 80);
+                    }}
                   >
-                    <path
-                      d="M12 2v4M20.364 4.636A9 9 0 1012 21"
-                      stroke="#9CA3AF"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2v4M20.364 4.636A9 9 0 1012 21"
+                        stroke="#9CA3AF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {isReadOnly && (
+                <div className="text-[10px] text-slate-400 italic">Đã khóa ở chế độ CHỈ ĐỌC</div>
+              )}
             </div>
           )}
           {selectedObject &&
@@ -2499,26 +2713,43 @@ function MapEditorContent() {
               const hasAnyScale = sc.x.enabled || sc.y.enabled || sc.z.enabled;
               if (!hasAnyScale) return null;
               const modelCfg = getModelConfig(selectedObject.modelUrl);
+              const isPattern = selectedObject.objectType === "pattern";
               const axes = [
-                { key: "x" as const, label: t("properties.width"), idx: 0 },
-                { key: "y" as const, label: t("properties.height"), idx: 1 },
-                { key: "z" as const, label: t("properties.depth"), idx: 2 },
+                { key: "x" as const, label: isPattern ? "Kích thước X (Dài)" : t("properties.width"), idx: 0 },
+                { key: "y" as const, label: isPattern ? "Chiều cao Y" : t("properties.height"), idx: 1 },
+                { key: "z" as const, label: isPattern ? "Kích thước Z (Rộng)" : t("properties.depth"), idx: 2 },
               ];
               return (
-                <div className="absolute right-6 top-6 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48">
-                  <div className="text-sm font-medium mb-2">{t("properties.title")}</div>
+                <div
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-40 bg-gray-900/90 text-gray-100 p-4 rounded-xl border border-white/10 w-52 backdrop-blur-md shadow-2xl"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                    <div className="text-[11px] font-black uppercase tracking-widest text-slate-300">
+                      {isPattern ? "Điều chỉnh hình dạng" : t("properties.title")}
+                    </div>
+                  </div>
                   {modelCfg?.hasColor && (
                     <>
                       <label className="text-xs">{t("properties.color")}</label>
                       <input
+                        disabled={isReadOnly}
                         type="color"
                         value={(selectedObject as any).color ?? "#00d9ff"}
                         onChange={(e) =>
-                          updateObjectProps(selectedObject.id, {
+                          handleObjectTransform(selectedObject.id, {
                             color: e.target.value,
                           })
                         }
-                        className="w-full h-8 mb-2 p-0 border-0"
+                        className="w-full h-8 mb-2 p-0 border-0 disabled:opacity-50"
                       />
                     </>
                   )}
@@ -2530,6 +2761,7 @@ function MapEditorContent() {
                         <div key={key}>
                           <label className="text-xs">{label}</label>
                           <input
+                            disabled={isReadOnly}
                             type="range"
                             min={ac.min ?? 0.2}
                             max={ac.max ?? 3}
@@ -2546,58 +2778,39 @@ function MapEditorContent() {
                                 s[1] = v;
                                 s[2] = v;
                               }
-                              updateObjectProps(selectedObject.id, {
+                              handleObjectTransform(selectedObject.id, {
                                 scale: s,
                               });
                             }}
-                            className="w-full"
+                            className="w-full disabled:opacity-50"
                           />
                         </div>
                       );
                     })}
 
-                    {/* {getConstraintsForModel(selectedObject.modelUrl)?.rotate.y
-                      .enabled && (
-                        <div className="mt-2">
-                          <button
-                            className="px-3 py-1 bg-gray-700 rounded text-sm"
-                            onClick={() => {
-                              const d = degToRad(90);
-                              const y = (selectedObject.rotation[1] ?? 0) + d;
-                              updateObjectProps(selectedObject.id, {
-                                rotation: [
-                                  selectedObject.rotation[0],
-                                  y,
-                                  selectedObject.rotation[2],
-                                ],
-                              });
-                            }}
-                          >
-                            Rotate +90°
-                          </button>
-                        </div>
-                      )} */}
-                    <button
-                      onClick={handleDeleteSelected}
-                      className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
-                    >
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
+                    {!isReadOnly && (
+                      <button
+                        onClick={handleDeleteSelected}
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
                       >
-                        <path
-                          d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      {t("properties.remove")}
-                    </button>
+                        <svg
+                          width="11"
+                          height="11"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        {t("properties.remove")}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -2624,11 +2837,23 @@ function MapEditorContent() {
 
           {selectedObject?.objectType === "checkpoint" &&
             (() => {
+              const cpObj = selectedObject;
+              if (!cpObj) return null;
               const cpIndex = objects
                 .filter((o) => o.objectType === "checkpoint")
-                .findIndex((o) => o.id === selectedObject.id);
+                .findIndex((o) => o.id === cpObj.id);
               return (
-                <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52">
+                <div
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52"
+                >
                   <div className="text-sm font-medium mb-2">
                     🔵 {t("properties.checkpointTitle")}
                   </div>
@@ -2638,45 +2863,47 @@ function MapEditorContent() {
                   </div>
                   <label className="text-xs text-gray-400">{t("properties.radius")}</label>
                   <input
+                    disabled={isReadOnly}
                     type="range"
                     min={4}
                     max={15}
                     step={0.5}
-                    value={selectedObject.radius ?? 2}
+                    value={cpObj.radius ?? 2}
                     onChange={(e) =>
-                      updateObjectProps(selectedObject.id, {
+                      handleObjectTransform(cpObj.id, {
                         radius: parseFloat(e.target.value),
                       })
                     }
-                    className="w-full mt-1"
+                    className="w-full mt-1 disabled:opacity-50"
                   />
-                  {/* <div className="text-xs text-gray-400 mt-1">
-                    {(selectedObject.radius ?? 2).toFixed(2)} m
-                  </div> */}
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="mt-3 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
-                  >
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
+                  {!isReadOnly && (
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="mt-3 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
                     >
-                      <path
-                        d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {t("properties.removeCheckpoint")}
-                  </button>
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {t("properties.removeCheckpoint")}
+                    </button>
+                  )}
                 </div>
               );
             })()}
+
+
 
           {/* ── Rule Configuration Modal ─────────────────────────────── */}
           <RuleConfigurationModal
@@ -2686,7 +2913,9 @@ function MapEditorContent() {
             onChange={setRule}
             objects={objects}
             isSaving={isSaving}
-            onSave={async (draftRule) => {
+            hasSolution={hasSolution}
+            isReadOnly={isReadOnly}
+            onSave={async (draftRule: any) => {
               const success = await saveToStorage(false, draftRule);
               if (success) {
                 setShowMissionModal(false);
@@ -2717,7 +2946,7 @@ function MapEditorContent() {
                 objects={objects}
                 selectedObjectId={selectedObjectId}
                 onSelectObject={setSelectedObjectId}
-                transformMode={transformMode}
+                transformMode={isReadOnly ? null : transformMode}
                 onObjectTransform={handleObjectTransform}
                 disableOrbitControls={isTransforming}
                 onTransformStart={handleTransformStart}

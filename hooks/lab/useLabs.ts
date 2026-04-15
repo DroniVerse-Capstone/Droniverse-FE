@@ -23,13 +23,14 @@ const sanitizeEnvironment = (env: any) => {
       sequentialCheckpoints: !!env.rule.sequentialCheckpoints,
       maxBlocks: env.rule.maxBlocks || 0
     } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
-    hasSolution: env.hasSolution || env.rule?.hasSolution || false
+    hasSolution: env.hasSolution || env.rule?.hasSolution || false,
+    solution: env.solution
   };
 };
 
-type LabStatus = "DRAFT" | "ACTIVE" | "INACTIVE" | "LOCKED" | "DELETED";
+export type LabStatus = "DRAFT" | "ACTIVE" | "INACTIVE" | "LOCKED" | "DELETED";
 
-type UseGetLabsOptions = {
+export type UseGetLabsOptions = {
   type?: "LEARNING" | "COMPETITION";
   status?: LabStatus;
   searchTerm?: string;
@@ -38,7 +39,7 @@ type UseGetLabsOptions = {
   withPaginationMeta?: boolean;
 };
 
-type LabsPaginationData = {
+export type LabsPaginationData = {
   data: LabData[];
   totalRecords: number;
   pageIndex: number;
@@ -46,12 +47,6 @@ type LabsPaginationData = {
   totalPages: number;
 };
 
-export function useGetLabs(
-  options: UseGetLabsOptions & { withPaginationMeta: true }
-): ReturnType<typeof useQuery<LabsPaginationData>>;
-export function useGetLabs(
-  options?: UseGetLabsOptions
-): ReturnType<typeof useQuery<LabData[]>>;
 export function useGetLabs(options?: UseGetLabsOptions) {
   return useQuery<LabData[] | LabsPaginationData>({
     queryKey: [
@@ -64,7 +59,6 @@ export function useGetLabs(options?: UseGetLabsOptions) {
       options?.withPaginationMeta,
     ],
     queryFn: async () => {
-      // Fetch all Labs (Metadata) from REAL Backend
       const response = await apiClient.get<any>("/academy/labs", {
         params: {
           ...(options?.status && { Status: options.status }),
@@ -169,6 +163,27 @@ export const useUpdateLab = () => {
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Cập nhật Lab thất bại!";
+      toast.error(message);
+    }
+  });
+};
+
+export const useDuplicateLab = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (labID: string) => {
+      const response = await apiClient.post<any>(`/academy/labs/${labID}/duplicate`);
+      const newLabData = response.data?.data?.lab || response.data?.data || response.data;
+      return {
+        ...newLabData,
+        labID: newLabData.labID || newLabData.id
+      } as LabData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Nhân bản Lab thất bại!";
       toast.error(message);
     }
   });
@@ -314,8 +329,6 @@ export const useUpdateLabFull = () => {
 
   return useMutation({
     mutationFn: async ({ labID, data, contentId }: { labID: string; data: Partial<LabData>; contentId?: string }) => {
-      // Chỉ lưu Map Nội dung (Rule, Môi trường, Tọa độ) khi đang ở Map Editor.
-      // Không update lại Thông tin cơ bản (Tên, Thể loại...) vì đã tách ra Modal bên ngoài list
       const labContentData = data.labContent?.environment;
 
       if (labContentData) {
@@ -330,3 +343,36 @@ export const useUpdateLabFull = () => {
     }
   });
 };
+
+export const useGetStudentLabDetail = (enrollmentId: string, labId: string) => {
+  return useQuery({
+    queryKey: ["student-lab-detail", enrollmentId, labId],
+    queryFn: async () => {
+      if (!enrollmentId || !labId) return null;
+      const response = await apiClient.get<any>(
+        `/academy/user/enrollments/${enrollmentId}/labs/${labId}`
+      );
+
+      const data = response.data?.data;
+      if (!data) return null;
+
+      // Map/Sanitize structures
+      if (data.labContent) {
+        let env = data.labContent.environment;
+        if (typeof env === "string") {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        data.labContent.environment = sanitizeEnvironment(env);
+      }
+
+      // Ensure consistent ID naming
+      if (data.lab) {
+        data.lab.labID = data.lab.labID || data.lab.id;
+      }
+
+      return data;
+    },
+    enabled: !!enrollmentId && !!labId,
+  });
+};
+

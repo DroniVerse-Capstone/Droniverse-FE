@@ -59,6 +59,45 @@
     "simulator": {
       "title": "Khu vực mô phỏng drone"
     },
+    "missionEnd": {
+      "successTitle": "Hoàn thành",
+      "failTitle": "Thất bại",
+      "successStatus": "Kiểm tra bài tập: Hoàn tất",
+      "failStatus": "Cảnh báo: Bài tập chưa đạt yêu cầu",
+      "successDesc": "Hoàn hảo! Tất cả điểm mốc đã được thu thập an toàn.",
+      "successDescSolution": "Xác nhận: Lời giải mẫu hoạt động hoàn hảo!",
+      "failDesc": "Phát hiện lỗi kỹ thuật hoặc sự cố ngoài ý muốn.",
+      "safety": "An toàn",
+      "systemStable": "Hệ thống ổn định",
+      "collisionWarning": "Cảnh báo va chạm",
+      "pass": "ĐẠT",
+      "fail": "LỖI",
+      "objectives": "Mục tiêu",
+      "score": "Điểm số",
+      "required": "bắt buộc",
+      "energy": "Năng lượng",
+      "remaining": "còn lại",
+      "outOfBattery": "HẾT PIN",
+      "notFinished": "CHƯA XONG",
+      "time": "Thời gian",
+      "timeUp": "HẾT GIỜ",
+      "patternCheck": "Kiểm tra Quỹ Đạo",
+      "pattern": "Quỹ Đạo",
+      "shape_square": "HÌNH VUÔNG",
+      "shape_circle": "HÌNH TRÒN",
+      "shape_zigzag": "QUỸ ĐẠO ZIGZAG",
+      "shape_triangle": "HÌNH TAM GIÁC",
+      "shape_cross": "HÌNH CHỮ THẬP",
+      "shape_polygon": "ĐA GIÁC",
+      "shape_custom": "TỰ DO",
+      "retry": "Giải Lại",
+      "saveSolution": "Lưu lời giải",
+      "submitWork": "Nộp bài tập",
+      "updateSolution": "Cập nhật lời giải",
+      "nextMission": "Chuyển sang bài mới",
+      "tryAgain": "Thử lại bài tập",
+      "backToList": "Trở về danh sách bài học"
+    },
     "blockly": {
       "title": "Khu vực chỉnh sửa lệnh",
       "categories": {
@@ -73,8 +112,8 @@
       },
       "blocks": {
         "takeOff": {
-          "message": "Cất cánh",
-          "tooltip": "Kích hoạt drone cất cánh rời khỏi mặt đất"
+          "message": "Khởi động",
+          "tooltip": "Khởi động động cơ cánh quạt của Drone (chưa bay lên)"
         },
         "up": {
           "message": "Bay lên %1 m",
@@ -992,7 +1031,7 @@
       "create": "Tạo mới"
     },
     "status": {
-      "active": "Đang hoạt động",
+      "active": "Đã xuất bản",
       "inactive": "Dừng hoạt động",
       "draft": "Bản nháp",
       "loading": "Đang tải...",
@@ -1002,16 +1041,26 @@
   "LabManagement": {
     "title": "Quản lý bài Lab ",
     "createBtn": "TẠO BÀI LAB",
+    "viewDetails": "Chi tiết Lab",
     "searchPlaceholder": "Tìm kiếm tên bài Lab...",
     "filters": {
       "all": "Tất cả",
       "draft": "Bản nháp",
-      "active": "Hoạt động",
+      "active": "Đã xuất bản",
       "inactive": "Dừng hoạt động"
+    },
+    "level": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó"
+    },
+    "type": {
+      "learning": "Học tập",
+      "competition": "Thi đấu"
     },
     "stats": {
       "total": "TỔNG SỐ LAB",
-      "active": "ĐANG HOẠT ĐỘNG",
+      "active": "ĐÃ XUẤT BẢN",
       "draft": "BẢN NHÁP",
       "inactive": "DỪNG HOẠT ĐỘNG"
     },
@@ -1023,12 +1072,16 @@
       "notFoundDesc": "Không có bài Lab nào khớp với nội dung hoặc trạng thái tìm kiếm.",
       "noDescription": "Không có thông tin mô tả chi tiết.",
       "status": {
-        "active": "ĐANG HOẠT ĐỘNG",
+        "active": "ĐÃ XUẤT BẢN",
         "draft": "BẢN NHÁP",
-        "inactive": "TẠM DỪNG"
+        "inactive": "TẠM DỪNG",
+        "locked": "KHÓA",
+        "readOnly": "CHỈ ĐỌC",
+        "deleted": "ĐÃ XÓA"
       },
       "actions": {
         "editInfo": "Sửa Thông Tin",
+        "duplicate": "Nhân bản bài lab",
         "delete": "Xóa bài lab",
         "editMap": "Tiến hành thiết kế Map"
       }
@@ -1046,23 +1099,28 @@
       "descPlaceholderEN": "Lab description...",
       "level": "Độ Khó",
       "type": "Loại Lab",
+      "estimatedTime": "Thời lượng dự kiến (phút) *",
       "status": "Trạng Thái",
+      "required": "Trường này không được để trống",
       "publishRequirements": "Yêu cầu để xuất bản",
       "syncing": "Đang đồng bộ dữ liệu...",
       "checklist": {
         "drone": "Drone điểm xuất phát",
         "objects": "Đối tượng trong Map",
-        "rules": "Luật chơi & Thời gian",
+        "rules": "Luật chơi ",
         "solution": "Giải bài thành công (Solve Test)"
       }
     },
     "confirm": {
       "deleteTitle": "Xác nhận xóa bài lab?",
-      "deleteDescription": "Hành động này không thể hoàn tác."
+      "deleteDescription": "Hành động này không thể hoàn tác.",
+      "duplicateTitle": "Xác nhận nhân bản bài lab?",
+      "duplicateDescription": "Tạo một bản sao mới (Bản nháp) của bài lab này với toàn bộ thông tin và bản đồ."
     },
     "toasts": {
       "createSuccess": "Khởi tạo Lab thành công!",
       "updateSuccess": "Cập nhật thông tin Lab thành công!",
+      "duplicateSuccess": "Nhân bản Lab thành công!",
       "deleteSuccess": "Đã xóa bài Lab!",
       "publishError": "Bài Lab chưa đủ điều kiện để xuất bản. Vui lòng kiểm tra lại yêu cầu!",
       "droneError": "Drone là object duy nhất, không thể copy."
@@ -1100,6 +1158,10 @@
       "star": "Ngôi sao",
       "heart": "Trái tim",
       "checkpoint": "Checkpoint",
+      "pattern_square": "Hình Vuông",
+      "pattern_circle": "Hình Tròn",
+      "pattern_rectangle": "Hình Chữ nhật",
+      "pattern_zigzag": "Hình Zigzag",
       "pts": "điểm",
       "loading": "Đang tải...",
       "add": "Thêm bài {name}"
@@ -1110,7 +1172,10 @@
       "saving": "Đang lưu...",
       "saved": "Đã lưu!",
       "offline": "Mất kết nối",
-      "configureRules": "Cấu hình Rule",
+      "configureRules": "Cấu hình luật chơi",
+      "viewConfig": "Xem cấu hình",
+      "readOnlyHUD": "CHỈ ĐỌC (ĐÃ KHÓA)",
+      "readOnlyDesc": "Đã khóa ở chế độ CHỈ ĐỌC",
       "mapSize": "Kích thước bản đồ",
       "transform": {
         "translate": "Di chuyển",
@@ -1155,22 +1220,42 @@
       "order": "Thứ tự",
       "remove": "Xóa đối tượng",
       "removeCheckpoint": "Xóa Checkpoint",
-      "deleteTooltip": "Xóa đối tượng đang chọn (Del / Backspace)"
+      "deleteTooltip": "Xóa đối tượng đang chọn (Del / Backspace)",
+      "patternTitle": "Cấu hình Quỹ đạo",
+      "tolerance": "Độ chính xác (Sai số)",
+      "showGuide": "Hiện đường dẫn",
+      "requireClockwise": "Yêu cầu đúng chiều",
+      "hiddenUntilRun": "Ẩn khi chưa bay"
     },
     "rules": {
       "title": "Cấu hình luật chơi",
       "description": "Thiết lập điều kiện hoàn thành cho bài lab",
       "requiredScore": "Điểm cần đạt *",
+      "goalLimit": "Cố định mức điểm",
+      "useMax": "Sử dụng tối đa",
       "totalAvailable": "Tổng điểm khả dụng",
+      "noBonusItems": "Hiện tại Map chưa có vật phẩm tính điểm nào",
       "scoreError": "⚠ Điểm yêu cầu vượt quá tổng điểm hiện có ({maxScore} điểm)",
       "timeLimit": "Thời gian (giây) *",
       "maxBlocks": "Số lượng khối *",
+      "fuelLimit": "Năng lượng tối đa",
+      "fuelLimitDesc": "Giới hạn pin để buộc HS tối ưu đường bay",
+      "constraints": "Ràng buộc nhiệm vụ",
+      "checklistTitle": "YÊU CẦU HOÀN THÀNH",
+      "checklist": {
+        "drone": "Drone điểm xuất phát",
+        "objects": "Đối tượng trong Map",
+        "rules": "Luật chơi & Ràng buộc",
+        "solution": "Giải bài thành công (Solve Test)"
+      },
       "advancedRules": "Quy tắc nâng cao",
       "sequentialCheckpoints": "Bay theo thứ tự",
       "sequentialDesc": "Drone phải đi qua các checkpoint theo đúng trình tự 1 → 2 → 3...",
       "sequentialError": "⚠ Cần tối thiểu 2 checkpoint trên bản đồ để bật quy tắc này",
       "cancel": "Hủy bỏ",
       "save": "Lưu cập nhật",
+      "readOnlyHUD": "CHỈ ĐỌC",
+      "readOnlyDesc": "Đã khóa ở chế độ CHỈ ĐỌC",
       "saving": "Đang lưu..."
     },
     "error": {
@@ -1179,6 +1264,18 @@
       "retry": "Thử lại",
       "manage": "Quản lý Lab"
     }
+  },
+  "MissionHUD": {
+    "initializing": "Khởi tạo nhiệm vụ",
+    "systemCheck": "Kiểm tra hệ thống: OK | Kết nối: Ổn định",
+    "syncData": "Đồng bộ dữ liệu bản đồ",
+    "processing": "Đang xử lý...",
+    "signalLost": "Mất tín hiệu / Lỗi kết nối",
+    "diagnosticReport": "Báo cáo chẩn đoán",
+    "authFailure": "Lỗi xác thực nghiêm trọng. Vui lòng quay lại trung tâm điều hành để xác minh thông tin nhiệm vụ.",
+    "backToBase": "Về căn cứ",
+    "connectionTerminated": "Kết nối đã ngắt",
+    "loadingSystems": "Đang tải hệ thống..."
   },
   "ManagerCompetitions": {
     "errors": {
@@ -1280,8 +1377,8 @@
     "done": "Đã xử lý"
   },
   "ManagerCourse": {
-     "filter": "Bộ lọc",
-     "level": {
+    "filter": "Bộ lọc",
+    "level": {
       "label": "Cấp độ:",
       "all": "Tất cả",
       "easy": "Cơ bản",

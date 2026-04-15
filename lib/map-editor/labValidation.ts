@@ -9,19 +9,25 @@ export interface LabValidation {
 }
 
 export const getLabValidation = (lab: LabData): LabValidation => {
-  const content = lab.labContent || (lab as any).mapData; // Fallback for transition
+  const content = lab.labContent || (lab as any).mapData;
   if (!content) return { hasDrone: false, hasObjects: false, hasRules: false, hasSolution: false, isValid: false };
-  console.log(content)
-  const hasDrone = content.environment.objects?.some((o: any) => o.modelUrl === "primitive:drone") || false;
-  const hasObjects = (content.environment.objects?.length || 0) > (hasDrone ? 1 : 0);
-  const hasRules = (content.environment.rule?.requiredScore > 0 || content.environment.objects?.some((o: any) => o.objectType === 'checkpoint')) && (content.environment.rule?.timeLimit ?? 0) > 0;
-  const hasSolution = (content.environment.hasSolution === true) || (content.environment.rule as any)?.hasSolution === true;
-  console.log(getLabValidation)
+
+  const objects = content.environment.objects || [];
+  const rule = content.environment.rule || {};
+
+  const hasDrone = objects.some((o: any) => o.modelUrl === "primitive:drone");
+  const hasObjects = objects.length > (hasDrone ? 1 : 0);
+
+  const hasGoals = (rule.requiredScore > 0) || objects.some((o: any) => o.objectType === 'checkpoint' || o.objectType === 'pattern');
+
+  const hasRules = (rule.timeLimit > 0) || (rule.maxBlocks > 0) || hasGoals;
+  const hasSolution = (content.environment.hasSolution === true) || (rule as any)?.hasSolution === true;
+
   return {
     hasDrone,
     hasObjects,
     hasRules,
     hasSolution,
-    isValid: hasDrone && hasObjects && hasRules && hasSolution
+    isValid: hasDrone && hasGoals && hasSolution
   };
 };
