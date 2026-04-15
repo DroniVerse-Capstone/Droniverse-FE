@@ -396,10 +396,10 @@ const CollectionEffect3D = ({ color, score }: { color: string, score: number }) 
       </mesh>
 
       {/* High speed outward color sparks */}
-      <Sparkles count={200} scale={18} size={25} speed={6} opacity={0.9} fade color={color} />
+      <Sparkles count={200} scale={18} size={25} speed={6} opacity={0.9} color={color} />
 
       {/* Huge white flashes */}
-      <Sparkles count={60} scale={12} size={60} speed={3} opacity={1} fade color="#ffffff" />
+      <Sparkles count={60} scale={12} size={60} speed={3} opacity={1} color="#ffffff" />
 
       <pointLight ref={lightRef} color={color} intensity={50} distance={40} decay={2} />
 
@@ -477,9 +477,9 @@ const BonusRenderer = ({ obj, completed }: { obj: any, completed: boolean }) => 
           {/* Ambient colored dust */}
           <Sparkles count={40} scale={obj.scale ? obj.scale[0] * 3 : 6} size={6} speed={0.4} opacity={0.6} color={config.primary} />
           {/* Bright twinkling central fragments */}
-          <Sparkles count={20} scale={obj.scale ? obj.scale[0] * 4 : 8} size={15} speed={1.5} opacity={1} color="#ffffff" fade />
+          <Sparkles count={20} scale={obj.scale ? obj.scale[0] * 4 : 8} size={15} speed={1.5} opacity={1} color="#ffffff" />
           {/* Stray large dust motes */}
-          <Sparkles count={10} scale={obj.scale ? obj.scale[0] * 5 : 10} size={25} speed={0.8} opacity={0.8} color={config.primary} fade />
+          <Sparkles count={10} scale={obj.scale ? obj.scale[0] * 5 : 10} size={25} speed={0.8} opacity={0.8} color={config.primary} />
 
           <pointLight color={config.primary} intensity={2} distance={10} decay={2} />
 
