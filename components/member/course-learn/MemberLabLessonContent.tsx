@@ -6,7 +6,7 @@ import { FaClock, FaSignal } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { useGetUserLabDetail } from "@/hooks/learning/useUserLearning";
+import { useGetUserLabMini } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
 import { TbDrone } from "react-icons/tb";
 
@@ -22,14 +22,16 @@ export default function MemberLabLessonContent({
   const locale = useLocale();
   const router = useRouter();
   const params = useParams<{ clubSlug?: string }>();
-  const labDetailQuery = useGetUserLabDetail(
+  const labDetailQuery = useGetUserLabMini(
     enrollmentId
       ? {
-          enrollmentId,
-          labId: referenceId,
-        }
+        enrollmentId,
+        labId: referenceId,
+      }
       : undefined,
   );
+
+  console.log("hello", labDetailQuery)
 
   if (labDetailQuery.isLoading) {
     return (

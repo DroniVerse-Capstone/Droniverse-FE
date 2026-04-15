@@ -1038,7 +1038,7 @@ export default function PlayLabWorkspace({
                       </button>
                     )}
                   </div>
-                ) : (
+                ) : missionEndState === "success" ? (
                   <div className="flex gap-3">
                     <button
                       onClick={handleReset}
@@ -1047,18 +1047,19 @@ export default function PlayLabWorkspace({
                       {t("missionEnd.retry")}
                     </button>
                     <button
-                      onClick={() => {
-                        if (missionEndState === "success") {
-                          setShowScoring(true);
-                        } else {
-                          handleReset();
-                        }
-                      }}
+                      onClick={() => setShowScoring(true)}
                       className="w-2/3 py-4 rounded bg-white text-black font-black text-[11px] uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:bg-slate-200 transition-all active:scale-95"
                     >
-                      {missionEndState === "success" ? "Nộp bài & Xem điểm" : t("missionEnd.tryAgain")}
+                      Nộp bài & Xem điểm
                     </button>
                   </div>
+                ) : (
+                  <button
+                    onClick={handleReset}
+                    className="w-full py-4 rounded bg-white text-black font-black text-[11px] uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:bg-slate-200 transition-all active:scale-95"
+                  >
+                    {t("missionEnd.tryAgain")}
+                  </button>
                 )}
                 <button
                   onClick={onExit}

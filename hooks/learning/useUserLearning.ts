@@ -27,6 +27,8 @@ import {
 	createUserLessonDataResponseSchema,
 	getUserLabDetailParamsSchema,
 	getUserLabDetailResponseSchema,
+	getUserLabMiniResponseSchema,
+	getUserLabMiniDataSchema,
 	getUserQuizAttemptReviewParamsSchema,
 	getUserQuizAttemptReviewResponseSchema,
 	getUserQuizDetailParamsSchema,
@@ -37,6 +39,7 @@ import {
 	submitUserQuizResponseSchema,
 	UserLearningPath,
 	getUserLearningPathResponseSchema,
+	GetUserLabMiniData,
 } from "@/validations/learning/user-learning"
 
 export const useGetUserLearningPath = (enrollmentId?: string) => {
@@ -227,6 +230,23 @@ export const useGetUserLabDetail = (params?: GetUserLabDetailParams) => {
 			)
 
 			const parsed = getUserLabDetailResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetUserLabMini = (params?: GetUserLabDetailParams) => {
+	return useQuery<GetUserLabMiniData, AxiosError<ApiError>>({
+		queryKey: ["user-lab-mini", params?.enrollmentId, params?.labId],
+		enabled: !!params?.enrollmentId && !!params?.labId,
+		queryFn: async () => {
+			const parsedParams = getUserLabDetailParamsSchema.parse(params)
+
+			const response = await apiClient.get(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/labs/${parsedParams.labId}/mini`
+			)
+
+			const parsed = getUserLabMiniResponseSchema.parse(response.data)
 			return parsed.data
 		},
 	})

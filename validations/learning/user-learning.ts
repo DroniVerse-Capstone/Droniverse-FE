@@ -301,6 +301,17 @@ export const getUserLabDetailDataSchema = z.object({
 	userLab: z.unknown().nullable(),
 })
 
+export const getUserLabMiniDataSchema = z.object({
+	lab: userLabDetailSchema,
+	userLab: z.unknown().nullable(),
+})
+
+export const getUserLabMiniResponseSchema = z.object({
+	data: getUserLabMiniDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export const getUserLabDetailResponseSchema = z.object({
 	data: getUserLabDetailDataSchema,
 	isSuccess: z.boolean(),
@@ -372,4 +383,8 @@ export type UserLabContent = z.infer<typeof userLabContentSchema>
 export type GetUserLabDetailData = z.infer<typeof getUserLabDetailDataSchema>
 export type GetUserLabDetailResponse = z.infer<
 	typeof getUserLabDetailResponseSchema
+>
+export type GetUserLabMiniData = z.infer<typeof getUserLabMiniDataSchema>
+export type GetUserLabMiniResponse = z.infer<
+	typeof getUserLabMiniResponseSchema
 >
