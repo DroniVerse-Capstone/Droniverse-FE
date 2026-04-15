@@ -8,6 +8,8 @@ import {
 	CompleteUserLessonData,
 	CompleteUserLessonParams,
 	CreateUserLessonDataParams,
+	GetUserLabDetailData,
+	GetUserLabDetailParams,
 	GetUserQuizAttemptReviewData,
 	GetUserQuizAttemptReviewParams,
 	GetUserQuizDetailData,
@@ -23,6 +25,8 @@ import {
 	completeUserLessonResponseSchema,
 	createUserLessonDataParamsSchema,
 	createUserLessonDataResponseSchema,
+	getUserLabDetailParamsSchema,
+	getUserLabDetailResponseSchema,
 	getUserQuizAttemptReviewParamsSchema,
 	getUserQuizAttemptReviewResponseSchema,
 	getUserQuizDetailParamsSchema,
@@ -207,6 +211,23 @@ export const useSubmitUserQuiz = () => {
 			queryClient.invalidateQueries({
 				queryKey: ["user-quiz-attempt-review", variables.enrollmentId, variables.quizId],
 			})
+		},
+	})
+}
+
+export const useGetUserLabDetail = (params?: GetUserLabDetailParams) => {
+	return useQuery<GetUserLabDetailData, AxiosError<ApiError>>({
+		queryKey: ["user-lab-detail", params?.enrollmentId, params?.labId],
+		enabled: !!params?.enrollmentId && !!params?.labId,
+		queryFn: async () => {
+			const parsedParams = getUserLabDetailParamsSchema.parse(params)
+
+			const response = await apiClient.get(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/labs/${parsedParams.labId}`
+			)
+
+			const parsed = getUserLabDetailResponseSchema.parse(response.data)
+			return parsed.data
 		},
 	})
 }

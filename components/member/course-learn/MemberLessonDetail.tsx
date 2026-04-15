@@ -69,7 +69,7 @@ export default function MemberLessonDetail({
         <span className="inline-flex items-center gap-2 rounded border-2 border-primary bg-primary/15 px-2 py-1 text-xs font-medium text-primary">
           {LESSON_TYPE_LABEL[lesson.type]}
         </span>
-        <span className="inline-flex items-center gap-2 rounded border-2 border-tertiary bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
+        <span className="inline-flex items-center gap-1 rounded border-2 border-tertiary bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
           <IoTimeOutline className="h-3.5 w-3.5" />
           {lesson.duration} phút
         </span>

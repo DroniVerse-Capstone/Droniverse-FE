@@ -257,6 +257,56 @@ export const submitUserQuizResponseSchema = z.object({
 	message: z.string(),
 })
 
+// ------------- Get User Lab Detail -------------
+
+export const getUserLabDetailParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	labId: z.string().uuid(),
+})
+
+export const userLabDetailSchema = z.object({
+	labID: z.string().uuid(),
+	type: z.string().min(1),
+	level: z.enum(["EASY", "MEDIUM", "HARD"]),
+	status: z.string().min(1),
+	estimatedTime: z.number().int().nonnegative(),
+	nameVN: z.string(),
+	nameEN: z.string(),
+	descriptionVN: z.string(),
+	descriptionEN: z.string(),
+	createAt: z.string(),
+	creator: z.unknown().nullable(),
+	updateAt: z.string(),
+	updater: z.unknown().nullable(),
+})
+
+export const userLabEnvironmentSchema = z
+	.object({
+		objects: z.array(z.record(z.string(), z.unknown())),
+		map: z.record(z.string(), z.unknown()),
+		rule: z.record(z.string(), z.unknown()),
+		hasSolution: z.boolean().optional(),
+		solution: z.record(z.string(), z.unknown()).optional(),
+	})
+	.passthrough()
+
+export const userLabContentSchema = z.object({
+	labID: z.string().uuid(),
+	environment: userLabEnvironmentSchema,
+})
+
+export const getUserLabDetailDataSchema = z.object({
+	lab: userLabDetailSchema,
+	labContent: userLabContentSchema,
+	userLab: z.unknown().nullable(),
+})
+
+export const getUserLabDetailResponseSchema = z.object({
+	data: getUserLabDetailDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type Lesson = z.infer<typeof lessonSchema>
 export type Module = z.infer<typeof moduleSchema>
 export type UserLearningPath = z.infer<typeof userLearningPathSchema>
@@ -315,3 +365,11 @@ export type GetUserQuizAttemptReviewResponse = z.infer<
 export type SubmitUserQuizParams = z.infer<typeof submitUserQuizParamsSchema>
 export type SubmitUserQuizData = z.infer<typeof submitUserQuizDataSchema>
 export type SubmitUserQuizResponse = z.infer<typeof submitUserQuizResponseSchema>
+export type GetUserLabDetailParams = z.infer<typeof getUserLabDetailParamsSchema>
+export type UserLabDetail = z.infer<typeof userLabDetailSchema>
+export type UserLabEnvironment = z.infer<typeof userLabEnvironmentSchema>
+export type UserLabContent = z.infer<typeof userLabContentSchema>
+export type GetUserLabDetailData = z.infer<typeof getUserLabDetailDataSchema>
+export type GetUserLabDetailResponse = z.infer<
+	typeof getUserLabDetailResponseSchema
+>

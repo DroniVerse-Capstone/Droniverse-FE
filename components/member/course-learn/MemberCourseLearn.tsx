@@ -90,7 +90,10 @@ export default function MemberCourseLearn() {
               enrollmentId={enrollmentId}
             />
           ) : (
-            <MemberLabLessonContent referenceId={selectedLesson.referenceID} />
+            <MemberLabLessonContent
+              referenceId={selectedLesson.referenceID}
+              enrollmentId={enrollmentId}
+            />
           )
         ) : (
           <div className="mx-auto flex h-full min-h-[60vh] w-full max-w-4xl items-center justify-center rounded-lg border border-greyscale-700 bg-greyscale-900/40 p-8 text-center">
