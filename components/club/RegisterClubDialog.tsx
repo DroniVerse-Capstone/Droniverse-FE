@@ -166,7 +166,7 @@ export default function RegisterClubDialog({
         </DialogTrigger>
       )}
 
-      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-hidden p-0">
+      <DialogContent className="w-[min(96vw,760px)] max-h-[85vh] overflow-hidden p-0">
         <div className="flex max-h-[85vh] flex-col">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle>{dialogTitle}</DialogTitle>

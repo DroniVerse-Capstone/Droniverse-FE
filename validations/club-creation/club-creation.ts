@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { categorySchema } from '@/validations/category/common-category'
+import { categorySchema } from '@/validations/category/category'
 
 export const clubCreationRequestSchema = z.object({
     nameVN: z.string().min(1),

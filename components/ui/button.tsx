@@ -29,6 +29,8 @@ const buttonVariants = cva(
           "bg-primary/15 text-primary border-1 border-primary-300 shadow-sm hover:bg-primary/5",
         secondaryIcon:
           "bg-secondary/15 text-secondary border-1 border-secondary-300 shadow-sm hover:bg-secondary/5",
+        successIcon:
+          "bg-success/15 text-success border-1 border-success-200 shadow-sm hover:bg-success/5",
       },
       size: {
         default: "h-10 px-4 py-2",

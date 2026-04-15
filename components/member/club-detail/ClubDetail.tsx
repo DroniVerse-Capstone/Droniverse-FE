@@ -1,6 +1,7 @@
 "use client";
 
 import { FadeIn } from "@/components/animation/FadeIn";
+import ClubHotCourse from "@/components/member/club-detail/ClubHotCourse";
 import ClubInfo from "@/components/member/club-detail/ClubInfo";
 import { useGetMyClubs } from "@/hooks/club/useClub";
 import { useParams } from "next/navigation";
@@ -32,6 +33,9 @@ export default function ClubDetail() {
     <div className="space-y-6 px-6 pb-6">
       <FadeIn from="bottom" duration={0.8} delay={0.2}>
         <ClubInfo clubId={clubId} />
+      </FadeIn>
+      <FadeIn from="bottom" duration={0.8} delay={0.4}>
+        <ClubHotCourse clubId={clubId} clubSlug={clubSlug} />
       </FadeIn>
     </div>
   );

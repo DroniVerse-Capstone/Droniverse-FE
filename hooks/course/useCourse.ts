@@ -5,15 +5,23 @@ import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
 	Course,
+	CreateCourseProductRequest,
+	CreateCourseProductResponse,
 	DeleteCourseResponse,
 	GetCoursesData,
 	PublishCourseResponse,
+	UpdateCourseProductRequest,
+	UpdateCourseProductResponse,
 	UnpublishCourseResponse,
+	createCourseProductRequestSchema,
+	createCourseProductResponseSchema,
 	createCourseResponseSchema,
 	deleteCourseResponseSchema,
 	getCourseDetailResponseSchema,
 	getCoursesResponseSchema,
 	publishCourseResponseSchema,
+	updateCourseProductRequestSchema,
+	updateCourseProductResponseSchema,
 	unpublishCourseResponseSchema,
 } from "@/validations/course/course"
 
@@ -154,6 +162,44 @@ export const useDeleteCourse = () => {
 					queryKey: ["course-detail", variables.courseId],
 				}),
 			])
+		},
+	})
+}
+
+export const useCreateCourseProduct = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		CreateCourseProductResponse,
+		AxiosError<ApiError>,
+		CreateCourseProductRequest
+	>({
+		mutationFn: async (data) => {
+			const payload = createCourseProductRequestSchema.parse(data)
+			const response = await apiClient.post("/community/products", payload)
+			return createCourseProductResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ["courses"] })
+		},
+	})
+}
+
+export const useUpdateCourseProduct = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		UpdateCourseProductResponse,
+		AxiosError<ApiError>,
+		{ id: string; data: UpdateCourseProductRequest }
+	>({
+		mutationFn: async ({ id, data }) => {
+			const payload = updateCourseProductRequestSchema.parse(data)
+			const response = await apiClient.put(`/community/products/${id}`, payload)
+			return updateCourseProductResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ["courses"] })
 		},
 	})
 }

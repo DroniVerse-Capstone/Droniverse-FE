@@ -1,18 +1,40 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 
 import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
   Club,
+  GetAllClubsData,
+  GetClubParticipationsData,
+  getAllClubsResponseSchema,
+  getClubParticipationsResponseSchema,
   getClubDetailResponseSchema,
   getMyClubsResponseSchema,
+  UpdateClubStatus,
+  UpdateClubStatusResponse,
+  updateClubStatusResponseSchema,
+  updateClubStatusSchema,
 } from "@/validations/club/club"
 
 type ClubStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | "ARCHIVED"
 
 type UseGetMyClubsOptions = {
   status?: ClubStatus | null
+}
+
+type UseGetAllClubsOptions = {
+  clubName?: string
+  clubStatus?: ClubStatus | null
+  currentPage?: number
+  pageSize?: number
+}
+
+type UseGetClubParticipationsOptions = {
+  participationName?: string
+  dateOfBirth?: string
+  currentPage?: number
+  pageSize?: number
 }
 
 type UploadTempClubImageResponse = {
@@ -43,6 +65,31 @@ export const useGetMyClubs = (options?: UseGetMyClubsOptions) => {
   })
 }
 
+export const useGetAllClubs = (options?: UseGetAllClubsOptions) => {
+  return useQuery<GetAllClubsData, AxiosError<ApiError>>({
+    queryKey: [
+      "all-clubs",
+      options?.clubName,
+      options?.clubStatus,
+      options?.currentPage,
+      options?.pageSize,
+    ],
+    queryFn: async () => {
+      const response = await apiClient.get("/community/clubs", {
+        params: {
+          ...(options?.clubName && { ClubName: options.clubName }),
+          ...(options?.clubStatus && { ClubStatus: options.clubStatus }),
+          CurrentPage: options?.currentPage ?? 1,
+          PageSize: options?.pageSize ?? 5,
+        },
+      })
+
+      const parsed = getAllClubsResponseSchema.parse(response.data)
+      return parsed.data
+    },
+  })
+}
+
 export const useGetClubDetailByCode = (clubCode?: string) => {
   return useQuery<Club, AxiosError<ApiError>>({
     queryKey: ["club-detail-by-code", clubCode],
@@ -66,6 +113,41 @@ export const useGetClubDetailById = (clubId?: string) => {
     },
   });
 };
+
+export const useGetClubParticipations = (
+  clubId?: string,
+  options?: UseGetClubParticipationsOptions,
+) => {
+  return useQuery<GetClubParticipationsData, AxiosError<ApiError>>({
+    queryKey: [
+      "club-participations",
+      clubId,
+      options?.participationName,
+      options?.dateOfBirth,
+      options?.currentPage,
+      options?.pageSize,
+    ],
+    enabled: !!clubId,
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/community/clubs/${clubId}/participants`,
+        {
+          params: {
+            ...(options?.participationName && {
+              ParticipantName: options.participationName,
+            }),
+            ...(options?.dateOfBirth && { DateOfBirth: options.dateOfBirth }),
+            CurrentPage: options?.currentPage ?? 1,
+            PageSize: options?.pageSize ?? 5,
+          },
+        }
+      )
+
+      const parsed = getClubParticipationsResponseSchema.parse(response.data)
+      return parsed.data
+    },
+  })
+}
 
 export const useUploadTempClubImage = (
   options?: UseUploadTempClubImageOptions
@@ -96,6 +178,39 @@ export const useUploadTempClubImage = (
     },
     onError: (error) => {
       options?.onError?.(error)
+    },
+  })
+}
+
+export const useUpdateClubStatus = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    UpdateClubStatusResponse,
+    AxiosError<ApiError>,
+    { id: string; data: UpdateClubStatus }
+  >({
+    mutationFn: async ({ id, data }) => {
+      const payload = updateClubStatusSchema.parse(data)
+
+      const response = await apiClient.put(
+        `/community/clubs/${id}/status`,
+        payload
+      )
+
+      return updateClubStatusResponseSchema.parse(response.data)
+    },
+    onSuccess: async (response, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-clubs"] }),
+        queryClient.invalidateQueries({ queryKey: ["all-clubs"] }),
+        queryClient.invalidateQueries({
+          queryKey: ["club-detail-by-id", variables.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["club-detail-by-code", response.data.clubCode],
+        }),
+      ])
     },
   })
 }

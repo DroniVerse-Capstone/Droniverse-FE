@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
   useActivateCourseVersion,
+  useCreateCourseVersionCertificate,
   useDeleteCourseVersion,
 } from "@/hooks/course-version/useCourseVersion";
 import { formatDateTime } from "@/lib/utils/format-date";
@@ -48,6 +49,7 @@ export default function CourseInfoTab({
 }: CourseInfoTabProps) {
   const locale = useLocale();
   const activateCourseVersionMutation = useActivateCourseVersion();
+  const createCertificateMutation = useCreateCourseVersionCertificate();
   const deleteCourseVersionMutation = useDeleteCourseVersion();
   const t = useTranslations("CourseManagement.CourseInfo");
 
@@ -90,11 +92,17 @@ export default function CourseInfoTab({
   const canDeleteVersion =
     canShowVersionActions && version.courseVersionID !== currentVersionId;
   const isActivating = activateCourseVersionMutation.isPending;
+  const isCreatingCertificate = createCertificateMutation.isPending;
   const isDeleting = deleteCourseVersionMutation.isPending;
 
   const handleActivateVersion = async () => {
     if (version.categories.length === 0 || version.requiredDrones.length === 0) {
       toast.error("Vui lòng gán danh mục và drone yêu cầu trước khi kích hoạt.");
+      return;
+    }
+
+    if (version.certificate === null) {
+      toast.error("Vui lòng tạo chứng nhận hoàn thành trước khi kích hoạt.");
       return;
     }
 
@@ -127,6 +135,27 @@ export default function CourseInfoTab({
         axiosError.response?.data?.message ||
           axiosError.message ||
           t("toast.deleteError")
+      );
+    }
+  };
+
+  const handleCreateCertificate = async () => {
+    try {
+      await createCertificateMutation.mutateAsync({
+        courseId,
+        versionId: version.courseVersionID,
+        payload: {
+          certificateNameVN: `Chứng nhận hoàn thành ${version.titleVN}`,
+          certificateNameEN: `Certificate of Completion - ${version.titleEN}`,
+        },
+      });
+      toast.success(t("certificate.toast.createSuccess"));
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("certificate.toast.createError")
       );
     }
   };
@@ -333,14 +362,51 @@ export default function CourseInfoTab({
         )}
 
         <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <h3 className="text-sm font-semibold text-greyscale-0">
-            {contextLabel}
-          </h3>
-          <div
-            className="text-sm text-greyscale-100 [&_p]:mb-2"
-            dangerouslySetInnerHTML={{ __html: localizedContext }}
-          />
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-greyscale-0">
+              {t("certificate.label")}
+            </h3>
+            {isDraftVersion && !version.certificate ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={isCreatingCertificate}
+                onClick={handleCreateCertificate}
+              >
+                {isCreatingCertificate
+                  ? t("certificate.actions.creating")
+                  : t("certificate.actions.create")}
+              </Button>
+            ) : null}
+          </div>
+
+          {version.certificate ? (
+            <div className="relative overflow-hidden rounded border border-greyscale-700">
+              <Image
+                src={version.certificate.imageUrl}
+                alt={t("certificate.label")}
+                fill
+                className="object-fit"
+              />
+              <div className="h-100" />
+            </div>
+          ) : (
+            <div className="flex h-56 items-center justify-center rounded border border-greyscale-700 bg-greyscale-900 text-sm text-greyscale-300">
+              {t("certificate.empty")}
+            </div>
+          )}
         </div>
+      </div>
+
+      <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
+        <h3 className="text-sm font-semibold text-greyscale-0">
+          {contextLabel}
+        </h3>
+        <div
+          className="dv-quill-render ql-editor"
+          dangerouslySetInnerHTML={{ __html: localizedContext }}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-3 text-sm text-greyscale-100 md:grid-cols-2">

@@ -3,11 +3,13 @@
 import { AxiosError } from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import React from "react";
 import toast from "react-hot-toast";
 import { GoZap } from "react-icons/go";
 import { MdDeleteOutline } from "react-icons/md";
 
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
+import CourseProductPriceSection from "@/components/course/CourseProductPriceSection";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import { Button } from "@/components/ui/button";
@@ -49,6 +51,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const isDraft = course.status === "DRAFT";
   const isPublish = course.status === "PUBLISH";
   const isUnpublish = course.status === "UNPUBLISH";
+  const hasMiniProduct = !!course.miniProduct;
   const isPublishing = publishCourseMutation.isPending;
   const isUnpublishing = unpublishCourseMutation.isPending;
   const isDeleting = deleteCourseMutation.isPending;
@@ -68,6 +71,11 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const actionButtonClassName = isTwoActions || isOneAction ? "w-full justify-center" : undefined;
 
   const handlePublishCourse = async () => {
+    if (!hasMiniProduct) {
+      toast.error(locale === "en" ? "Please set a price for the course before publishing." : "Vui lòng thiết lập giá cho khóa học trước khi xuất bản.");
+      return;
+    }
+
     try {
       const response = await publishCourseMutation.mutateAsync({
         courseId: course.courseID,
@@ -115,6 +123,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
     }
   };
 
+
   return (
     <article
       className="cursor-pointer rounded border border-greyscale-700 bg-greyscale-900 p-4 shadow-sm hover:bg-greyscale-800 transition-colors"
@@ -143,7 +152,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
           {version?.level ? (
             <CourseLevelBadge level={version.level} />
           ) : null}
-          <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary/40">
+          <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {version?.estimatedDuration ?? t("unknown")} {t("min")}
           </div>
         </div>
@@ -155,6 +164,12 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
       </h3>
 
       <p className="mb-4 line-clamp-3 text-sm text-greyscale-100">{description}</p>
+
+      <CourseProductPriceSection
+        course={course}
+        version={version}
+        canManagePrice={isDraft}
+      />
 
       <div className="mt-3 space-y-1.5 border-t border-greyscale-700 pt-2 text-xs">
         <div className="flex items-center justify-between gap-3">
