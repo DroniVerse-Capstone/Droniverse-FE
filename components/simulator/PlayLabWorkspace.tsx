@@ -14,10 +14,11 @@ import { LabContentData, LabSolution } from "@/types/lab";
 import { FaPlay, FaRedo, FaBatteryFull, FaRegClock, FaGlobe, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaBug, FaTerminal, FaTrophy, FaClock } from "react-icons/fa";
 import { projectToWorld, worldToCanvas } from "@/lib/config3D/simConfig";
 import { Command } from "@/lib/simulator/droneSimulator";
+import { validatePattern, validateFlightPattern, Point3D } from "@/lib/simulator/patternValidation";
+import { MissionVictoryHUD } from "./MissionVictoryHUD";
 
 
 
-// Removed static SANDBOX_ORIGIN constant as it must now be dynamic based on map cells.
 
 const playGameSound = (type: "coin" | "checkpoint" | "win" | "fail") => {
   try {
@@ -74,11 +75,19 @@ type PlayLabProps = {
   labData: LabContentData;
   labMeta?: any;
   mode: "admin" | "student";
+  initialBlocks?: string;
   onMissionComplete: (result: any) => void;
   onExit: () => void;
 };
 
-export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComplete, onExit }: PlayLabProps) {
+export default function PlayLabWorkspace({
+  labData,
+  labMeta,
+  mode,
+  initialBlocks,
+  onMissionComplete,
+  onExit
+}: PlayLabProps) {
   const t = useTranslations("Sandbox");
   const [status, setStatus] = useState<string>("ready");
   const [showMissionBrief, setShowMissionBrief] = useState(true);
@@ -92,9 +101,13 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
   const [collectedBonuses, setCollectedBonuses] = useState<Set<string>>(new Set());
 
   const [missionEndState, setMissionEndState] = useState<"success" | "failed" | null>(null);
+  const [studentFinalMetrics, setStudentFinalMetrics] = useState<LabSolution['metrics'] | null>(null);
+  const [showScoring, setShowScoring] = useState(false);
   const [failReason, setFailReason] = useState<string>("");
   const [sessionKey, setSessionKey] = useState<number>(0);
   const [isWorkspaceDirty, setIsWorkspaceDirty] = useState(false);
+  const [dronePathHistory, setDronePathHistory] = useState<Point3D[]>([]);
+  const [completedPatterns, setCompletedPatterns] = useState<Set<string>>(new Set());
 
   // -- Dynamic World Configuration (BE Driven) --
   const canvasConfig = useMemo(() => {
@@ -180,14 +193,17 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
   );
 
   useEffect(() => {
-    console.log(labData)
-    if (blocklyContext && labData.solution?.xml) {
-      console.log("🚀 STARTING LOAD PROCESS...");
+    // Determine the source of reality based on the mode
+    // Students should NEVER see the labData.solution.xml (Golden Solution)
+    const xmlToLoad = mode === "student" ? initialBlocks : labData.solution?.xml;
+
+    if (blocklyContext && xmlToLoad) {
+      console.log(`🚀 STARTING LOAD PROCESS (${mode} mode)...`);
       try {
         const { Blockly, workspace } = blocklyContext;
 
         workspace.clear();
-        const xml = Blockly.utils.xml.textToDom(labData.solution.xml);
+        const xml = Blockly.utils.xml.textToDom(xmlToLoad);
 
         Blockly.Events.disable();
         try {
@@ -200,26 +216,20 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
         // Reset dirty flag AFTER loading and with a slight delay for any trailing events
         setTimeout(() => {
           setIsWorkspaceDirty(false);
-          console.log("✨ Solution loaded and dirty flag reset");
+          console.log("✨ Initial blocks/solution loaded and dirty flag reset");
         }, 50);
 
         // Small delay to ensure rendering is complete before centering
         setTimeout(() => {
-          workspace.zoomCenter
-
           workspace.scrollCenter();
           console.log("🎯 Centered and Fitted");
         }, 200);
       } catch (e) {
         console.error("❌ XML Parsing/Loading Error:", e);
       }
-    } else {
-      console.log("🔍 Waiting for load conditions:", {
-        hasContext: !!blocklyContext,
-        hasXml: !!labData.solution?.xml
-      });
     }
-  }, [blocklyContext, labData.solution?.xml]);
+  }, [blocklyContext, initialBlocks, labData.solution?.xml, mode]);
+
 
   const toolboxXml = useMemo(
     () =>
@@ -323,6 +333,8 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
     controller.reset(initialState);
     setDroneState(initialState);
     setStatus("ready");
+    setDronePathHistory([]);
+    setCompletedPatterns(new Set());
     simRef.current?.clearTrail?.();
   }, [controller, labData, initialState]);
 
@@ -403,15 +415,55 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
       }
     });
 
+    // 3. Record Path History (Full 3D: X, Altitude as Y, Z)
+    if (status === "running") {
+      setDronePathHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last && last.x === droneState.x && last.y === droneState.altitude && last.z === droneState.y) return prev;
+        return [...prev, { x: droneState.x ?? 0, y: droneState.altitude ?? 0, z: droneState.y ?? 0 }];
+      });
+    }
+
   }, [droneState.x, droneState.y, droneState.altitude, droneState.batteryConsumed, status, labData.rule.fuelLimit, labData.rule.sequentialCheckpoints, labData.objects, collectedCheckpoints, collectedBonuses, checkpoints, controller]);
 
   const allCheckpointsCollected = totalCheckpoints === 0 || collectedCheckpoints.size === totalCheckpoints;
   const hasEnoughScore = !labData.rule.requiredScore || currentScore >= labData.rule.requiredScore;
 
+  // Patterns Check - Using new rich validation engine
+  const patternObjects = useMemo(() => labData.objects.filter((obj: any) => obj.objectType === "pattern"), [labData.objects]);
+
+  const patternResults = useMemo(() => {
+    return patternObjects.map(obj => {
+      return {
+        id: obj.id,
+        shape: obj.shape,
+        report: validateFlightPattern(dronePathHistory, obj, canvasCenter)
+      };
+    });
+  }, [dronePathHistory, patternObjects]);
+
+  const allPatternsCompleted = useMemo(() => {
+    if (patternObjects.length === 0) return true;
+    return patternResults.every(res => res.report.success);
+  }, [patternResults, patternObjects]);
+
   // End State: Check Mission Success
   useEffect(() => {
     if (status === "finished" && missionEndState === null) {
-      if (allCheckpointsCollected && hasEnoughScore) {
+      if (allCheckpointsCollected && hasEnoughScore && allPatternsCompleted) {
+
+        // --- CAPTURE METRICS FOR HUD ---
+        const { Blockly, workspace } = blocklyContext || {};
+        const program = (Blockly && workspace) ? generateProgram(Blockly, workspace) : [];
+
+        setStudentFinalMetrics({
+          timeSpent: labData.rule.timeLimit ? (labData.rule.timeLimit - timeLeft) : 0,
+          fuelConsumed: droneState.batteryConsumed || 0,
+          logicalDistance: calculateLogicalDistance(program) / 200,
+          blockCount: workspace?.getAllBlocks(false).length || 0
+        });
+        // -------------------------------
+
         // Delay a bit so the user can see the drone stop
         const timer = setTimeout(() => {
           playGameSound("win");
@@ -421,16 +473,17 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
       } else {
         // Determine failure reason
         let reason = "Bạn đã hoàn thành đường bay ";
-        if (!allCheckpointsCollected && !hasEnoughScore) reason += "nhưng KHÔNG nhặt đủ mục tiêu và KHÔNG gom đủ điểm.";
-        else if (!allCheckpointsCollected) reason += "nhưng KHÔNG vượt qua tất cả Checkpoint.";
-        else reason += `nhưng KHÔNG đạt đủ điểm số yêu cầu (${currentScore}/${labData.rule.requiredScore} điểm).`;
+        if (!allCheckpointsCollected) reason += "nhưng KHÔNG vượt qua tất cả Checkpoint.";
+        else if (!allPatternsCompleted) reason += "nhưng bay KHÔNG đúng quỹ đạo yêu cầu.";
+        else if (!hasEnoughScore) reason += `nhưng KHÔNG đạt đủ điểm số yêu cầu (${currentScore}/${labData.rule.requiredScore} điểm).`;
+        else reason += "nhưng có lỗi phát sinh.";
 
         playGameSound("fail");
         setMissionEndState("failed");
         setFailReason(reason);
       }
     }
-  }, [allCheckpointsCollected, hasEnoughScore, currentScore, status, missionEndState, labData.rule.requiredScore]);
+  }, [allCheckpointsCollected, hasEnoughScore, allPatternsCompleted, currentScore, status, missionEndState, labData.rule.requiredScore, blocklyContext, labData.rule.timeLimit, timeLeft, droneState.batteryConsumed]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col h-full w-full bg-slate-950 font-sans text-white overflow-hidden">
@@ -744,13 +797,43 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
               ref={simRef}
               debugBounds={SIMULATOR_CONFIG.debug.showBounds ? controller.getObstacleBounds() : []}
               mapSize={canvasConfig.width}
+              patternResults={patternResults}
             />
           </div>
         </div>
       </div>
 
-      {/* CINEMATIC FULL-SCREEN MISSION OVERLAY */}
-      {missionEndState && (
+      {/* MISSION VICTORY HUD (ONLY AFTER CLICKING SUBMIT) */}
+      {showScoring && studentFinalMetrics && (
+        <MissionVictoryHUD
+          studentMetrics={studentFinalMetrics}
+          adminMetrics={labData.solution?.metrics}
+          onRetry={() => {
+            setShowScoring(false);
+            handleReset();
+          }}
+          onSubmit={(score) => {
+            console.log("FINAL SUBMISSION DATA:", {
+              score,
+              metrics: studentFinalMetrics,
+              xml: blocklyContext ? blocklyContext.Blockly.Xml.domToPrettyText(blocklyContext.Blockly.Xml.workspaceToDom(blocklyContext.workspace)) : ""
+            });
+
+            if (onMissionComplete && blocklyContext) {
+              const { Blockly, workspace } = blocklyContext;
+              const xmlText = Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace));
+              const solution: LabSolution = {
+                xml: xmlText,
+                metrics: studentFinalMetrics
+              };
+              onMissionComplete(solution);
+            }
+          }}
+        />
+      )}
+
+      {/* STANDARD MISSION END OVERLAY (SUCCESS OR FAILED) */}
+      {missionEndState && !showScoring && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 bg-slate-950/40 backdrop-blur-2xl backdrop-saturate-150 animate-in fade-in duration-700">
           <div className="w-full max-w-3xl bg-[#0d0f14]/80 border border-white/10 rounded-xl shadow-[0_0_100px_rgba(0,0,0,0.9)] overflow-hidden relative flex flex-col md:flex-row animate-in zoom-in-95 slide-in-from-bottom-12 duration-700 ease-out">
 
@@ -771,7 +854,7 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
 
                 <div className="text-center space-y-2">
                   <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none italic">
-                    {missionEndState === "success" ? "Hoàn thành" : "Thất bại"}
+                    {missionEndState === "success" ? t("missionEnd.successTitle") : t("missionEnd.failTitle")}
                   </h2>
                   <div className={`h-1 w-12 mx-auto rounded-full ${missionEndState === "success" ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 </div>
@@ -785,33 +868,33 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                 <div className="flex items-center gap-3">
                   <div className={`w-1.5 h-1.5 rounded-full ${missionEndState === 'success' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'} animate-pulse`} />
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                    {missionEndState === "success" ? "Kiểm tra bài tập: Hoàn tất" : "Cảnh báo: Bài tập chưa đạt yêu cầu"}
+                    {missionEndState === "success" ? t("missionEnd.successStatus") : t("missionEnd.failStatus")}
                   </h3>
                 </div>
                 <p className="text-[17px] font-bold text-white/95 leading-snug">
                   {missionEndState === "success"
-                    ? (isWorkspaceDirty ? "Hoàn hảo! Tất cả điểm mốc đã được thu thập an toàn." : "Xác nhận: Lời giải mẫu hoạt động hoàn hảo!")
-                    : (failReason || "Phát hiện lỗi kỹ thuật hoặc sự cố ngoài ý muốn.")
+                    ? (isWorkspaceDirty ? t("missionEnd.successDesc") : t("missionEnd.successDescSolution"))
+                    : (failReason || t("missionEnd.failDesc"))
                   }
                 </p>
               </div>
 
               {/* High-Fidelity HUD Diagnostics (Compact) */}
-              <div className="flex flex-col gap-2 mt-2 w-full">
+              <div className="flex flex-col gap-2 mt-2 w-full max-h-[250px] overflow-y-auto custom-scrollbar pr-2 pb-2">
                 {/* Safety Row */}
                 <div className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${status !== "crashed" ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
                   <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${status !== "crashed" ? 'bg-emerald-500' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
 
                   <div className="w-[85px] shrink-0">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">An toàn</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.safety")}</span>
                   </div>
 
                   <div className="flex-1 min-w-0 pr-3">
-                    <span className="text-[11px] font-bold text-white block truncate">{status !== "crashed" ? "Hệ thống ổn định" : "Cảnh báo va chạm"}</span>
+                    <span className="text-[11px] font-bold text-white block truncate">{status !== "crashed" ? t("missionEnd.systemStable") : t("missionEnd.collisionWarning")}</span>
                   </div>
 
                   <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${status !== "crashed" ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                    {status !== "crashed" ? 'ĐẠT' : 'LỖI'}
+                    {status !== "crashed" ? t("missionEnd.pass") : t("missionEnd.fail")}
                   </div>
                 </div>
 
@@ -821,7 +904,7 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${collectedCheckpoints.size === totalCheckpoints ? 'bg-emerald-500' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
 
                     <div className="w-[85px] shrink-0">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mục tiêu</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.objectives")}</span>
                     </div>
 
                     <div className="flex-1 min-w-0 pr-3">
@@ -829,7 +912,7 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     </div>
 
                     <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${collectedCheckpoints.size === totalCheckpoints ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                      {collectedCheckpoints.size === totalCheckpoints ? 'ĐẠT' : 'LỖI'}
+                      {collectedCheckpoints.size === totalCheckpoints ? t("missionEnd.pass") : t("missionEnd.fail")}
                     </div>
                   </div>
                 )}
@@ -840,17 +923,17 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${hasEnoughScore ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
 
                     <div className="w-[85px] shrink-0">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Điểm số</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.score")}</span>
                     </div>
 
                     <div className="flex-1 min-w-0 pr-3">
                       <span className={`text-[11px] font-mono font-bold block truncate ${hasEnoughScore ? 'text-white' : 'text-slate-400'}`}>
-                        {currentScore} {labData.rule.requiredScore > 0 && <span className="opacity-50 text-[10px] font-normal ml-1">/ {labData.rule.requiredScore} bắt buộc</span>}
+                        {currentScore} {labData.rule.requiredScore > 0 && <span className="opacity-50 text-[10px] font-normal ml-1">/ {labData.rule.requiredScore} {t("missionEnd.required")}</span>}
                       </span>
                     </div>
 
                     <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${hasEnoughScore ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                      {hasEnoughScore ? 'ĐẠT' : 'LỖI'}
+                      {hasEnoughScore ? t("missionEnd.pass") : t("missionEnd.fail")}
                     </div>
                   </div>
                 ) : null}
@@ -861,17 +944,17 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${(missionEndState === 'success' && fuelRemaining > 0) ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (fuelRemaining <= 0 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-slate-600')}`} />
 
                     <div className="w-[85px] shrink-0">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Năng lượng</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.energy")}</span>
                     </div>
 
                     <div className="flex-1 min-w-0 pr-3">
                       <span className={`text-[11px] font-mono font-bold block truncate ${(missionEndState === 'success' || fuelRemaining <= 0) ? 'text-white' : 'text-slate-400'}`}>
-                        {Math.max(0, Math.floor(fuelRemaining))}% <span className="opacity-50 text-[10px] font-normal ml-1">còn lại</span>
+                        {Math.max(0, Math.floor(fuelRemaining))}% <span className="opacity-50 text-[10px] font-normal ml-1">{t("missionEnd.remaining")}</span>
                       </span>
                     </div>
 
                     <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${(missionEndState === 'success' && fuelRemaining > 0) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : (fuelRemaining <= 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-white/5 text-slate-400 border-white/10')}`}>
-                      {(missionEndState === 'success' && fuelRemaining > 0) ? 'ĐẠT' : (fuelRemaining <= 0 ? 'HẾT PIN' : 'CHƯA XONG')}
+                      {(missionEndState === 'success' && fuelRemaining > 0) ? t("missionEnd.pass") : (fuelRemaining <= 0 ? t("missionEnd.outOfBattery") : t("missionEnd.notFinished"))}
                     </div>
                   </div>
                 ) : null}
@@ -882,7 +965,7 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${(missionEndState === 'success' && timeLeft > 0) ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (timeLeft <= 0 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-slate-600')}`} />
 
                     <div className="w-[85px] shrink-0">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thời gian</span>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.time")}</span>
                     </div>
 
                     <div className="flex-1 min-w-0 pr-3">
@@ -892,11 +975,31 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                     </div>
 
                     <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${(missionEndState === 'success' && timeLeft > 0) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : (timeLeft <= 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-white/5 text-slate-400 border-white/10')}`}>
-                      {(missionEndState === 'success' && timeLeft > 0) ? 'ĐẠT' : (timeLeft <= 0 ? 'HẾT GIỜ' : 'CHƯA XONG')}
+                      {(missionEndState === 'success' && timeLeft > 0) ? t("missionEnd.pass") : (timeLeft <= 0 ? t("missionEnd.timeUp") : t("missionEnd.notFinished"))}
                     </div>
                   </div>
                 ) : null}
+
+                {/* Pattern Minimal Progress Report - Consistent Format */}
+                {patternResults.map((pr, pIdx) => (
+                  <div key={pr.id} className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${pr.report.success ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${pr.report.success ? 'bg-emerald-500' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
+
+                    <div className="w-[85px] shrink-0">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.pattern")} {pIdx + 1}</span>
+                    </div>
+
+                    <div className="flex-1 min-w-0 pr-3">
+                      <span className="text-[11px] font-mono font-bold text-white block truncate">{t(`missionEnd.shape_${pr.shape?.toLowerCase()}`) || pr.shape?.toUpperCase() || ""}</span>
+                    </div>
+
+                    <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${pr.report.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                      {pr.report.success ? t("missionEnd.pass") : t("missionEnd.fail")}
+                    </div>
+                  </div>
+                ))}
               </div>
+
 
               {/* Actions */}
               <div className="mt-auto space-y-3">
@@ -906,7 +1009,7 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                       onClick={handleReset}
                       className={`${(!labData.solution || isWorkspaceDirty) ? "w-1/3" : "w-full"} py-4 rounded border border-white/20 bg-transparent text-white font-black text-[11px] uppercase tracking-[0.1em] hover:bg-white/5 transition-all active:scale-95`}
                     >
-                      Giải Lại
+                      {t("missionEnd.retry")}
                     </button>
                     {(!labData.solution || isWorkspaceDirty) && (
                       <button
@@ -931,45 +1034,37 @@ export default function PlayLabWorkspace({ labData, labMeta, mode, onMissionComp
                         }}
                         className="w-2/3 py-4 rounded bg-emerald-500 text-black font-black text-[11px] uppercase tracking-[0.1em] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all active:scale-95"
                       >
-                        {!labData.solution ? "Lưu lời giải" : "Cập nhật lời giải"}
+                        {!labData.solution ? t("missionEnd.saveSolution") : t("missionEnd.updateSolution")}
                       </button>
                     )}
                   </div>
                 ) : (
-                  <button
-                    onClick={() => {
-                      if (missionEndState === "success") {
-                        if (onMissionComplete && blocklyContext) {
-                          const { Blockly, workspace } = blocklyContext;
-                          const xmlText = Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace));
-                          const program = generateProgram(Blockly, workspace);
-
-                          const solution: LabSolution = {
-                            xml: xmlText,
-                            metrics: {
-                              timeSpent: labData.rule.timeLimit ? (labData.rule.timeLimit - timeLeft) : 0,
-                              fuelConsumed: droneState.batteryConsumed || 0,
-                              logicalDistance: calculateLogicalDistance(program) / 200,
-                              blockCount: workspace.getAllBlocks(false).length
-                            }
-                          };
-
-                          onMissionComplete(solution);
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleReset}
+                      className="w-1/3 py-4 rounded border border-white/20 bg-transparent text-white font-black text-[11px] uppercase tracking-[0.1em] hover:bg-white/5 transition-all active:scale-95"
+                    >
+                      {t("missionEnd.retry")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (missionEndState === "success") {
+                          setShowScoring(true);
+                        } else {
+                          handleReset();
                         }
-                      } else {
-                        handleReset();
-                      }
-                    }}
-                    className="w-full py-4 rounded bg-white text-black font-black text-[12px] uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:bg-slate-200 transition-all active:scale-95"
-                  >
-                    {missionEndState === "success" ? "Chuyển sang bài mới" : "Thử lại bài tập"}
-                  </button>
+                      }}
+                      className="w-2/3 py-4 rounded bg-white text-black font-black text-[11px] uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:bg-slate-200 transition-all active:scale-95"
+                    >
+                      {missionEndState === "success" ? "Nộp bài & Xem điểm" : t("missionEnd.tryAgain")}
+                    </button>
+                  </div>
                 )}
                 <button
                   onClick={onExit}
                   className="w-full py-2 rounded text-slate-500 hover:text-white font-bold text-[10px] uppercase tracking-widest transition-colors"
                 >
-                  Trở về danh sách bài học
+                  {t("missionEnd.backToList")}
                 </button>
               </div>
             </div>

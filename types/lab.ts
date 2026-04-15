@@ -10,9 +10,18 @@ export type MapObject = {
   collisionRadius?: number;
   isClamped?: boolean;
   color?: string;
-  objectType?: "obstacle" | "bonus" | "checkpoint";
+  objectType?: "obstacle" | "bonus" | "checkpoint" | "pattern";
   scoreValue?: number;
   radius?: number;
+  // Flight Pattern specific fields
+  shape?: "square" | "rectangle" | "circle" | "zigzag" | "custom";
+  width?: number;
+  height?: number;
+  points?: { x: number; z: number }[];
+  tolerance?: number;
+  showGuide?: boolean;
+  requireClockwise?: boolean;
+  hiddenUntilRun?: boolean;
 };
 
 export interface LabMap {
@@ -78,4 +87,25 @@ export interface LabData {
 export interface LabContent {
   id: string;
   environment: LabContentData;
+}
+
+export interface StudentLabDetail {
+  lab: LabData;
+  labContent: LabContent;
+  userLab: {
+    id: string;
+    enrollmentID: string;
+    labID: string;
+    status: string;
+    score: number;
+    solution: LabSolution;
+    createAt: string;
+    updateAt: string;
+  } | null;
+}
+
+export interface StudentLabResponse {
+  data: StudentLabDetail;
+  isSuccess: boolean;
+  message: string;
 }

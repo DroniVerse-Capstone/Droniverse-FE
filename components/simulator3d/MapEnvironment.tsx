@@ -5,7 +5,7 @@ export function MapEnvironment({ theme }: { theme?: "default" | "space" | "sunse
     return (
       <>
         <color attach="background" args={["#050510"]} />
-        <Stars radius={200} depth={200} count={3000} factor={15} saturation={0} fade speed={3} />
+        <Stars radius={400} depth={200} count={3000} factor={15} saturation={0} fade speed={3} />
         <Environment preset="apartment" blur={0.8} />
         <ambientLight intensity={0.2} />
       </>

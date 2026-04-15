@@ -24,6 +24,7 @@ interface RuleConfigurationModalProps {
   onSave: (rule: LabRule) => Promise<void>;
   isSaving?: boolean;
   hasSolution?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
@@ -35,6 +36,7 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
   onSave,
   isSaving,
   hasSolution = false,
+  isReadOnly = false,
 }) => {
   const t = useTranslations("MapEditor.rules");
   const [draftRule, setDraftRule] = useState<LabRule>(rule);
@@ -123,7 +125,7 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
   const isScoreInvalid = maxScore > 0 && draftRule.requiredScore > maxScore;
   const isSeqInvalid = draftRule.sequentialCheckpoints && cpCount < 2;
   const hasAnyZodError = Object.values(errors).filter(Boolean).length > 0;
-  const canSave = isDirty && !isScoreInvalid && !isSeqInvalid && !isSaving && !hasAnyZodError;
+  const canSave = isDirty && !isScoreInvalid && !isSeqInvalid && !isSaving && !hasAnyZodError && !isReadOnly;
 
   return (
     <Dialog open={show} onOpenChange={(open) => !open && onClose()}>
@@ -138,7 +140,7 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
             <DialogTitle className="text-[12px] font-black uppercase tracking-[0.2em] text-white">
-              {t("title")}
+              {t("title")} {isReadOnly && <span className="ml-2 text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">{t("readOnlyHUD")}</span>}
             </DialogTitle>
           </div>
           <button
@@ -169,7 +171,7 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                     </div>
                   </div>
 
-                  {maxScore > 0 && (
+                  {maxScore > 0 && !isReadOnly && (
                     <button
                       onClick={() => handleNumericChange("requiredScore", maxScore.toString())}
                       className="text-[9px] text-primary/60 hover:text-primary font-black uppercase tracking-widest transition-colors"
@@ -182,12 +184,13 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                 {maxScore > 0 ? (
                   <div className="flex flex-col gap-2">
                     <Input
+                      disabled={isReadOnly}
                       type="number"
                       placeholder="0"
                       value={draftRule.requiredScore || ""}
                       onChange={(e) => handleNumericChange("requiredScore", e.target.value)}
                       className={cn(
-                        "h-9 text-xs font-bold bg-black/40 border-white/5 focus:outline-none focus:border-primary/50 focus-visible:ring-0 transition-all rounded text-white tabular-nums shadow-inner",
+                        "h-9 text-xs font-bold bg-black/40 border-white/5 focus:outline-none focus:border-primary/50 focus-visible:ring-0 transition-all rounded text-white tabular-nums shadow-inner disabled:opacity-50 disabled:cursor-not-allowed",
                         isScoreInvalid && "border-primary/50 text-primary"
                       )}
                     />
@@ -223,14 +226,16 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                       <span className="text-[10px] font-black text-white/70 uppercase tracking-tight flex-1">{t("timeLimit")}</span>
                       {isTimeEnabled && (
                         <Input
+                          disabled={isReadOnly}
                           type="number"
                           placeholder="30"
                           value={draftRule.timeLimit || ""}
                           onChange={(e) => handleNumericChange("timeLimit", e.target.value)}
-                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0", errors.timeLimit && "text-primary")}
+                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0 disabled:opacity-50 disabled:cursor-not-allowed", errors.timeLimit && "text-primary")}
                         />
                       )}
                       <Switch
+                        disabled={isReadOnly}
                         checked={isTimeEnabled}
                         onCheckedChange={(checked) => {
                           setIsTimeEnabled(checked);
@@ -253,14 +258,16 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                       <span className="text-[10px] font-black text-white/70 uppercase tracking-tight flex-1">{t("maxBlocks")}</span>
                       {isBlocksEnabled && (
                         <Input
+                          disabled={isReadOnly}
                           type="number"
                           placeholder="10"
                           value={draftRule.maxBlocks || ""}
                           onChange={(e) => handleNumericChange("maxBlocks", e.target.value)}
-                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0", errors.maxBlocks && "text-primary")}
+                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0 disabled:opacity-50 disabled:cursor-not-allowed", errors.maxBlocks && "text-primary")}
                         />
                       )}
                       <Switch
+                        disabled={isReadOnly}
                         checked={isBlocksEnabled}
                         onCheckedChange={(checked) => {
                           setIsBlocksEnabled(checked);
@@ -294,14 +301,16 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                       <span className="text-[10px] font-black text-white/70 uppercase tracking-tight flex-1">{t("fuelLimit")}</span>
                       {isFuelEnabled && (
                         <Input
+                          disabled={isReadOnly}
                           type="number"
                           placeholder="100"
                           value={draftRule.fuelLimit || ""}
                           onChange={(e) => handleNumericChange("fuelLimit", e.target.value)}
-                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0", errors.fuelLimit && "text-primary")}
+                          className={cn("h-7 w-16 text-[11px] font-bold bg-black/40 border-white/10 focus:outline-none focus:border-primary/50 transition-all rounded text-white text-center tabular-nums p-0 disabled:opacity-50 disabled:cursor-not-allowed", errors.fuelLimit && "text-primary")}
                         />
                       )}
                       <Switch
+                        disabled={isReadOnly}
                         checked={isFuelEnabled}
                         onCheckedChange={(checked) => {
                           setIsFuelEnabled(checked);
@@ -334,7 +343,7 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
                       </p>
                     </div>
                     <Switch
-                      disabled={cpCount < 2}
+                      disabled={cpCount < 2 || isReadOnly}
                       checked={draftRule.sequentialCheckpoints && cpCount >= 2}
                       onCheckedChange={(checked) =>
                         setDraftRule(prev => ({ ...prev, sequentialCheckpoints: checked }))
@@ -363,20 +372,22 @@ export const RuleConfigurationModal: React.FC<RuleConfigurationModalProps> = ({
             {t("cancel")}
           </Button>
 
-          <Button
-            disabled={!canSave}
-            onClick={handleApplyChanges}
-            className={cn(
-              "h-9 px-6 bg-primary hover:bg-primary/80 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded shadow-lg transition-all active:scale-95 flex items-center gap-2.5",
-              (isScoreInvalid || isSeqInvalid || hasAnyZodError) && "opacity-40 grayscale pointer-events-none"
-            )}
-          >
-            {isSaving ? (
-              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : null}
-            {isSaving ? t("saving") : (t("save") || "Lưu cập nhật")}
-            {!isSaving && <FaChevronRight size={10} />}
-          </Button>
+          {!isReadOnly && (
+            <Button
+              disabled={!canSave}
+              onClick={handleApplyChanges}
+              className={cn(
+                "h-9 px-6 bg-primary hover:bg-primary/80 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded shadow-lg transition-all active:scale-95 flex items-center gap-2.5",
+                (isScoreInvalid || isSeqInvalid || hasAnyZodError) && "opacity-40 grayscale pointer-events-none"
+              )}
+            >
+              {isSaving ? (
+                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : null}
+              {isSaving ? t("saving") : (t("save") || "Lưu cập nhật")}
+              {!isSaving && <FaChevronRight size={10} />}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

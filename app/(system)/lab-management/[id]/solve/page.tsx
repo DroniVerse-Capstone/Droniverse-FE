@@ -101,6 +101,7 @@ export default function AdminSolveLabPage() {
         labData={labContent}
         labMeta={labData}
         mode="admin"
+        initialBlocks={labContent.solution?.xml}
         onMissionComplete={handleMissionComplete}
         onExit={handleExit}
       />

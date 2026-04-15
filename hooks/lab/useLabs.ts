@@ -168,6 +168,27 @@ export const useUpdateLab = () => {
   });
 };
 
+export const useDuplicateLab = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (labID: string) => {
+      const response = await apiClient.post<any>(`/academy/labs/${labID}/duplicate`);
+      const newLabData = response.data?.data?.lab || response.data?.data || response.data;
+      return {
+        ...newLabData,
+        labID: newLabData.labID || newLabData.id
+      } as LabData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["labs"] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Nhân bản Lab thất bại!";
+      toast.error(message);
+    }
+  });
+};
+
 export const useDeleteLab = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -322,3 +343,36 @@ export const useUpdateLabFull = () => {
     }
   });
 };
+
+export const useGetStudentLabDetail = (enrollmentId: string, labId: string) => {
+  return useQuery({
+    queryKey: ["student-lab-detail", enrollmentId, labId],
+    queryFn: async () => {
+      if (!enrollmentId || !labId) return null;
+      const response = await apiClient.get<any>(
+        `/academy/user/enrollments/${enrollmentId}/labs/${labId}`
+      );
+      
+      const data = response.data?.data;
+      if (!data) return null;
+
+      // Map/Sanitize structures
+      if (data.labContent) {
+        let env = data.labContent.environment;
+        if (typeof env === "string") {
+          try { env = JSON.parse(env); } catch (e) { }
+        }
+        data.labContent.environment = sanitizeEnvironment(env);
+      }
+
+      // Ensure consistent ID naming
+      if (data.lab) {
+        data.lab.labID = data.lab.labID || data.lab.id;
+      }
+
+      return data;
+    },
+    enabled: !!enrollmentId && !!labId,
+  });
+};
+

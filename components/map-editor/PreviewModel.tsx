@@ -13,12 +13,65 @@ import RockGLB from "../simulator3d/obstacles/RockGLB";
 import GrassGLB from "../simulator3d/decor/GrassGLB";
 import Tree2GLB from "../simulator3d/decor/Tree2GLB";
 
+import * as THREE from "three";
+import { Line } from "@react-three/drei";
+
 export default function PreviewModel({ model }: { model: any }) {
   if (!model?.url) return null;
 
   if (model.url.startsWith("primitive:")) {
     const t = model.url.split(":")[1];
     const previewScale = model.previewScale ?? model.defaultScale ?? 1;
+
+    // Handle Pattern Previews
+    if (t.startsWith("pattern_")) {
+      const shape = t.replace("pattern_", "");
+      const map: Record<string, string> = {
+        square: "#00ffff",
+        circle: "#39ff14",
+        zigzag: "#ffea00",
+      };
+      const shapeColor = map[shape] ?? "#00ffff";
+
+      // Scale specifically for the sidebar camera
+      const scaleBase = previewScale * 35;
+      let points: THREE.Vector3[] = [];
+
+      if (shape === "circle") {
+        const steps = 32;
+        for (let i = 0; i <= steps; i++) {
+          const a = (i / steps) * Math.PI * 2;
+          points.push(new THREE.Vector3(Math.cos(a) * 0.5, 0, Math.sin(a) * 0.5));
+        }
+      } else if (shape === "square") {
+        const hw = 0.5, hd = 0.5;
+        points = [
+          new THREE.Vector3(-hw, 0, -hd),
+          new THREE.Vector3(hw, 0, -hd),
+          new THREE.Vector3(hw, 0, hd),
+          new THREE.Vector3(-hw, 0, hd),
+          new THREE.Vector3(-hw, 0, -hd),
+        ];
+      } else if (shape === "zigzag") {
+        points = [
+          new THREE.Vector3(-0.5, 0, -0.5),
+          new THREE.Vector3(-0.25, 0, 0.5),
+          new THREE.Vector3(0, 0, -0.5),
+          new THREE.Vector3(0.25, 0, 0.5),
+          new THREE.Vector3(0.5, 0, -0.5),
+        ];
+      }
+
+      const flatPts = points.map((p) => [p.x, p.y, p.z] as [number, number, number]);
+
+      return (
+        <group scale={[scaleBase, scaleBase, scaleBase]} position={[0, -0.4, 0]} rotation={[0, 0, 0]}>
+          <Line points={flatPts} color={shapeColor} lineWidth={4} />
+          {/* Subtle glow for the sidebar preview */}
+          <Line points={flatPts} color={shapeColor} lineWidth={8} transparent opacity={0.3} />
+        </group>
+      );
+    }
 
     if (t === "drone") {
       return (

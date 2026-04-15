@@ -5,7 +5,7 @@ import type * as BlocklyType from "blockly/core";
 import "blockly/blocks";
 import "blockly/javascript";
 import { registerBlocks } from "@/lib/blockly";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useTranslations, useLocale } from "@/providers/i18n-provider";
 import "@/styles/blocklyCustom.css";
 
 type Props = {
@@ -19,6 +19,7 @@ type Props = {
 
 export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlocksChange }: Props) {
   const t = useTranslations("Sandbox");
+  const locale = useLocale();
   const blocklyDivRef = useRef<HTMLDivElement | null>(null);
   const workspaceRef = useRef<any>(null);
   const [panelsCollapsed, setPanelsCollapsed] = useState(false);
@@ -29,6 +30,17 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
       const mod = await import("blockly/core");
       const Blockly = ((mod as any).default ??
         mod) as unknown as typeof BlocklyType;
+
+      // Import language pack to fix right-click context menu crash
+      try {
+        const Msg = locale === "vi"
+          ? await import("blockly/msg/vi").then(m => m.default || m)
+          : await import("blockly/msg/en").then(m => m.default || m);
+        Blockly.setLocale(Msg);
+      } catch (err) {
+        console.error("Failed to load Blockly locale:", err);
+      }
+
       if (!mounted) return;
 
       registerBlocks(Blockly, {
@@ -133,6 +145,7 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         toolboxPosition: "start",
         horizontalLayout: false,
         collapse: false,
+        contextMenu: false,
       } as any);
 
       // ... rest of the code remains same ...
@@ -279,12 +292,18 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
           Blockly.svgResize(workspaceRef.current);
         }
       });
+
+      // Chặn chuột phải trực tiếp trên div container để đảm bảo menu không hiện ra
+      const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+      blocklyDiv.addEventListener("contextmenu", handleContextMenu);
+
       if (blocklyDivRef.current) {
         resizeObserver.observe(blocklyDivRef.current);
       }
 
       return () => {
         resizeObserver.disconnect();
+        blocklyDiv.removeEventListener("contextmenu", handleContextMenu);
       };
     })();
 

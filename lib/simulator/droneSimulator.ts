@@ -217,7 +217,20 @@ export class DroneController {
 			this.emitTick();
 			return;
 		}
+
 		const cmd = this.queue.shift()!;
+
+		// Handle loops by expanding them into the queue
+		if (cmd.type === 'repeat') {
+			const expandedActions: Command[] = [];
+			for (let i = 0; i < cmd.count; i++) {
+				expandedActions.push(...cmd.actions);
+			}
+			this.queue.unshift(...expandedActions);
+			this.step(); // Immediately call step again to process the first expanded command
+			return;
+		}
+
 		this.applyCommandAnimated(cmd, () => {
 			if (this.status !== 'running') return;
 			this.step();
@@ -232,7 +245,24 @@ export class DroneController {
 		}
 		if (this.status === 'running') return;
 
-		const cmd = this.queue.shift()!;
+		let cmd = this.queue.shift()!;
+
+		// Handle loops by expanding them into the queue
+		if (cmd.type === 'repeat') {
+			const expandedActions: Command[] = [];
+			for (let i = 0; i < cmd.count; i++) {
+				expandedActions.push(...cmd.actions);
+			}
+			this.queue.unshift(...expandedActions);
+			// For stepOnce, we don't automatically run more; just get the next real command
+			if (this.queue.length === 0) {
+				this.setStatus('completed');
+				this.emitTick();
+				return;
+			}
+			cmd = this.queue.shift()!;
+		}
+
 		this.setStatus('running');
 		await this.applyCommandAnimated(cmd, () => { });
 		if (this.queue.length === 0) {
@@ -481,18 +511,6 @@ export class DroneController {
 				s.isStarted = true;
 				return [s];
 
-			case "repeat": {
-				let tempState = { ...s };
-				const states: DroneState[] = [];
-				for (let i = 0; i < cmd.count; i++) {
-					for (const action of cmd.actions) {
-						const intermediateStates: any = this.previewCommand(tempState, action);
-						tempState = intermediateStates[intermediateStates.length - 1];
-						states.push(...intermediateStates);
-					}
-				}
-				return states;
-			}
 
 			case 'up': {
 				return [{ ...s, altitude: s.altitude + cmd.amount }];
@@ -564,4 +582,5 @@ function shortestAngleDiff(a: number, b: number) {
 	let diff = ((b - a + 540) % 360) - 180;
 	return diff;
 }
+
 

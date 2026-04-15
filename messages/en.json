@@ -59,6 +59,45 @@
     "simulator": {
       "title": "Simulator 3D"
     },
+    "missionEnd": {
+      "successTitle": "Completed",
+      "failTitle": "Failed",
+      "successStatus": "Mission Details: Complete",
+      "failStatus": "Warning: Mission Unsuccessful",
+      "successDesc": "Perfect! All checkpoints collected safely.",
+      "successDescSolution": "Confirmed: Solution works perfectly!",
+      "failDesc": "Technical error or unexpected issue detected.",
+      "safety": "Safety",
+      "systemStable": "System Stable",
+      "collisionWarning": "Collision System",
+      "pass": "PASS",
+      "fail": "FAIL",
+      "objectives": "Objectives",
+      "score": "Score",
+      "required": "required",
+      "energy": "Energy",
+      "remaining": "remaining",
+      "outOfBattery": "EMPTY",
+      "notFinished": "PENDING",
+      "time": "Time",
+      "timeUp": "TIMEOUT",
+      "patternCheck": "Pattern Check",
+      "pattern": "Pattern",
+      "shape_square": "SQUARE",
+      "shape_triangle": "TRIANGLE",
+      "shape_circle": "CIRCLE",
+      "shape_zigzag": "ZIGZAG",
+      "shape_cross": "CROSS",
+      "shape_polygon": "POLYGON",
+      "shape_custom": "CUSTOM",
+      "retry": "Try Again",
+      "saveSolution": "Save Solution",
+      "submitWork": "Submit Assignment",
+      "updateSolution": "Update Solution",
+      "nextMission": "Next Mission",
+      "tryAgain": "Retry Mission",
+      "backToList": "Back to Course"
+    },
     "blockly": {
       "title": "Blockly Editor",
       "categories": {
@@ -909,6 +948,7 @@
   "LabManagement": {
     "title": "LAB MANAGEMENT",
     "createBtn": "CREATE NEW LAB",
+    "viewDetails": "Lab Details",
     "searchPlaceholder": "Search lab name...",
     "filters": {
       "all": "All",
@@ -943,10 +983,12 @@
         "draft": "DRAFT",
         "inactive": "INACTIVE",
         "locked": "LOCKED",
+        "readOnly": "READ-ONLY",
         "deleted": "DELETED"
       },
       "actions": {
         "editInfo": "Edit Information",
+        "duplicate": "Duplicate lab",
         "delete": "Delete lab",
         "editMap": "Proceed to Map Design"
       }
@@ -972,17 +1014,20 @@
       "checklist": {
         "drone": "Drone starting point",
         "objects": "Objects in Map",
-        "rules": "Rules & Time",
+        "rules": "Rules ",
         "solution": "Successfully solved (Solve Test)"
       }
     },
     "confirm": {
       "deleteTitle": "Confirm delete lab?",
-      "deleteDescription": "This action cannot be undone."
+      "deleteDescription": "This action cannot be undone.",
+      "duplicateTitle": "Confirm duplicate lab?",
+      "duplicateDescription": "Create a new copy (Draft) of this lab with all info and map content."
     },
     "toasts": {
       "createSuccess": "Lab initialized successfully!",
       "updateSuccess": "Lab information updated successfully!",
+      "duplicateSuccess": "Lab duplicated successfully!",
       "deleteSuccess": "Lab deleted successfully!",
       "publishError": "Lab does not meet the requirements for publication. Please check the requirements again!",
       "droneError": "Drone is a unique object, cannot be copied."
@@ -1020,6 +1065,10 @@
       "star": "Star",
       "heart": "Heart",
       "checkpoint": "Checkpoint",
+      "pattern_square": "Square Path",
+      "pattern_circle": "Circle Path",
+      "pattern_rectangle": "Rectangle Path",
+      "pattern_zigzag": "Zigzag Path",
       "pts": "pts",
       "loading": "Loading...",
       "add": "Add {name}"
@@ -1030,7 +1079,10 @@
       "saving": "Saving...",
       "saved": "Saved!",
       "offline": "Offline",
-      "configureRules": "Rules",
+      "configureRules": "Config Rules",
+      "viewConfig": "View Config",
+      "readOnlyHUD": "READ-ONLY (LOCKED)",
+      "readOnlyDesc": "Locked in READ-ONLY mode",
       "mapSize": "Map Size",
       "transform": {
         "translate": "Translate",
@@ -1075,7 +1127,12 @@
       "order": "Order",
       "remove": "Remove Object",
       "removeCheckpoint": "Remove Checkpoint",
-      "deleteTooltip": "Delete selected object (Del / Backspace)"
+      "deleteTooltip": "Delete selected object (Del / Backspace)",
+      "patternTitle": "Flight Pattern Properties",
+      "tolerance": "Tolerance (Precision)",
+      "showGuide": "Show Guide Path",
+      "requireClockwise": "Require Clockwise",
+      "hiddenUntilRun": "Hidden Until Running"
     },
     "rules": {
       "title": "Rule Configuration",
@@ -1104,6 +1161,8 @@
       "sequentialError": "⚠ Need at least 2 checkpoints on the map to enable this rule",
       "cancel": "Cancel",
       "save": "Save Changes",
+      "readOnlyHUD": "READ-ONLY",
+      "readOnlyDesc": "Locked in READ-ONLY mode",
       "saving": "Saving..."
     },
     "error": {
@@ -1112,5 +1171,17 @@
       "retry": "Try Again",
       "manage": "Manage Labs"
     }
+  },
+  "MissionHUD": {
+    "initializing": "Initializing Mission",
+    "systemCheck": "System Check: OK | Uplink: Stable",
+    "syncData": "Syncing Map Data",
+    "processing": "Processing...",
+    "signalLost": "Signal Lost / Error",
+    "diagnosticReport": "Diagnostic Report",
+    "authFailure": "Critical failure in authentication protocol. Please return to headquarters and re-verify mission credentials.",
+    "backToBase": "Back to Headquarters",
+    "connectionTerminated": "Connection Terminated",
+    "loadingSystems": "Loading Systems..."
   }
 }

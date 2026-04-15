@@ -73,7 +73,7 @@ type Props = {
   hudAxisHints?: { label: string; detail: string }[];
   goal?: {
     position: [number, number, number];
-    shape?: "circle" | "square";
+    shape?: "circle" | "square" | "zigzag";
     radius?: number;
     size?: [number, number];
     rotation?: [number, number, number];
@@ -130,6 +130,8 @@ type Props = {
   failReason?: string;
   isSequential?: boolean;
   debugBounds?: { matrix: number[]; id: string; size: number[]; raw?: any }[];
+  /** Kết quả xác thực quỹ đạo thời gian thực */
+  patternResults?: any[];
 };
 
 const DebugBounds = ({ bounds }: { bounds: { matrix: number[]; id: string; size: number[]; raw?: any }[] }) => {
@@ -186,6 +188,154 @@ const DebugBounds = ({ bounds }: { bounds: { matrix: number[]; id: string; size:
         );
       })}
     </>
+  );
+};
+
+const PatternRenderer = ({ obj, results }: { obj: MapObject, results: any[] }) => {
+  const { shape, id } = obj;
+  const matRef = useRef<any>(null);
+  const result = results?.find(r => r.id === id);
+  const report = result?.report;
+
+  const startCornerIdx = report?.startCornerIdx ?? 0;
+  const isCCW = report?.isCCW ?? false;
+
+  useFrame((state, delta) => {
+    if (matRef.current) {
+      matRef.current.dashOffset -= delta * 2;
+    }
+  });
+
+  const shapeColor = useMemo(() => {
+    const colorMap: Record<string, string> = {
+      square: "#00ffff",
+      circle: "#39ff14",
+      zigzag: "#ffea00",
+    };
+    return colorMap[shape ?? ""] ?? "#00ffff";
+  }, [shape]);
+
+  const points = useMemo(() => {
+    const Y_HEIGHT = 0.2;
+    const hw = 0.5, hd = 0.5;
+    if (shape === "square" || shape === "rectangle") {
+      return [
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd),
+      ];
+    }
+    if (shape === "circle") {
+      const pts: THREE.Vector3[] = [];
+      const steps = 64;
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * 0.5, Y_HEIGHT, Math.sin(a) * 0.5));
+      }
+      return pts;
+    }
+    if (shape === "zigzag") {
+      return [
+        new THREE.Vector3(-0.5, Y_HEIGHT, -0.5),
+        new THREE.Vector3(-0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0, Y_HEIGHT, -0.5),
+        new THREE.Vector3(0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0.5, Y_HEIGHT, -0.5),
+      ];
+    }
+    return [];
+  }, [shape]);
+
+  const segments = useMemo(() => {
+    if (shape !== "square" && shape !== "rectangle") return [];
+    const res = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      res.push({ start: points[i], end: points[i + 1], edgeIdx: i });
+    }
+    return res;
+  }, [shape, points]);
+
+  // ── Circle / Zigzag: single polyline, 4-layer neon glow (matches Map Editor exactly) ──
+  if (shape === "circle" || shape === "zigzag") {
+    if (points.length === 0) return null;
+    const flatPts = points.map((p) => [p.x, p.y, p.z] as [number, number, number]);
+    return (
+      <group>
+        {/* L1: Outer Glow — very thick, low opacity */}
+        <Line points={flatPts} color={shapeColor} lineWidth={24} transparent opacity={0.12} depthWrite={false} />
+        {/* L2: Middle Glow */}
+        <Line points={flatPts} color={shapeColor} lineWidth={10} transparent opacity={0.3} depthWrite={false} />
+        {/* L3: Solid core */}
+        <Line points={flatPts} color={shapeColor} lineWidth={2} transparent opacity={0.8} depthWrite={false} />
+        {/* L4: Flowing animated dashes (matRef drives dashOffset) */}
+        <Line
+          ref={matRef}
+          points={flatPts}
+          color="#ffffff"
+          lineWidth={3}
+          dashed
+          dashSize={0.1}
+          gapSize={0.2}
+          dashScale={2}
+          transparent
+          opacity={0.4}
+          depthWrite={false}
+        />
+      </group>
+    );
+  }
+
+  // ── Square / Rectangle: per-segment with real-time pass/fail highlight ──
+  if (segments.length === 0) return null;
+
+  return (
+    <group>
+      {segments.map((seg, i) => {
+        let k = -1;
+        if (report?.segmentPass) {
+          k = isCCW
+            ? (startCornerIdx - 1 - i + 4) % 4
+            : (i - startCornerIdx + 4) % 4;
+        }
+
+        const isPassed = k >= 0 ? !!report?.segmentPass[k] : false;
+        const segColor = isPassed ? "#10b981" : shapeColor; // Emerald Green for success
+        const glowOp = isPassed ? 0.8 : 0.3; // Increased pulse glow
+        const coreOp = isPassed ? 1.0 : 0.8;
+
+        const pts: [number, number, number][] = [
+          [seg.start.x, seg.start.y, seg.start.z],
+          [seg.end.x, seg.end.y, seg.end.z],
+        ];
+
+        return (
+          <group key={i}>
+            {/* L1: Outer Glow */}
+            <Line points={pts} color={segColor} lineWidth={24} transparent opacity={glowOp * 0.4} depthWrite={false} />
+            {/* L2: Middle Glow */}
+            <Line points={pts} color={segColor} lineWidth={10} transparent opacity={glowOp} depthWrite={false} />
+            {/* L3: Core — white when passed, neon color when not */}
+            <Line points={pts} color={isPassed ? "#ffffff" : segColor} lineWidth={isPassed ? 4 : 2} transparent opacity={coreOp} depthWrite={false} />
+            {/* L4: Flowing dashes — vivid (0.9) when passed, subtle (0.4) otherwise */}
+            <Line
+              ref={i === 0 ? matRef : null}
+              points={pts}
+              color="#ffffff"
+              lineWidth={3}
+              dashed
+              dashSize={0.1}
+              gapSize={0.2}
+              dashScale={2}
+              transparent
+              opacity={isPassed ? 0.9 : 0.4}
+              depthWrite={false}
+            />
+          </group>
+        );
+      })}
+    </group>
   );
 };
 
@@ -403,6 +553,7 @@ function Simulator3D(
     debugBounds = [],
     status = "idle",
     failReason = "",
+    patternResults = [],
   }: Props,
   ref: any
 ) {
@@ -422,13 +573,20 @@ function Simulator3D(
   const [shakeIntensity, setShakeIntensity] = useState(0);
 
   const droneWorldState = useMemo(() => {
+    if (!state) {
+      return {
+        position: [0, 0, 0] as [number, number, number],
+        headingRad: 0,
+        isFlying: false,
+      };
+    }
     const { x, y, z } = projectToWorld(state.x, state.y, state.altitude, canvasCenter);
     return {
       position: [x, y, z] as [number, number, number],
       headingRad: ((180 - state.headingDeg) * Math.PI) / 180,
       isFlying: !!state.isStarted || state.altitude > 0,
     };
-  }, [state]);
+  }, [state, canvasCenter]);
 
   // Handle Crash Visuals & Audio
   useEffect(() => {
@@ -711,7 +869,7 @@ function Simulator3D(
         rafRef.current = null;
       });
     }
-  }, [state.x, state.y, state.altitude]);
+  }, [state]);
 
 
   return (
@@ -798,6 +956,20 @@ function Simulator3D(
                             );
                         }
                       })()}
+                    </group>
+                  );
+                }
+
+                if (obj.objectType === "pattern") {
+                  return (
+                    <group
+                      key={obj.id}
+                      position={obj.position as [number, number, number]}
+                      rotation={[degToRad(obj.rotation?.[0] || 0), degToRad(obj.rotation?.[1] || 0), degToRad(obj.rotation?.[2] || 0)]}
+                      scale={obj.scale as [number, number, number]}
+                      visible={status === "running" ? true : !obj.hiddenUntilRun}
+                    >
+                      <PatternRenderer obj={obj} results={patternResults || []} />
                     </group>
                   );
                 }
