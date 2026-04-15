@@ -76,7 +76,6 @@ export interface LabData {
   updatedAt?: string;
   thumbnail?: string;
   isActive?: boolean;
-  estimatedTime?: number;
   creator?: {
     userId: string;
     fullName: string;
