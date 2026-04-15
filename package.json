@@ -36,6 +36,7 @@
 		"date-fns": "^4.1.0",
 		"dompurify": "^3.3.3",
 		"framer-motion": "^12.29.2",
+		"idb": "^8.0.3",
 		"lucide-react": "^0.563.0",
 		"next": "14.2.5",
 		"ngrok": "^5.0.0-beta.2",

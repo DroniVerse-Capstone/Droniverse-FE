@@ -209,7 +209,7 @@ export default function ManagerMyCourse() {
                   course={course}
                   onClick={() => {
                     if (!clubSlug) return;
-                    router.push(`/manager/${clubSlug}/${course.courseVersionId}`);
+                    router.push(`/manager/${clubSlug}/my-course/${course.courseId}`);
                   }}
                 />
               ))}

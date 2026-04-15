@@ -1,7 +1,10 @@
 "use client";
 
 import React from "react";
+import { useParams, useRouter } from "next/navigation";
+import { FaArrowLeft } from "react-icons/fa";
 
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetUserQuizAttemptReview } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
@@ -16,6 +19,8 @@ export default function MemberQuizAttemptReviewContent({
   quizId,
 }: MemberQuizAttemptReviewContentProps) {
   const locale = useLocale();
+  const router = useRouter();
+  const params = useParams<{ clubSlug?: string }>();
   const reviewQuery = useGetUserQuizAttemptReview({ enrollmentId, quizId });
 
   if (reviewQuery.isLoading) {
@@ -41,12 +46,30 @@ export default function MemberQuizAttemptReviewContent({
   }
 
   const { quiz, attempt, questions } = reviewQuery.data;
+  const canGoBack = Boolean(params?.clubSlug);
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 rounded-lg border border-greyscale-700 bg-greyscale-900/60 p-6">
-      <h2 className="text-xl font-semibold text-greyscale-0">
-        {locale === "en" ? "Quiz Review" : "Xem lại bài quiz"}: {locale === "en" ? quiz.titleEN : quiz.titleVN}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-greyscale-0">
+          {locale === "en" ? "Quiz Review" : "Xem lại bài quiz"}: {locale === "en" ? quiz.titleEN : quiz.titleVN}
+        </h2>
+
+        <Button
+          type="button"
+          variant="outline"
+          icon={<FaArrowLeft />}
+          disabled={!canGoBack}
+          onClick={() => {
+            if (!params?.clubSlug) {
+              return;
+            }
+            router.push(`/learn/${params.clubSlug}/${enrollmentId}`);
+          }}
+        >
+          {locale === "en" ? "Back to course" : "Quay lại khóa học"}
+        </Button>
+      </div>
 
       <div className="flex flex-wrap gap-2 text-xs">
         <span
