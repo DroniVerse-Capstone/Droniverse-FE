@@ -14,7 +14,7 @@ import { COURSE_STATUS } from "@/lib/constants/course";
 import EmptyState from "@/components/common/EmptyState";
 import { useTranslations } from "@/providers/i18n-provider";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 12;
 
 type CourseStatus = "DRAFT" | "PUBLISH" | "UNPUBLISH" | "ARCHIVED" | null;
 

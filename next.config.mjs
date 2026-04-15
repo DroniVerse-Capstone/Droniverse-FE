@@ -28,6 +28,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "doanhnhanplus.vn",
       },
+      {
+        protocol: "https",
+        hostname: "media.istockphoto.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-media.sforum.vn",
+      }
     ],
   },
 };

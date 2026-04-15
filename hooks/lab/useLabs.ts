@@ -352,7 +352,7 @@ export const useGetStudentLabDetail = (enrollmentId: string, labId: string) => {
       const response = await apiClient.get<any>(
         `/academy/user/enrollments/${enrollmentId}/labs/${labId}`
       );
-      
+
       const data = response.data?.data;
       if (!data) return null;
 

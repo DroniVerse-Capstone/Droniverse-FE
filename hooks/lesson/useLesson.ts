@@ -5,9 +5,13 @@ import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
 	DeleteLessonResponse,
+	ImportLabLessonRequest,
+	ImportLabLessonResponse,
 	Lesson,
 	deleteLessonResponseSchema,
 	getLessonsResponseSchema,
+	importLabLessonRequestSchema,
+	importLabLessonResponseSchema,
 } from "@/validations/lesson/lesson"
 
 type UseGetLessonsOptions = {
@@ -21,6 +25,16 @@ type DeleteLessonVariables = {
 
 type UseDeleteLessonOptions = {
 	onSuccess?: (data: DeleteLessonResponse) => void
+	onError?: (error: AxiosError<ApiError>) => void
+}
+
+type ImportLabLessonVariables = {
+	labId: string
+	payload: ImportLabLessonRequest
+}
+
+type UseImportLabLessonOptions = {
+	onSuccess?: (data: ImportLabLessonResponse) => void
 	onError?: (error: AxiosError<ApiError>) => void
 }
 
@@ -67,8 +81,40 @@ export const useDeleteLesson = (options?: UseDeleteLessonOptions) => {
 	})
 }
 
+export const useImportLabLesson = (options?: UseImportLabLessonOptions) => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		ImportLabLessonResponse,
+		AxiosError<ApiError>,
+		ImportLabLessonVariables
+	>({
+		mutationFn: async ({ labId, payload }) => {
+			const requestBody = importLabLessonRequestSchema.parse(payload)
+			const response = await apiClient.post(
+				`/academy/labs/${labId}/lessons`,
+				requestBody
+			)
+
+			return importLabLessonResponseSchema.parse(response.data)
+		},
+		onSuccess: async (data, variables) => {
+			await queryClient.invalidateQueries({
+				queryKey: ["lessons", variables.payload.moduleID],
+			})
+
+			options?.onSuccess?.(data)
+		},
+		onError: (error) => {
+			options?.onError?.(error)
+		},
+	})
+}
+
 export type {
 	DeleteLessonVariables,
+	ImportLabLessonVariables,
 	UseDeleteLessonOptions,
 	UseGetLessonsOptions,
+	UseImportLabLessonOptions,
 }

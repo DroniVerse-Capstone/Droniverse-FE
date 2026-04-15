@@ -39,6 +39,12 @@ export default function ClubSwitcherDialog({
     error,
   } = useGetMyClubs({});
 
+  const currentClubSlug = React.useMemo(() => {
+    if (!pathname) return "";
+    const segments = pathname.split("/").filter(Boolean);
+    return segments[1] || "";
+  }, [pathname]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -75,7 +81,7 @@ export default function ClubSwitcherDialog({
             clubs.map((club) => {
               const clubName =
                 locale === "en" ? club.nameEN || club.nameVN : club.nameVN;
-              const isCurrent = pathname?.endsWith(`-${club.clubID}`);
+              const isCurrent = currentClubSlug.endsWith(`-${club.clubID}`);
 
               return (
                 <button

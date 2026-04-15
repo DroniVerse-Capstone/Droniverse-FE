@@ -14,13 +14,11 @@ import { useTranslations } from "@/providers/i18n-provider";
 export default function StudentPlayLabPage() {
   const params = useParams();
   const router = useRouter();
-  const labId = params?.id as string;
+  const labId = params?.labId as string;
+  const enrollmentId = params?.enrollmentId as string;
   const t = useTranslations("MissionHUD");
 
-  // HARDCODED Enrollment ID for now as requested by user.
-  const ENROLLMENT_ID = "d5bc6d12-2576-4261-bf42-bc16b982022a";
-
-  const { data: studentLabData, isLoading, isError, error } = useGetStudentLabDetail(ENROLLMENT_ID, labId) as any;
+  const { data: studentLabData, isLoading, isError, error } = useGetStudentLabDetail(enrollmentId, labId) as any;
 
   const labData = studentLabData?.lab;
   const labContent = studentLabData?.labContent?.environment;

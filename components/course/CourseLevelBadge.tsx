@@ -12,9 +12,9 @@ type CourseLevelBadgeProps = {
 }
 
 const levelClassMap: Record<string, string> = {
-  EASY: "bg-secondary/15 text-secondary border-2 border-secondary/40",
-  MEDIUM: "bg-warning/15 text-warning border-2 border-warning/40",
-  HARD: "bg-error/15 text-error border-2 border-error/40",
+  EASY: "bg-secondary/15 text-secondary border-2 border-secondary",
+  MEDIUM: "bg-warning/15 text-warning border-2 border-warning",
+  HARD: "bg-error/15 text-error border-2 border-error",
 }
 
 export default function CourseLevelBadge({

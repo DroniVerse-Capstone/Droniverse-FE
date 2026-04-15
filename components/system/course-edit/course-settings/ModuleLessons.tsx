@@ -63,11 +63,6 @@ export default function ModuleLessons({
   });
 
   const handleOpenView = (lesson: Lesson) => {
-    if (lesson.type === "LAB") {
-      toast("Tính năng xem chi tiết Lab sẽ được cập nhật sau.");
-      return;
-    }
-
     setSelectedLesson(lesson);
     setViewOpen(true);
   };
@@ -174,16 +169,18 @@ export default function ModuleLessons({
 
                 {canManageLessons ? (
                   <>
-                    <TooltipWrapper label={t("tooltip.edit")}>
-                      <Button
-                        type="button"
-                        variant="editIcon"
-                        size="icon"
-                        onClick={() => handleOpenEdit(lesson)}
-                      >
-                        <BiEdit size={16} />
-                      </Button>
-                    </TooltipWrapper>
+                    {lesson.type !== "LAB" ? (
+                      <TooltipWrapper label={t("tooltip.edit")}>
+                        <Button
+                          type="button"
+                          variant="editIcon"
+                          size="icon"
+                          onClick={() => handleOpenEdit(lesson)}
+                        >
+                          <BiEdit size={16} />
+                        </Button>
+                      </TooltipWrapper>
+                    ) : null}
 
                     <ConfirmActionPopover
                       trigger={

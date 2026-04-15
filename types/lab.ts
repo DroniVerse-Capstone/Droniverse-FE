@@ -65,6 +65,7 @@ export interface LabData {
   nameEN?: string;
   descriptionVN: string;
   descriptionEN?: string;
+  estimatedTime?: number;
   level: LabLevel;
   type: LabType;
   status: LabStatus;

@@ -443,9 +443,9 @@
     "myRequests": "Yêu cầu của tôi",
     "status": {
       "all": "Tất cả",
-      "active": "Đang hoạt động",
+      "active": "Hoạt động",
       "inactive": "Dừng hoạt động",
-      "suspended": "Bị cấm",
+      "suspended": "Đình chỉ",
       "archived": "Lưu trữ",
       "pending": "Chờ duyệt",
       "rejected": "Từ chối",
@@ -473,7 +473,9 @@
         "approver": "Người duyệt",
         "rejectReason": "Lý do từ chối",
         "status": "Trạng thái",
-        "actions": "Thao tác"
+        "actions": "Thao tác",
+        "managers": "Quản lý",
+        "members": "Thành viên"
       },
       "actions": {
         "view": "Xem chi tiết",
@@ -523,6 +525,15 @@
         "description": "Đường dẫn câu lạc bộ không hợp lệ hoặc bạn không có quyền truy cập."
       },
       "error": "Không tải được thông tin câu lạc bộ"
+    },
+    "ClubHotCourse": {
+      "title": "Khóa học đang hot",
+      "viewAll": "Xem tất cả",
+      "empty": "Chưa có khóa học hot nào",
+      "errors": {
+        "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+        "loadCourses": "Không thể tải danh sách khóa học hot."
+      }
     }
   },
   "CourseManagement": {
@@ -605,7 +616,40 @@
       "unknown": "Chưa xác định",
       "min": "phút",
       "creator": "Người tạo",
-      "updater": "Người cập nhật"
+      "updater": "Người cập nhật",
+      "actions": {
+        "publish": "Xuất bản",
+        "unpublish": "Ngừng xuất bản",
+        "delete": "Xóa"
+      },
+      "confirm": {
+        "publish": {
+          "title": "Xác nhận xuất bản khóa học?",
+          "description": "Khóa học sẽ được chuyển sang trạng thái xuất bản.",
+          "confirmText": "Xuất bản",
+          "cancelText": "Hủy"
+        },
+        "unpublish": {
+          "title": "Xác nhận ngừng xuất bản khóa học?",
+          "description": "Khóa học sẽ chuyển về trạng thái ngừng xuất bản.",
+          "confirmText": "Ngừng xuất bản",
+          "cancelText": "Hủy"
+        },
+        "delete": {
+          "title": "Xác nhận xóa khóa học?",
+          "description": "Hành động này không thể hoàn tác.",
+          "confirmText": "Xóa",
+          "cancelText": "Hủy"
+        }
+      },
+      "toast": {
+        "publishSuccess": "Xuất bản khóa học thành công.",
+        "publishError": "Xuất bản khóa học thất bại.",
+        "unpublishSuccess": "Ngừng xuất bản khóa học thành công.",
+        "unpublishError": "Ngừng xuất bản khóa học thất bại.",
+        "deleteSuccess": "Xóa khóa học thành công.",
+        "deleteError": "Xóa khóa học thất bại."
+      }
     },
     "CourseEdit": {
       "courseInfo": "Thông tin khóa học",
@@ -646,6 +690,18 @@
       },
       "image": {
         "empty": "Không có hình ảnh"
+      },
+      "certificate": {
+        "label": "Chứng chỉ",
+        "empty": "Không có ảnh chứng chỉ",
+        "actions": {
+          "create": "Tạo chứng chỉ",
+          "creating": "Đang tạo..."
+        },
+        "toast": {
+          "createSuccess": "Đã tạo chứng chỉ thành công.",
+          "createError": "Không thể tạo chứng chỉ."
+        }
       },
       "meta": {
         "createdBy": "Người tạo",
@@ -786,6 +842,13 @@
           "titleEN": "Tiêu đề tiếng Anh",
           "titleVNPlaceholder": "Nhập tiêu đề tiếng Việt",
           "titleENPlaceholder": "Nhập tiêu đề tiếng Anh",
+          "labSearch": "Tìm kiếm bài lab",
+          "labSearchPlaceholder": "Nhập tên hoặc mô tả bài lab",
+          "labType": "Loại",
+          "labNoDescription": "Không có mô tả",
+          "labEmpty": "Không tìm thấy bài lab phù hợp.",
+          "labSelectHint": "Vui lòng chọn một bài lab để tạo bài học.",
+          "labSelected": "Đã chọn bài lab.",
           "theoryContentVN": "Nội dung tiếng Việt",
           "theoryContentEN": "Nội dung tiếng Anh",
           "theoryContentVNPlaceholder": "Nhập nội dung lý thuyết tiếng Việt",
@@ -808,15 +871,17 @@
           "cancel": "Hủy"
         },
         "toast": {
-          "labComingSoon": "Tính năng tạo bài Lab sẽ được cập nhật sau."
+          "importLabSuccess": "Tạo lesson từ lab thành công."
         },
         "error": {
           "missingTitle": "Vui lòng nhập tiêu đề tiếng Việt và tiếng Anh.",
           "missingTheory": "Vui lòng nhập đầy đủ thông tin cho bài lý thuyết.",
           "missingQuiz": "Vui lòng nhập đầy đủ thông tin cho bài kiểm tra.",
+          "missingLab": "Vui lòng chọn một bài lab.",
           "invalidPassScore": "Điểm đạt không được lớn hơn tổng điểm.",
           "createTheoryFailed": "Không thể tạo bài lý thuyết.",
-          "createQuizFailed": "Không thể tạo bài kiểm tra."
+          "createQuizFailed": "Không thể tạo bài kiểm tra.",
+          "importLabFailed": "Không thể tạo lesson từ lab."
         }
       },
       "UpdateLessonDialog": {
@@ -853,7 +918,8 @@
         "title": "Xem chi tiết bài học",
         "subtitle": {
           "theory": "Chi tiết bài lý thuyết",
-          "quiz": "Chi tiết bài kiểm tra"
+          "quiz": "Chi tiết bài kiểm tra",
+          "lab": "Chi tiết bài Lab"
         },
         "fields": {
           "titleVN": "Tiêu đề (Tiếng Việt)",
@@ -862,6 +928,8 @@
           "timeLimit": "Thời gian: {value} phút",
           "maxScore": "Điểm tối đa: {value}",
           "passScore": "Điểm đạt: {value}",
+          "labLevel": "Độ khó",
+          "labType": "Loại Lab",
           "theoryContentVN": "Nội dung tiếng Việt",
           "theoryContentEN": "Nội dung tiếng Anh",
           "quizDescriptionVN": "Mô tả tiếng Việt",
@@ -869,7 +937,8 @@
         },
         "error": {
           "loadTheoryFailed": "Không thể tải chi tiết bài lý thuyết.",
-          "loadQuizFailed": "Không thể tải chi tiết bài kiểm tra."
+          "loadQuizFailed": "Không thể tải chi tiết bài kiểm tra.",
+          "loadLabFailed": "Không thể tải chi tiết bài Lab."
         }
       },
       "QuizQuestionConfigDialog": {
@@ -919,6 +988,34 @@
           "createFailed": "Không thể tạo câu hỏi.",
           "updateFailed": "Không thể cập nhật câu hỏi.",
           "deleteFailed": "Không thể xóa câu hỏi."
+        }
+      }
+    },
+    "AssignCourseVersionDialog": {
+      "category": {
+        "title": "Gán danh mục",
+        "description": "Chọn một hoặc nhiều danh mục để gán cho phiên bản khóa học này.",
+        "selectPlaceholder": "Chọn danh mục",
+        "buttons": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        },
+        "toast": {
+          "success": "Gán danh mục thành công.",
+          "error": "Không thể gán danh mục cho phiên bản khóa học."
+        }
+      },
+      "drone": {
+        "title": "Gán drone",
+        "description": "Chọn một hoặc nhiều drone để gán cho phiên bản khóa học này.",
+        "selectPlaceholder": "Chọn drone",
+        "buttons": {
+          "cancel": "Hủy",
+          "confirm": "Xác nhận"
+        },
+        "toast": {
+          "success": "Gán drone thành công.",
+          "error": "Không thể gán drone cho phiên bản khóa học."
         }
       }
     }
@@ -1179,5 +1276,181 @@
     "backToBase": "Về căn cứ",
     "connectionTerminated": "Kết nối đã ngắt",
     "loadingSystems": "Đang tải hệ thống..."
+  },
+  "ManagerCompetitions": {
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCompetitions": "Không thể tải danh sách cuộc thi."
+    },
+    "empty": {
+      "title": "Chưa có cuộc thi nào",
+      "description": "Khi câu lạc bộ tạo cuộc thi, danh sách sẽ hiển thị ở đây."
+    },
+    "summary": {
+      "total": "Tổng cộng {{count}} cuộc thi"
+    },
+    "filters": {
+      "label": "Lọc trạng thái",
+      "all": "Tất cả"
+    },
+    "fallback": {
+      "noDescription": "Chưa có mô tả"
+    },
+    "status": {
+      "ALL": "Tất cả",
+      "DRAFT": "Bản nháp",
+      "PUBLISHED": "Đã công khai",
+      "REGISTRATION_OPEN": "Đang mở đăng ký",
+      "REGISTRATION_CLOSED": "Đóng đăng ký",
+      "ONGOING": "Đang diễn ra",
+      "FINISHED": "Đã kết thúc",
+      "RESULT_PUBLISHED": "Đã công bố kết quả",
+      "CANCELLED": "Đã hủy",
+      "INVALID": "Không hợp lệ"
+    },
+    "metrics": {
+      "rounds": "Số vòng",
+      "competitors": "Thí sinh",
+      "prizes": "Giải thưởng",
+      "visible": "Công khai"
+    },
+    "timeline": {
+      "registration": "Đăng ký",
+      "competition": "Thi đấu"
+    },
+    "meta": {
+      "createdAt": "Tạo lúc",
+      "invalidReason": "Lý do không hợp lệ"
+    }
+  },
+  "ManagerMembers": {
+    "errors": "Không xác định được câu lạc bộ hiện tại.",
+    "memberlist": "Danh sách thành viên",
+    "requests": "Yêu cầu tham gia",
+    "status": {
+      "all": "Tất cả",
+      "pending": "Chờ duyệt",
+      "rejected": "Từ chối",
+      "approved": "Đã duyệt"
+    },
+    "headers": {
+      "stt": "STT",
+      "avatar": "Ảnh đại diện",
+      "name": "Tên thành viên",
+      "email": "Email",
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "gender": "Giới tính",
+      "dateOfBirth": "Ngày sinh",
+      "joinDate": "Ngày tham gia",
+      "status": "Trạng thái",
+      "actions": "Thao tác",
+      "requester": "Người yêu cầu",
+      "requestedAt": "Ngày yêu cầu",
+      "approvedAt": "Ngày duyệt"
+    },
+    "searchPlaceholder": "Tìm theo tên",
+    "total": "Tổng cộng",
+    "member": "thành viên",
+    "error": {
+      "loadMembers": "Không thể tải danh sách thành viên.",
+      "loadRequests": "Không thể tải danh sách yêu cầu tham gia."
+    },
+    "empty": {
+      "members": "Chưa có thành viên nào trong câu lạc bộ.",
+      "requests": "Chưa có yêu cầu tham gia nào."
+    },
+    "approved": {
+      "title": "Duyệt yêu cầu này?",
+      "description": "Thành viên sẽ được thêm vào câu lạc bộ sau khi duyệt.",
+      "confirmText": "Duyệt",
+      "cancelText": "Hủy",
+      "toast": "Đã duyệt yêu cầu tham gia."
+    },
+    "rejected": {
+      "title": "Từ chối yêu cầu này?",
+      "description": "Yêu cầu sẽ bị từ chối và người dùng sẽ không được thêm vào câu lạc bộ.",
+      "confirmText": "Từ chối",
+      "cancelText": "Hủy",
+      "toast": "Đã từ chối yêu cầu tham gia."
+    },
+    "done": "Đã xử lý"
+  },
+  "ManagerCourse": {
+    "filter": "Bộ lọc",
+    "level": {
+      "label": "Cấp độ:",
+      "all": "Tất cả",
+      "easy": "Cơ bản",
+      "medium": "Trung bình",
+      "hard": "Nâng cao"
+    },
+    "sort": {
+      "label": "Số người học:",
+      "mostPopular": "Nhiều nhất",
+      "leastPopular": "Ít nhất"
+    },
+    "owner": {
+      "label": "Club sở hữu:",
+      "all": "Tất cả",
+      "owned": "Đã sở hữu",
+      "notOwned": "Chưa sở hữu"
+    },
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCourses": "Không thể tải danh sách khóa học."
+    },
+    "searchPlaceholder": "Nhập tên khóa học...",
+    "search": "Tìm kiếm",
+    "clearSearch": "Xóa",
+    "empty": "Không có khóa học phù hợp"
+  },
+  "ManagerMyCourse": {
+    "filter": "Bộ lọc",
+    "level": {
+      "label": "Cấp độ:",
+      "all": "Tất cả",
+      "easy": "Cơ bản",
+      "medium": "Trung bình",
+      "hard": "Nâng cao"
+    },
+    "profitType": {
+      "label": "Loại lợi nhuận:",
+      "all": "Tất cả",
+      "profit": "Có lợi nhuận",
+      "nonprofit": "Phi lợi nhuận"
+    },
+    "sortBy": {
+      "label": "Sắp xếp theo:",
+      "all": "Tất cả",
+      "totalCodes": "Tổng số mã",
+      "remainingCodes": "Số mã còn lại",
+      "participants": "Số thành viên học"
+    },
+    "sortDirection": {
+      "label": "Thứ tự:",
+      "all": "Không có",
+      "asc": "Tăng dần",
+      "desc": "Giảm dần"
+    },
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCourses": "Không thể tải danh sách khóa học của câu lạc bộ."
+    },
+    "empty": "Chưa có khóa học nào"
+  },
+  "ManagerMyCourseCard": {
+    "minutes": "phút",
+    "learners": "thành viên học",
+    "codes": "mã còn lại",
+    "profit": "Có lợi nhuận",
+    "nonProfit": "Phi lợi nhuận"
+  },
+  "ClubCourseCard": {
+    "minutes": "phút",
+    "sponsored": "Được tài trợ",
+    "remaining": "mã còn lại",
+    "notOwned": "Chưa sở hữu",
+    "learners": "người học"
   }
 }

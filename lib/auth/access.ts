@@ -9,7 +9,7 @@ export const SYSTEM_MANAGER_ROLE = 'SYSTEM_MANAGER'
 
 const AUTH_PATHS = ['/auth/login', '/auth/register']
 const PUBLIC_PATHS = ['/', '/about', '/contact']
-const MEMBER_PATHS = ['/member']
+const MEMBER_PATHS = ['/member', '/learn']
 const MANAGER_PATHS = ['/manager']
 const SYSTEM_PATHS = [
   '/dashboard',
@@ -103,9 +103,7 @@ export const canAccessRoute = (pathname: string, roleName?: string | null) => {
   if (!roleName) return false
 
   if (matchPathGroup(pathname, MEMBER_PATHS)) {
-    // return roleName === CLUB_MEMBER_ROLE 
-
-    return roleName === CLUB_MEMBER_ROLE || roleName === ADMIN_ROLE || roleName === SYSTEM_MANAGER_ROLE
+    return roleName === CLUB_MEMBER_ROLE
   }
 
   if (matchPathGroup(pathname, MANAGER_PATHS)) {

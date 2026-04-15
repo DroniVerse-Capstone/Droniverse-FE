@@ -26,8 +26,14 @@ export default function ClubDetailHeader() {
     setOpen(false);
   };
 
+  const currentClubSlug = React.useMemo(() => {
+    if (!pathname) return "";
+    const segments = pathname.split("/").filter(Boolean);
+    return segments[1] || "";
+  }, [pathname]);
+
   const currentClub = clubs.find((club) =>
-    pathname?.endsWith(`-${club.clubID}`),
+    currentClubSlug.endsWith(`-${club.clubID}`),
   );
   const currentClubName = currentClub
     ? locale === "en"

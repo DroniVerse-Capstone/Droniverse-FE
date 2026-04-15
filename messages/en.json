@@ -477,7 +477,9 @@
         "approver": "Approver",
         "rejectReason": "Reject Reason",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "managers": "Manager",
+        "members": "Members"
       },
       "actions": {
         "view": "View Details",
@@ -527,6 +529,15 @@
         "description": "The club link is invalid or you don't have permission to access it."
       },
       "error": "Failed to load club information"
+    },
+    "ClubHotCourse": {
+      "title": "Hot courses",
+      "viewAll": "View all",
+      "empty": "No hot courses available",
+      "errors": {
+        "resolveClub": "Unable to determine the current club.",
+        "loadCourses": "Failed to load hot course list."
+      }
     }
   },
   "CourseManagement": {
@@ -609,7 +620,40 @@
       "unknown": "Unknown",
       "min": "minutes",
       "creator": "Created by",
-      "updater": "Updated by"
+      "updater": "Updated by",
+      "actions": {
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete"
+      },
+      "confirm": {
+        "publish": {
+          "title": "Confirm publishing this course?",
+          "description": "This course will move to published status.",
+          "confirmText": "Publish",
+          "cancelText": "Cancel"
+        },
+        "unpublish": {
+          "title": "Confirm unpublishing this course?",
+          "description": "This course will move to unpublished status.",
+          "confirmText": "Unpublish",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deleting this course?",
+          "description": "This action cannot be undone.",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "publishSuccess": "Course published successfully.",
+        "publishError": "Failed to publish course.",
+        "unpublishSuccess": "Course unpublished successfully.",
+        "unpublishError": "Failed to unpublish course.",
+        "deleteSuccess": "Course deleted successfully.",
+        "deleteError": "Failed to delete course."
+      }
     },
     "CourseEdit": {
       "courseInfo": "Course Information",
@@ -650,6 +694,18 @@
       },
       "image": {
         "empty": "No image available"
+      },
+      "certificate": {
+        "label": "Certificate",
+        "empty": "No certificate image",
+        "actions": {
+          "create": "Create certificate",
+          "creating": "Creating..."
+        },
+        "toast": {
+          "createSuccess": "Certificate created successfully.",
+          "createError": "Failed to create certificate."
+        }
       },
       "meta": {
         "createdBy": "Created by",
@@ -790,6 +846,13 @@
           "titleEN": "English Title",
           "titleVNPlaceholder": "Enter Vietnamese title",
           "titleENPlaceholder": "Enter English title",
+          "labSearch": "Search labs",
+          "labSearchPlaceholder": "Enter lab name or description",
+          "labType": "Type",
+          "labNoDescription": "No description",
+          "labEmpty": "No matching labs found.",
+          "labSelectHint": "Please select one lab to create a lesson.",
+          "labSelected": "Lab selected.",
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "theoryContentVNPlaceholder": "Enter Vietnamese theory content",
@@ -812,15 +875,17 @@
           "cancel": "Cancel"
         },
         "toast": {
-          "labComingSoon": "Lab creation feature will be available soon."
+          "importLabSuccess": "Lesson created from lab successfully."
         },
         "error": {
           "missingTitle": "Please enter both Vietnamese and English titles.",
           "missingTheory": "Please fill in all required theory fields.",
           "missingQuiz": "Please fill in all required quiz fields.",
+          "missingLab": "Please select one lab.",
           "invalidPassScore": "Pass score cannot be greater than total score.",
           "createTheoryFailed": "Failed to create theory lesson.",
-          "createQuizFailed": "Failed to create quiz lesson."
+          "createQuizFailed": "Failed to create quiz lesson.",
+          "importLabFailed": "Failed to create lesson from lab."
         }
       },
       "UpdateLessonDialog": {
@@ -857,7 +922,8 @@
         "title": "Lesson Details",
         "subtitle": {
           "theory": "Theory Lesson Details",
-          "quiz": "Quiz Lesson Details"
+          "quiz": "Quiz Lesson Details",
+          "lab": "Lab Lesson Details"
         },
         "fields": {
           "titleVN": "Title (Vietnamese)",
@@ -866,6 +932,8 @@
           "timeLimit": "Time: {value} minutes",
           "maxScore": "Max Score: {value}",
           "passScore": "Pass Score: {value}",
+          "labLevel": "Difficulty",
+          "labType": "Lab Type",
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "quizDescriptionVN": "Vietnamese Description",
@@ -873,7 +941,8 @@
         },
         "error": {
           "loadTheoryFailed": "Failed to load theory lesson details.",
-          "loadQuizFailed": "Failed to load quiz lesson details."
+          "loadQuizFailed": "Failed to load quiz lesson details.",
+          "loadLabFailed": "Failed to load lab lesson details."
         }
       },
       "QuizQuestionConfigDialog": {
@@ -923,6 +992,34 @@
           "createFailed": "Failed to create question.",
           "updateFailed": "Failed to update question.",
           "deleteFailed": "Failed to delete question."
+        }
+      }
+    },
+    "AssignCourseVersionDialog": {
+      "category": {
+        "title": "Assign Categories",
+        "description": "Select one or more categories to assign to this course version.",
+        "selectPlaceholder": "Select categories",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Categories assigned successfully.",
+          "error": "Failed to assign categories to the course version."
+        }
+      },
+      "drone": {
+        "title": "Assign Drones",
+        "description": "Select one or more drones to assign to this course version.",
+        "selectPlaceholder": "Select drones",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Drones assigned successfully.",
+          "error": "Failed to assign drones to the course version."
         }
       }
     }
@@ -1183,5 +1280,181 @@
     "backToBase": "Back to Headquarters",
     "connectionTerminated": "Connection Terminated",
     "loadingSystems": "Loading Systems..."
+  },
+  "ManagerCompetitions": {
+    "errors": {
+      "resolveClub": "Unable to resolve current club.",
+      "loadCompetitions": "Unable to load competitions."
+    },
+    "empty": {
+      "title": "No competitions yet",
+      "description": "Competitions created by this club will appear here."
+    },
+    "summary": {
+      "total": "{{count}} competitions in total"
+    },
+    "filters": {
+      "label": "Filter by status",
+      "all": "All"
+    },
+    "fallback": {
+      "noDescription": "No description"
+    },
+    "status": {
+      "ALL": "All",
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "REGISTRATION_OPEN": "Registration Open",
+      "REGISTRATION_CLOSED": "Registration Closed",
+      "ONGOING": "Ongoing",
+      "FINISHED": "Finished",
+      "RESULT_PUBLISHED": "Result Published",
+      "CANCELLED": "Cancelled",
+      "INVALID": "Invalid"
+    },
+    "metrics": {
+      "rounds": "Rounds",
+      "competitors": "Competitors",
+      "prizes": "Prizes",
+      "visible": "Visible"
+    },
+    "timeline": {
+      "registration": "Registration",
+      "competition": "Competition"
+    },
+    "meta": {
+      "createdAt": "Created at",
+      "invalidReason": "Invalid reason"
+    }
+  },
+  "ManagerMembers": {
+    "errors": "Unable to determine the current club.",
+    "memberlist": "Member List",
+    "requests": "Join Requests",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "approved": "Approved"
+    },
+    "headers": {
+      "stt": "No.",
+      "avatar": "Avatar",
+      "name": "Member Name",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "joinDate": "Join Date",
+      "status": "Status",
+      "actions": "Actions",
+      "requester": "Requester",
+      "requestedAt": "Requested At",
+      "approvedAt": "Approved At"
+    },
+    "searchPlaceholder": "Search by name",
+    "total": "Total",
+    "member": "members",
+    "error": {
+      "loadMembers": "Failed to load member list.",
+      "loadRequests": "Failed to load join requests."
+    },
+    "empty": {
+      "members": "No members in this club yet.",
+      "requests": "No join requests available."
+    },
+    "approved": {
+      "title": "Approve this request?",
+      "description": "The member will be added to the club after approval.",
+      "confirmText": "Approve",
+      "cancelText": "Cancel",
+      "toast": "Join request approved."
+    },
+    "rejected": {
+      "title": "Reject this request?",
+      "description": "The request will be rejected and the user will not be added to the club.",
+      "confirmText": "Reject",
+      "cancelText": "Cancel",
+      "toast": "Join request rejected."
+    },
+    "done": "Processed"
+  },
+  "ManagerCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "sort": {
+      "label": "Number of learners:",
+      "mostPopular": "Most popular",
+      "leastPopular": "Least popular"
+    },
+    "owner": {
+      "label": "Owning club:",
+      "all": "All",
+      "owned": "Owned",
+      "notOwned": "Not owned"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load course list."
+    },
+    "searchPlaceholder": "Enter course name...",
+    "search": "Search",
+    "clearSearch": "Clear",
+    "empty": "No matching courses found"
+  },
+  "ManagerMyCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "profitType": {
+      "label": "Profit type:",
+      "all": "All",
+      "profit": "For-profit",
+      "nonprofit": "Non-profit"
+    },
+    "sortBy": {
+      "label": "Sort by:",
+      "all": "All",
+      "totalCodes": "Total codes",
+      "remainingCodes": "Remaining codes",
+      "participants": "Participants"
+    },
+    "sortDirection": {
+      "label": "Direction:",
+      "all": "None",
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load club course list."
+    },
+    "empty": "No courses available"
+  },
+  "ManagerMyCourseCard": {
+    "minutes": "minutes",
+    "learners": "learners",
+    "codes": "codes remaining",
+    "profit": "For-profit",
+    "nonProfit": "Non-profit"
+  },
+  "ClubCourseCard": {
+    "minutes": "minutes",
+    "sponsored": "Sponsored",
+    "remaining": "codes remaining",
+    "notOwned": "Not owned",
+    "learners": "learners"
   }
 }

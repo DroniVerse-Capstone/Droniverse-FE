@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 type ConfirmActionPopoverProps = {
   trigger: React.ReactNode;
@@ -22,6 +23,7 @@ type ConfirmActionPopoverProps = {
   sideOffset?: number;
   widthClassName?: string;
   avoidCollisions?: boolean;
+  triggerClassName?: string;
 };
 
 export default function ConfirmActionPopover({
@@ -37,13 +39,14 @@ export default function ConfirmActionPopover({
   sideOffset = 4,
   widthClassName = "w-72",
   avoidCollisions = true,
+  triggerClassName,
 }: ConfirmActionPopoverProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <span className="inline-flex">{trigger}</span>
+        <span className={cn("inline-flex", triggerClassName)}>{trigger}</span>
       </PopoverTrigger>
 
       <PopoverContent
@@ -51,7 +54,7 @@ export default function ConfirmActionPopover({
         side={side}
         sideOffset={sideOffset}
         avoidCollisions={avoidCollisions}
-        className={`${widthClassName} space-y-3 z-[150]`}
+        className={`${widthClassName} z-150 space-y-3`}
       >
         <div className="space-y-1">
           <p className="text-md font-medium text-greyscale-0">{title}</p>
