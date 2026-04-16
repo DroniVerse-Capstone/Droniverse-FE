@@ -376,3 +376,34 @@ export const useGetStudentLabDetail = (enrollmentId: string, labId: string) => {
   });
 };
 
+// -------------------------
+// Submit student lab result
+// -------------------------
+interface SubmitLabPayload {
+  solution: string;        // Blockly XML
+  isCompleted: boolean;
+  time: number;            // seconds spent
+  numberOfStep: number;    // block count
+  length: number;          // logical distance
+  feedbackVN: string;
+  feedbackEN: string;
+  point: number;           // total score 0-100
+}
+
+export const useSubmitStudentLab = (enrollmentId: string, labId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: SubmitLabPayload) => {
+      const response = await apiClient.post(
+        `/academy/user/enrollments/${enrollmentId}/labs/${labId}/submit`,
+        payload
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate lab detail so next visit reflects submitted state
+      queryClient.invalidateQueries({ queryKey: ["student-lab-detail", enrollmentId, labId] });
+    },
+  });
+};

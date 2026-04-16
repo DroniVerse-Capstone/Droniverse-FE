@@ -39,6 +39,7 @@ export interface LabRule {
 
 export interface LabSolution {
   xml: string;
+  score?: number;          // calculated total score 0-100
   metrics: {
     timeSpent: number;
     fuelConsumed: number;
