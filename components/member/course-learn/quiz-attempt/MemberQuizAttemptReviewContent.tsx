@@ -57,10 +57,9 @@ export default function MemberQuizAttemptReviewContent({
         </h2>
         <Button
           variant="outline"
-          size="sm"
           icon={<FaArrowLeft />}
           onClick={handleExit}
-          className="border-greyscale-700 text-greyscale-200"
+          className="border-greyscale-700 text-greyscale-0"
         >
           {locale === "en" ? "Back" : "Quay lại"}
         </Button>

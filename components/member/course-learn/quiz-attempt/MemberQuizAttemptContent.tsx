@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { GiDuration } from "react-icons/gi";
-import { openDB, type DBSchema } from "idb";import { FaArrowLeft } from "react-icons/fa";
+import { openDB, type DBSchema } from "idb";
+import { FaArrowLeft } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -41,7 +41,9 @@ const openQuizAttemptDb = () =>
   openDB<QuizAttemptDraftDb>(QUIZ_ATTEMPT_DB_NAME, 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(QUIZ_ATTEMPT_STORE_NAME)) {
-        db.createObjectStore(QUIZ_ATTEMPT_STORE_NAME, { keyPath: "storageKey" });
+        db.createObjectStore(QUIZ_ATTEMPT_STORE_NAME, {
+          keyPath: "storageKey",
+        });
       }
     },
   });
@@ -77,8 +79,6 @@ export default function MemberQuizAttemptContent({
   enrollmentId,
   quizId,
 }: MemberQuizAttemptContentProps) {
-  const router = useRouter();
-  const params = useParams<{ clubSlug?: string }>();
   const quizQuestionsQuery = useGetUserQuizQuestions({ enrollmentId, quizId });
   const submitQuizMutation = useSubmitUserQuiz();
   const [answers, setAnswers] = React.useState<
@@ -138,7 +138,8 @@ export default function MemberQuizAttemptContent({
             Math.floor((Date.now() - (draft.updatedAt ?? Date.now())) / 1000),
           );
           const restoredRemainingSeconds =
-            typeof draft.remainingSeconds === "number" && draft.remainingSeconds >= 0
+            typeof draft.remainingSeconds === "number" &&
+            draft.remainingSeconds >= 0
               ? Math.max(0, draft.remainingSeconds - elapsedSeconds)
               : quizData.timeLimit * 60;
 
@@ -250,7 +251,11 @@ export default function MemberQuizAttemptContent({
         // Ignore cleanup failures so submit result is not blocked.
       });
 
-      toast.success(isAutoSubmit ? "Hết giờ, hệ thống đã tự nộp bài." : "Nộp quiz thành công.");
+      toast.success(
+        isAutoSubmit
+          ? "Hết giờ, hệ thống đã tự nộp bài."
+          : "Nộp quiz thành công.",
+      );
 
       handleExit();
 
@@ -288,7 +293,8 @@ export default function MemberQuizAttemptContent({
     }
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      const warningMessage = "Bạn có bài làm chưa nộp. Rời trang sẽ mất tiến trình hiện tại.";
+      const warningMessage =
+        "Bạn có bài làm chưa nộp. Rời trang sẽ mất tiến trình hiện tại.";
       event.preventDefault();
       event.returnValue = warningMessage;
       return warningMessage;
@@ -332,18 +338,18 @@ export default function MemberQuizAttemptContent({
   return (
     <div className="w-full">
       <div className="grid gap-4 lg:grid-cols-10 lg:gap-6">
-        <div className="flex items-center justify-between">
-        <div className="space-y-4 lg:col-span-7">        <Button
-          variant="outline"
-          size="sm"
-          icon={<FaArrowLeft />}
-          onClick={handleExit}
-          className="border-greyscale-700 text-greyscale-200"
-        >
-          Quay lại
-        </Button>
-      </div>
+        <div className="space-y-4 lg:col-span-7">
+          {/* <Button
+            variant="outline"
+            size="sm"
+            icon={<FaArrowLeft />}
+            onClick={handleExit}
+            className="border-greyscale-700 text-greyscale-200"
+          >
+            Quay lại
+          </Button> */}
 
+          <div className="space-y-4">
           {questions.map((question, index) => (
             <div
               key={question.questionID}
@@ -382,6 +388,7 @@ export default function MemberQuizAttemptContent({
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         <aside className="lg:col-span-3 lg:sticky lg:top-4 lg:self-start">
