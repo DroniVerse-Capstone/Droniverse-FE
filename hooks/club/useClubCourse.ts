@@ -109,19 +109,19 @@ export const useGetClubHotCourses = (
 
 export const useGetClubCourseOverview = (
 	clubId?: string,
-	courseVersionId?: string
+	courseId?: string
 ) => {
 	return useQuery<ClubCourseOverview, AxiosError<ApiError>>({
-		queryKey: ["club-course-overview", clubId, courseVersionId],
-		enabled: !!clubId && !!courseVersionId,
+		queryKey: ["club-course-overview", clubId, courseId],
+		enabled: !!clubId && !!courseId,
 		queryFn: async () => {
 			const parsedQuery = getClubCourseOverviewQuerySchema.parse({
 				clubId,
-				courseVersionId,
+				courseId,
 			})
 
 			const response = await apiClient.get(
-				`/academy/courses/${parsedQuery.courseVersionId}/overview`,
+				`/academy/courses/${parsedQuery.courseId}/overview`,
 				{
 					params: {
 						clubId: parsedQuery.clubId,

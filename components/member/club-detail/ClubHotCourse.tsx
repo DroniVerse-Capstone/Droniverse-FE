@@ -77,7 +77,14 @@ export default function ClubHotCourse({
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {courses.map((course) => (
-              <ClubCourseCard key={course.courseVersionId} course={course} />
+              <ClubCourseCard
+                key={course.courseId}
+                course={course}
+                onClick={() => {
+                  if (!clubSlug) return;
+                  router.push(`/member/${clubSlug}/${course.courseId}`);
+                }}
+              />
             ))}
           </div>
         )

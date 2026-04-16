@@ -53,7 +53,7 @@ export default function MemberCourseOverview() {
     return uuidMatch?.[0];
   }, [clubSlug]);
 
-  const courseVersionId = React.useMemo(() => {
+  const courseId = React.useMemo(() => {
     if (!courseSlug) return undefined;
 
     if (UUID_SUFFIX_REGEX.test(courseSlug)) {
@@ -66,7 +66,7 @@ export default function MemberCourseOverview() {
 
   const { data, isLoading, isError, error } = useGetClubCourseOverview(
     clubId,
-    courseVersionId,
+    courseId,
   );
   const enterCourseCodeMutation = useEnterCourseCode();
   const receiveCourseCodeMutation = useReceiveCourseCode();
@@ -75,7 +75,7 @@ export default function MemberCourseOverview() {
   const [activateCode, setActivateCode] = React.useState("");
 
   const handleGoLearn = React.useCallback(async () => {
-    if (!clubSlug || !courseVersionId || !clubId) {
+    if (!clubSlug || !courseId || !clubId || !data?.courseVersionID) {
       return;
     }
 
@@ -86,7 +86,7 @@ export default function MemberCourseOverview() {
 
     try {
       const response = await createEnrollmentMutation.mutateAsync({
-        courseVersionID: courseVersionId,
+        courseVersionID: data.courseVersionID,
         clubID: clubId,
       });
 
@@ -102,9 +102,10 @@ export default function MemberCourseOverview() {
   }, [
     clubId,
     clubSlug,
-    courseVersionId,
+    courseId,
     createEnrollmentMutation,
     data?.enrollmentID,
+    data?.courseVersionID,
     router,
   ]);
 
@@ -142,7 +143,7 @@ export default function MemberCourseOverview() {
   }, [activateCode, clubId, enterCourseCodeMutation]);
 
   const handleReceiveCode = React.useCallback(async () => {
-    if (!clubId || !courseVersionId) {
+    if (!clubId || !courseId) {
       toast.error("Không xác định được khóa học hiện tại.");
       return;
     }
@@ -150,7 +151,7 @@ export default function MemberCourseOverview() {
     try {
       await receiveCourseCodeMutation.mutateAsync({
         clubId,
-        courseId: courseVersionId,
+        courseId,
       });
 
       toast.success("Đã nhận mã, hãy kiểm tra gmail");
@@ -162,9 +163,9 @@ export default function MemberCourseOverview() {
         "Không thể nhận mã. Vui lòng thử lại.";
       toast.error(message);
     }
-  }, [clubId, courseVersionId, receiveCourseCodeMutation]);
+  }, [clubId, courseId, receiveCourseCodeMutation]);
 
-  if (!clubId || !courseVersionId) {
+  if (!clubId || !courseId) {
     return (
       <div className="px-6 py-4">
         <EmptyState title="Không xác định được khóa học hoặc câu lạc bộ hiện tại." />
@@ -334,26 +335,28 @@ export default function MemberCourseOverview() {
                         ? "Đang nhận mã..."
                         : "Nhận mã"}
                     </Button>
-                  ) : (
-                    <Button
-                      variant="default"
-                      className="w-full"
-                      disabled={
-                        !data.miniProduct ||
-                        data.clubCourseOwn?.remainingQuantity === 0
-                      }
-                      onClick={() => {
-                        if (!clubSlug || !courseSlug) return;
-                        router.push(
-                          `/member/${clubSlug}/${courseSlug}/checkout`,
-                        );
-                      }}
-                    >
-                      {data.clubCourseOwn?.remainingQuantity === 0
-                        ? "Đã hết mã"
-                        : "Mua ngay"}
-                    </Button>
-                  )}
+                  ) : null 
+                  // (
+                  //   <Button
+                  //     variant="default"
+                  //     className="w-full"
+                  //     disabled={
+                  //       !data.miniProduct ||
+                  //       data.clubCourseOwn?.remainingQuantity === 0
+                  //     }
+                  //     onClick={() => {
+                  //       if (!clubSlug || !courseSlug) return;
+                  //       router.push(
+                  //         `/member/${clubSlug}/${courseSlug}/checkout`,
+                  //       );
+                  //     }}
+                  //   >
+                  //     {data.clubCourseOwn?.remainingQuantity === 0
+                  //       ? "Đã hết mã"
+                  //       : "Mua ngay"}
+                  //   </Button>
+                  // )}
+                }
                   <Button
                     variant="secondary"
                     className="w-full"

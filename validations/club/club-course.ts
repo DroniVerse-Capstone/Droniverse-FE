@@ -36,6 +36,7 @@ export const clubCourseOverviewOwnSchema = z.object({
 export const clubCourseOverviewSchema = z.object({
 	author: clubCourseOverviewUserSchema,
 	enrollmentID: z.string().uuid().nullable(),
+	courseID: z.string().uuid(),
 	courseVersionID: z.string().uuid(),
 	titleVN: z.string(),
 	titleEN: z.string(),
@@ -125,7 +126,7 @@ export const getClubHotCoursesQuerySchema = z.object({
 
 export const getClubCourseOverviewQuerySchema = z.object({
 	clubId: z.string().uuid(),
-	courseVersionId: z.string().uuid(),
+	courseId: z.string().uuid(),
 })
 
 export type ClubCourseLevel = z.infer<typeof clubCourseLevelSchema>

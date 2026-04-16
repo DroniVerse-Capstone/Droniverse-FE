@@ -43,7 +43,7 @@ export default function ManagerCourseOverview() {
     return uuidMatch?.[0];
   }, [clubSlug]);
 
-  const courseVersionId = React.useMemo(() => {
+  const courseId = React.useMemo(() => {
     if (!courseSlug) return undefined;
 
     if (UUID_SUFFIX_REGEX.test(courseSlug)) {
@@ -56,10 +56,10 @@ export default function ManagerCourseOverview() {
 
   const { data, isLoading, isError, error } = useGetClubCourseOverview(
     clubId,
-    courseVersionId,
+    courseId,
   );
 
-  if (!clubId || !courseVersionId) {
+  if (!clubId || !courseId) {
     return (
       <div className="px-6 py-4">
         <EmptyState title="Không xác định được khóa học hoặc câu lạc bộ hiện tại." />

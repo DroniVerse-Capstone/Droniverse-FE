@@ -89,9 +89,9 @@ export const useCreateUserEnrollment = () => {
 
 			return createUserEnrollmentResponseSchema.parse(response.data)
 		},
-		onSuccess: (_data, variables) => {
+		onSuccess: (data, variables) => {
 			queryClient.invalidateQueries({
-				queryKey: ["club-course-overview", variables.clubID, variables.courseVersionID],
+				queryKey: ["club-course-overview", variables.clubID, data.data.courseID],
 			})
 			queryClient.invalidateQueries({
 				queryKey: ["user-enrollments", variables.clubID],

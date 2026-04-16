@@ -41,7 +41,7 @@ export default function MemberCourseCheckout() {
     return uuidMatch?.[0];
   }, [clubSlug]);
 
-  const courseVersionId = React.useMemo(() => {
+  const courseId = React.useMemo(() => {
     if (!courseSlug) return undefined;
 
     const uuidMatch = courseSlug.match(UUID_SUFFIX_REGEX);
@@ -50,7 +50,7 @@ export default function MemberCourseCheckout() {
 
   const { data, isLoading, isError, error } = useGetClubCourseOverview(
     clubId,
-    courseVersionId,
+    courseId,
   );
 
   const [createdOrderId, setCreatedOrderId] = React.useState<string | undefined>(
@@ -129,7 +129,7 @@ export default function MemberCourseCheckout() {
     quantity,
   ]);
 
-  if (!clubId || !courseVersionId) {
+  if (!clubId || !courseId) {
     return (
       <div className="px-6 py-4">
         <EmptyState title="Không xác định được khóa học hoặc câu lạc bộ hiện tại." />
