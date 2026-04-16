@@ -2,9 +2,6 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { FaArrowLeft } from "react-icons/fa";
-
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetUserQuizAttemptReview } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
