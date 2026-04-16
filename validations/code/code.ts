@@ -180,6 +180,45 @@ export const bulkAssignCodesResponseSchema = z.object({
 	message: z.string(),
 })
 
+// ---- Enter Course Code ----
+
+export const enterCourseCodeParamsSchema = z.object({
+	clubId: z.string().uuid(),
+})
+
+export const enterCourseCodeRequestSchema = z.object({
+	codeId: z.string().trim().min(1),
+})
+
+export const enterCourseCodeDataSchema = z.object({
+	codeID: z.string().trim().min(1),
+	userID: z.string().uuid(),
+	usedDate: z.string().trim().min(1),
+})
+
+export const enterCourseCodeResponseSchema = z.object({
+	data: enterCourseCodeDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+// ---- Receive Course Code ----
+
+export const receiveCourseCodeParamsSchema = z.object({
+	clubId: z.string().uuid(),
+	courseId: z.string().uuid(),
+})
+
+export const receiveCourseCodeDataSchema = z.object({
+	remainingCode: z.number().int().nonnegative(),
+})
+
+export const receiveCourseCodeResponseSchema = z.object({
+	data: receiveCourseCodeDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 // ---- Generate Codes ----
 
 export const generateCodesRequestSchema = z.object({
@@ -252,6 +291,15 @@ export type BulkAssignCodesRequest = z.infer<typeof bulkAssignCodesRequestSchema
 export type BulkAssignedCodeItem = z.infer<typeof bulkAssignedCodeItemSchema>
 export type BulkAssignCodesData = z.infer<typeof bulkAssignCodesDataSchema>
 export type BulkAssignCodesResponse = z.infer<typeof bulkAssignCodesResponseSchema>
+export type EnterCourseCodeParams = z.infer<typeof enterCourseCodeParamsSchema>
+export type EnterCourseCodeRequest = z.infer<typeof enterCourseCodeRequestSchema>
+export type EnterCourseCodeData = z.infer<typeof enterCourseCodeDataSchema>
+export type EnterCourseCodeResponse = z.infer<typeof enterCourseCodeResponseSchema>
+export type ReceiveCourseCodeParams = z.infer<typeof receiveCourseCodeParamsSchema>
+export type ReceiveCourseCodeData = z.infer<typeof receiveCourseCodeDataSchema>
+export type ReceiveCourseCodeResponse = z.infer<
+	typeof receiveCourseCodeResponseSchema
+>
 export type GenerateCodesRequest = z.infer<typeof generateCodesRequestSchema>
 export type GeneratedClubCourse = z.infer<typeof generatedClubCourseSchema>
 export type GenerateCodesResponse = z.infer<typeof generateCodesResponseSchema>

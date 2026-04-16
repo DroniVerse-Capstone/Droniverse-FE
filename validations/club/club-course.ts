@@ -35,6 +35,7 @@ export const clubCourseOverviewOwnSchema = z.object({
 
 export const clubCourseOverviewSchema = z.object({
 	author: clubCourseOverviewUserSchema,
+	enrollmentID: z.string().uuid().nullable(),
 	courseVersionID: z.string().uuid(),
 	titleVN: z.string(),
 	titleEN: z.string(),

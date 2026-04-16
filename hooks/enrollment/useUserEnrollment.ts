@@ -1,11 +1,15 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 
 import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
+	CreateUserEnrollmentRequest,
+	CreateUserEnrollmentResponse,
 	GetUserEnrollmentsData,
 	GetUserEnrollmentsQuery,
+	createUserEnrollmentRequestSchema,
+	createUserEnrollmentResponseSchema,
 	getUserEnrollmentsDataSchema,
 } from "@/validations/enrollment/user-enrollment"
 
@@ -64,5 +68,34 @@ export const useGetUserEnrollments = (
 			return getUserEnrollmentsDataSchema.parse(response.data.data)
 		},
 		enabled: !!clubId,
+	})
+}
+
+export const useCreateUserEnrollment = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		CreateUserEnrollmentResponse,
+		AxiosError<ApiError>,
+		CreateUserEnrollmentRequest
+	>({
+		mutationFn: async (payload) => {
+			const parsedPayload = createUserEnrollmentRequestSchema.parse(payload)
+
+			const response = await apiClient.post(
+				"/academy/user/enrollments",
+				parsedPayload
+			)
+
+			return createUserEnrollmentResponseSchema.parse(response.data)
+		},
+		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["club-course-overview", variables.clubID, variables.courseVersionID],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ["user-enrollments", variables.clubID],
+			})
+		},
 	})
 }

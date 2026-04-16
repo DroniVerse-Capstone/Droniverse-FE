@@ -39,9 +39,40 @@ export const getUserEnrollmentsResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const createUserEnrollmentRequestSchema = z.object({
+	courseVersionID: z.string().uuid(),
+	clubID: z.string().uuid(),
+})
+
+export const createUserEnrollmentDataSchema = z.object({
+	enrollmentID: z.string().uuid(),
+	courseID: z.string().uuid(),
+	courseVersionID: z.string().uuid(),
+	userID: z.string().uuid(),
+	clubID: z.string().uuid(),
+	enrollDate: z.string().trim().min(1),
+	lastAccessDate: z.string().trim().min(1),
+	expireDate: z.string().trim().min(1),
+	progress: z.number().min(0).max(100),
+	status: enrollmentStatusSchema,
+})
+
+export const createUserEnrollmentResponseSchema = z.object({
+	data: createUserEnrollmentDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type UserEnrollment = z.infer<typeof userEnrollmentSchema>
 export type GetUserEnrollmentsQuery = z.infer<typeof getUserEnrollmentsQuerySchema>
 export type GetUserEnrollmentsData = z.infer<typeof getUserEnrollmentsDataSchema>
 export type GetUserEnrollmentsResponse = z.infer<typeof getUserEnrollmentsResponseSchema>
+export type CreateUserEnrollmentRequest = z.infer<
+	typeof createUserEnrollmentRequestSchema
+>
+export type CreateUserEnrollmentData = z.infer<typeof createUserEnrollmentDataSchema>
+export type CreateUserEnrollmentResponse = z.infer<
+	typeof createUserEnrollmentResponseSchema
+>
 export type EnrollmentStatus = z.infer<typeof enrollmentStatusSchema>
 export type CourseLevel = z.infer<typeof levelSchema>

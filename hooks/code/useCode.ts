@@ -10,12 +10,20 @@ import {
 	BulkAssignCodesResponse,
 	ClubCourseCodeSummary,
 	CourseCodeUsersPaging,
+	EnterCourseCodeRequest,
+	EnterCourseCodeResponse,
 	GenerateCodesRequest,
 	GenerateCodesResponse,
+	ReceiveCourseCodeResponse,
 	assignCodeToUserRequestSchema,
 	assignCodeToUserResponseSchema,
 	bulkAssignCodesRequestSchema,
 	bulkAssignCodesResponseSchema,
+	enterCourseCodeParamsSchema,
+	enterCourseCodeRequestSchema,
+	enterCourseCodeResponseSchema,
+	receiveCourseCodeParamsSchema,
+	receiveCourseCodeResponseSchema,
 	UpdateClubCourseProfitTypeRequest,
 	UpdateClubCourseProfitTypeResponse,
 	clubCourseCodeSummarySchema,
@@ -49,6 +57,16 @@ type UseGetCourseUsersCodesByClubOptions = Omit<
 > & {
 	currentPage?: number
 	pageSize?: number
+}
+
+type EnterCourseCodeVariables = {
+	clubId: string
+	payload: EnterCourseCodeRequest
+}
+
+type ReceiveCourseCodeVariables = {
+	clubId: string
+	courseId: string
 }
 
 export const useGetCourseCodesByClub = (
@@ -262,6 +280,61 @@ export const useBulkAssignCodesToUsers = () => {
 			})
 			queryClient.invalidateQueries({
 				queryKey: ["course-users-codes-by-club"],
+			})
+		},
+	})
+}
+
+export const useEnterCourseCode = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		EnterCourseCodeResponse,
+		AxiosError<ApiError>,
+		EnterCourseCodeVariables
+	>({
+		mutationFn: async ({ clubId, payload }) => {
+			const parsedParams = enterCourseCodeParamsSchema.parse({ clubId })
+			const parsedPayload = enterCourseCodeRequestSchema.parse(payload)
+
+			const response = await apiClient.post(
+				`/academy/codes/${parsedParams.clubId}/enter-code`,
+				parsedPayload
+			)
+
+			return enterCourseCodeResponseSchema.parse(response.data)
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["club-course-overview"],
+			})
+		},
+	})
+}
+
+export const useReceiveCourseCode = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		ReceiveCourseCodeResponse,
+		AxiosError<ApiError>,
+		ReceiveCourseCodeVariables
+	>({
+		mutationFn: async ({ clubId, courseId }) => {
+			const parsedParams = receiveCourseCodeParamsSchema.parse({
+				clubId,
+				courseId,
+			})
+
+			const response = await apiClient.post(
+				`/academy/codes/clubs/${parsedParams.clubId}/courses/${parsedParams.courseId}/get-code`
+			)
+
+			return receiveCourseCodeResponseSchema.parse(response.data)
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["club-course-overview"],
 			})
 		},
 	})
