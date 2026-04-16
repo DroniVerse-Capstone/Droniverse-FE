@@ -4,7 +4,8 @@ import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { GiDuration } from "react-icons/gi";
-import { openDB, type DBSchema } from "idb";
+import { openDB, type DBSchema } from "idb";import { FaArrowLeft } from "react-icons/fa";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -12,6 +13,7 @@ import {
   useSubmitUserQuiz,
 } from "@/hooks/learning/useUserLearning";
 import type { UserQuizAnswerKey } from "@/validations/learning/user-learning";
+import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
 
 type MemberQuizAttemptContentProps = {
   enrollmentId: string;
@@ -82,6 +84,7 @@ export default function MemberQuizAttemptContent({
   const [answers, setAnswers] = React.useState<
     Record<string, UserQuizAnswerKey>
   >({});
+  const { handleExit } = useLessonNavigation(enrollmentId, quizId);
   const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(
     null,
   );
@@ -249,11 +252,7 @@ export default function MemberQuizAttemptContent({
 
       toast.success(isAutoSubmit ? "Hết giờ, hệ thống đã tự nộp bài." : "Nộp quiz thành công.");
 
-      if (params?.clubSlug) {
-        router.push(`/learn/${params.clubSlug}/${enrollmentId}`);
-      } else {
-        router.back();
-      }
+      handleExit();
 
       setTimeout(() => {
         toast(
@@ -333,7 +332,18 @@ export default function MemberQuizAttemptContent({
   return (
     <div className="w-full">
       <div className="grid gap-4 lg:grid-cols-10 lg:gap-6">
-        <div className="space-y-4 lg:col-span-7">
+        <div className="flex items-center justify-between">
+        <div className="space-y-4 lg:col-span-7">        <Button
+          variant="outline"
+          size="sm"
+          icon={<FaArrowLeft />}
+          onClick={handleExit}
+          className="border-greyscale-700 text-greyscale-200"
+        >
+          Quay lại
+        </Button>
+      </div>
+
           {questions.map((question, index) => (
             <div
               key={question.questionID}

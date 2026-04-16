@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { FaClock, FaSignal } from "react-icons/fa";
+import { FaClock, FaSignal, FaCheckCircle, FaAward } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -54,7 +54,10 @@ export default function MemberLabLessonContent({
   }
 
   const lab = labDetailQuery.data.lab;
+  const userLab = labDetailQuery.data.userLab;
+  const isCompleted = userLab?.isCompleted;
   const canOpenLab = Boolean(enrollmentId && params?.clubSlug);
+  const labUrl = `/learn/${params.clubSlug}/${enrollmentId}/lab/${lab.labID || referenceId}`;
   const levelLabelMap = {
     EASY: { vi: "Cơ bản", en: "Easy" },
     MEDIUM: { vi: "Trung bình", en: "Medium" },
@@ -67,8 +70,8 @@ export default function MemberLabLessonContent({
 
   return (
     <div className="relative mx-auto w-full max-w-4xl overflow-hidden rounded border border-greyscale-700/90 bg-greyscale-900/70 p-6 shadow-[0_16px_50px_-24px_rgba(0,0,0,0.85)] backdrop-blur-sm">
-      <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-secondary/15 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-tertiary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -right-16 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
 
       <div className="relative space-y-5">
         <div className="space-y-3">
@@ -88,8 +91,8 @@ export default function MemberLabLessonContent({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded border-2 border-tertiary/35 bg-tertiary/10 p-3">
-            <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-tertiary">
+          <div className="rounded border-2 border-primary/35 bg-primary/10 p-3">
+            <p className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-primary">
               <FaClock className="h-3.5 w-3.5" />
               Thời gian ước tính
             </p>
@@ -109,20 +112,64 @@ export default function MemberLabLessonContent({
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="secondary"
-            icon={<TbDrone />}
-            disabled={!canOpenLab}
-            onClick={() =>
-              router.push(
-                `/learn/${params.clubSlug}/${enrollmentId}/lab/${lab.labID || referenceId}`,
-              )
-            }
-          >
-            {locale === "en" ? "Open lab" : "Vào bài lab"}
-          </Button>
+        {isCompleted && (
+          <div className="rounded border border-success/30 bg-success/5 p-4 space-y-3 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+              <FaAward size={48} className="text-success" />
+            </div>
+            <div className="flex items-center justify-between relative z-10">
+              <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-success">
+                <FaCheckCircle className="animate-pulse" />
+                {locale === "en" ? "STATUS: COMPLETED" : "TRẠNG THÁI: HOÀN THÀNH"}
+              </span>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] uppercase tracking-widest text-success/60 font-medium">Kết quả</span>
+                <span className="text-2xl font-black text-success italic">
+                  {userLab.point}<span className="text-xs text-success/70 not-italic ml-1">/100</span>
+                </span>
+              </div>
+            </div>
+            <div className="p-3 rounded bg-greyscale-950/40 border border-greyscale-800/50 text-sm text-greyscale-200 leading-relaxed italic relative z-10">
+              <span className="text-success/40 mr-2 text-lg">“</span>
+              {locale === "en" ? userLab.feedbackEN : userLab.feedbackVN}
+              <span className="text-success/40 ml-2 text-lg">”</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-3">
+          {isCompleted ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!canOpenLab}
+                onClick={() => router.push(labUrl)}
+                className="hover:bg-greyscale-800"
+              >
+                {locale === "en" ? "Review work" : "Xem lại bài làm"}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                icon={<TbDrone />}
+                disabled={!canOpenLab}
+                onClick={() => router.push(`${labUrl}?mode=retry`)}
+              >
+                {locale === "en" ? "Solve again" : "Giải lại"}
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="default"
+              icon={<TbDrone />}
+              disabled={!canOpenLab}
+              onClick={() => router.push(labUrl)}
+            >
+              {locale === "en" ? "Open lab" : "Vào bài lab"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

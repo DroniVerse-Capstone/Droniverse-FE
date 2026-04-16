@@ -288,6 +288,20 @@ export const userLabDetailSchema = z.object({
 	updater: z.unknown().nullable(),
 })
 
+export const studentUserLabSchema = z.object({
+  userLabID: z.string().uuid(),
+  userID: z.string().uuid(),
+  labID: z.string().uuid(),
+  solution: z.string().nullable().optional(),
+  isCompleted: z.boolean(),
+  time: z.number().nullable().optional(),
+  numberOfStep: z.number().nullable().optional(),
+  length: z.number().nullable().optional(),
+  feedbackVN: z.string().nullable().optional(),
+  feedbackEN: z.string().nullable().optional(),
+  point: z.number().nullable().optional(),
+})
+
 export const userLabEnvironmentSchema = z
 	.object({
 		objects: z.array(z.record(z.string(), z.unknown())),
@@ -306,12 +320,12 @@ export const userLabContentSchema = z.object({
 export const getUserLabDetailDataSchema = z.object({
 	lab: userLabDetailSchema,
 	labContent: userLabContentSchema,
-	userLab: z.unknown().nullable(),
+	userLab: studentUserLabSchema.nullable(),
 })
 
 export const getUserLabMiniDataSchema = z.object({
 	lab: userLabDetailSchema,
-	userLab: z.unknown().nullable(),
+	userLab: studentUserLabSchema.nullable(),
 })
 
 export const getUserLabMiniResponseSchema = z.object({
@@ -399,3 +413,4 @@ export type GetUserLabMiniData = z.infer<typeof getUserLabMiniDataSchema>
 export type GetUserLabMiniResponse = z.infer<
 	typeof getUserLabMiniResponseSchema
 >
+export type StudentUserLab = z.infer<typeof studentUserLabSchema>

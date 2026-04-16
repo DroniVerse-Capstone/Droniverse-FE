@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetUserQuizAttemptReview } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
+import { Button } from "@/components/ui/button";
+import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
+import { FaArrowLeft } from "react-icons/fa";
 
 type MemberQuizAttemptReviewContentProps = {
   enrollmentId: string;
@@ -22,6 +25,7 @@ export default function MemberQuizAttemptReviewContent({
   const router = useRouter();
   const params = useParams<{ clubSlug?: string }>();
   const reviewQuery = useGetUserQuizAttemptReview({ enrollmentId, quizId });
+  const { handleExit } = useLessonNavigation(enrollmentId, quizId);
 
   if (reviewQuery.isLoading) {
     return (
@@ -50,24 +54,18 @@ export default function MemberQuizAttemptReviewContent({
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 rounded-lg border border-greyscale-700 bg-greyscale-900/60 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-greyscale-0">
           {locale === "en" ? "Quiz Review" : "Xem lại bài quiz"}: {locale === "en" ? quiz.titleEN : quiz.titleVN}
         </h2>
-
         <Button
-          type="button"
           variant="outline"
+          size="sm"
           icon={<FaArrowLeft />}
-          disabled={!canGoBack}
-          onClick={() => {
-            if (!params?.clubSlug) {
-              return;
-            }
-            router.push(`/learn/${params.clubSlug}/${enrollmentId}`);
-          }}
+          onClick={handleExit}
+          className="border-greyscale-700 text-greyscale-200"
         >
-          {locale === "en" ? "Back to course" : "Quay lại khóa học"}
+          {locale === "en" ? "Back" : "Quay lại"}
         </Button>
       </div>
 
