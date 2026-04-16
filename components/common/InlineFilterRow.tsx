@@ -15,6 +15,7 @@ type InlineFilterRowProps<T extends string> = {
   options: InlineFilterOption<T>[];
   onChange: (value: T | null) => void;
   allLabel?: string;
+  showAllOption?: boolean;
 };
 
 export default function InlineFilterRow<T extends string>({
@@ -23,21 +24,24 @@ export default function InlineFilterRow<T extends string>({
   options,
   onChange,
   allLabel = "Tất cả",
+  showAllOption = true,
 }: InlineFilterRowProps<T>) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <span className="text-greyscale-0">{label}</span>
 
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => onChange(null)}
-        className={`h-auto p-0 font-Regular ${
-          selectedValue === null ? "text-primary" : "text-greyscale-200"
-        }`}
-      >
-        {allLabel}
-      </Button>
+      {showAllOption ? (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onChange(null)}
+          className={`h-auto p-0 font-Regular ${
+            selectedValue === null ? "text-primary" : "text-greyscale-200"
+          }`}
+        >
+          {allLabel}
+        </Button>
+      ) : null}
 
       {options.map((option) => (
         <Button

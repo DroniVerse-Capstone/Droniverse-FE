@@ -6,6 +6,8 @@ export const codeOwnStateSchema = z.enum(["UnUserOwned", "UserOwned"])
 
 export const userCodesStateSchema = z.enum(["User_No_Codes", "User_Has_Codes"])
 
+export const codeProfitTypeSchema = z.enum(["PROFIT", "NONPROFIT"])
+
 export const getCourseCodesByClubParamsSchema = z.object({
 	clubId: z.string().uuid(),
 	courseId: z.string().uuid(),
@@ -95,6 +97,89 @@ export const getCourseUsersCodesByClubResponseSchema = z.object({
 	message: z.string(),
 })
 
+// ---- Get Club Course Code Summary ----
+
+export const getClubCourseCodeSummaryParamsSchema = z.object({
+	clubId: z.string().uuid(),
+	courseId: z.string().uuid(),
+})
+
+export const clubCourseCodeSummarySchema = z.object({
+	remainingQuantity: z.number().int().nonnegative(),
+	totalQuantity: z.number().int().nonnegative(),
+	profitType: codeProfitTypeSchema,
+})
+
+// ---- Update Club Course Profit Type ----
+
+export const updateClubCourseProfitTypeRequestSchema = z.object({
+	profitType: codeProfitTypeSchema,
+})
+
+export const updateClubCourseProfitTypeDataSchema = z.object({
+	clubId: z.string().uuid(),
+	courseId: z.string().uuid(),
+	totalQuantity: z.number().int().nonnegative(),
+	remainingQuantity: z.number().int().nonnegative(),
+	profitType: codeProfitTypeSchema,
+	isAvailable: z.boolean(),
+})
+
+export const updateClubCourseProfitTypeResponseSchema = z.object({
+	data: updateClubCourseProfitTypeDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+// ---- Assign Code To User ----
+
+export const assignCodeToUserRequestSchema = z.object({
+	codeId: z.string().trim().min(1),
+	userId: z.string().uuid(),
+	sendEmail: z.boolean(),
+})
+
+export const assignCodeToUserDataSchema = z.object({
+	codeId: z.string(),
+	userId: z.string().uuid(),
+	assignedAt: z.string().trim().min(1),
+})
+
+export const assignCodeToUserResponseSchema = z.object({
+	data: assignCodeToUserDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+// ---- Bulk Assign Codes To Users ----
+
+export const bulkAssignCodeItemSchema = z.object({
+	codeId: z.string().trim().min(1),
+	userId: z.string().uuid(),
+})
+
+export const bulkAssignCodesRequestSchema = z.object({
+	items: z.array(bulkAssignCodeItemSchema).min(1),
+	sendEmail: z.boolean(),
+})
+
+export const bulkAssignedCodeItemSchema = z.object({
+	codeId: z.string(),
+	userId: z.string().uuid(),
+	assignedAt: z.string().trim().min(1),
+})
+
+export const bulkAssignCodesDataSchema = z.object({
+	totalAssigned: z.number().int().nonnegative(),
+	assignedItems: z.array(bulkAssignedCodeItemSchema),
+})
+
+export const bulkAssignCodesResponseSchema = z.object({
+	data: bulkAssignCodesDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 // ---- Generate Codes ----
 
 export const generateCodesRequestSchema = z.object({
@@ -120,6 +205,7 @@ export const generateCodesResponseSchema = z.object({
 export type CodeUseState = z.infer<typeof codeUseStateSchema>
 export type CodeOwnState = z.infer<typeof codeOwnStateSchema>
 export type UserCodesState = z.infer<typeof userCodesStateSchema>
+export type CodeProfitType = z.infer<typeof codeProfitTypeSchema>
 export type GetCourseCodesByClubParams = z.infer<
 	typeof getCourseCodesByClubParamsSchema
 >
@@ -145,6 +231,27 @@ export type CourseCodeUsersPaging = z.infer<typeof courseCodeUsersPagingSchema>
 export type GetCourseUsersCodesByClubResponse = z.infer<
 	typeof getCourseUsersCodesByClubResponseSchema
 >
+export type GetClubCourseCodeSummaryParams = z.infer<
+	typeof getClubCourseCodeSummaryParamsSchema
+>
+export type ClubCourseCodeSummary = z.infer<typeof clubCourseCodeSummarySchema>
+export type UpdateClubCourseProfitTypeRequest = z.infer<
+	typeof updateClubCourseProfitTypeRequestSchema
+>
+export type UpdateClubCourseProfitTypeData = z.infer<
+	typeof updateClubCourseProfitTypeDataSchema
+>
+export type UpdateClubCourseProfitTypeResponse = z.infer<
+	typeof updateClubCourseProfitTypeResponseSchema
+>
+export type AssignCodeToUserRequest = z.infer<typeof assignCodeToUserRequestSchema>
+export type AssignCodeToUserData = z.infer<typeof assignCodeToUserDataSchema>
+export type AssignCodeToUserResponse = z.infer<typeof assignCodeToUserResponseSchema>
+export type BulkAssignCodeItem = z.infer<typeof bulkAssignCodeItemSchema>
+export type BulkAssignCodesRequest = z.infer<typeof bulkAssignCodesRequestSchema>
+export type BulkAssignedCodeItem = z.infer<typeof bulkAssignedCodeItemSchema>
+export type BulkAssignCodesData = z.infer<typeof bulkAssignCodesDataSchema>
+export type BulkAssignCodesResponse = z.infer<typeof bulkAssignCodesResponseSchema>
 export type GenerateCodesRequest = z.infer<typeof generateCodesRequestSchema>
 export type GeneratedClubCourse = z.infer<typeof generatedClubCourseSchema>
 export type GenerateCodesResponse = z.infer<typeof generateCodesResponseSchema>

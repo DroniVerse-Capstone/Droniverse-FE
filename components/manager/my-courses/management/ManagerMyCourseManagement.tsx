@@ -1,17 +1,20 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { IoMdArrowBack } from "react-icons/io";
 
 import EmptyState from "@/components/common/EmptyState";
 import ManagerCourseCodeDistributionTab from "@/components/manager/my-courses/management/ManagerCourseCodeDistributionTab";
 import ManagerCourseCodesTab from "@/components/manager/my-courses/management/ManagerCourseCodesTab";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default function ManagerMyCourseManagement() {
+  const router = useRouter();
   const params = useParams<{ clubSlug?: string; courseId?: string }>();
   const clubSlug = params?.clubSlug;
   const courseId = params?.courseId;
@@ -35,6 +38,22 @@ export default function ManagerMyCourseManagement() {
 
   return (
     <div className="space-y-4 px-6 py-4">
+      <Button
+        type="button"
+        variant="outline"
+        icon={<IoMdArrowBack />}
+        onClick={() => {
+          if (!clubSlug) {
+            router.back();
+            return;
+          }
+
+          router.push(`/manager/${clubSlug}/my-courses`);
+        }}
+      >
+        Quay lại khóa học của tôi
+      </Button>
+
       <Tabs defaultValue="code-management" className="w-full">
         <TabsList>
           <TabsTrigger value="code-management">Quản lý mã</TabsTrigger>
