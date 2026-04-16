@@ -6,7 +6,7 @@
 export const SIMULATOR_CONFIG = {
   // --- 1. CÀI ĐẶT DEBUG ---
   debug: {
-    showBounds: false, // Để true để hiện khung va chạm (wireframes)
+    showBounds: true, // Để true để hiện khung va chạm (wireframes)
     logCollisions: true, // Ghi log "CRASH!" ra console khi va chạm
     showHUDExtras: false, // Hiện thêm thông số kỹ thuật trên HUD
   },

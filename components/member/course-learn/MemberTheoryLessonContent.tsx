@@ -8,6 +8,7 @@ import { useCompleteUserLesson } from "@/hooks/learning/useUserLearning";
 import { useGetTheoryDetail } from "@/hooks/theory/useTheory";
 import { useLocale } from "@/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
+import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
 import { FaRegCheckCircle } from "react-icons/fa";
 
 type MemberTheoryLessonContentProps = {
@@ -27,6 +28,9 @@ export default function MemberTheoryLessonContent({
   const theoryDetailQuery = useGetTheoryDetail(referenceId);
   const completeLessonMutation = useCompleteUserLesson();
   const [completed, setCompleted] = React.useState(isCompleted);
+
+  const { handleNext, lessonContext } = useLessonNavigation(enrollmentId || "", referenceId);
+  const hasNext = !!lessonContext?.next;
 
   React.useEffect(() => {
     setCompleted(isCompleted);

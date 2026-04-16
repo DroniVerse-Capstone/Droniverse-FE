@@ -47,13 +47,36 @@ export default function LearningPathSideBar({
   }, [data]);
 
   React.useEffect(() => {
-    if (!data || selectedLessonId || !onSelectLesson) return;
+    if (!data || !onSelectLesson) return;
 
-    for (const module of data.modules) {
-      const firstUnlocked = module.lessons.find((lesson) => !lesson.isLocked);
-      if (firstUnlocked) {
-        onSelectLesson(firstUnlocked);
-        return;
+    // Priority 1: Match from URL/selectedLessonId
+    if (selectedLessonId) {
+      for (const module of data.modules) {
+        const lesson = module.lessons.find((l) => l.lessonID === selectedLessonId);
+        if (lesson) {
+          // Trigger selection if not already selected (this initializes parent state if from URL)
+          onSelectLesson(lesson);
+
+          // Ensure module is expanded
+          setExpandedModules((prev) => {
+            if (prev.has(module.moduleID)) return prev;
+            const next = new Set(prev);
+            next.add(module.moduleID);
+            return next;
+          });
+          return;
+        }
+      }
+    }
+
+    // Priority 2: Auto-select first unlocked lesson IF no selection is active
+    if (!selectedLessonId) {
+      for (const module of data.modules) {
+        const firstUnlocked = module.lessons.find((lesson) => !lesson.isLocked);
+        if (firstUnlocked) {
+          onSelectLesson(firstUnlocked);
+          return;
+        }
       }
     }
   }, [data, onSelectLesson, selectedLessonId]);
@@ -109,9 +132,8 @@ export default function LearningPathSideBar({
           className="h-8 w-8 rounded border border-greyscale-700"
         >
           <IoChevronForwardOutline
-            className={`h-4 w-4 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           />
         </Button>
       </div>

@@ -1,42 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { useGetStudentLabDetail } from "@/hooks/lab/useLabs";
+import { useGetStudentLabDetail, useSubmitStudentLab } from "@/hooks/lab/useLabs";
+import { useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
 import PlayLabWorkspace from "@/components/simulator/PlayLabWorkspace";
 import { SimulatorErrorBoundary } from "@/components/simulator/SimulatorErrorBoundary";
 import { LabContentData, LabSolution } from "@/types/lab";
 import Loading from "@/app/loading";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { useTranslations } from "@/providers/i18n-provider";
+import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
+
+// Auto-generate feedback based on score
+function generateFeedback(score: number): { vn: string; en: string } {
+  if (score >= 95)
+    return {
+      vn: "Xuất sắc! Bạn đã thực hiện chuyến bay hoàn hảo với hiệu suất vượt trội.",
+      en: "Outstanding! You completed the flight mission with exceptional performance.",
+    };
+  if (score >= 80)
+    return {
+      vn: "Tốt lắm! Chuyến bay của bạn đạt hiệu quả cao, cần tinh chỉnh thêm một chút.",
+      en: "Great job! Your flight was highly efficient with minor room for improvement.",
+    };
+  if (score >= 60)
+    return {
+      vn: "Hoàn thành tốt! Hãy thử tối ưu thêm thời gian và nhiên liệu để đạt điểm cao hơn.",
+      en: "Well done! Try to optimize your flight time and fuel usage to score higher.",
+    };
+  return {
+    vn: "Bạn đã hoàn thành bài tập. Hãy luyện tập thêm để cải thiện kỹ năng lập trình drone.",
+    en: "You completed the lab. Keep practicing to improve your drone programming skills.",
+  };
+}
 
 export default function StudentPlayLabPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const labId = params?.labId as string;
   const enrollmentId = params?.enrollmentId as string;
+  const mode = searchParams.get("mode");
   const t = useTranslations("MissionHUD");
 
   const { data: studentLabData, isLoading, isError, error } = useGetStudentLabDetail(enrollmentId, labId) as any;
+  const submitMutation = useSubmitStudentLab(enrollmentId, labId);
+  const { lessonContext, handleNext, handleExit } = useLessonNavigation(enrollmentId, labId);
 
-  const labData = studentLabData?.lab;
-  const labContent = studentLabData?.labContent?.environment;
-  const previousWorkXml = studentLabData?.userLab?.solution?.xml;
-
-  const beErrorMessage = error?.response?.data?.message || studentLabData?.message;
-
-  const handleMissionComplete = async (solution: LabSolution) => {
-    if (!labContent) return;
-    toast.loading("...", { id: "student-submission" });
-    // ... logic ...
-  };
-
-  const handleExit = () => {
-    router.back();
-  };
-
-  if (isLoading) {
+  // We only show the full-screen loading if we have absolutely no data yet.
+  if (!labId || !enrollmentId || (isLoading && !studentLabData)) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-950">
         <Loading />
@@ -44,7 +58,49 @@ export default function StudentPlayLabPage() {
     );
   }
 
-  if (isError || !labContent) {
+  const labData = studentLabData?.lab;
+  const labContent = studentLabData?.labContent?.environment;
+  // If in 'retry' mode, we don't load the previous XML so the student starts fresh
+  const previousWorkXml = mode === "retry" ? undefined : studentLabData?.userLab?.solution;
+
+  const beErrorMessage = error?.response?.data?.message || studentLabData?.message;
+
+  const handleMissionComplete = async (solution: LabSolution) => {
+    if (!labContent) return;
+
+    const feedback = generateFeedback(solution.score ?? 0);
+    console.log("solution", solution);
+    const toastId = toast.loading("Đang nộp bài...");
+    try {
+      await submitMutation.mutateAsync({
+        solution: solution.xml ?? "",
+        isCompleted: true,
+        time: solution.metrics?.timeSpent ?? 0,
+        numberOfStep: solution.metrics?.blockCount ?? 0,
+        length: Math.round(solution.metrics?.logicalDistance ?? 0),
+        feedbackVN: feedback.vn,
+        feedbackEN: feedback.en,
+        point: solution.score ?? 0,
+      });
+
+      toast.success("Nộp bài thành công! 🎉", { id: toastId });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Nộp bài thất bại. Vui lòng thử lại.";
+      toast.error(msg, { id: toastId });
+    }
+  };
+
+  // Only show full-page loading if we have no data at all
+  if (isLoading && !studentLabData) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-slate-950">
+        <Loading />
+      </div>
+    );
+  }
+
+  // Show error only if it actually failed AND it's not loading anymore
+  if (isError || (!isLoading && !labContent)) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 font-sans text-white overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(220,38,38,0.15)_0%,rgba(2,6,23,1)_80%)]" />
@@ -120,6 +176,7 @@ export default function StudentPlayLabPage() {
           // Load the student's previous work if available (Restore Progress)
           initialBlocks={previousWorkXml}
           onMissionComplete={handleMissionComplete}
+          onNext={handleNext}
           onExit={handleExit}
         />
       </SimulatorErrorBoundary>

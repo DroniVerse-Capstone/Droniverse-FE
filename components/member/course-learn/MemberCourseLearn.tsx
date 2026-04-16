@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import MemberLabLessonContent from "@/components/member/course-learn/MemberLabLessonContent";
 import MemberLessonDetail from "@/components/member/course-learn/MemberLessonDetail";
@@ -18,8 +18,10 @@ import { RiArrowGoBackFill } from "react-icons/ri";
 export default function MemberCourseLearn() {
   const router = useRouter();
   const params = useParams<{ enrollmentId?: string; clubSlug?: string }>();
+  const searchParams = useSearchParams();
   const clubSlug = params?.clubSlug;
   const enrollmentId = params?.enrollmentId;
+  const lessonIdFromUrl = searchParams.get("lessonId");
   const [selectedLesson, setSelectedLesson] = React.useState<Lesson | null>(
     null,
   );
@@ -45,7 +47,7 @@ export default function MemberCourseLearn() {
   return (
     <div className="flex flex-col md:flex-row">
       <LearningPathSideBar
-        selectedLessonId={selectedLesson?.lessonID ?? null}
+        selectedLessonId={selectedLesson?.lessonID ?? lessonIdFromUrl}
         onSelectLesson={setSelectedLesson}
       />
 

@@ -16,6 +16,7 @@ import { projectToWorld, worldToCanvas } from "@/lib/config3D/simConfig";
 import { Command } from "@/lib/simulator/droneSimulator";
 import { validatePattern, validateFlightPattern, Point3D } from "@/lib/simulator/patternValidation";
 import { MissionVictoryHUD } from "./MissionVictoryHUD";
+import { calculateLabScore } from "@/lib/simulator/labScoring";
 
 
 
@@ -77,6 +78,7 @@ type PlayLabProps = {
   mode: "admin" | "student";
   initialBlocks?: string;
   onMissionComplete: (result: any) => void;
+  onNext?: () => void;
   onExit: () => void;
 };
 
@@ -86,6 +88,7 @@ export default function PlayLabWorkspace({
   mode,
   initialBlocks,
   onMissionComplete,
+  onNext,
   onExit
 }: PlayLabProps) {
   const t = useTranslations("Sandbox");
@@ -812,23 +815,7 @@ export default function PlayLabWorkspace({
             setShowScoring(false);
             handleReset();
           }}
-          onSubmit={(score) => {
-            console.log("FINAL SUBMISSION DATA:", {
-              score,
-              metrics: studentFinalMetrics,
-              xml: blocklyContext ? blocklyContext.Blockly.Xml.domToPrettyText(blocklyContext.Blockly.Xml.workspaceToDom(blocklyContext.workspace)) : ""
-            });
-
-            if (onMissionComplete && blocklyContext) {
-              const { Blockly, workspace } = blocklyContext;
-              const xmlText = Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace));
-              const solution: LabSolution = {
-                xml: xmlText,
-                metrics: studentFinalMetrics
-              };
-              onMissionComplete(solution);
-            }
-          }}
+          onNext={onNext}
         />
       )}
 
@@ -1047,7 +1034,22 @@ export default function PlayLabWorkspace({
                       {t("missionEnd.retry")}
                     </button>
                     <button
-                      onClick={() => setShowScoring(true)}
+                      onClick={() => {
+                        if (onMissionComplete && blocklyContext && studentFinalMetrics) {
+                          const { Blockly, workspace } = blocklyContext;
+                          const xmlText = Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(workspace));
+
+                          const score = calculateLabScore(studentFinalMetrics, labData.solution?.metrics);
+
+                          const solution: LabSolution = {
+                            xml: xmlText,
+                            metrics: studentFinalMetrics,
+                            score: score // Passing score back for API
+                          };
+                          onMissionComplete(solution);
+                        }
+                        setShowScoring(true);
+                      }}
                       className="w-2/3 py-4 rounded bg-white text-black font-black text-[11px] uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:bg-slate-200 transition-all active:scale-95"
                     >
                       Nộp bài & Xem điểm

@@ -3,6 +3,7 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { FaArrowLeft } from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -11,6 +12,7 @@ import {
   useSubmitUserQuiz,
 } from "@/hooks/learning/useUserLearning";
 import type { UserQuizAnswerKey } from "@/validations/learning/user-learning";
+import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
 
 type MemberQuizAttemptContentProps = {
   enrollmentId: string;
@@ -26,6 +28,8 @@ export default function MemberQuizAttemptContent({
   const quizQuestionsQuery = useGetUserQuizQuestions({ enrollmentId, quizId });
   const submitQuizMutation = useSubmitUserQuiz();
   const [answers, setAnswers] = React.useState<Record<string, UserQuizAnswerKey>>({});
+
+  const { handleExit } = useLessonNavigation(enrollmentId, quizId);
 
   const questions = quizQuestionsQuery.data ?? [];
   const isAllAnswered =
@@ -58,12 +62,8 @@ export default function MemberQuizAttemptContent({
       });
 
       toast.success("Nộp quiz thành công.");
-
-        if (params?.clubSlug) {
-          router.push(`/learn/${params.clubSlug}/${enrollmentId}`);
-        } else {
-          router.back();
-        }
+      
+      handleExit();
 
       setTimeout(() => {
         toast(
@@ -107,7 +107,18 @@ export default function MemberQuizAttemptContent({
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 rounded-lg border border-greyscale-700 bg-greyscale-900/60 p-6">
-      <h2 className="text-xl font-semibold text-greyscale-0">Làm bài Quiz</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-greyscale-0">Làm bài Quiz</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          icon={<FaArrowLeft />}
+          onClick={handleExit}
+          className="border-greyscale-700 text-greyscale-200"
+        >
+          Quay lại
+        </Button>
+      </div>
 
       {questions.map((question, index) => (
         <div
