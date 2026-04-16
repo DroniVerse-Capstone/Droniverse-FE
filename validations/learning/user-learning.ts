@@ -172,8 +172,16 @@ export const userQuizQuestionSchema = z.object({
 	options: z.array(userQuizQuestionOptionSchema),
 })
 
+export const getUserQuizQuestionsDataSchema = z.object({
+	quizID: z.string().uuid(),
+	titleVN: z.string(),
+	titleEN: z.string(),
+	timeLimit: z.number().int().positive(),
+	questions: z.array(userQuizQuestionSchema),
+})
+
 export const getUserQuizQuestionsResponseSchema = z.object({
-	data: z.array(userQuizQuestionSchema),
+	data: getUserQuizQuestionsDataSchema,
 	isSuccess: z.boolean(),
 	message: z.string(),
 })
@@ -369,6 +377,9 @@ export type GetUserQuizQuestionsParams = z.infer<
 >
 export type UserQuizQuestionOption = z.infer<typeof userQuizQuestionOptionSchema>
 export type UserQuizQuestion = z.infer<typeof userQuizQuestionSchema>
+export type GetUserQuizQuestionsData = z.infer<
+	typeof getUserQuizQuestionsDataSchema
+>
 export type GetUserQuizQuestionsResponse = z.infer<
 	typeof getUserQuizQuestionsResponseSchema
 >

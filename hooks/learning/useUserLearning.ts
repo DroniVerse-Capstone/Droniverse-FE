@@ -14,11 +14,11 @@ import {
 	GetUserQuizAttemptReviewParams,
 	GetUserQuizDetailData,
 	GetUserQuizDetailParams,
+	GetUserQuizQuestionsData,
 	GetUserQuizQuestionsParams,
 	SubmitUserQuizData,
 	SubmitUserQuizParams,
 	UserLesson,
-	UserQuizQuestion,
 	checkUserLessonExistsParamsSchema,
 	checkUserLessonExistsResponseSchema,
 	completeUserLessonParamsSchema,
@@ -152,7 +152,7 @@ export const useGetUserQuizDetail = (params?: GetUserQuizDetailParams) => {
 export const useGetUserQuizQuestions = (
 	params?: GetUserQuizQuestionsParams
 ) => {
-	return useQuery<UserQuizQuestion[], AxiosError<ApiError>>({
+	return useQuery<GetUserQuizQuestionsData, AxiosError<ApiError>>({
 		queryKey: ["user-quiz-questions", params?.enrollmentId, params?.quizId],
 		enabled: !!params?.enrollmentId && !!params?.quizId,
 		queryFn: async () => {
