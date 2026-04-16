@@ -34,6 +34,7 @@ export default function RootLayout({
     <html>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProvider initialLocale={locale}>{children}</AppProvider>
+
       </body>
     </html>
   );

@@ -1,51 +1,44 @@
-
-import { SIMULATION_CANVAS, WORLD_SCALE } from "../config3D/constants";
+import { SIMULATOR_CONFIG } from "../simulator/config";
 
 export const HEMISPHERE_LIGHT_CONFIG = {
-  skyColor: "#e0f2fe",
-  groundColor: "#0f172a",
-  intensity: 0.6,
-  position: [0, 1, 0] as [number, number, number],
+  skyColor: SIMULATOR_CONFIG.lighting.hemisphere.sky,
+  groundColor: SIMULATOR_CONFIG.lighting.hemisphere.ground,
+  intensity: SIMULATOR_CONFIG.lighting.hemisphere.intensity,
+  position: SIMULATOR_CONFIG.lighting.hemisphere.pos,
 };
 
 export const AMBIENT_LIGHT_CONFIG = {
-  color: "#ffffff",
-  intensity: 1.2,
+  color: SIMULATOR_CONFIG.lighting.ambient.color,
+  intensity: SIMULATOR_CONFIG.lighting.ambient.intensity,
 };
-export const SHOW_AMBIENT_LIGHT = true;
+
+export const SHOW_AMBIENT_LIGHT = SIMULATOR_CONFIG.lighting.ambient.show;
 
 export const DIRECTIONAL_LIGHT_CONFIG = {
-  position: [50, 120, 50] as [number, number, number],
-  intensity: 0.6,
-  color: "#f8f3e6",
-  castShadow: false,
+  position: SIMULATOR_CONFIG.lighting.directional.pos,
+  intensity: SIMULATOR_CONFIG.lighting.directional.intensity,
+  color: SIMULATOR_CONFIG.lighting.directional.color,
+  castShadow: SIMULATOR_CONFIG.lighting.directional.castShadow,
   shadowMapSize: {
-    width: 2048,
-    height: 2048,
+    width: SIMULATOR_CONFIG.performance.shadowRes,
+    height: SIMULATOR_CONFIG.performance.shadowRes,
   },
-  shadowBias: -0.001,
+  shadowBias: SIMULATOR_CONFIG.lighting.directional.shadowBias,
 };
 
-const WORLD_WIDTH = SIMULATION_CANVAS.WIDTH * WORLD_SCALE.POSITION;
-const WORLD_HEIGHT = SIMULATION_CANVAS.HEIGHT * WORLD_SCALE.POSITION;
-const WORLD_CENTER_X = 0;
-const WORLD_CENTER_Z = 0;
-const DEFAULT_POINT_HEIGHT = Math.max(WORLD_WIDTH, WORLD_HEIGHT) * 0.6;
-
 export const POINT_LIGHT_CONFIG = {
-  position: [WORLD_CENTER_X, DEFAULT_POINT_HEIGHT, WORLD_CENTER_Z] as [number, number, number],
-  intensity: 1.2,
-  color: "#38bdf8",
+  position: [0, 100, 0] as [number, number, number], // Placeholder for dynamic height
+  intensity: SIMULATOR_CONFIG.lighting.point.intensity,
+  color: SIMULATOR_CONFIG.lighting.point.color,
 };
 
 export const CONTACT_SHADOWS_CONFIG = {
-  position: [0, 0, 0] as [number, number, number],
-  opacity: 0.6,
-  scale: Math.max(80, Math.max(WORLD_WIDTH, WORLD_HEIGHT) * 0.8),
-  blur: Math.max(2.5, Math.min(8, Math.max(WORLD_WIDTH, WORLD_HEIGHT) * 0.02)),
-  far: Math.max(40, Math.max(WORLD_WIDTH, WORLD_HEIGHT) * 0.5),
+  position: SIMULATOR_CONFIG.lighting.contactShadow.pos,
+  opacity: SIMULATOR_CONFIG.lighting.contactShadow.opacity,
+  scale: 40,
+  blur: SIMULATOR_CONFIG.lighting.contactShadow.blur,
+  far: SIMULATOR_CONFIG.lighting.contactShadow.far,
 };
 
-export const SHOW_POINT_LIGHT = true;
-export const SHOW_CONTACT_SHADOWS = false;
-
+export const SHOW_POINT_LIGHT = SIMULATOR_CONFIG.lighting.point.show;
+export const SHOW_CONTACT_SHADOWS = SIMULATOR_CONFIG.lighting.contactShadow.show;

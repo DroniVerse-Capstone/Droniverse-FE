@@ -59,6 +59,45 @@
     "simulator": {
       "title": "Simulator 3D"
     },
+    "missionEnd": {
+      "successTitle": "Completed",
+      "failTitle": "Failed",
+      "successStatus": "Mission Details: Complete",
+      "failStatus": "Warning: Mission Unsuccessful",
+      "successDesc": "Perfect! All checkpoints collected safely.",
+      "successDescSolution": "Confirmed: Solution works perfectly!",
+      "failDesc": "Technical error or unexpected issue detected.",
+      "safety": "Safety",
+      "systemStable": "System Stable",
+      "collisionWarning": "Collision System",
+      "pass": "PASS",
+      "fail": "FAIL",
+      "objectives": "Objectives",
+      "score": "Score",
+      "required": "required",
+      "energy": "Energy",
+      "remaining": "remaining",
+      "outOfBattery": "EMPTY",
+      "notFinished": "PENDING",
+      "time": "Time",
+      "timeUp": "TIMEOUT",
+      "patternCheck": "Pattern Check",
+      "pattern": "Pattern",
+      "shape_square": "SQUARE",
+      "shape_triangle": "TRIANGLE",
+      "shape_circle": "CIRCLE",
+      "shape_zigzag": "ZIGZAG",
+      "shape_cross": "CROSS",
+      "shape_polygon": "POLYGON",
+      "shape_custom": "CUSTOM",
+      "retry": "Try Again",
+      "saveSolution": "Save Solution",
+      "submitWork": "Submit Assignment",
+      "updateSolution": "Update Solution",
+      "nextMission": "Next Mission",
+      "tryAgain": "Retry Mission",
+      "backToList": "Back to Course"
+    },
     "blockly": {
       "title": "Blockly Editor",
       "categories": {
@@ -148,42 +187,6 @@
           "tooltip": "Input a number from user"
         }
       }
-    }
-  },
-  "MapEditor": {
-    "toolbar": {
-      "mode": "Mode",
-      "translate": "Translate",
-      "rotate": "Rotate",
-      "scale": "Scale"
-    },
-    "loading": "Loading…",
-    "alerts": {
-      "droneAlreadyExists": "There is already a drone in the scene."
-    },
-    "panels": {
-      "rotate": {
-        "title": "Rotate (Y)",
-        "rotate90": "Rotate +90°"
-      },
-      "obstacle": {
-        "title": "Obstacle",
-        "color": "Color",
-        "width": "Width (X)",
-        "height": "Height (Y)",
-        "depth": "Depth (Z)",
-        "dimensions": "Dimensions ≈ W×H×D:",
-        "rotate90": "Rotate +90°"
-      }
-    },
-    "buttons": {
-      "add": "Add"
-    },
-    "categories": {
-      "all": "All",
-      "drone": "Drone",
-      "obstacle": "Obstacle",
-      "decor": "Decor"
     }
   },
   "PublicHeader": {
@@ -365,5 +368,1094 @@
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
     "cta": "Go Back"
+  },
+  "RegisterClubDialog": {
+    "title": "Register Club",
+    "subtitle": "Fill out the form below to request creating your own Club",
+    "editTitle": "Edit Club Creation Request",
+    "editSubtitle": "Update your club creation request information",
+    "viewTitle": "Request Details",
+    "fields": {
+      "nameVi": "Club Name (Vietnamese)",
+      "nameEn": "Club Name (English)",
+      "description": "Reason for establishing the Club",
+      "category": "Category",
+      "categoryPlaceholder": "Select category",
+      "coverImage": "Club Image",
+      "isPublic": "Public Club",
+      "limitMembers": "Member Limit",
+      "limitManagers": "Manager Limit",
+      "mode": "Mode",
+      "createAt": "Created At",
+      "updatedAt": "Updated At",
+      "approvedAt": "Approved At",
+      "rejectReason": "Reject Reason",
+      "approveBy": "Approved By"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Register",
+      "update": "Update",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirm": "Confirm Rejection"
+    },
+    "privacy": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "validation": "Please fill in all valid information",
+    "error": "Failed to submit club creation request",
+    "empty": "No data found",
+    "reject": {
+      "title": "Reject Reason",
+      "description": "Enter the reason for rejecting this club creation request.",
+      "placeholder": "Enter reject reason...",
+      "validation": "Please enter a reject reason"
+    }
+  },
+  "JoinClubDialog": {
+    "title": "Join Club",
+    "subtitle": "Enter the club code to request to join the club",
+    "field": {
+      "code": "Club Code",
+      "codePlaceholder": "Enter club code..."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Join",
+      "find": "Find Club"
+    },
+    "error": "Club not found"
+  },
+  "ClubImageUpload": {
+    "toast": {
+      "success": "Image uploaded successfully",
+      "error": "Image upload failed",
+      "warning": "Please select a valid image file"
+    },
+    "caption": {
+      "upload": "Click or drag an image here to upload",
+      "change": "Drag another image here or click to choose again",
+      "accept": "Supports PNG, JPG, JPEG, WEBP",
+      "empty": "No image selected",
+      "remove": "Remove image"
+    }
+  },
+  "ClubDashboard": {
+    "myClubs": "My Clubs",
+    "myRequests": "My Requests",
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "approved": "Approved",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "title": "No clubs yet.",
+      "title1": "No requests yet"
+    },
+    "privacy": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "table": {
+      "headers": {
+        "name": "Club Name",
+        "mode": "Mode",
+        "image": "Club Image",
+        "createdAt": "Created At",
+        "approvedAt": "Approved At",
+        "processedAt": "Processed At",
+        "category": "Category",
+        "requester": "Requester",
+        "approver": "Approver",
+        "rejectReason": "Reject Reason",
+        "status": "Status",
+        "actions": "Actions",
+        "managers": "Manager",
+        "members": "Members"
+      },
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit Request",
+        "delete": "Cancel Request",
+        "titleDelete": "Cancel this request?",
+        "warnDelete": "This action will cancel the club creation request",
+        "confirm": "Confirm",
+        "cancel": "Close"
+      }
+    }
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "sum": "Total",
+    "records": "records",
+    "more": "More pages"
+  },
+  "ClubDetail": {
+    "Nav": {
+      "home": "Overview",
+      "members": "Members",
+      "courses": "Courses",
+      "myCourses": "My Courses",
+      "competitions": "Competitions"
+    },
+    "ClubSwitcher": {
+      "title": "Switch Club",
+      "subtitle": "Select a club from your list to quickly switch.",
+      "empty": "You haven't joined any clubs yet.",
+      "now": "Current Club"
+    },
+    "ClubInfo": {
+      "createdAt": "Founded Date",
+      "members": "Total Members",
+      "manager": "Club Manager",
+      "courses": "Owned Courses",
+      "out": "Leave Club",
+      "edit": "Edit Club Info",
+      "privacy": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "empty": {
+        "title": "Club Not Found",
+        "description": "The club link is invalid or you don't have permission to access it."
+      },
+      "error": "Failed to load club information"
+    },
+    "ClubHotCourse": {
+      "title": "Hot courses",
+      "viewAll": "View all",
+      "empty": "No hot courses available",
+      "errors": {
+        "resolveClub": "Unable to determine the current club.",
+        "loadCourses": "Failed to load hot course list."
+      }
+    }
+  },
+  "CourseManagement": {
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "publish": "Published",
+      "unpublish": "Unpublished",
+      "archived": "Archived",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deprecated": "Deprecated"
+    },
+    "level": {
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "management": {
+      "total": "Total courses",
+      "search": "Search by course title",
+      "empty": "No matching courses found"
+    },
+    "CreateCourseDialog": {
+      "title": "Create New Course",
+      "subtitle": "Fill in the basic information to create a new course",
+      "titleEdit": "Update",
+      "subtitleEdit": "Edit current version information and add change notes.",
+      "titleVersion": "Create New Version",
+      "subtitleVersion": "Fill in the basic information to create a new course version.",
+      "fields": {
+        "title": {
+          "vi": "Course title (Vietnamese)",
+          "en": "Course title (English)",
+          "placeholderVi": "Enter Vietnamese title",
+          "placeholderEn": "Enter English title"
+        },
+        "description": {
+          "vi": "Course description (Vietnamese)",
+          "en": "Course description (English)",
+          "placeholderVi": "Enter Vietnamese description",
+          "placeholderEn": "Enter English description"
+        },
+        "estimatedTime": "Estimated duration (minutes)",
+        "level": "Difficulty level",
+        "coverImage": "Course cover image",
+        "context": {
+          "vi": "Introduction content (Vietnamese)",
+          "en": "Introduction content (English)",
+          "placeholderVi": "Enter Vietnamese content",
+          "placeholderEn": "Enter English content"
+        },
+        "changeLog": "Change log"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create course",
+        "update": "Update course",
+        "createVersion": "Create version"
+      },
+      "toast": {
+        "success": "Course created successfully",
+        "success1": "Course version updated successfully.",
+        "error": "Please enter all required information in the correct format."
+      },
+      "error": {
+        "createFailed": "Failed to create course",
+        "updateFailed": "Failed to update course version"
+      },
+      "level": {
+        "easy": "Beginner",
+        "medium": "Intermediate",
+        "hard": "Advanced"
+      }
+    },
+    "AdminCourseCard": {
+      "title": "No version available",
+      "description": "This course is in draft and has no current version content.",
+      "unknown": "Unknown",
+      "min": "minutes",
+      "creator": "Created by",
+      "updater": "Updated by",
+      "actions": {
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete"
+      },
+      "confirm": {
+        "publish": {
+          "title": "Confirm publishing this course?",
+          "description": "This course will move to published status.",
+          "confirmText": "Publish",
+          "cancelText": "Cancel"
+        },
+        "unpublish": {
+          "title": "Confirm unpublishing this course?",
+          "description": "This course will move to unpublished status.",
+          "confirmText": "Unpublish",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deleting this course?",
+          "description": "This action cannot be undone.",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "publishSuccess": "Course published successfully.",
+        "publishError": "Failed to publish course.",
+        "unpublishSuccess": "Course unpublished successfully.",
+        "unpublishError": "Failed to unpublish course.",
+        "deleteSuccess": "Course deleted successfully.",
+        "deleteError": "Failed to delete course."
+      }
+    },
+    "CourseEdit": {
+      "courseInfo": "Course Information",
+      "courseSettings": "Course Settings",
+      "addVersion": "Add Version",
+      "createVersion": "Create New Version",
+      "duplicateVersion": "Duplicate from Existing Version",
+      "error": {
+        "cantfind": "No valid course found.",
+        "details": "Unable to load course details.",
+        "empty": "No course data available.",
+        "cantload": "Unable to load course version details."
+      }
+    },
+    "CourseInfo": {
+      "title": {
+        "untitled": "Untitled course"
+      },
+      "description": {
+        "label": "Description",
+        "empty": "No description"
+      },
+      "context": {
+        "label": "Content",
+        "empty": "<p>—</p>"
+      },
+      "changeLog": {
+        "label": "Changes",
+        "empty": "No changes"
+      },
+      "category": {
+        "label": "Categories",
+        "empty": "No categories"
+      },
+      "drone": {
+        "label": "Required drones",
+        "empty": "No required drones"
+      },
+      "image": {
+        "empty": "No image available"
+      },
+      "certificate": {
+        "label": "Certificate",
+        "empty": "No certificate image",
+        "actions": {
+          "create": "Create certificate",
+          "creating": "Creating..."
+        },
+        "toast": {
+          "createSuccess": "Certificate created successfully.",
+          "createError": "Failed to create certificate."
+        }
+      },
+      "meta": {
+        "createdBy": "Created by",
+        "createdAt": "Created at",
+        "updatedBy": "Updated by",
+        "updatedAt": "Updated at"
+      },
+      "version": {
+        "label": "Version"
+      },
+      "duration": {
+        "label": "minutes",
+        "unknown": "Unknown"
+      },
+      "level": {
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "activate": "Activate",
+        "delete": "Delete",
+        "update": "Update"
+      },
+      "confirm": {
+        "activate": {
+          "title": "Confirm activation",
+          "description": "Once activated, this version will be used as the current course version.",
+          "confirmText": "Activate",
+          "cancelText": "Cancel"
+        },
+        "delete": {
+          "title": "Confirm deletion",
+          "description": "This action cannot be undone. Are you sure you want to delete the selected version?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        }
+      },
+      "toast": {
+        "activateSuccess": "Course version activated successfully.",
+        "activateError": "Failed to activate course version.",
+        "deleteSuccess": "Course version deleted successfully.",
+        "deleteError": "Failed to delete course version."
+      },
+      "empty": {
+        "noVersion": "No course version data available."
+      }
+    },
+    "DuplicateCourseVersionDialog": {
+      "title": "Duplicate Course Version",
+      "subtitle": "Select an existing version to duplicate as a new version.",
+      "field": {
+        "sourceVersion": "Source Version",
+        "sourceVersionPlaceholder": "Select a version to duplicate"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "confirm": "Duplicate"
+      },
+      "error": {
+        "empty": "Please select a version to duplicate.",
+        "duplicateFailed": "Failed to duplicate the course version.",
+        "loadingVersions": "Failed to load version list.",
+        "emptyMessage": "This course has no versions yet."
+      }
+    },
+    "CourseSettings": {
+      "title": "Module List",
+      "error": {
+        "cantLoad": "Unable to load module list.",
+        "emptyId": "Please select a course version to load modules.",
+        "empty": "No modules available yet."
+      },
+      "ModuleDialog": {
+        "title": "Add New Module",
+        "subtitle": "The module number will be automatically assigned as",
+        "editTitle": "Edit Module",
+        "editSubtitle": "Update module information",
+        "fields": {
+          "title": {
+            "vi": "Vietnamese Title",
+            "en": "English Title",
+            "placeholderVi": "Enter Vietnamese title",
+            "placeholderEn": "Enter English title"
+          }
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Add Module",
+          "update": "Save Changes"
+        },
+        "error": {
+          "emptyId": "Please select a course version before adding a module.",
+          "normalized": "Please fill in all required fields."
+        },
+        "toast": {
+          "success": "Module added successfully.",
+          "error": "Failed to add module.",
+          "updateFailed": "Failed to update module."
+        }
+      },
+      "ModuleItem": {
+        "module": "Module",
+        "delete": {
+          "title": "Delete Module",
+          "description": "Are you sure you want to delete Module",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "list": "Lesson List"
+      },
+      "ModuleLesson": {
+        "minutes": "minutes",
+        "tooltip": {
+          "view": "View details",
+          "question": "Configure questions",
+          "edit": "Edit",
+          "delete": "Delete lesson"
+        },
+        "delete": {
+          "title": "Delete Lesson",
+          "description": "Are you sure you want to delete this lesson?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "empty": "No lessons in this module yet."
+      },
+      "CreateLessonDialog": {
+        "title": "Create New Lesson",
+        "subtitle": "The lesson order will be assigned as {orderIndex} in this module.",
+        "lessonType": "Lesson Type",
+        "lessonTypePlaceholder": "Select lesson type",
+        "lessonTypes": {
+          "theory": "Theory",
+          "quiz": "Quiz",
+          "lab": "Lab"
+        },
+        "fields": {
+          "titleVN": "Vietnamese Title",
+          "titleEN": "English Title",
+          "titleVNPlaceholder": "Enter Vietnamese title",
+          "titleENPlaceholder": "Enter English title",
+          "labSearch": "Search labs",
+          "labSearchPlaceholder": "Enter lab name or description",
+          "labType": "Type",
+          "labNoDescription": "No description",
+          "labEmpty": "No matching labs found.",
+          "labSelectHint": "Please select one lab to create a lesson.",
+          "labSelected": "Lab selected.",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "theoryContentVNPlaceholder": "Enter Vietnamese theory content",
+          "theoryContentENPlaceholder": "Enter English theory content",
+          "estimatedTime": "Estimated Time (minutes)",
+          "estimatedTimePlaceholder": "e.g., 15",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description",
+          "quizDescriptionVNPlaceholder": "Enter Vietnamese quiz description",
+          "quizDescriptionENPlaceholder": "Enter English quiz description",
+          "quizTimeLimit": "Time Limit (minutes)",
+          "quizTimeLimitPlaceholder": "e.g., 20",
+          "quizTotalScore": "Total Score",
+          "quizTotalScorePlaceholder": "e.g., 10",
+          "quizPassScore": "Pass Score",
+          "quizPassScorePlaceholder": "e.g., 7"
+        },
+        "buttons": {
+          "createLesson": "Create Lesson",
+          "cancel": "Cancel"
+        },
+        "toast": {
+          "importLabSuccess": "Lesson created from lab successfully."
+        },
+        "error": {
+          "missingTitle": "Please enter both Vietnamese and English titles.",
+          "missingTheory": "Please fill in all required theory fields.",
+          "missingQuiz": "Please fill in all required quiz fields.",
+          "missingLab": "Please select one lab.",
+          "invalidPassScore": "Pass score cannot be greater than total score.",
+          "createTheoryFailed": "Failed to create theory lesson.",
+          "createQuizFailed": "Failed to create quiz lesson.",
+          "importLabFailed": "Failed to create lesson from lab."
+        }
+      },
+      "UpdateLessonDialog": {
+        "title": "Edit Lesson",
+        "subtitle": {
+          "theory": "Update theory lesson",
+          "quiz": "Update quiz lesson"
+        },
+        "fields": {
+          "titleVN": "Vietnamese Title",
+          "titleEN": "English Title",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "estimatedTime": "Estimated Time (minutes)",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description",
+          "quizTimeLimit": "Time Limit",
+          "quizTotalScore": "Total Score",
+          "quizPassScore": "Pass Score"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save Changes"
+        },
+        "error": {
+          "missingTheory": "Please fill in all required theory fields.",
+          "missingQuiz": "Please fill in all required quiz fields.",
+          "invalidPassScore": "Pass score cannot be greater than total score.",
+          "updateTheoryFailed": "Failed to update theory lesson.",
+          "updateQuizFailed": "Failed to update quiz lesson."
+        }
+      },
+      "LessonDetailDialog": {
+        "title": "Lesson Details",
+        "subtitle": {
+          "theory": "Theory Lesson Details",
+          "quiz": "Quiz Lesson Details",
+          "lab": "Lab Lesson Details"
+        },
+        "fields": {
+          "titleVN": "Title (Vietnamese)",
+          "titleEN": "Title (English)",
+          "estimatedTime": "{value} minutes",
+          "timeLimit": "Time: {value} minutes",
+          "maxScore": "Max Score: {value}",
+          "passScore": "Pass Score: {value}",
+          "labLevel": "Difficulty",
+          "labType": "Lab Type",
+          "theoryContentVN": "Vietnamese Content",
+          "theoryContentEN": "English Content",
+          "quizDescriptionVN": "Vietnamese Description",
+          "quizDescriptionEN": "English Description"
+        },
+        "error": {
+          "loadTheoryFailed": "Failed to load theory lesson details.",
+          "loadQuizFailed": "Failed to load quiz lesson details.",
+          "loadLabFailed": "Failed to load lab lesson details."
+        }
+      },
+      "QuizQuestionConfigDialog": {
+        "title": "Quiz Question Configuration",
+        "subtitle": "Set up questions for the quiz.",
+        "lessonPrefix": "Lesson",
+        "form": {
+          "createTitle": "Add New Question",
+          "updateTitle": "Update Question",
+          "description": "Fill in all content, 4 answers, and select the correct one.",
+          "reset": "Reset",
+          "contentVN": "Vietnamese Content",
+          "contentEN": "English Content",
+          "answers": "Answers",
+          "score": "Score",
+          "answerVNPlaceholder": "Vietnamese answer",
+          "answerENPlaceholder": "English answer",
+          "submitCreate": "Add Question",
+          "submitUpdate": "Update Question"
+        },
+        "list": {
+          "title": "Question List",
+          "searchPlaceholder": "Search questions",
+          "questionPrefix": "Question",
+          "questionSuffix": "questions",
+          "editing": "Editing",
+          "totalScore": "Total Score",
+          "score": "Score"
+        },
+        "empty": {
+          "noQuestions": "No questions in this quiz yet.",
+          "notFound": "No matching questions found."
+        },
+        "confirm": {
+          "deleteTitle": "Delete Question",
+          "deleteDescription": "Are you sure you want to delete this question?",
+          "confirmText": "Delete",
+          "cancelText": "Cancel"
+        },
+        "tooltip": {
+          "edit": "Edit question",
+          "delete": "Delete question"
+        },
+        "error": {
+          "missingFields": "Please fill in all required fields.",
+          "loadFailed": "Failed to load questions.",
+          "createFailed": "Failed to create question.",
+          "updateFailed": "Failed to update question.",
+          "deleteFailed": "Failed to delete question."
+        }
+      }
+    },
+    "AssignCourseVersionDialog": {
+      "category": {
+        "title": "Assign Categories",
+        "description": "Select one or more categories to assign to this course version.",
+        "selectPlaceholder": "Select categories",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Categories assigned successfully.",
+          "error": "Failed to assign categories to the course version."
+        }
+      },
+      "drone": {
+        "title": "Assign Drones",
+        "description": "Select one or more drones to assign to this course version.",
+        "selectPlaceholder": "Select drones",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "toast": {
+          "success": "Drones assigned successfully.",
+          "error": "Failed to assign drones to the course version."
+        }
+      }
+    }
+  },
+  "Common": {
+    "buttons": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "save": "Save Changes",
+      "delete": "Delete",
+      "close": "Close",
+      "edit": "Edit",
+      "create": "Create New"
+    },
+    "status": {
+      "active": "Published",
+      "inactive": "Inactive",
+      "draft": "Draft",
+      "loading": "Loading...",
+      "noData": "No data available"
+    }
+  },
+  "LabManagement": {
+    "title": "LAB MANAGEMENT",
+    "createBtn": "CREATE NEW LAB",
+    "viewDetails": "Lab Details",
+    "searchPlaceholder": "Search lab name...",
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "active": "Published",
+      "inactive": "Inactive"
+    },
+    "level": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "type": {
+      "learning": "Learning",
+      "competition": "Competition"
+    },
+    "stats": {
+      "total": "TOTAL LABS",
+      "active": "PUBLISHED",
+      "draft": "DRAFT",
+      "inactive": "INACTIVE"
+    },
+    "table": {
+      "databaseTitle": "Lab Database",
+      "empty": "No Lab data available",
+      "notFound": "No Labs found",
+      "emptyDesc": "The system has not recorded any Labs yet. Please create a new Lab to continue.",
+      "notFoundDesc": "No Labs match your search content or status.",
+      "noDescription": "No detailed description available.",
+      "status": {
+        "active": "PUBLISHED",
+        "draft": "DRAFT",
+        "inactive": "INACTIVE",
+        "locked": "LOCKED",
+        "readOnly": "READ-ONLY",
+        "deleted": "DELETED"
+      },
+      "actions": {
+        "editInfo": "Edit Information",
+        "duplicate": "Duplicate lab",
+        "delete": "Delete lab",
+        "editMap": "Proceed to Map Design"
+      }
+    },
+    "form": {
+      "createTitle": "Initialize Lab",
+      "editTitle": "Configure Lab",
+      "nameVN": "Lab Name (Vietnamese) *",
+      "nameEN": "Lab Name (English) *",
+      "descVN": "Description (Vietnamese) *",
+      "descEN": "Description (English) *",
+      "namePlaceholderVN": "Ex: Flight Training...",
+      "namePlaceholderEN": "Ex: Flight Training...",
+      "descPlaceholderVN": "Lab content...",
+      "descPlaceholderEN": "Lab description...",
+      "level": "Difficulty",
+      "type": "Lab Type",
+      "estimatedTime": "Estimated duration (min) *",
+      "status": "Status",
+      "required": "This field is required",
+      "publishRequirements": "Requirements for publication",
+      "syncing": "Syncing data...",
+      "checklist": {
+        "drone": "Drone starting point",
+        "objects": "Objects in Map",
+        "rules": "Rules ",
+        "solution": "Successfully solved (Solve Test)"
+      }
+    },
+    "confirm": {
+      "deleteTitle": "Confirm delete lab?",
+      "deleteDescription": "This action cannot be undone.",
+      "duplicateTitle": "Confirm duplicate lab?",
+      "duplicateDescription": "Create a new copy (Draft) of this lab with all info and map content."
+    },
+    "toasts": {
+      "createSuccess": "Lab initialized successfully!",
+      "updateSuccess": "Lab information updated successfully!",
+      "duplicateSuccess": "Lab duplicated successfully!",
+      "deleteSuccess": "Lab deleted successfully!",
+      "publishError": "Lab does not meet the requirements for publication. Please check the requirements again!",
+      "droneError": "Drone is a unique object, cannot be copied."
+    },
+    "pagination": {
+      "page": "Page"
+    }
+  },
+  "MapEditor": {
+    "categories": {
+      "all": "All",
+      "drone": "Drone",
+      "obstacle": "Obstacle",
+      "decor": "Decor",
+      "bonus": "Bonus",
+      "checkpoint": "Checkpoint",
+      "theme": "Environment",
+      "uncategorized": "Other"
+    },
+    "themes": {
+      "title": "Environment Settings",
+      "default": "Default",
+      "space": "Space",
+      "sunset": "Sunset",
+      "daylight": "Early Morning"
+    },
+    "models": {
+      "drone": "Drone",
+      "box": "Box",
+      "tree": "Tree 1",
+      "tree2": "Tree 2",
+      "grass": "Grass",
+      "rock": "Rock",
+      "diamond": "Diamond",
+      "star": "Star",
+      "heart": "Heart",
+      "checkpoint": "Checkpoint",
+      "pattern_square": "Square Path",
+      "pattern_circle": "Circle Path",
+      "pattern_rectangle": "Rectangle Path",
+      "pattern_zigzag": "Zigzag Path",
+      "pts": "pts",
+      "loading": "Loading...",
+      "add": "Add {name}"
+    },
+    "toolbar": {
+      "back": "Back",
+      "save": "Save Map",
+      "saving": "Saving...",
+      "saved": "Saved!",
+      "offline": "Offline",
+      "configureRules": "Config Rules",
+      "viewConfig": "View Config",
+      "readOnlyHUD": "READ-ONLY (LOCKED)",
+      "readOnlyDesc": "Locked in READ-ONLY mode",
+      "mapSize": "Map Size",
+      "transform": {
+        "translate": "Translate",
+        "rotate": "Rotate",
+        "scale": "Scale"
+      }
+    },
+    "hud": {
+      "completed": "COMPLETED",
+      "failed": "FAILED"
+    },
+    "status": {
+      "loading": "Loading",
+      "saving": "Syncing..."
+    },
+    "toasts": {
+      "networkLost": "Network connection lost. Please check your connection to save data!",
+      "networkRestored": "Network connection restored!",
+      "noNetwork": "No network connection. Please check your connection!",
+      "saveSuccess": "Map saved!",
+      "publishSuccess": "Lab published successfully!",
+      "publishError": "Lab does not meet publishing requirements. Please check the Checklist!",
+      "saveError": "Failed to save data!",
+      "genericError": "An error occurred while saving",
+      "solutionSuccess": "Lab solved successfully! Lab is ready to be published.",
+      "droneExists": "Drone already exists in scene!",
+      "droneCopyError": "Drone is unique, cannot be copied.",
+      "dronePasteError": "Drone is unique, cannot be pasted."
+    },
+    "confirm": {
+      "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?"
+    },
+    "properties": {
+      "title": "Properties",
+      "color": "Color",
+      "width": "Width (X)",
+      "height": "Height (Y)",
+      "depth": "Depth (Z)",
+      "rotateY": "Rotate (Y)",
+      "radius": "Radius",
+      "checkpointTitle": "Checkpoint Properties",
+      "order": "Order",
+      "remove": "Remove Object",
+      "removeCheckpoint": "Remove Checkpoint",
+      "deleteTooltip": "Delete selected object (Del / Backspace)",
+      "patternTitle": "Flight Pattern Properties",
+      "tolerance": "Tolerance (Precision)",
+      "showGuide": "Show Guide Path",
+      "requireClockwise": "Require Clockwise",
+      "hiddenUntilRun": "Hidden Until Running"
+    },
+    "rules": {
+      "title": "Rule Configuration",
+      "description": "Set completion conditions for the lab",
+      "requiredScore": "Required Score *",
+      "goalLimit": "Goal score limit",
+      "useMax": "Use Max",
+      "totalAvailable": "Total score available",
+      "noBonusItems": "No bonus items found on current map",
+      "scoreError": "⚠ Required score exceeds current total available ({maxScore} pts)",
+      "timeLimit": "Time Limit (sec) *",
+      "maxBlocks": "Max Blocks *",
+      "fuelLimit": "Max Energy (Fuel)",
+      "fuelLimitDesc": "Limit energy to force optimal flight paths",
+      "constraints": "Mission Constraints",
+      "checklistTitle": "COMPLETION REQUIREMENTS",
+      "checklist": {
+        "drone": "Drone starting point",
+        "objects": "Objects in Map",
+        "rules": "Rules & Constraints",
+        "solution": "Solve Test Result"
+      },
+      "advancedRules": "Advanced Rules",
+      "sequentialCheckpoints": "Sequential Fly",
+      "sequentialDesc": "Drone must pass through checkpoints in order 1 → 2 → 3...",
+      "sequentialError": "⚠ Need at least 2 checkpoints on the map to enable this rule",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "readOnlyHUD": "READ-ONLY",
+      "readOnlyDesc": "Locked in READ-ONLY mode",
+      "saving": "Saving..."
+    },
+    "error": {
+      "title": "Access Error",
+      "description": "The system could not load the Lab data. Invalid ID, deleted data, or network issues.",
+      "retry": "Try Again",
+      "manage": "Manage Labs"
+    }
+  },
+  "MissionHUD": {
+    "initializing": "Initializing Mission",
+    "systemCheck": "System Check: OK | Uplink: Stable",
+    "syncData": "Syncing Map Data",
+    "processing": "Processing...",
+    "signalLost": "Signal Lost / Error",
+    "diagnosticReport": "Diagnostic Report",
+    "authFailure": "Critical failure in authentication protocol. Please return to headquarters and re-verify mission credentials.",
+    "backToBase": "Back to Headquarters",
+    "connectionTerminated": "Connection Terminated",
+    "loadingSystems": "Loading Systems..."
+  },
+  "ManagerCompetitions": {
+    "errors": {
+      "resolveClub": "Unable to resolve current club.",
+      "loadCompetitions": "Unable to load competitions."
+    },
+    "empty": {
+      "title": "No competitions yet",
+      "description": "Competitions created by this club will appear here."
+    },
+    "summary": {
+      "total": "{{count}} competitions in total"
+    },
+    "filters": {
+      "label": "Filter by status",
+      "all": "All"
+    },
+    "fallback": {
+      "noDescription": "No description"
+    },
+    "status": {
+      "ALL": "All",
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "REGISTRATION_OPEN": "Registration Open",
+      "REGISTRATION_CLOSED": "Registration Closed",
+      "ONGOING": "Ongoing",
+      "FINISHED": "Finished",
+      "RESULT_PUBLISHED": "Result Published",
+      "CANCELLED": "Cancelled",
+      "INVALID": "Invalid"
+    },
+    "metrics": {
+      "rounds": "Rounds",
+      "competitors": "Competitors",
+      "prizes": "Prizes",
+      "visible": "Visible"
+    },
+    "timeline": {
+      "registration": "Registration",
+      "competition": "Competition"
+    },
+    "meta": {
+      "createdAt": "Created at",
+      "invalidReason": "Invalid reason"
+    }
+  },
+  "ManagerMembers": {
+    "errors": "Unable to determine the current club.",
+    "memberlist": "Member List",
+    "requests": "Join Requests",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "approved": "Approved"
+    },
+    "headers": {
+      "stt": "No.",
+      "avatar": "Avatar",
+      "name": "Member Name",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "joinDate": "Join Date",
+      "status": "Status",
+      "actions": "Actions",
+      "requester": "Requester",
+      "requestedAt": "Requested At",
+      "approvedAt": "Approved At"
+    },
+    "searchPlaceholder": "Search by name",
+    "total": "Total",
+    "member": "members",
+    "error": {
+      "loadMembers": "Failed to load member list.",
+      "loadRequests": "Failed to load join requests."
+    },
+    "empty": {
+      "members": "No members in this club yet.",
+      "requests": "No join requests available."
+    },
+    "approved": {
+      "title": "Approve this request?",
+      "description": "The member will be added to the club after approval.",
+      "confirmText": "Approve",
+      "cancelText": "Cancel",
+      "toast": "Join request approved."
+    },
+    "rejected": {
+      "title": "Reject this request?",
+      "description": "The request will be rejected and the user will not be added to the club.",
+      "confirmText": "Reject",
+      "cancelText": "Cancel",
+      "toast": "Join request rejected."
+    },
+    "done": "Processed"
+  },
+  "ManagerCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "sort": {
+      "label": "Number of learners:",
+      "mostPopular": "Most popular",
+      "leastPopular": "Least popular"
+    },
+    "owner": {
+      "label": "Owning club:",
+      "all": "All",
+      "owned": "Owned",
+      "notOwned": "Not owned"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load course list."
+    },
+    "searchPlaceholder": "Enter course name...",
+    "search": "Search",
+    "clearSearch": "Clear",
+    "empty": "No matching courses found"
+  },
+  "ManagerMyCourse": {
+    "filter": "Filter",
+    "level": {
+      "label": "Level:",
+      "all": "All",
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced"
+    },
+    "profitType": {
+      "label": "Profit type:",
+      "all": "All",
+      "profit": "For-profit",
+      "nonprofit": "Non-profit"
+    },
+    "sortBy": {
+      "label": "Sort by:",
+      "all": "All",
+      "totalCodes": "Total codes",
+      "remainingCodes": "Remaining codes",
+      "participants": "Participants"
+    },
+    "sortDirection": {
+      "label": "Direction:",
+      "all": "None",
+      "asc": "Ascending",
+      "desc": "Descending"
+    },
+    "errors": {
+      "resolveClub": "Unable to determine the current club.",
+      "loadCourses": "Failed to load club course list."
+    },
+    "empty": "No courses available"
+  },
+  "ManagerMyCourseCard": {
+    "minutes": "minutes",
+    "learners": "learners",
+    "codes": "codes remaining",
+    "profit": "For-profit",
+    "nonProfit": "Non-profit"
+  },
+  "ClubCourseCard": {
+    "minutes": "minutes",
+    "sponsored": "Sponsored",
+    "remaining": "codes remaining",
+    "notOwned": "Not owned",
+    "learners": "learners"
   }
 }

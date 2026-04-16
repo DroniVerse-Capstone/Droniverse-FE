@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "quill/dist/quill.snow.css";
 
 @plugin "tailwindcss-animate";
 
@@ -102,22 +103,26 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-2xl: 32px;
-  --radius: 8px; /* Default radius */
+  --radius: 8px;
+  /* Default radius */
 }
 
 /* Blockly UX tweaks (Scratch-like) */
 .blocklyToolboxDiv {
   width: 220px;
 }
+
 .blocklyFlyoutBackground {
   fill: #f3f4f6 !important;
   fill-opacity: 1 !important;
 }
+
 .blocklyTreeLabel {
   font-size: 13px !important;
 }
-.blocklyZoom > image,
-.blocklyTrash > image {
+
+.blocklyZoom>image,
+.blocklyTrash>image {
   opacity: 0.9;
 }
 
@@ -125,6 +130,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-family-primary);
+  scrollbar-gutter: stable;
 }
 
 /* === DRONIVERSE CUSTOM SCROLLBAR === */
@@ -201,10 +207,12 @@ body {
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
@@ -240,4 +248,233 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dv-quill-editor .ql-toolbar.ql-snow,
+.dv-quill-editor .ql-container.ql-snow {
+  border-color: var(--color-greyscale-700);
+}
+
+.dv-quill-editor .ql-toolbar.ql-snow {
+  border-radius: 8px 8px 0 0;
+  background: var(--color-greyscale-900);
+}
+
+.dv-quill-editor .ql-container.ql-snow {
+  border-radius: 0 0 8px 8px;
+  background: var(--color-greyscale-800);
+}
+
+.dv-quill-editor .ql-editor {
+  min-height: 180px;
+  color: var(--color-greyscale-0);
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: normal;
+}
+
+.dv-quill-editor .ql-container {
+  direction: ltr;
+}
+
+.dv-quill-editor .ql-editor.ql-blank::before {
+  color: var(--color-greyscale-300);
+  font-style: normal;
+}
+
+.dv-quill-editor .ql-stroke {
+  stroke: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-fill {
+  fill: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-picker,
+.dv-quill-editor .ql-picker-options,
+.dv-quill-editor .ql-picker-item,
+.dv-quill-editor .ql-picker-label,
+.dv-quill-editor .ql-snow .ql-picker.ql-expanded .ql-picker-label {
+  color: var(--color-greyscale-25);
+}
+
+.dv-quill-editor .ql-snow .ql-picker-options {
+  background: var(--color-greyscale-900);
+  border-color: var(--color-greyscale-700);
+}
+
+.dv-quill-editor .ql-snow.ql-toolbar button:hover .ql-stroke,
+.dv-quill-editor .ql-snow .ql-toolbar button:hover .ql-stroke,
+.dv-quill-editor .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.dv-quill-editor .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+  stroke: var(--color-primary-200);
+}
+
+.dv-quill-editor .ql-snow.ql-toolbar button:hover .ql-fill,
+.dv-quill-editor .ql-snow .ql-toolbar button:hover .ql-fill,
+.dv-quill-editor .ql-snow.ql-toolbar button.ql-active .ql-fill,
+.dv-quill-editor .ql-snow .ql-toolbar button.ql-active .ql-fill {
+  fill: var(--color-primary-200);
+}
+
+.dv-quill-editor--error .ql-toolbar.ql-snow,
+.dv-quill-editor--error .ql-container.ql-snow {
+  border-color: var(--color-error-100);
+}
+
+.dv-quill-render {
+  color: var(--color-greyscale-0);
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+
+.dv-quill-render h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.dv-quill-render h2 {
+  margin: 0 0 0.625rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+  color: var(--color-secondary-25);
+}
+
+.dv-quill-render h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 400;
+  color: var(--color-secondary-25);
+}
+
+.dv-quill-render p {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  color: var(--color-greyscale-25);
+}
+
+.dv-quill-render strong {
+  color: var(--color-greyscale-0);
+}
+
+.dv-quill-render a {
+  color: var(--color-tertiary-50);
+  text-decoration: underline;
+}
+
+.dv-quill-render ul,
+.dv-quill-render ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.dv-quill-render ul {
+  list-style: disc;
+}
+
+.dv-quill-render ol {
+  list-style: decimal;
+}
+
+.dv-quill-render blockquote {
+  margin: 0 0 0.75rem;
+  border-left: 3px solid var(--color-primary-200);
+  padding-left: 0.75rem;
+  color: var(--color-greyscale-100);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* === HUD & MISSION INTERFACE ANIMATIONS === */
+
+@keyframes dv-scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes dv-glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes dv-pulse-glow {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 5px currentColor); }
+  50% { opacity: 1; filter: drop-shadow(0 0 15px currentColor); }
+}
+
+@keyframes dv-radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dv-text-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes dv-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-dv-scanline {
+  animation: dv-scanline 8s linear infinite;
+}
+
+.animate-dv-glitch {
+  animation: dv-glitch 0.3s cubic-bezier(.25,.46,.45,.94) infinite;
+}
+
+.animate-dv-pulse-glow {
+  animation: dv-pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-dv-radar {
+  animation: dv-radar-spin 4s linear infinite;
+}
+
+.animate-dv-blink {
+  animation: dv-text-blink 1.5s step-end infinite;
+}
+
+.animate-dv-float {
+  animation: dv-float 4s ease-in-out infinite;
+}
+
+/* Glassmorphism Utilities */
+.dv-glass {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dv-glass-error {
+  background: rgba(69, 10, 10, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.15);
 }

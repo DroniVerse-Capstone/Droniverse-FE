@@ -24,6 +24,9 @@ interface CheckpointBeaconProps {
     order?: number;
     completed?: boolean;
     showText?: boolean;
+    isInteractive?: boolean;
+    isSequential?: boolean;
+    droneState?: { position: [number, number, number] };
 }
 
 export default function CheckpointBeacon({
@@ -31,6 +34,9 @@ export default function CheckpointBeacon({
     order = 0,
     completed = false,
     showText = true,
+    isInteractive = false,
+    isSequential = true,
+    droneState,
 }: CheckpointBeaconProps) {
     const groupRef = useRef<THREE.Group>(null!);
     const baseRef = useRef<THREE.Group>(null!);
@@ -41,11 +47,56 @@ export default function CheckpointBeacon({
     const activeColor = ORDER_COLORS[order % ORDER_COLORS.length];
     const displayColor = completed ? COMPLETED_COLOR : activeColor;
 
-    useFrame((state) => {
+    // Internal state for interactive HUD & effects
+    const prevCompletedRef = useRef(completed);
+    const beamScaleRef = useRef(1); // 1 to 0 transition
+    const shockwaveRef = useRef({ radius: 0, opacity: 0 });
+    const textRef = useRef<any>(null!);
+
+    useFrame((state, delta) => {
         const t = state.clock.getElapsedTime();
 
-        if (baseRef.current) {
-            baseRef.current.rotation.y = t * 0.4;
+        // 1. Audio SFX: Trigger Ding when status flips to completed
+        if (completed && !prevCompletedRef.current) {
+            try {
+                const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // High A
+                osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+
+                // Trigger Shockwave
+                shockwaveRef.current = { radius: radius, opacity: 1.0 };
+            } catch (e) {
+                console.warn("Audio Context suppressed.");
+            }
+        }
+        prevCompletedRef.current = completed;
+
+        // 2. Visual Transitions
+        // Beam shrinking logic
+        const targetScale = completed ? 0 : 1;
+        beamScaleRef.current += (targetScale - beamScaleRef.current) * delta * 4;
+
+        // Shockwave expansion
+        if (shockwaveRef.current.opacity > 0) {
+            shockwaveRef.current.radius += delta * 40;
+            shockwaveRef.current.opacity -= delta * 1.5;
+        }
+
+        if (baseRef.current && !completed) {
+            baseRef.current.rotation.y = t * 0.8;
         }
 
         if (scanningRingsRef.current) {
@@ -53,21 +104,22 @@ export default function CheckpointBeacon({
                 if (!(child instanceof THREE.Mesh)) return;
                 const ring = child;
                 const offset = (i * 0.5) % 1;
-                const progress = (t * 0.8 + offset) % 1;
+                const progress = (t * 1.2 + offset) % 1;
                 ring.position.y = progress * BEAM_HEIGHT;
 
                 if (ring.material && ring.material instanceof THREE.MeshStandardMaterial) {
-                    ring.material.opacity = Math.sin(progress * Math.PI) * 0.6;
+                    ring.material.opacity = completed ? 0 : Math.sin(progress * Math.PI) * 0.6;
                 }
             });
         }
 
-        if (labelRef.current && groupRef.current) {
-            labelRef.current.position.y = BEAM_HEIGHT + 1.5 + Math.sin(t * 1.5) * 0.4;
-            labelRef.current.rotation.y = Math.atan2(
-                state.camera.position.x - groupRef.current.position.x,
-                state.camera.position.z - groupRef.current.position.z
-            );
+        if (labelRef.current) {
+            const hoverY = BEAM_HEIGHT + 1.5 + Math.sin(t * 2.5) * 0.4;
+            const completedY = 3.5 + Math.sin(t * 1.5) * 0.2;
+            labelRef.current.position.y = THREE.MathUtils.lerp(labelRef.current.position.y, completed ? completedY : hoverY, 0.1);
+
+            // Force orientation to match camera exactly for "snappy" feel
+            labelRef.current.quaternion.copy(state.camera.quaternion);
         }
     });
 
@@ -102,7 +154,7 @@ export default function CheckpointBeacon({
             </group>
 
             {/* ── CORE POWER PILLAR ─────────────────────────────────────── */}
-            <group position={[0, BEAM_HEIGHT / 2, 0]}>
+            <group position={[0, (BEAM_HEIGHT / 2), 0]} scale-y={beamScaleRef.current}>
                 {/* Outer Holographic Sheath */}
                 <mesh>
                     <cylinderGeometry args={[radius * 0.12, radius * 0.12, BEAM_HEIGHT, 32, 1, true]} />
@@ -111,7 +163,7 @@ export default function CheckpointBeacon({
                         emissive={displayColor}
                         emissiveIntensity={0.2}
                         transparent
-                        opacity={0.15}
+                        opacity={completed ? 0 : 0.15}
                         side={THREE.DoubleSide}
                         depthWrite={false}
                     />
@@ -119,7 +171,7 @@ export default function CheckpointBeacon({
                 {/* Inner Bright Thread */}
                 <mesh>
                     <cylinderGeometry args={[radius * 0.02, radius * 0.02, BEAM_HEIGHT, 8, 1, true]} />
-                    <meshBasicMaterial color={displayColor} />
+                    <meshBasicMaterial color={displayColor} transparent opacity={completed ? 0 : 1} />
                 </mesh>
                 {/* Scanning Rings Moving Up */}
                 <group ref={scanningRingsRef} position={[0, -BEAM_HEIGHT / 2, 0]}>
@@ -133,6 +185,14 @@ export default function CheckpointBeacon({
                     </mesh>
                 </group>
             </group>
+
+            {/* ── SHOCKWAVE EFFECT ───────────────────────────────────────── */}
+            {completed && (
+                <mesh rotation-x={-Math.PI / 2} position={[0, 0.2, 0]}>
+                    <ringGeometry args={[shockwaveRef.current.radius * 0.9, shockwaveRef.current.radius, 64]} />
+                    <meshBasicMaterial color="#34d399" transparent opacity={Math.max(0, shockwaveRef.current.opacity)} />
+                </mesh>
+            )}
 
             {/* ── FLOATING HUD HEADER (NUMBER + FRAME) ──────────────────── */}
             {showText && (
@@ -168,8 +228,9 @@ export default function CheckpointBeacon({
                         </mesh>
                     </group>
 
-                    {/* The Number */}
+                    {/* The Number or Icon */}
                     <Text
+                        ref={textRef}
                         fontSize={1.5}
                         color={displayColor}
                         anchorX="center"
@@ -177,7 +238,7 @@ export default function CheckpointBeacon({
                         outlineColor="#000000"
                         outlineWidth={0.05}
                     >
-                        {String(order + 1)}
+                        {completed ? "✓" : (isSequential ? String(order + 1) : "🚩")}
                     </Text>
 
                     {/* Subtle backlight glow for number */}

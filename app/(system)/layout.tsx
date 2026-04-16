@@ -8,12 +8,12 @@ export default function SystemLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
-      <div className="flex min-h-screen">
+    <div className="h-screen">
+      <div className="flex h-screen">
         <SystemSidebar />
-        <main className="flex min-w-0 flex-1 flex-col overflow-x-hidden bg-greyscale-800">
+        <main className="flex h-screen min-w-0 flex-1 flex-col overflow-y-auto bg-greyscale-800">
           <SystemHeader />
-          <div className="min-w-0 flex-1 p-4">{children}</div>
+          <div className="min-w-0 flex-1 overflow-x-hidden p-4">{children}</div>
         </main>
       </div>
     </div>

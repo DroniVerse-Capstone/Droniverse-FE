@@ -37,6 +37,7 @@ export default function DroneHUD({
     { label: isRelativeMode ? "ΔY" : "Y", value: (isRelativeMode ? adjustedY : storedY).toFixed(0) },
     { label: isRelativeMode ? "ΔZ" : "Z", value: displayZ.toFixed(0) },
     { label: "Heading", value: `${headingValue.toFixed(0)}°` },
+    { label: "Engines", value: state.isStarted ? "ON" : "OFF" },
   ];
 
   return (
@@ -46,18 +47,22 @@ export default function DroneHUD({
         <span>{title}</span>
       </div>
       {description && <div className="text-slate-400 text-[10px] sm:text-[11px] leading-relaxed">{description}</div>}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono">
-        {items.map((item) => (
-          <div
-            key={item.label}
-            className="flex flex-col gap-0.5 sm:gap-1 rounded-lg bg-slate-900/80 px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-700/60"
-          >
-            <span className="text-slate-500 uppercase tracking-wide text-[9px] sm:text-[10px]">
-              {item.label}
-            </span>
-            <span className="text-slate-50 text-xs sm:text-sm">{item.value}</span>
-          </div>
-        ))}
+      <div className="flex flex-wrap gap-2 sm:gap-3 text-[10px] sm:text-[11px] font-mono">
+        {items.map((item) => {
+          const isEngine = item.label === "Engines";
+          const engineColor = state.isStarted ? "text-emerald-400" : "text-rose-400";
+          return (
+            <div
+              key={item.label}
+              className="flex-1 min-w-[60px] flex flex-col gap-0.5 sm:gap-1 rounded-lg bg-slate-900/80 px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-700/60"
+            >
+              <span className="text-slate-500 uppercase tracking-wide text-[9px] sm:text-[10px]">
+                {item.label}
+              </span>
+              <span className={`text-xs sm:text-sm ${isEngine ? engineColor : "text-slate-50"}`}>{item.value}</span>
+            </div>
+          );
+        })}
       </div>
       {axisHints.length > 0 && (
 

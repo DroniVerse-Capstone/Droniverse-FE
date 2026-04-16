@@ -16,7 +16,7 @@ export default function LoginBanner() {
       <FadeIn from="center" duration={1.2} delay={0.3} className="absolute">
         <Image
           className="opacity-10 object-cover"
-          src="/images/Logo-NoBG.png"
+          src="/images/Logo-NoBg.png"
           alt="Drone Background"
           width={582}
           height={582}

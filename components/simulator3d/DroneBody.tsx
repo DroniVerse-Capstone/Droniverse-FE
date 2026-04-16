@@ -42,29 +42,38 @@ type RotorProps = {
 
 function Rotor({ position, isFlying, colorConfig }: RotorProps) {
   const groupRef = useRef<THREE.Group | null>(null);
+  const spinVelocity = useRef(0);
+
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    const spinSpeed = isFlying
+    const targetSpinSpeed = isFlying
       ? DRONE_ROTOR_CONFIG.SPIN_SPEED_FLYING
       : DRONE_ROTOR_CONFIG.SPIN_SPEED_IDLE;
-    // console.log(spinSpeed);
-    if (spinSpeed <= 0) return;
-    groupRef.current.rotation.y += spinSpeed * delta;
-    // console.log(groupRef)
+    
+    // Smoothly interpolate current spin speed towards target
+    spinVelocity.current += (targetSpinSpeed - spinVelocity.current) * delta * 2;
+    
+    if (spinVelocity.current <= 0.01) return;
+    groupRef.current.rotation.y += spinVelocity.current * delta;
   });
+
+  // Strobe effect multiplier for emissive intensity when engines are on
+  const isStrobing = isFlying && (Date.now() % 300 < 150);
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Code vòng tròn lớn của cánh quạt  */}
+      {/* Code vòng tròn lớn của cánh quạt - Sử dụng BasicMaterial để tự phát sáng tối đa */}
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.85, 0.08, 16, 48]} />
-        <meshStandardMaterial
-          color={colorConfig?.rotor ?? DRONE_COLORS.ROTOR.color}
-          emissive={colorConfig?.rotorEmissive ?? DRONE_COLORS.ROTOR.emissive}
-          emissiveIntensity={isFlying ? 0.5 : 0.1}
-          roughness={0.3}
-          metalness={0.7}
-        />
+        {isFlying ? (
+          <meshBasicMaterial color={isStrobing ? "#22d3ee" : "#0891b2"} />
+        ) : (
+          <meshStandardMaterial
+            color={colorConfig?.rotor ?? DRONE_COLORS.ROTOR.color}
+            roughness={0.3}
+            metalness={0.7}
+          />
+        )}
       </mesh>
       {/*  Này code cái cục tròn ở tâm cánh quạt */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -127,6 +136,7 @@ function DroneBody({ state, colorConfig }: Props) {
         state.position[2],
       ]}
       rotation={[0, state.headingRad, 0]}
+      scale={1.3} // Visually big but physically accurate position
     >
       <mesh castShadow>
         <boxGeometry args={DRONE_SIZES.FUSELAGE} />
@@ -139,6 +149,32 @@ function DroneBody({ state, colorConfig }: Props) {
           roughness={DRONE_COLORS.FUSELAGE.roughness}
         />
       </mesh>
+
+      {/* Drone Status LED (Mounted on the rear tail for visibility) */}
+      <group position={[0, 0.45, -0.7]}>
+        {/* Core LED */}
+        <mesh>
+          <sphereGeometry args={[0.25, 16, 16]} />
+          <meshBasicMaterial color={state.isFlying ? "#10b981" : "#ef4444"} />
+        </mesh>
+        
+        {/* Glowing Aura for High Visibility */}
+        <mesh scale={2.5}>
+          <sphereGeometry args={[0.25, 16, 16]} />
+          <meshBasicMaterial 
+            color={state.isFlying ? "#34d399" : "#f87171"} 
+            transparent 
+            opacity={0.3} 
+            depthWrite={false}
+          />
+        </mesh>
+
+        <pointLight 
+          color={state.isFlying ? "#10b981" : "#ef4444"} 
+          intensity={state.isFlying ? 15 : 5} 
+          distance={10} 
+        />
+      </group>
 
       <mesh
         position={DRONE_SIZES.NOSE_POSITION}

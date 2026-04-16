@@ -15,12 +15,43 @@ import GroundPlane from "../simulator3d/GroundPlane";
 import { MAP_COLORS, GRID_CONFIG } from "@/lib/models3d/mapConfig";
 import { CAMERA_CONFIG } from "@/lib/config3D/cameraConfig";
 import { WORLD_SCALE } from "@/lib/config3D/constants";
+import { useSearchParams, useRouter } from "next/navigation";
+import { LabData, LabRule, LabMap, MapObject } from "@/types/lab";
+import { getLabValidation } from "@/lib/map-editor/labValidation";
+import { useLabFull, useUpdateLabFull, useSuspenseLabFull } from "@/hooks/lab/useLabs";
+import {
+  FaGlobe, FaCube, FaTree, FaGem, FaMapMarkerAlt, FaPaperPlane, FaQuestionCircle, FaImage, FaCubes, FaPlay, FaLock, FaRulerCombined,
+  FaCheck,
+  FaArrowLeft,
+  FaSave,
+  FaEye
+} from "react-icons/fa";
+import Loading from "@/app/loading";
+import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
+import { RuleConfigurationModal } from "./RuleConfigurationModal";
+import { useTranslations } from "@/providers/i18n-provider";
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  all: <FaGlobe />,
+  drone: <FaPaperPlane />,
+  obstacle: <FaCube />,
+  decor: <FaTree />,
+  bonus: <FaGem />,
+  checkpoint: <FaMapMarkerAlt />,
+  pattern: <FaRulerCombined />,
+  theme: <FaImage />,
+  uncategorized: <FaQuestionCircle />
+};
 
 import {
   OrbitControls,
   TransformControls,
   Environment,
   ContactShadows,
+  Html,
+  Stars,
+  Sky,
+  Line,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { Box3, Vector3, Quaternion, Euler, Color } from "three";
@@ -36,6 +67,7 @@ import CheckpointRing from "../simulator3d/checkpoint/CheckpointBeacon";
 import RockGLB from "../simulator3d/obstacles/RockGLB";
 import GrassGLB from "../simulator3d/decor/GrassGLB";
 import Tree2GLB from "../simulator3d/decor/Tree2GLB";
+import { MapEnvironment } from "../simulator3d/MapEnvironment";
 import {
   buildModelCategories,
   getConstraintsForModel,
@@ -43,42 +75,29 @@ import {
   getModelConfig,
 } from "@/lib/map-editor/editorModels";
 import { useToast, ToastContainer } from "./Toast";
+const EDITOR_CONFIG = {
+  MAX_ALT_CEILING: 150,
+  THROTTLE_MS: 16,
+};
+
 // @ts-ignore - FBXLoader typing may not be present in this project
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+import { map } from "zod";
+import { LanguageSwitcher } from "../layouts/LanguageSwitcher";
 
-type TransformMode = "translate" | "rotate" | "scale";
+type TransformMode = "translate" | "rotate" | "scale" | null;
 
-type MapObject = {
-  id: string;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-  modelUrl: string;
-  scaleLimits?: { min: number; max: number };
-  scalable?: boolean;
-  rotatable?: boolean;
-  collisionRadius?: number;
-  isClamped?: boolean;
-  color?: string;
-  objectType?: "obstacle" | "bonus" | "checkpoint";
-  scoreValue?: number;
-  radius?: number;
-};
 
-type MissionSettings = {
-  labName: string;
-  description: string;
-  timeLimit: number;
-  requiredScore: number;
-  sequentialCheckpoints: boolean;
-};
-
-const DEFAULT_MISSION: MissionSettings = {
-  labName: "",
-  description: "",
-  timeLimit: 120,
+const DEFAULT_RULE: LabRule = {
+  timeLimit: 0,
   requiredScore: 0,
   sequentialCheckpoints: false,
+  maxBlocks: 0,
+};
+
+const DEFAULT_MAP: LabMap = {
+  cells: 20,
+  theme: "default",
 };
 
 function degToRad(deg: number) {
@@ -88,6 +107,23 @@ function degToRad(deg: number) {
 type TransformPayload = Partial<MapObject> & { __final?: boolean };
 
 const MODEL_CATEGORIES = buildModelCategories();
+
+/**
+ * Chuẩn hóa object sang string JSON với các key được sắp xếp để so sánh chính xác.
+ */
+function stableStringify(obj: any): string {
+  if (!obj) return "";
+  return JSON.stringify(obj, (key, value) => {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      return Object.keys(value).sort().reduce((acc: any, k) => {
+        acc[k] = value[k];
+        return acc;
+      }, {});
+    }
+    return value;
+  });
+}
 
 const BONUS_LIGHT_COLOR: Record<string, string> = {
   diamond: "#00eeff",
@@ -148,21 +184,28 @@ function SidebarModelPreview({ m }: { m: any }) {
   const inView = useInView(containerRef, { amount: 0.1, once: true });
 
   const [shouldRender, setShouldRender] = useState(false);
+  const [mountedNode, setMountedNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setMountedNode(containerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
-    if (inView && !shouldRender) {
+    if (inView && !shouldRender && mountedNode) {
       timeout = setTimeout(() => setShouldRender(true), 150);
     }
     return () => clearTimeout(timeout);
-  }, [inView, shouldRender]);
+  }, [inView, shouldRender, mountedNode]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full h-full flex items-center justify-center"
     >
-      {!shouldRender ? (
+      {!shouldRender || !mountedNode ? (
         <div className="flex flex-col items-center gap-2">
           <div className="w-6 h-6 border-2 border-sky-400/20 border-t-sky-400 rounded-full animate-spin" />
           <span className="text-[10px] text-sky-400/50 font-medium uppercase tracking-widest">
@@ -171,6 +214,7 @@ function SidebarModelPreview({ m }: { m: any }) {
         </div>
       ) : (
         <Canvas
+          eventSource={mountedNode}
           shadows
           gl={{
             toneMapping: THREE.ACESFilmicToneMapping,
@@ -192,6 +236,125 @@ function SidebarModelPreview({ m }: { m: any }) {
     </div>
   );
 }
+
+function FlightPatternVisual({ object, isSelected }: { object: MapObject; isSelected: boolean }) {
+  const { shape } = object;
+  const matRef = useRef<any>(null);
+
+  // Animate the line dash offset to create a "flowing energy" effect
+  useFrame((state, delta) => {
+    if (matRef.current) {
+      matRef.current.dashOffset -= delta * 2;
+    }
+  });
+
+  // Color per shape type — vibrant, super-bright neon palette
+  const shapeColor = useMemo(() => {
+    const map: Record<string, string> = {
+      square: "#00ffff",   // neon cyan
+      circle: "#39ff14",   // alien green
+      zigzag: "#ffea00",   // electric yellow
+    };
+    return map[shape ?? ""] ?? "#00ffff";
+  }, [shape]);
+
+  const coreOpacity = isSelected ? 1.0 : 0.8;
+  const glowOpacity = isSelected ? 0.6 : 0.3;
+
+  // Build flat 2D points, raised slightly in Y so it doesn't sink ("chìm") into the floor grid
+  const points = useMemo(() => {
+    const Y_HEIGHT = 0.2; // Floating above the ground
+    if (shape === "circle") {
+      const pts: THREE.Vector3[] = [];
+      const steps = 64;
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * 0.5, Y_HEIGHT, Math.sin(a) * 0.5));
+      }
+      return pts;
+    }
+    if (shape === "square") {
+      const hw = 0.5, hd = 0.5;
+      return [
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, -hd),
+        new THREE.Vector3(hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, hd),
+        new THREE.Vector3(-hw, Y_HEIGHT, -hd), // close
+      ];
+    }
+    if (shape === "zigzag") {
+      return [
+        new THREE.Vector3(-0.5, Y_HEIGHT, -0.5),
+        new THREE.Vector3(-0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0, Y_HEIGHT, -0.5),
+        new THREE.Vector3(0.25, Y_HEIGHT, 0.5),
+        new THREE.Vector3(0.5, Y_HEIGHT, -0.5),
+      ];
+    }
+    return [];
+  }, [shape]);
+
+  if (points.length === 0) return null;
+
+  const flatPts = points.map((p) => [p.x, p.y, p.z] as [number, number, number]);
+
+  return (
+    <group>
+      {/* Outer Glow layer — very thick, low opacity */}
+      <Line
+        points={flatPts}
+        color={shapeColor}
+        lineWidth={24}
+        transparent
+        opacity={glowOpacity * 0.4}
+        depthWrite={false}
+      />
+      {/* Middle Glow layer — medium thickness */}
+      <Line
+        points={flatPts}
+        color={shapeColor}
+        lineWidth={10}
+        transparent
+        opacity={glowOpacity}
+        depthWrite={false}
+      />
+      {/* Core line (solid center) */}
+      <Line
+        points={flatPts}
+        color={isSelected ? "#ffffff" : shapeColor}
+        lineWidth={isSelected ? 4 : 2}
+        transparent
+        opacity={coreOpacity}
+        depthWrite={false}
+      />
+
+      {/* Flowing energy dashes on top */}
+      <Line
+        ref={matRef}
+        points={flatPts}
+        color="#ffffff"
+        lineWidth={3}
+        dashed
+        dashSize={0.1}
+        gapSize={0.2}
+        dashScale={2}
+        transparent
+        opacity={isSelected ? 0.9 : 0.4}
+        depthWrite={false}
+      />
+
+      {/* Floor reflection — makes it look like it's glowing onto the ground */}
+      {isSelected && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+          <planeGeometry args={[1.2, 1.2]} />
+          <meshBasicMaterial color={shapeColor} transparent opacity={0.25} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
 
 function ModelObject({
   object,
@@ -260,7 +423,7 @@ function ModelObject({
       const effectiveRadius =
         baseRadius * (meshRef.current.scale.toArray()[0] ?? 1);
       const limit = Math.max(0, MAP_HALF - effectiveRadius);
-      const MAX_ALT_CEILING = 50;
+
 
       const cx = Math.max(-limit, Math.min(limit, position[0]));
       const cz = Math.max(-limit, Math.min(limit, position[2]));
@@ -272,7 +435,7 @@ function ModelObject({
         finalFloor = Math.max(finalFloor, effectiveRadius + 0.3);
       }
 
-      const cy = Math.max(finalFloor, Math.min(MAX_ALT_CEILING, position[1]));
+      const cy = Math.max(finalFloor, Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, position[1]));
 
       if (cx !== position[0] || cz !== position[2] || cy !== position[1]) {
         meshRef.current.position.set(cx, cy, cz);
@@ -345,12 +508,17 @@ function ModelObject({
             node.material._origEmissive =
               node.material.emissive?.clone() || new Color(0, 0, 0);
           }
-          node.material.emissive.setRGB(intensity, 0, 0);
+          node.material.emissive?.setRGB(intensity, 0, 0);
         }
       });
     } else if (meshRef.current) {
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material && node.material._origEmissive) {
+        if (
+          node.isMesh &&
+          node.material &&
+          node.material.emissive &&
+          node.material._origEmissive
+        ) {
           node.material.emissive.copy(node.material._origEmissive);
         }
       });
@@ -360,7 +528,7 @@ function ModelObject({
   const lastSyncRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const THROTTLE_MS = 16;
+  const THROTTLE_MS = EDITOR_CONFIG.THROTTLE_MS;
   const scheduleSync = useCallback(() => {
     if (finalizingRef.current) return;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -401,12 +569,13 @@ function ModelObject({
             castShadow
             receiveShadow
             position={object.position}
+            rotation={object.rotation}
             scale={object.scale}
           >
             <DroneBody
               state={{
                 position: [0, 0, 0],
-                headingRad: object.rotation[1] ?? 0,
+                headingRad: 0,
                 isFlying: false,
               }}
             />
@@ -422,16 +591,8 @@ function ModelObject({
             scale={object.scale}
           >
             <BoxObstacle
-              ob={{
-                id: object.id,
-                position: [0, 0, 0],
-                size: [
-                  object.scale[0] * 2,
-                  object.scale[1] * 2,
-                  object.scale[2] * 2,
-                ],
-                color: object.color,
-              }}
+              color={object.color}
+              size={[1, 1, 1]}
             />
           </group>
         ) : primitiveType === "tree" ? (
@@ -502,10 +663,27 @@ function ModelObject({
             onClick={handleClick}
             position={object.position}
             rotation={object.rotation}
+            scale={object.scale}
           >
             <CheckpointRing
               radius={object.radius ?? 2}
               order={checkpointOrder ?? 0}
+            />
+          </group>
+        ) : primitiveType?.startsWith("pattern_") ? (
+          <group
+            ref={meshRef}
+            onClick={handleClick}
+            position={object.position}
+            rotation={object.rotation}
+            scale={object.scale}
+          >
+            <FlightPatternVisual
+              object={{
+                ...object,
+                shape: primitiveType.replace("pattern_", "") as any
+              }}
+              isSelected={isSelected}
             />
           </group>
         ) : null
@@ -537,7 +715,7 @@ function ModelObject({
                 : true;
           const _showZ =
             transformMode === "rotate" ? (_c?.rotate.z.enabled ?? true) : true;
-          return (
+          return transformMode && (
             <TransformControls
               ref={transformRef}
               object={meshRef.current}
@@ -679,7 +857,7 @@ function ModelObjectFBX({
       const center = new Vector3();
       box.getCenter(center);
       c.position.sub(center);
-    } catch (e) {}
+    } catch (e) { }
     return c;
   }, [scene]);
 
@@ -697,6 +875,8 @@ function ModelObjectFBX({
   const handleObjectChange = useCallback(() => {
     if (meshRef.current) {
       const position = meshRef.current.position.toArray();
+
+      console.log("position 222", position)
       const rotation = meshRef.current.rotation.toArray().slice(0, 3);
       let scale = meshRef.current.scale.toArray();
 
@@ -725,7 +905,7 @@ function ModelObjectFBX({
       const effectiveRadius =
         baseRadius * (meshRef.current.scale.toArray()[0] ?? 1);
       const limit = Math.max(0, MAP_HALF - effectiveRadius);
-      const MAX_ALT_CEILING = 50;
+
 
       const cx = Math.max(-limit, Math.min(limit, position[0]));
       const cz = Math.max(-limit, Math.min(limit, position[2]));
@@ -737,7 +917,7 @@ function ModelObjectFBX({
         finalFloor = Math.max(finalFloor, effectiveRadius + 0.3);
       }
 
-      const cy = Math.max(finalFloor, Math.min(MAX_ALT_CEILING, position[1]));
+      const cy = Math.max(finalFloor, Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, position[1]));
 
       if (cx !== position[0] || cz !== position[2] || cy !== position[1]) {
         meshRef.current.position.set(cx, cy, cz);
@@ -805,17 +985,21 @@ function ModelObjectFBX({
       const time = state.clock.getElapsedTime();
       const intensity = (Math.sin(time * 15) * 0.5 + 0.5) * 0.8;
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material) {
+        if (node.isMesh && node.material && node.material.emissive) {
           if (!node.material._origEmissive) {
-            node.material._origEmissive =
-              node.material.emissive?.clone() || new Color(0, 0, 0);
+            node.material._origEmissive = node.material.emissive.clone();
           }
-          node.material.emissive.setRGB(intensity, 0, 0);
+          node.material.emissive?.setRGB(intensity, 0, 0);
         }
       });
     } else if (meshRef.current) {
       meshRef.current.traverse((node: any) => {
-        if (node.isMesh && node.material && node.material._origEmissive) {
+        if (
+          node.isMesh &&
+          node.material &&
+          node.material.emissive &&
+          node.material._origEmissive
+        ) {
           node.material.emissive.copy(node.material._origEmissive);
         }
       });
@@ -825,7 +1009,7 @@ function ModelObjectFBX({
   const lastSyncRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const THROTTLE_MS = 16;
+  const THROTTLE_MS = EDITOR_CONFIG.THROTTLE_MS;
   const scheduleSync = useCallback(() => {
     if (finalizingRef.current) return;
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -882,11 +1066,11 @@ function ModelObjectFBX({
                 : true;
           const _showZ =
             transformMode === "rotate" ? (_c?.rotate.z.enabled ?? true) : true;
-          return (
+          return transformMode && (
             <TransformControls
               ref={transformRef}
               object={meshRef.current}
-              mode={transformMode}
+              mode={transformMode as any}
               showX={_showX}
               showY={_showY}
               showZ={_showZ}
@@ -1011,6 +1195,71 @@ function ModelObjectWrapper(props: {
 
 const MemoModelObject = memo(ModelObjectWrapper);
 
+function CameraManager({ map, labId, resetToken }: { map: LabMap; labId: string | null; resetToken: number }) {
+  const { camera, controls } = useThree();
+  const lastLoadedRef = useRef<string | null>(null);
+  const targetPos = useRef<THREE.Vector3 | null>(null);
+
+  const performReset = useCallback(() => {
+    const worldSize = map.cells * GRID_CONFIG.sectionSize;
+    const distance = worldSize * 0.8;
+    const height = worldSize * 0.4;
+    const newTarget = new THREE.Vector3(distance, height, distance);
+
+    if (!lastLoadedRef.current) {
+      camera.position.copy(newTarget);
+      camera.lookAt(0, 0, 0);
+      if (controls) {
+        (controls as any).target.set(0, 0, 0);
+        (controls as any).update();
+      }
+    } else {
+      targetPos.current = newTarget;
+    }
+  }, [camera, controls, map.cells]);
+
+  useFrame(() => {
+    if (targetPos.current) {
+      camera.position.lerp(targetPos.current, 0.1);
+      camera.lookAt(0, 0, 0);
+      if (camera.position.distanceTo(targetPos.current) < 0.1) {
+        targetPos.current = null;
+      }
+    }
+  });
+
+  // Handle initial load and lab changes
+  useEffect(() => {
+    if (labId && lastLoadedRef.current !== labId) {
+      performReset();
+      lastLoadedRef.current = labId;
+    }
+  }, [labId, performReset]);
+
+  // Handle manual reset token
+  useEffect(() => {
+    if (resetToken > 0) {
+      performReset();
+    }
+  }, [resetToken, performReset]);
+
+  return null;
+}
+
+function MapLoading() {
+  const t = useTranslations("MapEditor.status");
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-3 backdrop-blur-md bg-greyscale-900/40 p-10 rounded-3xl border border-white/5 shadow-2xl">
+        <div className="w-10 h-10 border-3 border-sky-400/20 border-t-sky-400 rounded-full animate-spin" />
+        <span className="text-xs text-sky-400 font-black uppercase tracking-[0.3em] drop-shadow-sm">
+          {t("loading")}
+        </span>
+      </div>
+    </Html>
+  );
+}
+
 function Scene({
   objects,
   selectedObjectId,
@@ -1020,7 +1269,9 @@ function Scene({
   disableOrbitControls,
   onTransformStart,
   onTransformEnd,
-  mapCells,
+  map,
+  labId,
+  cameraResetToken,
 }: {
   objects: MapObject[];
   selectedObjectId: string | null;
@@ -1030,9 +1281,11 @@ function Scene({
   disableOrbitControls: boolean;
   onTransformStart: (id?: string) => void;
   onTransformEnd: (id?: string) => void;
-  mapCells: number;
+  map: LabMap;
+  labId: string | null;
+  cameraResetToken: number;
 }) {
-  const { camera, gl } = useThree();
+  const { camera, gl, controls } = useThree();
 
   const handleCanvasClick = useCallback(
     (e: any) => {
@@ -1043,7 +1296,8 @@ function Scene({
   );
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<MapLoading />}>
+      <CameraManager map={map} labId={labId} resetToken={cameraResetToken} />
       <hemisphereLight intensity={1} groundColor="#444444" color="#ffffff" />
       <directionalLight
         position={[10, 10, 5]}
@@ -1056,13 +1310,13 @@ function Scene({
       <ContactShadows
         position={[0, 0, 0]}
         opacity={0.4}
-        scale={mapCells * GRID_CONFIG.sectionSize}
+        scale={map.cells * GRID_CONFIG.sectionSize}
         blur={2.5}
         far={1.5}
       />
 
       {(() => {
-        const worldSize = mapCells * GRID_CONFIG.sectionSize;
+        const worldSize = map.cells * GRID_CONFIG.sectionSize;
         const planeSize: [number, number] = [worldSize, worldSize];
         return (
           <>
@@ -1089,6 +1343,7 @@ function Scene({
 
       {(() => {
         let cpIdx = 0;
+        console.log("objects", objects);
         return objects.map((object) => {
           const isCheckpoint = object.objectType === "checkpoint";
           const order = isCheckpoint ? cpIdx : undefined;
@@ -1104,7 +1359,7 @@ function Scene({
               onTransformStart={onTransformStart}
               onTransformEnd={onTransformEnd}
               isTransforming={disableOrbitControls}
-              mapWorldSize={mapCells * GRID_CONFIG.sectionSize}
+              mapWorldSize={map.cells * GRID_CONFIG.sectionSize}
               checkpointOrder={order}
             />
           );
@@ -1116,33 +1371,332 @@ function Scene({
         enableZoom={!disableOrbitControls}
         enableRotate={!disableOrbitControls}
         maxPolarAngle={Math.PI / 2}
-        maxDistance={mapCells * GRID_CONFIG.sectionSize * 1.5}
+        maxDistance={map.cells * GRID_CONFIG.sectionSize * 1.5}
       />
     </Suspense>
   );
+
 }
 
+
 function MapEditorContent() {
-  const [objects, setObjects] = useState<MapObject[]>([]);
+  const mainCanvasContainerRef = useRef<HTMLDivElement>(null);
+  const [mountedNode, setMountedNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (mainCanvasContainerRef.current) {
+      setMountedNode(mainCanvasContainerRef.current);
+    }
+  }, []);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const labId = searchParams.get("id");
+  const { data: storedLab, contentId } = useSuspenseLabFull(labId || "");
+  const isReadOnly = storedLab?.status === "ACTIVE";
+  const t = useTranslations("MapEditor");
+  const { toasts, dismiss, toast } = useToast();
+
+  // -- Core states initialized from suspended data to avoid "jumping" on first render --
+  const [objects, setObjects] = useState<MapObject[]>(() =>
+    storedLab?.labContent?.environment?.objects || []
+  );
+  const [map, setMap] = useState<LabMap>(() => {
+    if (!storedLab) return DEFAULT_MAP;
+    return {
+      cells: storedLab.labContent?.environment?.map?.cells || 20,
+      theme: storedLab.labContent?.environment?.map?.theme || "default",
+    };
+  });
+
+  const [rule, setRule] = useState<LabRule>(() => {
+    if (!storedLab) return DEFAULT_RULE;
+    return {
+      timeLimit: storedLab.labContent?.environment?.rule?.timeLimit || 0,
+      requiredScore: storedLab.labContent?.environment?.rule?.requiredScore || 0,
+      maxBlocks: storedLab.labContent?.environment?.rule?.maxBlocks || 0,
+      fuelLimit: storedLab.labContent?.environment?.rule?.fuelLimit || 0,
+      sequentialCheckpoints: storedLab.labContent?.environment?.rule?.sequentialCheckpoints || false,
+    };
+  });
+  const [hasSolution, setHasSolution] = useState<boolean>(() => {
+    return (storedLab?.labContent?.environment?.hasSolution === true) || (storedLab?.labContent?.environment?.rule as any)?.hasSolution === true;
+  });
+
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
   const [transformMode, setTransformMode] =
     useState<TransformMode>("translate");
   const [isTransforming, setIsTransforming] = useState(false);
   const [lockedObjectId, setLockedObjectId] = useState<string | null>(null);
   const finalizingRef = useRef<boolean>(false);
-  const [mapCells, setMapCells] = useState(20);
-  const mapWorldSize = mapCells * GRID_CONFIG.sectionSize;
+  const mapWorldSize = map.cells * GRID_CONFIG.sectionSize;
+  const [cameraResetToken, setCameraResetToken] = useState(0);
 
-  const [clipboardObject, setClipboardObject] = useState<Omit<
-    MapObject,
-    "id"
-  > | null>(null);
+  // -- Persistence & Missions --
+  const updateLabFull = useUpdateLabFull();
+  const hasLoadedRef = useRef<string | null>(labId);
 
-  const { toasts, dismiss, toast } = useToast();
 
-  const [missionSettings, setMissionSettings] =
-    useState<MissionSettings>(DEFAULT_MISSION);
+  // -- UX & Resilience States --
+  const [isDirty, setIsDirty] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const lastSavedStateRef = useRef<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showMissionModal, setShowMissionModal] = useState(false);
+  const [clipboardObject, setClipboardObject] = useState<Omit<MapObject, "id"> | null>(null);
+
+  // 1. Monitor Online Status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // 2. Track Dirty State (Change Detection)
+  useEffect(() => {
+    // Only track after initial load from API is successfully applied
+    if (!storedLab || hasLoadedRef.current !== labId) return;
+
+    const currentState = stableStringify({
+      objects,
+      map: {
+        cells: map.cells,
+        theme: map.theme,
+      },
+      rule,
+      hasSolution
+    });
+
+    if (!lastSavedStateRef.current) {
+      // First run after load: Snapshot as the reference point
+      lastSavedStateRef.current = currentState;
+      setIsDirty(false); // Ensure clean on start
+      return;
+    }
+
+    const modified = currentState !== lastSavedStateRef.current;
+    if (isDirty !== modified) {
+      setIsDirty(modified);
+    }
+  }, [objects, map, rule, hasSolution, labId, storedLab]);
+
+  // 2.5 Real-time Validation for UI
+  const currentValidation = useMemo(() => {
+    // Construct a virtual LabData for validation purposes
+    const virtualLab = {
+      ...storedLab,
+      labContent: {
+        environment: {
+          objects,
+          map,
+          rule,
+          hasSolution
+        }
+      }
+    } as any;
+    return getLabValidation(virtualLab);
+  }, [objects, map, rule, hasSolution, storedLab]);
+
+  // 3. Navigation Guard
+  useEffect(() => {
+    // A. External Navigation (Browser Refresh/Close)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = t("confirm.unsavedChanges");
+      }
+    };
+
+    // B. Internal Navigation (SPA links)
+    const handleAnchorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+
+      if (anchor && anchor.href && isDirty) {
+        // Only intercept internal links that actually change the path or search
+        try {
+          const url = new URL(anchor.href);
+          const isInternal = url.origin === window.location.origin;
+          const isDifferentPath = url.pathname !== window.location.pathname || url.search !== window.location.search;
+
+          if (isInternal && isDifferentPath) {
+            if (!window.confirm(t("confirm.unsavedChanges"))) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }
+        } catch (e) {
+          // Ignore invalid URLs
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("click", handleAnchorClick, true); // Use capture phase
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("click", handleAnchorClick, true);
+    };
+  }, [isDirty]);
+
+  const handleBack = useCallback(() => {
+    if (isDirty) {
+      if (window.confirm(t("confirm.unsavedChanges"))) {
+        // router.push("/lab-management");
+        router.back()
+
+      }
+    } else {
+      // router.push("/lab-management");
+      router.back()
+
+    }
+  }, [isDirty, router]);
+
+
+
+
+  /**
+   * HÀM LƯU MAP CHÍNH (SAVE MAP FUNCTION)
+   * Hàm này xử lý việc thu thập toàn bộ objects, mission settings và gửi lên API để lưu trữ.
+   */
+  const saveToStorage = useCallback(async (publish: boolean = false, ruleOverride?: LabRule, objectsOverride?: MapObject[]): Promise<boolean> => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    if (!isOnline) {
+      toast.error(t("toasts.noNetwork"));
+      setIsSaving(false);
+      return false;
+    }
+
+    // Sync state if provided as override
+    if (ruleOverride) setRule(ruleOverride);
+    if (objectsOverride) setObjects(objectsOverride);
+
+    const currentObjects = objectsOverride || objects;
+
+    // --- Rule Sanitization (Teacher-Proofing) ---
+    // This part ensures that even if the user deletes items after setting rules, 
+    // the saved lab is ALWAYS possible to finish.
+    const actualMaxScore = currentObjects.reduce((acc, o) => acc + (o.scoreValue || 0), 0);
+    const actualCPCount = currentObjects.filter(o => o.objectType === "checkpoint").length;
+
+    let currentRule = ruleOverride || rule;
+
+    // If the required score is higher than what's available on the map, we auto-fix it.
+    if (currentRule.requiredScore > actualMaxScore) {
+      currentRule = { ...currentRule, requiredScore: actualMaxScore };
+    }
+
+    // If sequential is ON but we don't have at least 2 checkpoints, we auto-off it.
+    if (currentRule.sequentialCheckpoints && actualCPCount < 2) {
+      currentRule = { ...currentRule, sequentialCheckpoints: false };
+    }
+
+    setRule(currentRule);
+    // --------------------------------------------
+
+    try {
+      // Small delay for psychological feedback (feel premium)
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Map Editor only manages map/rule data, so we strictly update labContent. 
+      // Basic info (name, description, etc.) is handled in the Lab Management modal.
+      const labDataUpdate: Partial<LabData> = {};
+      console.log("Saving environment data:", { objects: currentObjects, rule: currentRule });
+
+      const labContentData: any = {
+        objects: currentObjects,
+        map: {
+          cells: map.cells,
+          theme: map.theme,
+        },
+        rule: currentRule,
+        hasSolution: isDirty ? false : hasSolution,
+        solution: isDirty ? undefined : (storedLab?.labContent?.environment?.solution)
+      };
+
+      if (isDirty && hasSolution) {
+        console.log("Map/Rules changed. Invalidating existing solution.");
+      }
+
+      if (publish) {
+        const validation = getLabValidation({
+          ...storedLab,
+          ...labDataUpdate,
+          labContent: { environment: labContentData }
+        } as any);
+
+        if (!validation.isValid) {
+          toast.error(t("toasts.publishError"));
+          setIsSaving(false);
+          return false;
+        }
+      }
+
+      if (labId) {
+        return new Promise<boolean>((resolve) => {
+          updateLabFull.mutate({
+            labID: labId,
+            data: { ...labDataUpdate, labContent: { environment: labContentData } },
+            contentId
+          }, {
+            onSuccess: () => {
+              setSaveSuccess(true);
+
+              if (isDirty && hasSolution) {
+                setHasSolution(false);
+                toast.warning("Bản đồ đã thay đổi. Lời giải mẫu cũ đã bị xóa để đảm bảo tính chính xác.");
+              } else {
+                toast.success(publish ? t("toasts.publishSuccess") : t("toasts.saveSuccess"));
+              }
+
+              // Snapshot new state as the reference point for isDirty
+              lastSavedStateRef.current = stableStringify(labContentData);
+              setIsDirty(false);
+              if (publish) {
+                setTimeout(() => router.push("/lab-management"), 1200);
+              }
+              setTimeout(() => setSaveSuccess(false), 2000);
+              resolve(true);
+            },
+            onError: () => {
+              toast.error(t("toasts.saveError"));
+              resolve(false);
+            },
+            onSettled: () => {
+              setIsSaving(false);
+            }
+          });
+        });
+      }
+      return false;
+    } catch (err) {
+      toast.error(t("toasts.genericError"));
+      setIsSaving(false);
+      return false;
+    }
+  }, [labId, map, rule, objects, router, toast, updateLabFull, contentId, storedLab]);
+
+  /**
+   * Chuyển hướng sang trang Solver để Admin giải đố và lưu lời giải mẫu.
+   * Tự động lưu Map hiện tại nếu có thay đổi.
+   */
+  const handleTestFlight = useCallback(async () => {
+    if (isDirty) {
+      const success = await saveToStorage(false);
+      if (!success) return; // Abort if save failed
+    }
+    router.push(`/lab-management/${labId}/solve`);
+  }, [isDirty, saveToStorage, router, labId]);
 
   const [missionRunning, setMissionRunning] = useState(false);
   const [missionTimeLeft, setMissionTimeLeft] = useState(0);
@@ -1181,30 +1735,44 @@ function MapEditorContent() {
       checkpoints.length === 0 ||
       collectedCheckpoints.size === checkpoints.length;
     const scoreCondition =
-      missionSettings.requiredScore <= 0 ||
-      currentScore >= missionSettings.requiredScore;
+      rule.requiredScore <= 0 ||
+      currentScore >= rule.requiredScore;
     const hasWinCondition =
-      checkpoints.length > 0 || missionSettings.requiredScore > 0;
+      checkpoints.length > 0 || rule.requiredScore > 0;
     if (hasWinCondition && cpCondition && scoreCondition) {
       clearInterval(missionTimerRef.current!);
       setMissionRunning(false);
       setMissionResult("pass");
+      setHasSolution(true);
+      toast.success(t("toasts.solutionSuccess"));
     }
   }, [
     collectedCheckpoints,
     currentScore,
     missionRunning,
     objects,
-    missionSettings.requiredScore,
+    rule.requiredScore,
   ]);
+
+  const lastOnlineToastRef = useRef<boolean>(isOnline);
+  useEffect(() => {
+    if (lastOnlineToastRef.current !== isOnline) {
+      if (!isOnline) {
+        toast.warning(t("toasts.networkLost"));
+      } else {
+        toast.success(t("toasts.networkRestored"));
+      }
+      lastOnlineToastRef.current = isOnline;
+    }
+  }, [isOnline, toast]);
 
   const startMission = useCallback(() => {
     setCollectedCheckpoints(new Set());
     setCurrentScore(0);
     setMissionResult(null);
-    setMissionTimeLeft(missionSettings.timeLimit);
+    setMissionTimeLeft(rule.timeLimit);
     setMissionRunning(true);
-  }, [missionSettings.timeLimit]);
+  }, [rule.timeLimit]);
 
   const stopMission = useCallback(() => {
     if (missionTimerRef.current) clearInterval(missionTimerRef.current);
@@ -1214,10 +1782,12 @@ function MapEditorContent() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      const isInput = tag === "INPUT" || tag === "TEXTAREA";
+      const isInput =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement;
 
       if (e.key === "Tab") {
+        if (isReadOnly) return;
         e.preventDefault();
         setTransformMode((prev) => {
           if (prev === "translate") return "rotate";
@@ -1228,21 +1798,21 @@ function MapEditorContent() {
       }
 
       if ((e.key === "Delete" || e.key === "Backspace") && selectedObjectId) {
-        if (isInput) return;
+        if (isInput || isReadOnly) return;
         e.preventDefault();
         setObjects((prev) => prev.filter((o) => o.id !== selectedObjectId));
         setSelectedObjectId(null);
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && !isInput) {
+      if ((e.ctrlKey || e.metaKey) && !isInput && !isReadOnly) {
         if (e.key === "c" || e.key === "x") {
           e.preventDefault();
           const obj = objects.find((o) => o.id === selectedObjectId);
           if (obj) {
             const isDrone = obj.modelUrl?.startsWith("primitive:drone");
             if (isDrone && e.key === "c") {
-              toast.error("Drone là object duy nhất, không thể copy.");
+              toast.error(t("toasts.droneCopyError"));
               return;
             }
             if (!isDrone) {
@@ -1263,7 +1833,7 @@ function MapEditorContent() {
           e.preventDefault();
           if (!clipboardObject) return;
           if (clipboardObject.modelUrl?.startsWith("primitive:drone")) {
-            toast.warning("Drone là object duy nhất, không thể paste.");
+            toast.warning(t("toasts.dronePasteError"));
             return;
           }
           const newObj: MapObject = {
@@ -1284,7 +1854,7 @@ function MapEditorContent() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedObjectId, clipboardObject, objects]);
+  }, [selectedObjectId, clipboardObject, objects, isReadOnly]);
 
   useEffect(() => {
     setObjects((prev) =>
@@ -1296,7 +1866,7 @@ function MapEditorContent() {
         return obj;
       }),
     );
-  }, [mapCells, mapWorldSize]);
+  }, [map.cells, mapWorldSize]);
 
   const handleObjectTransform = useCallback(
     (id: string, transform: TransformPayload) => {
@@ -1306,8 +1876,7 @@ function MapEditorContent() {
           const merged = { ...obj, ...transform };
           if (transform.scale) {
             if (obj.scalable === false) {
-              // --
-              return { ...obj, scale: obj.scale };
+              merged.scale = obj.scale;
             } else if (obj.scaleLimits) {
               const incoming = transform.scale ?? obj.scale;
               const min = obj.scaleLimits.min;
@@ -1340,7 +1909,6 @@ function MapEditorContent() {
               baseRadius * (merged.scale ? merged.scale[0] : obj.scale[0]);
 
             const limit = Math.max(0, MAP_HALF - effectiveRadius);
-            const MAX_ALT_CEILING = 50;
             const floor =
               getConstraintsForModel(merged.modelUrl)?.translate.y.min ?? 0;
 
@@ -1349,7 +1917,7 @@ function MapEditorContent() {
               const nz = Math.max(-limit, Math.min(limit, incomingPos[2]));
               const ny = Math.max(
                 floor,
-                Math.min(MAX_ALT_CEILING, incomingPos[1]),
+                Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, incomingPos[1]),
               );
 
               merged.position = [nx, ny, nz];
@@ -1365,7 +1933,7 @@ function MapEditorContent() {
               );
               const clampedY = Math.max(
                 floor,
-                Math.min(MAX_ALT_CEILING, incomingPos[1]),
+                Math.min(EDITOR_CONFIG.MAX_ALT_CEILING, incomingPos[1]),
               );
 
               const wasClamped =
@@ -1417,7 +1985,7 @@ function MapEditorContent() {
           (o.modelUrl || "").startsWith("primitive:drone"),
         );
         if (existingDrone) {
-          toast.error("Drone đã tồn tại trong scene!");
+          toast.error(t("toasts.droneExists"));
           setSelectedObjectId(existingDrone.id);
           return;
         }
@@ -1456,6 +2024,15 @@ function MapEditorContent() {
           newObj.scale = [1, 1, 1];
           newObj.scalable = false;
           newObj.position[1] = Math.max(2, newObj.position[1]);
+        } else if (m.category === "pattern") {
+          newObj.objectType = "pattern";
+          newObj.shape = m.id.replace("pattern_", "") as any;
+          newObj.tolerance = 0.5;
+          newObj.showGuide = true;
+          newObj.requireClockwise = true;
+          newObj.width = m.defaultScale;
+          newObj.height = m.defaultScale;
+          newObj.points = [];
         } else if (m.category === "obstacle" || m.category === "decor") {
           newObj.objectType = "obstacle";
         }
@@ -1518,125 +2095,129 @@ function MapEditorContent() {
     [],
   );
 
-  const categories = useMemo(() => [...MODEL_CATEGORIES], []);
+  const categories = useMemo(() => [
+    ...MODEL_CATEGORIES,
+    { id: "theme", name: t("categories.theme"), models: [] }
+  ], [t]);
 
   // Export / Import
-  const exportLabData = useCallback(() => {
-    const checkpoints = objects.filter((o) => o.objectType === "checkpoint");
-    const bonusItems = objects.filter((o) => o.objectType === "bonus");
-    const obstacles = objects.filter(
-      (o) =>
-        o.objectType === "obstacle" ||
-        (!o.objectType && o.modelUrl !== "primitive:checkpoint"),
-    );
+  // const exportLabData = useCallback(() => {
+  //   const checkpoints = objects.filter((o) => o.objectType === "checkpoint");
+  //   console.log("checkpoints", checkpoints);
+  //   const bonusItems = objects.filter((o) => o.objectType === "bonus");
+  //   const obstacles = objects.filter(
+  //     (o) =>
+  //       o.objectType === "obstacle" ||
+  //       (!o.objectType && o.modelUrl !== "primitive:checkpoint"),
+  //   );
 
-    const labData = {
-      labName: missionSettings.labName,
-      description: missionSettings.description,
-      timeLimit: missionSettings.timeLimit,
-      requiredScore: missionSettings.requiredScore,
-      sequentialCheckpoints: missionSettings.sequentialCheckpoints,
-      obstacles: obstacles.map((o) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        scale: o.scale,
-        color: o.color,
-      })),
-      bonusItems: bonusItems.map((o) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        scale: o.scale,
-        scoreValue: o.scoreValue ?? 10,
-      })),
-      checkpoints: checkpoints.map((o, idx) => ({
-        id: o.id,
-        modelUrl: o.modelUrl,
-        position: o.position,
-        rotation: o.rotation,
-        radius: o.radius ?? 2,
-        order: idx,
-      })),
-    };
-    const blob = new Blob([JSON.stringify(labData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${missionSettings.labName || "lab"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [objects, missionSettings]);
+  //   const labData = {
+  //     labName: missionSettings.labName,
+  //     description: missionSettings.description,
+  //     timeLimit: missionSettings.timeLimit,
+  //     requiredScore: missionSettings.requiredScore,
+  //     sequentialCheckpoints: missionSettings.sequentialCheckpoints,
+  //     obstacles: obstacles.map((o) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       scale: o.scale,
+  //       color: o.color,
+  //     })),
+  //     bonusItems: bonusItems.map((o) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       scale: o.scale,
+  //       scoreValue: o.scoreValue ?? 10,
+  //     })),
+  //     checkpoints: checkpoints.map((o, idx) => ({
+  //       id: o.id,
+  //       modelUrl: o.modelUrl,
+  //       position: o.position,
+  //       rotation: o.rotation,
+  //       radius: o.radius ?? 2,
+  //       order: idx,
+  //     })),
+  //   };
+  //   const blob = new Blob([JSON.stringify(labData, null, 2)], {
+  //     type: "application/json",
+  //   });
+  //   const url = URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `${missionSettings.labName || "lab"}.json`;
+  //   a.click();
+  //   URL.revokeObjectURL(url);
+  // }, [objects, missionSettings]);
 
-  const loadLabData = useCallback(
-    (json: any) => {
-      try {
-        setMissionSettings({
-          labName: json.labName ?? "",
-          description: json.description ?? "",
-          timeLimit: json.timeLimit ?? 120,
-          requiredScore: json.requiredScore ?? 0,
-          sequentialCheckpoints: json.sequentialCheckpoints ?? false,
-        });
+  // const loadLabData = useCallback(
+  //   (json: any) => {
+  //     try {
+  //       setMissionSettings({
+  //         labName: json.labName ?? "",
+  //         description: json.description ?? "",
+  //         timeLimit: json.timeLimit ?? 120,
+  //         requiredScore: json.requiredScore ?? 0,
+  //         sequentialCheckpoints: json.sequentialCheckpoints ?? false,
+  //       });
 
-        const spawned: MapObject[] = [];
+  //       const spawned: MapObject[] = [];
 
-        for (const o of json.obstacles ?? []) {
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: o.modelUrl,
-            position: o.position,
-            rotation: o.rotation,
-            scale: o.scale,
-            color: o.color,
-            objectType: "obstacle",
-            scalable: true,
-            rotatable: true,
-          });
-        }
+  //       for (const o of json.obstacles ?? []) {
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: o.modelUrl,
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: o.scale,
+  //           color: o.color,
+  //           objectType: "obstacle",
+  //           scalable: true,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        for (const o of json.bonusItems ?? []) {
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: o.modelUrl,
-            position: o.position,
-            rotation: o.rotation,
-            scale: o.scale,
-            objectType: "bonus",
-            scoreValue: o.scoreValue ?? 10,
-            scalable: true,
-            rotatable: true,
-          });
-        }
+  //       for (const o of json.bonusItems ?? []) {
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: o.modelUrl,
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: o.scale,
+  //           objectType: "bonus",
+  //           scoreValue: o.scoreValue ?? 10,
+  //           scalable: true,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        for (let idx = 0; idx < (json.checkpoints ?? []).length; idx++) {
-          const o = json.checkpoints[idx];
-          spawned.push({
-            id: `loaded-${Date.now()}-${Math.random()}`,
-            modelUrl: "primitive:checkpoint",
-            position: o.position,
-            rotation: o.rotation,
-            scale: [1, 1, 1],
-            objectType: "checkpoint",
-            radius: o.radius ?? 2,
-            scalable: false,
-            rotatable: true,
-          });
-        }
+  //       for (let idx = 0; idx < (json.checkpoints ?? []).length; idx++) {
+  //         const o = json.checkpoints[idx];
+  //         spawned.push({
+  //           id: `loaded-${Date.now()}-${Math.random()}`,
+  //           modelUrl: "primitive:checkpoint",
+  //           position: o.position,
+  //           rotation: o.rotation,
+  //           scale: [1, 1, 1],
+  //           objectType: "checkpoint",
+  //           radius: o.radius ?? 2,
+  //           scalable: false,
+  //           rotatable: true,
+  //         });
+  //       }
 
-        setObjects(spawned);
-        setSelectedObjectId(null);
-        stopMission();
-      } catch (err) {
-        alert("Failed to load lab data: " + (err as any)?.message);
-      }
-    },
-    [stopMission],
-  );
+  //       setObjects(spawned);
+  //       setSelectedObjectId(null);
+  //       stopMission();
+  //     } catch (err) {
+  //       alert("Tải dữ liệu bài Lab thất bại: " + (err as any)?.message);
+  //     }
+  //   },
+  //   [stopMission],
+  // );
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [previewModelId, setPreviewModelId] = useState<string | null>(null);
@@ -1655,14 +2236,19 @@ function MapEditorContent() {
     };
   }, []);
 
+  if (!storedLab) {
+    return <MapEditorErrorScreen />;
+  }
+
   return (
-    <div className="fixed inset-0 flex bg-gray-900 text-gray-100 overflow-hidden">
+    <div className="fixed inset-0 flex bg-greyscale-900 text-gray-100 overflow-hidden select-none">
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
       {/* Left sidebar */}
       <aside
         className="
     w-85 sm:w-[420px] h-full
-    bg-[linear-gradient(180deg,#041129_0%,#071426_45%,#020617_100%)]
+    
+    bg-[linear-gradient(180deg,#0b0f18,#071426_45%,#0b0f18)]
     border-r border-white/6
     flex
     overflow-y-auto
@@ -1670,88 +2256,153 @@ function MapEditorContent() {
   "
       >
         {/* Category  */}
-        <nav className="sticky top-0 h-full w-16 sm:w-20 flex flex-col items-center gap-4 py-6 bg-[#061a2b]/80 backdrop-blur-xl border-r border-white/6 ring-1 ring-white/5">
+        <nav className="sticky top-0 h-full w-16 sm:w-20 flex flex-col items-center gap-4 py-6 bg-greyscale-900 backdrop-blur-xl border-r border-white/6 ring-1 ring-white/5">
           {categories.map((cat) => {
             const active = selectedCategory === cat.id;
             return (
               <button
                 key={cat.id}
                 onClick={() => handleSetCategory(cat.id)}
-                title={cat.name}
+                title={t(`categories.${cat.id}`)}
+                disabled={isReadOnly}
                 className={`
             relative w-10 h-10 sm:w-12 sm:h-12 rounded  
             flex items-center justify-center
-            transition-all duration-250
-            ${
-              active
-                ? "bg-linear-to-br from-sky-400 to-blue-600 text-white shadow-lg"
-                : "bg-white/4 text-gray-400 hover:bg-white/8 hover:text-white"
-            }
+            transition-all duration-300 ease-out
+            ${isReadOnly ? "opacity-40 cursor-not-allowed" : ""}
+            ${active
+                    ? "bg-sky-500 text-white shadow-[0_0_20px_rgba(14,165,233,0.4)] scale-105 border border-sky-400/30"
+                    : "bg-white/5 text-slate-400 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/10"
+                  }
           `}
               >
-                <span className="text-lg">{cat.icon}</span>
+                <span className={`text-xl transition-transform duration-300 ${active ? 'scale-110 drop-shadow-md' : ''}`}>
+                  {CATEGORY_ICONS[cat.id] || <FaQuestionCircle />}
+                </span>
               </button>
             );
           })}
         </nav>
 
         {/* Asset  */}
-        <div className="flex-1 px-4 py-5">
-          <div className="grid grid-cols-2 gap-4">
-            {MODEL_CATEGORIES.find(
-              (c) => c.id === selectedCategory,
-            )?.models.map((m) => (
-              <div
-                key={m.id}
-                className="group relative flex flex-col rounded-xl overflow-hidden border border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] transition-all duration-200 hover:shadow-[0_0_24px_rgba(56,189,248,0.10)]"
-              >
-                {/* Colored accent line top */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+        <div className="flex-1 px-4 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {selectedCategory === "theme" ? (
+            <div className="flex flex-col gap-4">
+              {/* <h3 className="text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-1 opacity-60">Cài đặt Môi Trường</h3> */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { id: 'default', name: t('themes.default'), img: '/images/enviroment/default.jpg' },
+                  { id: 'space', name: t('themes.space'), img: '/images/enviroment/space.jpg' },
+                  { id: 'sunset', name: t('themes.sunset'), img: '/images/enviroment/sunset.jpg' },
+                  { id: 'daylight', name: t('themes.daylight'), img: '/images/enviroment/daylight.jpg' }
+                ].map(theme => {
+                  const isActive = map.theme === theme.id;
+                  return (
+                    <div
+                      key={theme.id}
+                      onClick={() => !isReadOnly && setMap((s: LabMap) => ({ ...s, theme: theme.id as any }))}
+                      className={`group relative flex flex-col rounded overflow-hidden border transition-all duration-200 ${isReadOnly ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'} ${isActive
+                        ? 'border-sky-400/40 shadow-[0_0_24px_rgba(56,189,248,0.15)] bg-sky-500/5'
+                        : 'border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] hover:shadow-[0_0_24px_rgba(56,189,248,0.1)]'
+                        }`}
+                    >
+                      {/* Colored accent line top */}
+                      <div className={`absolute top-0 left-0 right-0 h-[2px] transition-opacity duration-300 z-10 ${isActive ? 'bg-sky-400 opacity-100' : 'bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100'
+                        }`} />
 
-                {/* Preview */}
-                <div className="relative h-28 sm:h-36 overflow-hidden">
-                  {m.defaultScoreValue && (
-                    <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-semibold">
-                      ✦ {m.defaultScoreValue} pts
+                      {/* Preview area - matching exactly h-28 sm:h-36 */}
+                      <div className="relative h-28 sm:h-36 overflow-hidden bg-black">
+                        <img
+                          src={theme.img}
+                          alt={theme.name}
+                          className={`w-full h-full object-cover transition-transform duration-500 ${isActive ? 'scale-110' : 'opacity-60 group-hover:opacity-90 group-hover:scale-[1.04]'}`}
+                        />
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
+                      </div>
+
+                      {/* Footer - matching exactly px-3 py-2.5 bg-white/[0.02] border-t */}
+                      <div className={`flex items-center gap-2 px-3 py-2.5 border-t transition-colors ${isActive ? 'border-sky-400/30 bg-sky-400/10' : 'border-white/[0.06] bg-white/[0.02]'
+                        }`}>
+                        <span className={`text-[13px] font-semibold truncate flex-1 tracking-tight ${isActive ? 'text-sky-300' : 'text-white'}`}>
+                          {theme.name}
+                        </span>
+
+                        <div className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive
+                          ? 'bg-sky-500 border border-sky-400 text-white shadow-[0_0_12px_rgba(56,189,248,0.4)]'
+                          : 'bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] text-slate-500'
+                          }`}>
+                          {isActive ? (
+                            <FaCheck className="text-[10px]" />
+                          ) : (
+                            <div className="w-1.5 h-1.5 bg-sky-500/50 rounded-full" />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
-                  <div className="w-full h-full group-hover:scale-[1.04] transition-transform duration-300 ease-out">
-                    <SidebarModelPreview m={m} />
+                  );
+                })}
+              </div>
+            </div>
+
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {MODEL_CATEGORIES.find(
+                (c) => c.id === selectedCategory,
+              )?.models.map((m) => (
+                <div
+                  key={m.id}
+                  className="group relative flex flex-col rounded overflow-hidden border border-white/[0.08] hover:border-sky-400/40 bg-[linear-gradient(160deg,#0c1a30_0%,#06101e_100%)] transition-all duration-200 hover:shadow-[0_0_24px_rgba(56,189,248,0.10)]"
+                >
+                  {/* Colored accent line top */}
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+
+                  {/* Preview */}
+                  <div className="relative h-28 sm:h-36 overflow-hidden">
+                    {m.defaultScoreValue && (
+                      <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[10px] font-semibold">
+                        ✦ {m.defaultScoreValue} {t("models.pts")}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(56,189,248,0.08),transparent_70%)]" />
+                    <div className="w-full h-full group-hover:scale-[1.04] transition-transform duration-300 ease-out">
+                      <SidebarModelPreview m={m} />
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
+                    <span className="text-[13px] font-semibold text-white truncate flex-1 tracking-tight">
+                      {t(`models.${m.id}`)}
+                    </span>
+                    <button
+                      onClick={() => !isReadOnly && addPredefinedModel(m)}
+                      aria-label={t("models.add", { name: t(`models.${m.id}`) })}
+                      disabled={isReadOnly}
+                      className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M12 5v14M5 12h14"
+                          stroke="#38bdf8"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-
-                {/* Footer */}
-                <div className="flex items-center gap-2 px-3 py-2.5 border-t border-white/[0.06] bg-white/[0.02]">
-                  <span className="text-[13px] font-semibold text-white truncate flex-1 tracking-tight">
-                    {m.name}
-                  </span>
-                  <button
-                    onClick={() => addPredefinedModel(m)}
-                    aria-label={`Add ${m.name}`}
-                    className="shrink-0 w-7 h-7 rounded-lg bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] hover:border-sky-400/30 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
-                  >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M12 5v14M5 12h14"
-                        stroke="#38bdf8"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-[#07111f]/95 border-b border-white/[0.06] backdrop-blur-md flex-wrap gap-y-2">
+        <div className="flex items-center gap-3 px-5 py-2.5 bg-greyscale-900 border-b border-white/[0.06] backdrop-blur-md flex-wrap ">
           {/* Map size */}
-          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+          <div className="flex items-center gap-2
+           px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.06]">
             <svg
               width="13"
               height="13"
@@ -1780,136 +2431,86 @@ function MapEditorContent() {
               min={10}
               max={50}
               step={5}
-              value={mapCells}
-              onChange={(e) => setMapCells(Number(e.target.value))}
-              className="w-20 h-0.5 accent-sky-400 cursor-pointer"
+              value={map.cells}
+              disabled={isReadOnly}
+              onChange={(e) => setMap((s: LabMap) => ({ ...s, cells: Number(e.target.value) }))}
+              className="w-20 h-0.5 accent-sky-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <span className="text-[11px] text-slate-400 font-mono tabular-nums">
-              {mapCells}×{mapCells}m
+              {map.cells}×{map.cells}m
             </span>
           </div>
 
           <div className="h-5 w-px bg-white/10" />
 
-          {/* Action buttons */}
+          {/* Navigation & Save */}
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setShowMissionModal(true)}
-              title="Mission Settings"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13]"
+              onClick={handleBack}
+              className="group flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold rounded bg-greyscale-700 text-greyscale-0 border-2 border-greyscale-600 hover:bg-white/5 transition-all shadow-sm"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="3"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                />
-                <path
-                  d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-              Mission
+              <FaArrowLeft className="text-[10px] group-hover:-translate-x-0.5 transition-transform text-primary-300" />
+              {t("toolbar.back")}
             </button>
 
-            <button
-              onClick={exportLabData}
-              title="Export lab as JSON"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13]"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 3v13M7 11l5 5 5-5M5 20h14"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Export
-            </button>
-
-            <label
-              title="Load lab from JSON"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 hover:text-white transition-all duration-150 border border-white/[0.07] hover:border-white/[0.13] cursor-pointer"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 21V8M7 13l5-5 5 5M5 4h14"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Load
-              <input
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = (evt) => {
-                    try {
-                      loadLabData(JSON.parse(evt.target!.result as string));
-                    } catch {
-                      toast.error("Invalid JSON file");
-                    }
-                  };
-                  reader.readAsText(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
-
-            {clipboardObject && (
+            {!isReadOnly && (
               <button
-                onClick={() => {
-                  const newObj: MapObject = {
-                    ...clipboardObject,
-                    id: `object-${Date.now()}-${Math.random()}`,
-                    position: [
-                      clipboardObject.position[0] + 1,
-                      clipboardObject.position[1],
-                      clipboardObject.position[2] + 1,
-                    ],
-                    isClamped: false,
-                  };
-                  setObjects((prev) => [...prev, newObj]);
-                  setTimeout(() => setSelectedObjectId(newObj.id), 0);
-                }}
-                title="Paste copied object (Ctrl+V)"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 transition-all duration-150 border border-sky-500/20 hover:border-sky-400/40"
+                onClick={() => saveToStorage(false)}
+                disabled={isSaving || !isOnline || !isDirty}
+                className={`
+                  relative flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded transition-all duration-300 border
+                  ${saveSuccess
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                    : !isOnline
+                      ? "bg-red-500/10 text-red-400 border-red-500/20 opacity-70"
+                      : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <rect
-                    x="8"
-                    y="4"
-                    width="12"
-                    height="16"
-                    rx="2"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  />
-                  <path
-                    d="M8 8H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-3"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                Paste
-                <kbd className="px-1 py-px bg-sky-950/60 rounded text-[9px] font-mono border border-sky-700/30 leading-tight opacity-70">
-                  ⌃V
-                </kbd>
+                {isSaving ? (
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : saveSuccess ? (
+                  <FaCheck className="animate-in zoom-in duration-300" />
+                ) : !isOnline ? (
+                  <span>⚠</span>
+                ) : (
+                  <FaSave className="text-[10px]" />
+                )}
+                {saveSuccess ? t("toolbar.saved") : isSaving ? t("toolbar.saving") : !isOnline ? t("toolbar.offline") : t("toolbar.save")}
+
+                {isDirty && !saveSuccess && !isSaving && isOnline && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-sky-400 rounded-full border-2 border-greyscale-900 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+                )}
               </button>
             )}
+
+            <button
+              onClick={() => setShowMissionModal(true)}
+              className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-primary-300 text-white border border-primary-200 hover:bg-primary-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300 ml-1"
+            >
+              {isReadOnly ? t("toolbar.viewConfig") : t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+
+            {currentValidation.hasDrone && currentValidation.hasObjects && currentValidation.hasRules && (
+              <button
+                onClick={handleTestFlight}
+                className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-emerald-500 text-black border border-emerald-400 hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 ml-1"
+              >
+                {hasSolution ? (
+                  <FaEye className="text-[10px] group-hover:scale-110 transition-transform" />
+                ) : (
+                  <FaPlay className="text-[10px] group-hover:scale-110 transition-transform" />
+                )}
+                {hasSolution ? "Xem lời giải" : "Giải thử"}
+              </button>
+            )}
+          </div>
+
+          <div className="h-5 w-px bg-white/10" />
+
+          <div className="flex items-center gap-1.5">
+            {/* Action buttons removed */}
           </div>
 
           {/* Mission HUD */}
@@ -1924,22 +2525,22 @@ function MapEditorContent() {
           )}
           {missionResult === "pass" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-semibold tracking-wide">
-              PASS
+              {t("hud.completed")}
             </span>
           )}
           {missionResult === "fail" && (
             <span className="px-3 py-1.5 text-[11px] rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 font-semibold tracking-wide">
-              FAIL
+              {t("hud.failed")}
             </span>
           )}
 
           {/* Transform mode */}
           <div className="ml-auto relative">
-            <div className="flex items-center gap-0.5 rounded-lg bg-white/[0.04] p-0.5 border border-white/[0.07]">
+            <div className="flex items-center gap-0.5 rounded bg-white/[0.04] p-0.5 border border-white/[0.07]">
               {[
                 {
                   mode: "translate" as TransformMode,
-                  label: "Move",
+                  label: "Di Chuyển",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1960,7 +2561,7 @@ function MapEditorContent() {
                 },
                 {
                   mode: "rotate" as TransformMode,
-                  label: "Rotate",
+                  label: "Xoay",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1974,7 +2575,7 @@ function MapEditorContent() {
                 },
                 {
                   mode: "scale" as TransformMode,
-                  label: "Scale",
+                  label: "Tỷ Lệ",
                   icon: (
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                       <path
@@ -1990,28 +2591,43 @@ function MapEditorContent() {
                 <button
                   key={mode}
                   onClick={() => setTransformMode(mode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-all duration-150 ${
-                    transformMode === mode
-                      ? "bg-sky-500/20 text-sky-300"
-                      : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]"
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded transition-all duration-150 ${transformMode === mode
+                    ? "bg-sky-500/20 text-sky-300"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]"
+                    }`}
                 >
                   {icon}
-                  {label}
+                  {t(`toolbar.transform.${mode}`)}
                 </button>
               ))}
             </div>
-            <kbd className="absolute -top-2 -left-2 px-1 py-px bg-[#07111f] text-slate-600 rounded text-[9px] font-mono border border-white/[0.06] leading-tight">
+            <kbd className="absolute -top-2 -left-2 px-1 py-px bg-[#07111f] text-slate-300 rounded text-[11px] font-mono border border-white/[0.06] leading-tight">
               Tab
             </kbd>
           </div>
+
+          <LanguageSwitcher />
+
+          {isReadOnly && (
+            <div className="ml-4 px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest animate-pulse flex items-center gap-2">
+              <FaLock className="text-[9px]" /> {t("toolbar.readOnlyHUD")}
+            </div>
+          )}
         </div>
 
         {/* 3D Canvas */}
-        <div className="flex-1 relative">
-          {selectedObject && (
+        <div className="flex-1 relative" ref={mainCanvasContainerRef}>
+          {selectedObject && !isReadOnly && (
             <button
               onClick={handleDeleteSelected}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
               title="Delete selected object (Del / Backspace)"
               className="absolute left-4 top-4 z-40 group flex items-center gap-2 px-3 py-2 rounded-lg bg-red-950/80 hover:bg-red-700/90 border border-red-500/30 hover:border-red-400/60 text-red-400 hover:text-white text-[12px] font-medium backdrop-blur-sm shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
             >
@@ -2023,59 +2639,70 @@ function MapEditorContent() {
                 aria-hidden="true"
               >
                 <path
-                  d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
-              Delete
+              {t("properties.remove")}
               <kbd className="ml-0.5 px-1 py-px bg-red-950/60 rounded text-[9px] font-mono border border-red-700/50 leading-tight text-red-500 group-hover:border-red-500/50 group-hover:text-red-300 transition-colors">
                 Del
               </kbd>
             </button>
           )}
           {selectedObject && transformMode === "rotate" && (
-            <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40">
-              <div className="text-sm font-medium mb-2">Rotate (Y)</div>
-              <div className="flex gap-2 items-center">
-                <button
-                  title="Rotate +90°"
-                  className="w-10 h-8 flex items-center justify-center bg-gray-700 rounded"
-                  onClick={() => {
-                    const d = degToRad(90);
-                    const y = (selectedObject.rotation[1] ?? 0) + d;
-                    finalizingRef.current = true;
-                    updateObjectProps(selectedObject.id, {
-                      rotation: [
-                        selectedObject.rotation[0],
-                        y,
-                        selectedObject.rotation[2],
-                      ],
-                    });
-                    setTimeout(() => {
-                      finalizingRef.current = false;
-                    }, 80);
-                  }}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+            <div
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                handleTransformStart();
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                handleTransformEnd();
+              }}
+              className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-40"
+            >
+              <div className="text-sm font-medium mb-2">{t("properties.rotateY")}</div>
+              {!isReadOnly && (
+                <div className="flex gap-2 items-center">
+                  <button
+                    title="Rotate +90°"
+                    className="w-10 h-8 flex items-center justify-center bg-gray-700 rounded"
+                    onClick={() => {
+                      const d = degToRad(90);
+                      const y = (selectedObject.rotation[1] ?? 0) + d;
+                      finalizingRef.current = true;
+                      handleObjectTransform(selectedObject.id, {
+                        rotation: [
+                          selectedObject.rotation[0],
+                          y,
+                          selectedObject.rotation[2],
+                        ],
+                      });
+                      setTimeout(() => {
+                        finalizingRef.current = false;
+                      }, 80);
+                    }}
                   >
-                    <path
-                      d="M12 2v4M20.364 4.636A9 9 0 1012 21"
-                      stroke="#9CA3AF"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2v4M20.364 4.636A9 9 0 1012 21"
+                        stroke="#9CA3AF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {isReadOnly && (
+                <div className="text-[10px] text-slate-400 italic">Đã khóa ở chế độ CHỈ ĐỌC</div>
+              )}
             </div>
           )}
           {selectedObject &&
@@ -2086,26 +2713,43 @@ function MapEditorContent() {
               const hasAnyScale = sc.x.enabled || sc.y.enabled || sc.z.enabled;
               if (!hasAnyScale) return null;
               const modelCfg = getModelConfig(selectedObject.modelUrl);
+              const isPattern = selectedObject.objectType === "pattern";
               const axes = [
-                { key: "x" as const, label: "Width (X)", idx: 0 },
-                { key: "y" as const, label: "Height (Y)", idx: 1 },
-                { key: "z" as const, label: "Depth (Z)", idx: 2 },
+                { key: "x" as const, label: isPattern ? "Kích thước X (Dài)" : t("properties.width"), idx: 0 },
+                { key: "y" as const, label: isPattern ? "Chiều cao Y" : t("properties.height"), idx: 1 },
+                { key: "z" as const, label: isPattern ? "Kích thước Z (Rộng)" : t("properties.depth"), idx: 2 },
               ];
               return (
-                <div className="absolute right-6 top-6 z-30 bg-gray-800/80 text-gray-100 p-3 rounded border border-gray-700 w-48">
-                  <div className="text-sm font-medium mb-2">Properties</div>
+                <div
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-40 bg-gray-900/90 text-gray-100 p-4 rounded-xl border border-white/10 w-52 backdrop-blur-md shadow-2xl"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                    <div className="text-[11px] font-black uppercase tracking-widest text-slate-300">
+                      {isPattern ? "Điều chỉnh hình dạng" : t("properties.title")}
+                    </div>
+                  </div>
                   {modelCfg?.hasColor && (
                     <>
-                      <label className="text-xs">Color</label>
+                      <label className="text-xs">{t("properties.color")}</label>
                       <input
+                        disabled={isReadOnly}
                         type="color"
                         value={(selectedObject as any).color ?? "#00d9ff"}
                         onChange={(e) =>
-                          updateObjectProps(selectedObject.id, {
+                          handleObjectTransform(selectedObject.id, {
                             color: e.target.value,
                           })
                         }
-                        className="w-full h-8 mb-2 p-0 border-0"
+                        className="w-full h-8 mb-2 p-0 border-0 disabled:opacity-50"
                       />
                     </>
                   )}
@@ -2117,6 +2761,7 @@ function MapEditorContent() {
                         <div key={key}>
                           <label className="text-xs">{label}</label>
                           <input
+                            disabled={isReadOnly}
                             type="range"
                             min={ac.min ?? 0.2}
                             max={ac.max ?? 3}
@@ -2133,58 +2778,39 @@ function MapEditorContent() {
                                 s[1] = v;
                                 s[2] = v;
                               }
-                              updateObjectProps(selectedObject.id, {
+                              handleObjectTransform(selectedObject.id, {
                                 scale: s,
                               });
                             }}
-                            className="w-full"
+                            className="w-full disabled:opacity-50"
                           />
                         </div>
                       );
                     })}
 
-                    {/* {getConstraintsForModel(selectedObject.modelUrl)?.rotate.y
-                      .enabled && (
-                        <div className="mt-2">
-                          <button
-                            className="px-3 py-1 bg-gray-700 rounded text-sm"
-                            onClick={() => {
-                              const d = degToRad(90);
-                              const y = (selectedObject.rotation[1] ?? 0) + d;
-                              updateObjectProps(selectedObject.id, {
-                                rotation: [
-                                  selectedObject.rotation[0],
-                                  y,
-                                  selectedObject.rotation[2],
-                                ],
-                              });
-                            }}
-                          >
-                            Rotate +90°
-                          </button>
-                        </div>
-                      )} */}
-                    <button
-                      onClick={handleDeleteSelected}
-                      className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
-                    >
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
+                    {!isReadOnly && (
+                      <button
+                        onClick={handleDeleteSelected}
+                        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
                       >
-                        <path
-                          d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      Remove Object
-                    </button>
+                        <svg
+                          width="11"
+                          height="11"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        {t("properties.remove")}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -2211,233 +2837,126 @@ function MapEditorContent() {
 
           {selectedObject?.objectType === "checkpoint" &&
             (() => {
+              const cpObj = selectedObject;
+              if (!cpObj) return null;
               const cpIndex = objects
                 .filter((o) => o.objectType === "checkpoint")
-                .findIndex((o) => o.id === selectedObject.id);
+                .findIndex((o) => o.id === cpObj.id);
               return (
-                <div className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52">
+                <div
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handleTransformStart();
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    handleTransformEnd();
+                  }}
+                  className="absolute right-6 top-6 z-40 bg-gray-800/90 text-gray-100 p-3 rounded border border-gray-700 w-52"
+                >
                   <div className="text-sm font-medium mb-2">
-                    🔵 Checkpoint Properties
+                    🔵 {t("properties.checkpointTitle")}
                   </div>
                   <div className="text-xs text-gray-400 mb-1">
-                    Order:{" "}
+                    {t("properties.order")}:{" "}
                     <span className="text-white font-mono">#{cpIndex + 1}</span>
                   </div>
-                  <label className="text-xs text-gray-400">Radius</label>
+                  <label className="text-xs text-gray-400">{t("properties.radius")}</label>
                   <input
+                    disabled={isReadOnly}
                     type="range"
                     min={4}
-                    max={10}
+                    max={15}
                     step={0.5}
-                    value={selectedObject.radius ?? 2}
+                    value={cpObj.radius ?? 2}
                     onChange={(e) =>
-                      updateObjectProps(selectedObject.id, {
+                      handleObjectTransform(cpObj.id, {
                         radius: parseFloat(e.target.value),
                       })
                     }
-                    className="w-full mt-1"
+                    className="w-full mt-1 disabled:opacity-50"
                   />
-                  {/* <div className="text-xs text-gray-400 mt-1">
-                    {(selectedObject.radius ?? 2).toFixed(2)} m
-                  </div> */}
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="mt-3 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
-                  >
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
+                  {!isReadOnly && (
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="mt-3 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 bg-red-900/40 hover:bg-red-700/60 border border-red-700/40 hover:border-red-500/60 rounded text-red-400 hover:text-red-200 text-[11px] font-medium transition-all duration-150"
                     >
-                      <path
-                        d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    Remove Checkpoint
-                  </button>
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {t("properties.removeCheckpoint")}
+                    </button>
+                  )}
                 </div>
               );
             })()}
 
-          {/* ── Mission Settings Modal ────────────────────────────────── */}
-          {showMissionModal && (
-            <div
-              className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setShowMissionModal(false);
-              }}
-            >
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-[380px] shadow-2xl text-gray-100">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-base font-semibold">
-                    ⚙ Mission Settings
-                  </h2>
-                  <button
-                    onClick={() => setShowMissionModal(false)}
-                    className="text-gray-500 hover:text-white text-lg leading-none"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">
-                      Lab Name
-                    </label>
-                    <input
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                      value={missionSettings.labName}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          labName: e.target.value,
-                        }))
-                      }
-                      placeholder="My Lab"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 block mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm resize-none h-20"
-                      value={missionSettings.description}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          description: e.target.value,
-                        }))
-                      }
-                      placeholder="Describe the mission objectives…"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs text-gray-400 block mb-1">
-                        Time Limit (s)
-                      </label>
-                      <input
-                        type="number"
-                        min={10}
-                        step={5}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                        value={missionSettings.timeLimit}
-                        onChange={(e) =>
-                          setMissionSettings((s) => ({
-                            ...s,
-                            timeLimit: Math.max(10, Number(e.target.value)),
-                          }))
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs text-gray-400 block mb-1">
-                        Required Score
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm"
-                        value={missionSettings.requiredScore}
-                        onChange={(e) =>
-                          setMissionSettings((s) => ({
-                            ...s,
-                            requiredScore: Math.max(0, Number(e.target.value)),
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      id="seq-cp"
-                      type="checkbox"
-                      checked={missionSettings.sequentialCheckpoints}
-                      onChange={(e) =>
-                        setMissionSettings((s) => ({
-                          ...s,
-                          sequentialCheckpoints: e.target.checked,
-                        }))
-                      }
-                      className="w-4 h-4 accent-[#3AC0D3]"
-                    />
-                    <label
-                      htmlFor="seq-cp"
-                      className="text-sm text-gray-300 cursor-pointer"
-                    >
-                      Sequential Checkpoints
-                    </label>
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-end gap-2">
-                  <button
-                    onClick={() => setShowMissionModal(false)}
-                    className="px-4 py-2 text-sm rounded bg-gray-700 hover:bg-gray-600"
-                  >
-                    Close
-                  </button>
-                  {!missionRunning ? (
-                    <button
-                      onClick={() => {
-                        setShowMissionModal(false);
-                        startMission();
-                      }}
-                      className="px-4 py-2 text-sm rounded bg-emerald-700 hover:bg-emerald-600 text-white font-medium"
-                    >
-                      ▶ Start Mission
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setShowMissionModal(false);
-                        stopMission();
-                      }}
-                      className="px-4 py-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white font-medium"
-                    >
-                      ■ Stop Mission
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
-          <Canvas
-            shadows
-            gl={{
-              toneMapping: THREE.ACESFilmicToneMapping,
-              toneMappingExposure: 0.8,
-              outputColorSpace: THREE.SRGBColorSpace,
-              preserveDrawingBuffer: true,
+
+          {/* ── Rule Configuration Modal ─────────────────────────────── */}
+          <RuleConfigurationModal
+            show={showMissionModal}
+            onClose={() => setShowMissionModal(false)}
+            rule={rule}
+            onChange={setRule}
+            objects={objects}
+            isSaving={isSaving}
+            hasSolution={hasSolution}
+            isReadOnly={isReadOnly}
+            onSave={async (draftRule: any) => {
+              const success = await saveToStorage(false, draftRule);
+              if (success) {
+                setShowMissionModal(false);
+              }
             }}
-            camera={{
-              position: CAMERA_CONFIG.INITIAL_POSITION,
-              fov: CAMERA_CONFIG.FOV,
-              near: CAMERA_CONFIG.NEAR,
-              far: 5000,
-            }}
-            className="w-full h-full"
-          >
-            <color attach="background" args={["#071427"]} />
-            <Scene
-              objects={objects}
-              selectedObjectId={selectedObjectId}
-              onSelectObject={setSelectedObjectId}
-              transformMode={transformMode}
-              onObjectTransform={handleObjectTransform}
-              disableOrbitControls={isTransforming}
-              onTransformStart={handleTransformStart}
-              onTransformEnd={handleTransformEnd}
-              mapCells={mapCells}
-            />
-          </Canvas>
+          />
+
+          {mountedNode && (
+            <Canvas
+              eventSource={mountedNode}
+              shadows
+              gl={{
+                toneMapping: THREE.ACESFilmicToneMapping,
+                toneMappingExposure: 0.8,
+                outputColorSpace: THREE.SRGBColorSpace,
+                preserveDrawingBuffer: true,
+              }}
+              camera={{
+                position: CAMERA_CONFIG.INITIAL_POSITION,
+                fov: CAMERA_CONFIG.FOV,
+                near: CAMERA_CONFIG.NEAR,
+                far: 5000,
+              }}
+              className="w-full h-full"
+            >
+              <MapEnvironment theme={map.theme} />
+              <Scene
+                objects={objects}
+                selectedObjectId={selectedObjectId}
+                onSelectObject={setSelectedObjectId}
+                transformMode={isReadOnly ? null : transformMode}
+                onObjectTransform={handleObjectTransform}
+                disableOrbitControls={isTransforming}
+                onTransformStart={handleTransformStart}
+                onTransformEnd={handleTransformEnd}
+                map={map}
+                labId={labId}
+                cameraResetToken={cameraResetToken}
+              />
+            </Canvas>
+          )}
         </div>
       </div>
     </div>
@@ -2445,5 +2964,11 @@ function MapEditorContent() {
 }
 
 export default function MapEditor() {
-  return <MapEditorContent />;
+  return (
+    <MapEditorErrorBoundary>
+      <Suspense fallback={<Loading />}>
+        <MapEditorContent />
+      </Suspense>
+    </MapEditorErrorBoundary>
+  );
 }

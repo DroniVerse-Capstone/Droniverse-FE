@@ -1,5 +1,5 @@
- "use client";
-import {  useGLTF } from "@react-three/drei";
+"use client";
+import { useGLTF } from "@react-three/drei";
 import HoopGoal from "./goals/HoopGoal";
 import SquareGoal from "./goals/SquareGoal";
 import {
@@ -9,10 +9,10 @@ import {
 type GoalProps = {
   goal: {
     position: { x: number; y: number; z: number };
-    shape?: "circle" | "square";
+    shape?: "circle" | "square" | "zigzag";
     radius?: number;
-    size?: [number, number]; 
-    rotation?: [number, number, number]; 
+    size?: [number, number];
+    rotation?: [number, number, number];
     coords?: { x: number; y: number; altitude: number };
   };
 };
@@ -29,8 +29,8 @@ export default function GoalMarker({ goal }: GoalProps) {
 
 
   const rotationRad: [number, number, number] = rotation
-    ? [ (rotation[0] * Math.PI) / 180, (rotation[1] * Math.PI) / 180, (rotation[2] * Math.PI) / 180 ]
-    : [0, Math.PI, 0]; 
+    ? [(rotation[0] * Math.PI) / 180, (rotation[1] * Math.PI) / 180, (rotation[2] * Math.PI) / 180]
+    : [0, Math.PI, 0];
 
   return (
     <group position={[position.x, baseY, position.z]} rotation={rotationRad}>

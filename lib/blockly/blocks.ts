@@ -38,7 +38,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_up",
 			message0: translations.up.message,
-			args0: [{ type: "field_number", name: "AMOUNT", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "AMOUNT", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 230,
@@ -47,7 +47,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_down",
 			message0: translations.down.message,
-			args0: [{ type: "field_number", name: "AMOUNT", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "AMOUNT", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 230,
@@ -56,7 +56,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_left",
 			message0: translations.left.message,
-			args0: [{ type: "field_number", name: "DIST", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "DIST", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 160,
@@ -65,7 +65,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_right",
 			message0: translations.right.message,
-			args0: [{ type: "field_number", name: "DIST", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "DIST", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 160,
@@ -74,7 +74,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_forward",
 			message0: translations.forward.message,
-			args0: [{ type: "field_number", name: "DIST", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "DIST", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 160,
@@ -83,7 +83,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 		{
 			type: "drone_back",
 			message0: translations.backward.message,
-			args0: [{ type: "field_number", name: "DIST", value: 1, min: 1, max: 10, precision: 1 }],
+			args0: [{ type: "field_number", name: "DIST", value: 1, min: 0.1, max: 10, precision: 0.1 }],
 			previousStatement: true,
 			nextStatement: true,
 			colour: 160,
@@ -111,6 +111,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			type: "drone_land",
 			message0: translations.land.message,
 			previousStatement: true,
+			nextStatement: true,
 			colour: 0,
 			tooltip: translations.land.tooltip,
 		},

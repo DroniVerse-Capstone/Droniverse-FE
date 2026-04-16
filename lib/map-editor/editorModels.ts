@@ -1,3 +1,6 @@
+import type { MapObject } from "@/types/lab";
+export type { MapObject };
+
 export type PredefinedModel = {
     id: string;
     name: string;
@@ -10,7 +13,7 @@ export type PredefinedModel = {
     rotatable?: boolean;
     hasColor?: boolean;
     collisionRadius?: number;
-    category?: "drone" | "obstacle" | "decor" | "goal" | "bonus" | "checkpoint";
+    category?: "drone" | "obstacle" | "decor" | "goal" | "bonus" | "checkpoint" | "pattern";
     constraints: ModelConstraints;
     defaultScoreValue?: number;  // for bonus items
     defaultRadius?: number;      // for checkpoints
@@ -43,23 +46,6 @@ export type ModelConstraints = {
     };
 };
 
-export type MapObject = {
-    id: string;
-    position: [number, number, number];
-    rotation: [number, number, number];
-    scale: [number, number, number];
-    modelUrl: string;
-    color?: string;
-    collisionRadius?: number;
-    scaleLimits?: { min: number; max: number };
-    scalable?: boolean;
-    rotatable?: boolean;
-    isClamped?: boolean;
-    // Extended fields
-    objectType?: "obstacle" | "bonus" | "checkpoint";
-    scoreValue?: number;   // bonus items only
-    radius?: number;       // checkpoints only (drives visual ring size)
-};
 
 export const MAX_ALTITUDE = 50;
 
@@ -249,9 +235,9 @@ const BOX_CONSTRAINTS: ModelConstraints = {
     },
     scale: {
         uniform: false,
-        x: { enabled: true, min: 2, max: 4.5 },
-        y: { enabled: true, min: 2, max: 4.5 },
-        z: { enabled: true, min: 2, max: 4.5 },
+        x: { enabled: true, min: 5, max: 50 },
+        y: { enabled: true, min: 5, max: 50 },
+        z: { enabled: true, min: 5, max: 50 },
     },
 };
 
@@ -293,6 +279,25 @@ const CHECKPOINT_CONSTRAINTS: ModelConstraints = {
     },
 };
 
+const PATTERN_CONSTRAINTS: ModelConstraints = {
+    translate: {
+        x: { enabled: true },
+        y: { enabled: true, min: 10, max: MAX_ALTITUDE },
+        z: { enabled: true },
+    },
+    rotate: {
+        x: { enabled: false },
+        y: { enabled: true },
+        z: { enabled: false },
+    },
+    scale: {
+        uniform: false,
+        x: { enabled: true, min: 20, max: 200 },
+        y: { enabled: false },
+        z: { enabled: true, min: 20, max: 200 },
+    },
+};
+
 export const PREDEFINED_MODELS: PredefinedModel[] = [
     {
         id: "drone",
@@ -313,10 +318,10 @@ export const PREDEFINED_MODELS: PredefinedModel[] = [
         id: "box",
         name: "Box",
         url: "primitive:box",
-        defaultScale: 2,
-        previewScale: 0.3,
-        minScale: 2,
-        maxScale: 4.5,
+        defaultScale: 10,
+        previewScale: 0.07,
+        minScale: 5,
+        maxScale: 50,
         scalable: true,
         rotatable: true,
         hasColor: true,
@@ -441,14 +446,60 @@ export const PREDEFINED_MODELS: PredefinedModel[] = [
         defaultScale: 1,
         previewScale: 1,
         minScale: 1,
-        maxScale: 1,
+        maxScale: 2,
         scalable: false,
         rotatable: false,
         hasColor: false,
         collisionRadius: 2,
         category: "checkpoint",
-        defaultRadius: 5,
+        defaultRadius: 10,
         constraints: CHECKPOINT_CONSTRAINTS,
+    },
+    // ── Flight Pattern Rules ────────────────────────────────
+    {
+        id: "pattern_square",
+        name: "Square Path",
+        url: "primitive:pattern_square",
+        defaultScale: 40,
+        previewScale: 0.1,
+        minScale: 20,
+        maxScale: 200,
+        scalable: true,
+        rotatable: true,
+        hasColor: false,
+        collisionRadius: 0,
+        category: "pattern",
+        constraints: PATTERN_CONSTRAINTS,
+    },
+    {
+        id: "pattern_circle",
+        name: "Circle Path",
+        url: "primitive:pattern_circle",
+        defaultScale: 20,
+        previewScale: 0.1,
+        minScale: 5,
+        maxScale: 200,
+        scalable: true,
+        rotatable: false,
+        hasColor: false,
+        collisionRadius: 0,
+        category: "pattern",
+        constraints: PATTERN_CONSTRAINTS,
+    },
+    {
+        id: "pattern_zigzag",
+        name: "Zigzag Path",
+        url: "primitive:pattern_zigzag",
+        defaultScale: 20,
+        previewScale: 0.1,
+        minScale: 5,
+        maxScale: 200,
+        scalable: true,
+        rotatable: true,
+        hasColor: false,
+        collisionRadius: 0,
+        category: "pattern",
+        constraints: PATTERN_CONSTRAINTS,
     },
 ];
 
@@ -468,6 +519,7 @@ export function buildModelCategories(): Category[] {
         goal: "⭐",
         bonus: "💎",
         checkpoint: "🔵",
+        pattern: "📐",
         uncategorized: "●",
     };
     const groups: Record<string, PredefinedModel[]> = {};

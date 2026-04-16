@@ -20,16 +20,18 @@ export type WorldPosition = {
 	z: number;
 };
 
-export function clampWithinCanvas(x: number, y: number) {
-	const pad = SIM_CANVAS.padding;
-	const clampedX = Math.max(pad, Math.min(SIM_CANVAS.width - pad, x));
-	const clampedY = Math.max(pad, Math.min(SIM_CANVAS.height - pad, y));
+export function clampWithinCanvas(x: number, y: number, customCanvas?: { width: number, height: number, padding: number }) {
+	const canvas = customCanvas || SIM_CANVAS;
+	const pad = canvas.padding;
+	const clampedX = Math.max(pad, Math.min(canvas.width - pad, x));
+	const clampedY = Math.max(pad, Math.min(canvas.height - pad, y));
 	return { x: clampedX, y: clampedY };
 }
 
-export function projectToWorld(xPx: number, yPx: number, altitude: number): WorldPosition {
-	const centeredX = xPx - CANVAS_CENTER.x;
-	const centeredZ = yPx - CANVAS_CENTER.y;
+export function projectToWorld(xPx: number, yPx: number, altitude: number, customCenter?: { x: number, y: number }): WorldPosition {
+	const center = customCenter || CANVAS_CENTER;
+	const centeredX = xPx - center.x;
+	const centeredZ = yPx - center.y;
 	return {
 		x: centeredX * WORLD_SCALE_VALUE,
 		y: altitude * ALTITUDE_SCALE,
@@ -41,10 +43,11 @@ export function radiusToWorld(radiusPx: number) {
 	return Math.max(1, radiusPx * WORLD_SCALE_VALUE);
 }
 
-export function worldToCanvas(xWorld: number, zWorld: number) {
+export function worldToCanvas(xWorld: number, zWorld: number, customCenter?: { x: number, y: number }) {
+	const center = customCenter || CANVAS_CENTER;
 	return {
-		x: xWorld / WORLD_SCALE_VALUE + CANVAS_CENTER.x,
-		y: zWorld / WORLD_SCALE_VALUE + CANVAS_CENTER.y,
+		x: xWorld / WORLD_SCALE_VALUE + center.x,
+		y: zWorld / WORLD_SCALE_VALUE + center.y,
 	};
 }
 

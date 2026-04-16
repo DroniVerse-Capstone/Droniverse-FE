@@ -20,8 +20,8 @@ export default function HomeConnect() {
           </p>
 
           <div className="mt-4">
-            <Button 
-              variant={"secondary"} 
+            <Button
+              variant={"secondary"}
               onClick={() => router.push("/contact")}
               size="lg"
             >
