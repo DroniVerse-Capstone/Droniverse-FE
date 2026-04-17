@@ -81,6 +81,7 @@
       "notFinished": "CHƯA XONG",
       "time": "Thời gian",
       "timeUp": "HẾT GIỜ",
+      "blockCount": "Số khối",
       "patternCheck": "Kiểm tra Quỹ Đạo",
       "pattern": "Quỹ Đạo",
       "shape_square": "HÌNH VUÔNG",
@@ -108,7 +109,8 @@
         "math": "➗ Toán học",
         "effects": "🎵 Hiệu ứng",
         "input": "⌨️ Input",
-        "variables": "📦 Biến"
+        "variables": "📦 Biến số",
+        "functions": "🧩 Hàm khối"
       },
       "blocks": {
         "takeOff": {
@@ -178,9 +180,29 @@
           "message": "Phát âm thanh %1",
           "tooltip": "Phát âm thanh cho drone"
         },
+        "procedures": {
+          "defNoReturnTitle": "Định nghĩa hàm",
+          "defReturnTitle": "Định nghĩa hàm có kết quả",
+          "do": "thực hiện",
+          "call": "gọi hàm",
+          "return": "trả về kết quả"
+        },
+        "variables": {
+          "set": "gán %1 bằng %2",
+          "change": "tăng %1 thêm %2"
+        },
         "inputNumber": {
           "message": "Nhập số %1",
           "tooltip": "Nhập một số từ người dùng"
+        },
+        "logic": {
+          "true": "ĐÚNG",
+          "false": "SAI",
+          "and": "VÀ",
+          "or": "HOẶC"
+        },
+        "math": {
+          "modulo": "chia %1 cho %2 lấy số dư"
         }
       }
     }
@@ -1173,7 +1195,11 @@
       "saved": "Đã lưu!",
       "offline": "Mất kết nối",
       "configureRules": "Cấu hình luật chơi",
-      "viewConfig": "Xem cấu hình",
+      "viewConfig": "Xem cấu hình bản đồ",
+      "blocklyConfig": "Cấu hình Blockly",
+      "viewBlocklyConfig": "Xem cấu hình Blockly",
+      "viewSolution": "Xem lời giải",
+      "trySolve": "Giải thử",
       "readOnlyHUD": "CHỈ ĐỌC (ĐÃ KHÓA)",
       "readOnlyDesc": "Đã khóa ở chế độ CHỈ ĐỌC",
       "mapSize": "Kích thước bản đồ",
@@ -1452,5 +1478,78 @@
     "remaining": "mã còn lại",
     "notOwned": "Chưa sở hữu",
     "learners": "người học"
+  },
+  "BlocklyManager": {
+    "title": "Cấu hình khối lệnh (Blockly)",
+    "description": "Chọn block cho phép học viên sử dụng",
+    "search": "Tìm kiếm...",
+    "selectAll": "Bật hết",
+    "deselectAll": "Tắt hết",
+    "selectedCount": "Tổng cộng đã chọn:",
+    "cancel": "Hủy bỏ",
+    "close": "Đóng",
+    "save": "Lưu cấu hình",
+    "required": "Mặc định",
+    "categories": {
+      "motion": "Di chuyển",
+      "loops": "Vòng lặp",
+      "logic": "Điều kiện",
+      "sensors": "Cảm biến",
+      "math": "Toán học",
+      "variables": "Biến số",
+      "functions": "Hàm khối"
+    },
+    "blocks": {
+      "drone_take_off": "Cất cánh",
+      "drone_take_off_desc": "Khởi động drone",
+      "drone_land": "Hạ cánh",
+      "drone_land_desc": "Hạ cánh an toàn",
+      "drone_up": "Bay lên",
+      "drone_up_desc": "Bay lên trên",
+      "drone_down": "Bay xuống",
+      "drone_down_desc": "Bay xuống dưới",
+      "drone_forward": "Tiến tới",
+      "drone_forward_desc": "Bay tới trước",
+      "drone_back": "Lùi lại",
+      "drone_back_desc": "Bay lùi sau",
+      "drone_left": "Sang trái",
+      "drone_left_desc": "Bay sang trái",
+      "drone_right": "Sang phải",
+      "drone_right_desc": "Bay sang phải",
+      "drone_turn_left": "Xoay trái",
+      "drone_turn_left_desc": "Xoay máy bay trái",
+      "drone_turn_right": "Xoay phải",
+      "drone_turn_right_desc": "Xoay máy bay phải",
+      "drone_repeat": "Lặp lại",
+      "drone_repeat_desc": "Vòng lặp N lần",
+      "drone_if": "Nếu",
+      "drone_if_desc": "Nhánh điều kiện",
+      "drone_if_else": "Nếu... Ngược lại",
+      "drone_if_else_desc": "Nhánh đầy đủ",
+      "logic_compare": "So sánh",
+      "logic_compare_desc": "So sánh giá trị",
+      "logic_operation": "Logic",
+      "logic_operation_desc": "Và / Hoặc",
+      "logic_negate": "Phủ định",
+      "logic_negate_desc": "Giá trị đảo",
+      "logic_boolean": "Đúng/Sai",
+      "logic_boolean_desc": "Boolean",
+      "drone_is_obstacle_ahead": "Có vật cản?",
+      "drone_is_obstacle_ahead_desc": "Cảm biến phía trước",
+      "math_number": "Số",
+      "math_number_desc": "Giá trị số",
+      "math_arithmetic": "Phép tính",
+      "math_arithmetic_desc": "Cộng, trừ, nhân, chia, lũy thừa",
+      "math_modulo": "Phần dư",
+      "math_modulo_desc": "Chia lấy dư",
+      "drone_amount_value": "Khoảng cách",
+      "drone_amount_value_desc": "Giá trị số cho di chuyển",
+      "drone_math_operation": "Toán tử rút gọn",
+      "drone_math_operation_desc": "Cộng, trừ, nhân, chia",
+      "category_variables": "Nhóm lệnh Biến số",
+      "category_variables_desc": "Bật/Tắt biến số",
+      "category_functions": "Nhóm lệnh Hàm khối",
+      "category_functions_desc": "Bật/Tắt hàm tự tạo"
+    }
   }
 }
