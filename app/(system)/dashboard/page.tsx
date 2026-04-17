@@ -1,7 +1,8 @@
+import SystemManagerDashBoard from '@/components/system/dashboard/SystemManagerDashBoard'
 import React from 'react'
 
-export default function SystemManagerDashBoard() {
+export default function SystemManagerDashBoardPage() {
   return (
-    <div>DashBoard</div>
+    <SystemManagerDashBoard />
   )
 }

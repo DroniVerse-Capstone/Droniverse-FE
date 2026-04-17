@@ -98,9 +98,8 @@ export default function SandboxPage() {
           logic: t("blockly.categories.logic"),
           sensors: t("blockly.categories.sensors"),
           math: t("blockly.categories.math"),
-          effects: t("blockly.categories.effects"),
-          input: t("blockly.categories.input"),
           variables: t("blockly.categories.variables"),
+          functions: t("blockly.categories.functions"),
         },
       }),
     [t]

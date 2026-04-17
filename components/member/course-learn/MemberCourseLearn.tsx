@@ -11,8 +11,12 @@ import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
 import LearningPathSideBar from "@/components/member/course-learn/LearningPathSideBar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { useCheckUserLessonExists } from "@/hooks/learning/useUserLearning";
+import {
+  useCheckUserLessonExists,
+  useGetUserLearningPath,
+} from "@/hooks/learning/useUserLearning";
 import type { Lesson } from "@/validations/learning/user-learning";
+import { PiCertificateBold } from "react-icons/pi";
 import { RiArrowGoBackFill } from "react-icons/ri";
 
 export default function MemberCourseLearn() {
@@ -44,6 +48,10 @@ export default function MemberCourseLearn() {
       : undefined,
   );
 
+  const { data: learningPath } = useGetUserLearningPath(enrollmentId);
+  const canShowCertificate =
+    learningPath?.status === "COMPLETED" && !!learningPath.userCertificate;
+
   return (
     <div className="flex flex-col md:flex-row">
       <LearningPathSideBar
@@ -60,6 +68,43 @@ export default function MemberCourseLearn() {
             <LanguageSwitcher />
           </div>
         </header>
+
+        {canShowCertificate ? (
+          <div className="mx-auto mb-5 w-full max-w-4xl rounded-lg border border-secondary/40 bg-secondary/10 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-secondary/20 p-2 text-secondary">
+                  <PiCertificateBold size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-greyscale-0">
+                    Bạn đã hoàn thành khóa học
+                  </p>
+                  <p className="text-xs text-greyscale-200">
+                    Chứng chỉ của bạn đã sẵn sàng.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={learningPath.userCertificate?.certificateUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 items-center justify-center rounded border border-secondary px-3 text-sm font-semibold text-secondary transition-colors hover:bg-secondary/10"
+              >
+                Xem chứng chỉ
+              </a>
+            </div>
+
+            <div className="relative mt-4 h-60 w-full overflow-hidden rounded border border-greyscale-700 bg-greyscale-950 md:h-80">
+              <img
+                src={learningPath.userCertificate?.certificateUrl}
+                alt="Certificate"
+                className="h-full w-full object-contain p-4"
+              />
+            </div>
+          </div>
+        ) : null}
 
         {selectedLesson ? (
           lessonExistsQuery.isLoading ? (

@@ -11,7 +11,7 @@ import { SIM_CANVAS } from "@/lib/config3D/simConfig";
 import { useDroneController } from "@/hooks/useDroneController";
 import { useTranslations } from "@/providers/i18n-provider";
 import { LabContentData, LabSolution } from "@/types/lab";
-import { FaPlay, FaRedo, FaBatteryFull, FaRegClock, FaGlobe, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaBug, FaTerminal, FaTrophy, FaClock } from "react-icons/fa";
+import { FaPlay, FaRedo, FaBatteryFull, FaRegClock, FaGlobe, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaBug, FaTerminal, FaTrophy, FaClock, FaCube } from "react-icons/fa";
 import { projectToWorld, worldToCanvas } from "@/lib/config3D/simConfig";
 import { Command } from "@/lib/simulator/droneSimulator";
 import { validatePattern, validateFlightPattern, Point3D } from "@/lib/simulator/patternValidation";
@@ -112,10 +112,9 @@ export default function PlayLabWorkspace({
   const [dronePathHistory, setDronePathHistory] = useState<Point3D[]>([]);
   const [completedPatterns, setCompletedPatterns] = useState<Set<string>>(new Set());
 
-  // -- Dynamic World Configuration (BE Driven) --
   const canvasConfig = useMemo(() => {
     const cells = labData.map?.cells || 20;
-    const size = cells * 200; // 1 cell = 200px in simulator space
+    const size = cells * 200;
     return {
       width: size,
       height: size,
@@ -190,14 +189,21 @@ export default function PlayLabWorkspace({
         if (!e.isUiEvent) {
           setIsWorkspaceDirty(true);
         }
+
+        if (e.type === Blockly.Events.BLOCK_CHANGE ||
+          e.type === Blockly.Events.BLOCK_CREATE ||
+          e.type === Blockly.Events.BLOCK_DELETE) {
+          const toolbox = workspace.getToolbox() as any;
+          if (toolbox && typeof toolbox.refreshSelection === 'function') {
+            toolbox.refreshSelection();
+          }
+        }
       });
     },
     []
   );
 
   useEffect(() => {
-    // Determine the source of reality based on the mode
-    // Students should NEVER see the labData.solution.xml (Golden Solution)
     const xmlToLoad = mode === "student" ? initialBlocks : labData.solution?.xml;
 
     if (blocklyContext && xmlToLoad) {
@@ -216,13 +222,11 @@ export default function PlayLabWorkspace({
           Blockly.Events.enable();
         }
 
-        // Reset dirty flag AFTER loading and with a slight delay for any trailing events
         setTimeout(() => {
           setIsWorkspaceDirty(false);
           console.log("✨ Initial blocks/solution loaded and dirty flag reset");
         }, 50);
 
-        // Small delay to ensure rendering is complete before centering
         setTimeout(() => {
           workspace.scrollCenter();
           console.log("🎯 Centered and Fitted");
@@ -238,17 +242,16 @@ export default function PlayLabWorkspace({
     () =>
       buildToolboxXml(SANDBOX_TOOLBOX_CATEGORIES, {
         categories: {
-          motion: "Motion",
-          loops: "Loops",
-          logic: "Logic",
-          sensors: "Sensors",
-          math: "Math",
-          effects: "Effects",
-          input: "Input",
-          variables: "Variables",
+          motion: t("blockly.categories.motion"),
+          loops: t("blockly.categories.loops"),
+          logic: t("blockly.categories.logic"),
+          sensors: t("blockly.categories.sensors"),
+          math: t("blockly.categories.math"),
+          variables: t("blockly.categories.variables"),
+          functions: t("blockly.categories.functions"),
         },
-      }),
-    []
+      }, labData.rule?.allowedBlocks),
+    [t, labData.rule?.allowedBlocks]
   );
 
   const handleRun = useCallback(() => {
@@ -260,14 +263,12 @@ export default function PlayLabWorkspace({
 
     if (program.length === 0) return;
 
-    // Reset Gamespace FIRST before changing status
     setCollectedCheckpoints(new Set());
     setMissionEndState(null);
     setFuelRemaining(labData.rule.fuelLimit || 100);
     setTimeLeft(labData.rule.timeLimit || 0);
     setSessionKey(prev => prev + 1);
 
-    // Then trigger simulator
     setStatus("running");
     setDroneState(initialState);
     controller.stop();
@@ -277,17 +278,15 @@ export default function PlayLabWorkspace({
     controller.run();
   }, [hasBlocks, status, controller, labData, initialState]);
 
-  // Pass ALL world objects to the controller for collision detection
   useEffect(() => {
     if (controller && labData.objects) {
-      // Include ONLY physical obstacles and decorations
       const obstacles = labData.objects
         .filter((obj: any) => obj.objectType === "obstacle" || obj.objectType === "decor")
         .map((obj: any) => ({
           id: obj.id,
           type: obj.objectType || "static_mesh",
           position: obj.position,
-          size: obj.size || obj.scale || [1, 1, 1], // Support scale as fallback for size
+          size: obj.size || obj.scale || [1, 1, 1],
           rotation: obj.rotation,
           raw: obj
         }));
@@ -296,7 +295,6 @@ export default function PlayLabWorkspace({
     }
   }, [controller, labData.objects]);
 
-  // Timer countdown logic (only if timeLimit is set)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (status === "running" && labData.rule.timeLimit && timeLeft > 0) {
@@ -310,20 +308,17 @@ export default function PlayLabWorkspace({
     };
   }, [status, labData.rule.timeLimit, timeLeft]);
 
-  // Handle crash status with a delay to show the "Wow" effects
   useEffect(() => {
     if (status === "crashed") {
-      // Delay the modal to let the user see the crash particles and camera shake
       const timer = setTimeout(() => {
         setMissionEndState("failed");
         setFailReason("Phát hiện va chạm. Sứ mệnh thất bại do drone hỏng hóc.");
-      }, 1500); // 1.5 seconds of pure crash visuals
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [status, t]);
 
   const handleReset = useCallback(() => {
-    // Clear mission state first
     setCollectedCheckpoints(new Set());
     setCollectedBonuses(new Set());
 
@@ -332,7 +327,6 @@ export default function PlayLabWorkspace({
     setTimeLeft(labData.rule.timeLimit || 0);
     setSessionKey(prev => prev + 1);
 
-    // Then reset drone
     controller.reset(initialState);
     setDroneState(initialState);
     setStatus("ready");
@@ -341,11 +335,9 @@ export default function PlayLabWorkspace({
     simRef.current?.clearTrail?.();
   }, [controller, labData, initialState]);
 
-  // Game Loop: Rule Enforcement & Radar Collision Detection
   useEffect(() => {
     if (status !== "running" && status !== "finished") return;
 
-    // 1. Check Violations: Out of Fuel
     if (labData.rule.fuelLimit && (droneState.batteryConsumed || 0) > labData.rule.fuelLimit) {
       setStatus("finished");
       controller.stop();
@@ -354,7 +346,6 @@ export default function PlayLabWorkspace({
       return;
     }
 
-    // 1b. Check Violations: Timeout
     if (labData.rule.timeLimit && timeLeft === 0) {
       setStatus("finished");
       controller.stop();
@@ -363,16 +354,14 @@ export default function PlayLabWorkspace({
       return;
     }
 
-    // 2. 3D Collision Detection (Distance & Altitude to Checkpoints)
     const droneWorld = projectToWorld(
       droneState.x ?? sandboxOrigin.x,
       droneState.y ?? sandboxOrigin.y,
-      droneState.altitude, // Enforce altitude strictly now!
+      droneState.altitude,
       canvasCenter
     );
 
     labData.objects.forEach((obj: any) => {
-      // 1. Checkpoint Collision
       if (obj.objectType === "checkpoint" && !collectedCheckpoints.has(obj.id)) {
         if (labData.rule.sequentialCheckpoints) {
           const nextCp = checkpoints[collectedCheckpoints.size];
@@ -453,17 +442,20 @@ export default function PlayLabWorkspace({
   // End State: Check Mission Success
   useEffect(() => {
     if (status === "finished" && missionEndState === null) {
-      if (allCheckpointsCollected && hasEnoughScore && allPatternsCompleted) {
+      // --- CAPTURE METRICS FOR HUD ---
+      const { Blockly, workspace } = blocklyContext || {};
+      const blockCount = workspace?.getAllBlocks(false).length || 0;
+      const isBlockCountValid = !labData.rule.maxBlocks || blockCount <= labData.rule.maxBlocks;
 
-        // --- CAPTURE METRICS FOR HUD ---
-        const { Blockly, workspace } = blocklyContext || {};
+      if (allCheckpointsCollected && hasEnoughScore && allPatternsCompleted && isBlockCountValid) {
+
         const program = (Blockly && workspace) ? generateProgram(Blockly, workspace) : [];
 
         setStudentFinalMetrics({
           timeSpent: labData.rule.timeLimit ? (labData.rule.timeLimit - timeLeft) : 0,
           fuelConsumed: droneState.batteryConsumed || 0,
           logicalDistance: calculateLogicalDistance(program) / 200,
-          blockCount: workspace?.getAllBlocks(false).length || 0
+          blockCount: blockCount
         });
         // -------------------------------
 
@@ -476,9 +468,14 @@ export default function PlayLabWorkspace({
       } else {
         // Determine failure reason
         let reason = "Bạn đã hoàn thành đường bay ";
+        const { workspace } = blocklyContext || {};
+        const blockCount = workspace?.getAllBlocks(false).length || 0;
+        const isBlockCountValid = !labData.rule.maxBlocks || blockCount <= labData.rule.maxBlocks;
+
         if (!allCheckpointsCollected) reason += "nhưng KHÔNG vượt qua tất cả Checkpoint.";
         else if (!allPatternsCompleted) reason += "nhưng bay KHÔNG đúng quỹ đạo yêu cầu.";
         else if (!hasEnoughScore) reason += `nhưng KHÔNG đạt đủ điểm số yêu cầu (${currentScore}/${labData.rule.requiredScore} điểm).`;
+        else if (!isBlockCountValid) reason += `nhưng sử dụng QUÁ số lượng khối cho phép (${blockCount}/${labData.rule.maxBlocks} khối).`;
         else reason += "nhưng có lỗi phát sinh.";
 
         playGameSound("fail");
@@ -486,7 +483,7 @@ export default function PlayLabWorkspace({
         setFailReason(reason);
       }
     }
-  }, [allCheckpointsCollected, hasEnoughScore, allPatternsCompleted, currentScore, status, missionEndState, labData.rule.requiredScore, blocklyContext, labData.rule.timeLimit, timeLeft, droneState.batteryConsumed]);
+  }, [allCheckpointsCollected, hasEnoughScore, allPatternsCompleted, currentScore, status, missionEndState, labData.rule.requiredScore, blocklyContext, labData.rule.timeLimit, timeLeft, droneState.batteryConsumed, labData.rule.maxBlocks]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col h-full w-full bg-slate-950 font-sans text-white overflow-hidden">
@@ -503,7 +500,7 @@ export default function PlayLabWorkspace({
 
             {/* Header - Refined & Minimal */}
             <div className="relative border-b border-white/5 px-8 py-5 flex items-center gap-4 bg-white/[0.02] shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center ring-4 ring-rose-500/5">
+              <div className="w-10 h-10 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center ring-4 ring-rose-500/5">
                 <FaInfoCircle className="text-rose-500 text-lg" />
               </div>
               <div>
@@ -518,13 +515,13 @@ export default function PlayLabWorkspace({
               {/* Mission Intel Section */}
               <div className="flex flex-col gap-3 shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-3 rounded-full bg-rose-500" />
+                  <div className="w-1 h-3 rounded-md bg-rose-500" />
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Nội dung nhiệm vụ cần thực hiện
                   </span>
                 </div>
 
-                <div className="bg-white/[0.03] border border-white/5 rounded-xl px-5 py-4 relative">
+                <div className="bg-white/[0.03] border border-white/5 rounded-md px-5 py-4 relative">
                   <div className="max-h-[140px] md:max-h-[180px] overflow-y-auto custom-scrollbar pr-3">
                     <p className="text-sm text-slate-300 leading-relaxed font-medium selection:bg-rose-500/30">
                       {(labMeta?.descriptionVN || "Không có nội dung bài tập cụ thể. Hoàn thành mục tiêu để vượt qua bài học.").replace(/\\n/g, '\n')}
@@ -540,7 +537,7 @@ export default function PlayLabWorkspace({
 
                     {/* Checkpoints Status */}
                     {totalCheckpoints > 0 && (
-                      <div className="relative rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
+                      <div className="relative rounded-md border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
                         <div className="flex items-center justify-between">
                           <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                             <FaCheckCircle className="text-rose-400 text-sm" />
@@ -558,7 +555,7 @@ export default function PlayLabWorkspace({
 
                     {/* Minimum Score */}
                     {labData.rule.requiredScore > 0 && (
-                      <div className="relative rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
+                      <div className="relative rounded-md border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
                         <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                           <FaTrophy className="text-rose-400 text-sm" />
                         </div>
@@ -571,7 +568,7 @@ export default function PlayLabWorkspace({
 
                     {/* Execution Window */}
                     {(labData.rule.timeLimit ?? 0) > 0 && (
-                      <div className="relative rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
+                      <div className="relative rounded-md border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
                         <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                           <FaClock className="text-rose-400 text-sm" />
                         </div>
@@ -584,13 +581,26 @@ export default function PlayLabWorkspace({
 
                     {/* Operational Energy */}
                     {(labData.rule.fuelLimit ?? 0) > 0 && (
-                      <div className="relative rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
+                      <div className="relative rounded-md border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
                         <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
                           <FaBatteryFull className="text-rose-400 text-sm" />
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Năng lượng tối đa</span>
                           <span className="text-lg font-bold text-white leading-none mt-1">{labData.rule.fuelLimit} <span className="text-[9px] font-normal opacity-50 uppercase tracking-tighter">Đơn vị</span></span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Block Limit Rule */}
+                    {(labData.rule.maxBlocks ?? 0) > 0 && (
+                      <div className="relative rounded-md border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-3 transition-all hover:bg-white/[0.04]">
+                        <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                          <FaCube className="text-rose-400 text-sm" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Số lượng khối lệnh</span>
+                          <span className="text-lg font-bold text-white leading-none mt-1">{labData.rule.maxBlocks} <span className="text-[9px] font-normal opacity-50 uppercase tracking-tighter">Khối tối đa</span></span>
                         </div>
                       </div>
                     )}
@@ -604,7 +614,7 @@ export default function PlayLabWorkspace({
             <div className="relative px-8 py-6 border-t border-white/5 bg-white/[0.01] flex justify-end shrink-0">
               <button
                 onClick={() => setShowMissionBrief(false)}
-                className="group relative px-10 py-3 font-bold text-xs uppercase tracking-widest rounded-full transition-all overflow-hidden"
+                className="group relative px-10 py-3 font-bold text-xs uppercase tracking-widest rounded transition-all overflow-hidden"
               >
                 <div className="absolute inset-0 bg-rose-600 group-hover:bg-rose-500 transition-colors" />
                 <div className="absolute inset-0 shadow-[0_0_20px_rgba(225,29,72,0.3)] group-hover:shadow-[0_0_30px_rgba(225,29,72,0.5)] transition-all" />
@@ -967,7 +977,26 @@ export default function PlayLabWorkspace({
                   </div>
                 ) : null}
 
-                {/* Pattern Minimal Progress Report - Consistent Format */}
+                {/* Block Count Row (Conditional) */}
+                {labData.rule.maxBlocks && labData.rule.maxBlocks > 0 ? (
+                  <div className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
+
+                    <div className="w-[85px] shrink-0">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.blockCount")}</span>
+                    </div>
+
+                    <div className="flex-1 min-w-0 pr-3">
+                      <span className={`text-[11px] font-mono font-bold block truncate ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'text-white' : 'text-slate-400'}`}>
+                        {blocklyContext?.workspace?.getAllBlocks(false).length || 0} <span className="opacity-50 text-[10px] font-normal">/ {labData.rule.maxBlocks} {t("missionEnd.required")}</span>
+                      </span>
+                    </div>
+
+                    <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                      {((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? t("missionEnd.pass") : t("missionEnd.fail")}
+                    </div>
+                  </div>
+                ) : null}
                 {patternResults.map((pr, pIdx) => (
                   <div key={pr.id} className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${pr.report.success ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${pr.report.success ? 'bg-emerald-500' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
