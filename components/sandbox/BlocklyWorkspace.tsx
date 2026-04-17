@@ -33,9 +33,36 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
 
       // Import language pack to fix right-click context menu crash
       try {
-        const Msg = locale === "vi"
+        const rawMsg = locale === "vi"
           ? await import("blockly/msg/vi").then(m => m.default || m)
           : await import("blockly/msg/en").then(m => m.default || m);
+
+        const Msg = { ...rawMsg };
+        const m = Msg as any;
+
+        // Custom Labels (Bilingual based on i18n JSON)
+        m['PROCEDURES_DEFNORETURN_TITLE'] = t("blockly.blocks.procedures.defNoReturnTitle") || (locale === "vi" ? 'Định nghĩa hàm' : 'Define function');
+        m['PROCEDURES_DEFNORETURN_PROCEDURE'] = 'tên_hàm';
+        m['PROCEDURES_DEFNORETURN_DO'] = t("blockly.blocks.procedures.do") || (locale === "vi" ? 'thực hiện' : 'do');
+        m['PROCEDURES_CALL_BEFORE_PARAMS'] = t("blockly.blocks.procedures.call") || (locale === "vi" ? 'gọi hàm' : 'call');
+        
+        m['PROCEDURES_DEFRETURN_TITLE'] = t("blockly.blocks.procedures.defReturnTitle") || (locale === "vi" ? 'Định nghĩa hàm có kết quả' : 'Define function with result');
+        m['PROCEDURES_DEFRETURN_PROCEDURE'] = 'tên_hàm';
+        m['PROCEDURES_DEFRETURN_DO'] = t("blockly.blocks.procedures.do") || (locale === "vi" ? 'thực hiện' : 'do');
+        m['PROCEDURES_DEFRETURN_RETURN'] = t("blockly.blocks.procedures.return") || (locale === "vi" ? 'trả về kết quả' : 'return result');
+
+        // Variables
+        m['VARIABLES_DEFAULT_NAME'] = locale === "vi" ? 'biến' : 'item';
+        m['VARIABLES_SET'] = t("blockly.blocks.variables.set") || (locale === "vi" ? 'gán %1 bằng %2' : 'set %1 to %2');
+        m['MATH_CHANGE_TITLE'] = t("blockly.blocks.variables.change") || (locale === "vi" ? 'tăng %1 thêm %2' : 'change %1 by %2');
+
+        // Logic & Math (The ones user found hard to understand)
+        m['LOGIC_BOOLEAN_TRUE'] = t("blockly.blocks.logic.true") || "TRUE";
+        m['LOGIC_BOOLEAN_FALSE'] = t("blockly.blocks.logic.false") || "FALSE";
+        m['LOGIC_OPERATION_AND'] = t("blockly.blocks.logic.and") || "AND";
+        m['LOGIC_OPERATION_OR'] = t("blockly.blocks.logic.or") || "OR";
+        m['MATH_MODULO_TITLE'] = t("blockly.blocks.math.modulo") || (locale === "vi" ? "Tìm số dư khi chia %1 cho %2" : "remainder of %1 ÷ %2");
+
         Blockly.setLocale(Msg);
       } catch (err) {
         console.error("Failed to load Blockly locale:", err);

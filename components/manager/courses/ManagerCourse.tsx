@@ -40,14 +40,14 @@ export default function ManagerCourse() {
   }, [clubSlug]);
 
   const sortOptions: InlineFilterOption<ParticipationSort>[] = [
-  { value: "MostPopular", label: t("sort.mostPopular") },
-  { value: "LeastPopular", label: t("sort.leastPopular") },
-];
+    { value: "MostPopular", label: t("sort.mostPopular") },
+    { value: "LeastPopular", label: t("sort.leastPopular") },
+  ];
 
-const ownerOptions: InlineFilterOption<CourseOwner>[] = [
-  { value: "Owned", label: t("owner.owned") },
-  { value: "NotOwned", label: t("owner.notOwned") },
-];
+  const ownerOptions: InlineFilterOption<CourseOwner>[] = [
+    { value: "Owned", label: t("owner.owned") },
+    { value: "NotOwned", label: t("owner.notOwned") },
+  ];
 
   const [selectedLevel, setSelectedLevel] = React.useState<ClubCourseLevel | null>(
     null,
@@ -126,10 +126,10 @@ const ownerOptions: InlineFilterOption<CourseOwner>[] = [
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-greyscale-0">
-                <IoFilterSharp />
-                <p className="text-sm font-semibold">{t("filter")}</p>
+              <IoFilterSharp />
+              <p className="text-sm font-semibold">{t("filter")}</p>
             </div>
-            
+
 
             <InlineFilterRow
               label={t("level.label")}
@@ -159,7 +159,7 @@ const ownerOptions: InlineFilterOption<CourseOwner>[] = [
           <div className="flex w-full gap-2 xl:max-w-md">
             <div className="relative flex-1">
               <Input
-                type="search" 
+                type="search"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 onKeyDown={(event) => {

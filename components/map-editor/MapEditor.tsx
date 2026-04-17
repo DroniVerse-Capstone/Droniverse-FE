@@ -24,11 +24,13 @@ import {
   FaCheck,
   FaArrowLeft,
   FaSave,
-  FaEye
+  FaEye,
+  FaPuzzlePiece
 } from "react-icons/fa";
 import Loading from "@/app/loading";
 import { MapEditorErrorBoundary, MapEditorErrorScreen } from "./ErrorBoundary";
 import { RuleConfigurationModal } from "./RuleConfigurationModal";
+import { BlocklyManager } from "./BlocklyManager";
 import { useTranslations } from "@/providers/i18n-provider";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -1408,6 +1410,7 @@ function MapEditorContent() {
       theme: storedLab.labContent?.environment?.map?.theme || "default",
     };
   });
+  const [showBlocklyManager, setShowBlocklyManager] = useState(false);
 
   const [rule, setRule] = useState<LabRule>(() => {
     if (!storedLab) return DEFAULT_RULE;
@@ -1417,6 +1420,7 @@ function MapEditorContent() {
       maxBlocks: storedLab.labContent?.environment?.rule?.maxBlocks || 0,
       fuelLimit: storedLab.labContent?.environment?.rule?.fuelLimit || 0,
       sequentialCheckpoints: storedLab.labContent?.environment?.rule?.sequentialCheckpoints || false,
+      allowedBlocks: storedLab.labContent?.environment?.rule?.allowedBlocks || [],
     };
   });
   const [hasSolution, setHasSolution] = useState<boolean>(() => {
@@ -2485,11 +2489,21 @@ function MapEditorContent() {
               </button>
             )}
 
+
+
             <button
               onClick={() => setShowMissionModal(true)}
               className="group flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold rounded bg-primary-300 text-white border border-primary-200 hover:bg-primary-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all duration-300 ml-1"
             >
               {isReadOnly ? t("toolbar.viewConfig") : t("toolbar.configureRules")} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="group-hover:translate-x-0.5 transition-transform"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+
+            <button
+              onClick={() => setShowBlocklyManager(true)}
+              className="group flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded bg-greyscale-800 text-white border border-greyscale-700 hover:bg-greyscale-700 transition-all duration-300 ml-1"
+            >
+              <FaPuzzlePiece className="text-sky-400 group-hover:rotate-12 transition-transform" />
+              {/* {isReadOnly ? t("toolbar.viewBlocklyConfig") : t("toolbar.blocklyConfig")} */}
             </button>
 
             {currentValidation.hasDrone && currentValidation.hasObjects && currentValidation.hasRules && (
@@ -2502,7 +2516,7 @@ function MapEditorContent() {
                 ) : (
                   <FaPlay className="text-[10px] group-hover:scale-110 transition-transform" />
                 )}
-                {hasSolution ? "Xem lời giải" : "Giải thử"}
+                {hasSolution ? t("toolbar.viewSolution") : t("toolbar.trySolve")}
               </button>
             )}
           </div>
@@ -2609,7 +2623,7 @@ function MapEditorContent() {
           <LanguageSwitcher />
 
           {isReadOnly && (
-            <div className="ml-4 px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest animate-pulse flex items-center gap-2">
+            <div className="ml-auto px-3 py-1.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest animate-pulse flex items-center gap-2 whitespace-nowrap">
               <FaLock className="text-[9px]" /> {t("toolbar.readOnlyHUD")}
             </div>
           )}
@@ -2921,6 +2935,22 @@ function MapEditorContent() {
                 setShowMissionModal(false);
               }
             }}
+          />
+
+          {/* ── Blockly Configuration Manager ─────────────────────────────── */}
+          <BlocklyManager
+            show={showBlocklyManager}
+            onClose={() => setShowBlocklyManager(false)}
+            rule={rule}
+            isReadOnly={isReadOnly}
+            onSave={async (allowedBlocks) => {
+              const draftRule = { ...rule, allowedBlocks };
+              setRule(draftRule);
+              if (!isReadOnly) {
+                await saveToStorage(false, draftRule);
+              }
+            }}
+            labName={storedLab?.nameVN}
           />
 
           {mountedNode && (

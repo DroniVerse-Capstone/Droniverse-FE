@@ -35,6 +35,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "cdn-media.sforum.vn",
+      },
+      {
+        protocol: "https",
+        hostname: "droniverse-bucket.s3.ap-southeast-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-useast1.kapwing.com",
       }
     ],
   },
