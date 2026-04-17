@@ -2,12 +2,24 @@
 import EmptyState from "@/components/common/EmptyState";
 import CourseOverviewHero from "@/components/course/CourseOverviewHero";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetClubCourseOverview } from "@/hooks/club/useClubCourse";
+import { useEnterCourseCode, useReceiveCourseCode } from "@/hooks/code/useCode";
+import { useCreateUserEnrollment } from "@/hooks/enrollment/useUserEnrollment";
 import { useLocale } from "@/providers/i18n-provider";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import React from "react";
+import toast from "react-hot-toast";
 import {
   IoBookOutline,
   IoChevronBackOutline,
@@ -15,7 +27,6 @@ import {
   IoTimeOutline,
 } from "react-icons/io5";
 import { TbDrone } from "react-icons/tb";
-import { da } from "zod/v4/locales";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -42,7 +53,7 @@ export default function MemberCourseOverview() {
     return uuidMatch?.[0];
   }, [clubSlug]);
 
-  const courseVersionId = React.useMemo(() => {
+  const courseId = React.useMemo(() => {
     if (!courseSlug) return undefined;
 
     if (UUID_SUFFIX_REGEX.test(courseSlug)) {
@@ -55,10 +66,106 @@ export default function MemberCourseOverview() {
 
   const { data, isLoading, isError, error } = useGetClubCourseOverview(
     clubId,
-    courseVersionId,
+    courseId,
   );
+  const enterCourseCodeMutation = useEnterCourseCode();
+  const receiveCourseCodeMutation = useReceiveCourseCode();
+  const createEnrollmentMutation = useCreateUserEnrollment();
+  const [activateDialogOpen, setActivateDialogOpen] = React.useState(false);
+  const [activateCode, setActivateCode] = React.useState("");
 
-  if (!clubId || !courseVersionId) {
+  const handleGoLearn = React.useCallback(async () => {
+    if (!clubSlug || !courseId || !clubId || !data?.courseVersionID) {
+      return;
+    }
+
+    if (data?.enrollmentID) {
+      router.push(`/learn/${clubSlug}/${data.enrollmentID}`);
+      return;
+    }
+
+    try {
+      const response = await createEnrollmentMutation.mutateAsync({
+        courseVersionID: data.courseVersionID,
+        clubID: clubId,
+      });
+
+      router.push(`/learn/${clubSlug}/${response.data.enrollmentID}`);
+    } catch (createEnrollmentError) {
+      const message =
+        (createEnrollmentError as { response?: { data?: { message?: string } } })
+          ?.response?.data?.message ||
+        (createEnrollmentError as { message?: string })?.message ||
+        "Không thể tạo enrollment. Vui lòng thử lại.";
+      toast.error(message);
+    }
+  }, [
+    clubId,
+    clubSlug,
+    courseId,
+    createEnrollmentMutation,
+    data?.enrollmentID,
+    data?.courseVersionID,
+    router,
+  ]);
+
+  const handleActivateCode = React.useCallback(async () => {
+    if (!clubId) {
+      toast.error("Không xác định được câu lạc bộ hiện tại.");
+      return;
+    }
+
+    const trimmedCode = activateCode.trim();
+    if (!trimmedCode) {
+      toast.error("Vui lòng nhập mã kích hoạt.");
+      return;
+    }
+
+    try {
+      const response = await enterCourseCodeMutation.mutateAsync({
+        clubId,
+        payload: {
+          codeId: trimmedCode,
+        },
+      });
+
+      toast.success(response.message || "Kích hoạt khóa học thành công.");
+      setActivateDialogOpen(false);
+      setActivateCode("");
+    } catch (activateError) {
+      const message =
+        (activateError as { response?: { data?: { message?: string } } })
+          ?.response?.data?.message ||
+        (activateError as { message?: string })?.message ||
+        "Kích hoạt mã thất bại.";
+      toast.error(message);
+    }
+  }, [activateCode, clubId, enterCourseCodeMutation]);
+
+  const handleReceiveCode = React.useCallback(async () => {
+    if (!clubId || !courseId) {
+      toast.error("Không xác định được khóa học hiện tại.");
+      return;
+    }
+
+    try {
+      await receiveCourseCodeMutation.mutateAsync({
+        clubId,
+        courseId,
+      });
+
+      toast.success("Đã nhận mã, hãy kiểm tra gmail");
+    } catch (receiveCodeError) {
+      const message =
+        (receiveCodeError as { response?: { data?: { message?: string } } })
+          ?.response?.data?.message ||
+        (receiveCodeError as { message?: string })?.message ||
+        "Không thể nhận mã. Vui lòng thử lại.";
+      toast.error(message);
+    }
+  }, [clubId, courseId, receiveCourseCodeMutation]);
+
+  if (!clubId || !courseId) {
     return (
       <div className="px-6 py-4">
         <EmptyState title="Không xác định được khóa học hoặc câu lạc bộ hiện tại." />
@@ -208,40 +315,53 @@ export default function MemberCourseOverview() {
                 <Button
                   variant="tertiary"
                   className="w-full"
-                  onClick={() => {
-                    if (!clubSlug || !courseSlug) return;
-                    router.push(`/member/${clubSlug}/${courseSlug}/learn`);
-                  }}
+                  onClick={handleGoLearn}
+                  disabled={createEnrollmentMutation.isPending}
                 >
-                  Vào học ngay
+                  {createEnrollmentMutation.isPending
+                    ? "Đang chuẩn bị vào học..."
+                    : "Vào học ngay"}
                 </Button>
               ) : (
                 <>
                   {data.clubCourseOwn?.profitType === "NONPROFIT" ? (
-                    <Button variant={"default"} className="w-full">
-                      Nhận mã
-                    </Button>
-                  ) : (
                     <Button
-                      variant="default"
+                      variant={"default"}
                       className="w-full"
-                      disabled={
-                        !data.miniProduct ||
-                        data.clubCourseOwn?.remainingQuantity === 0
-                      }
-                      onClick={() => {
-                        if (!clubSlug || !courseSlug) return;
-                        router.push(
-                          `/member/${clubSlug}/${courseSlug}/checkout`,
-                        );
-                      }}
+                      onClick={handleReceiveCode}
+                      disabled={receiveCourseCodeMutation.isPending}
                     >
-                      {data.clubCourseOwn?.remainingQuantity === 0
-                        ? "Đã hết mã"
-                        : "Mua ngay"}
+                      {receiveCourseCodeMutation.isPending
+                        ? "Đang nhận mã..."
+                        : "Nhận mã"}
                     </Button>
-                  )}
-                  <Button variant="secondary" className="w-full">
+                  ) : null 
+                  // (
+                  //   <Button
+                  //     variant="default"
+                  //     className="w-full"
+                  //     disabled={
+                  //       !data.miniProduct ||
+                  //       data.clubCourseOwn?.remainingQuantity === 0
+                  //     }
+                  //     onClick={() => {
+                  //       if (!clubSlug || !courseSlug) return;
+                  //       router.push(
+                  //         `/member/${clubSlug}/${courseSlug}/checkout`,
+                  //       );
+                  //     }}
+                  //   >
+                  //     {data.clubCourseOwn?.remainingQuantity === 0
+                  //       ? "Đã hết mã"
+                  //       : "Mua ngay"}
+                  //   </Button>
+                  // )}
+                }
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => setActivateDialogOpen(true)}
+                  >
                     Kích hoạt
                   </Button>
                 </>
@@ -250,6 +370,59 @@ export default function MemberCourseOverview() {
           </div>
         </aside>
       </div>
+
+      <Dialog
+        open={activateDialogOpen}
+        onOpenChange={(open) => {
+          setActivateDialogOpen(open);
+          if (!open) {
+            setActivateCode("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Kích hoạt khóa học</DialogTitle>
+            <DialogDescription>
+              Nhập mã kích hoạt để mở quyền truy cập khóa học.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="member-activate-code"
+              className="text-sm font-medium text-greyscale-25"
+            >
+              Mã kích hoạt
+            </label>
+            <Input
+              id="member-activate-code"
+              value={activateCode}
+              onChange={(event) => setActivateCode(event.target.value)}
+              placeholder="Nhập mã đã nhận qua mail"
+              disabled={enterCourseCodeMutation.isPending}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setActivateDialogOpen(false)}
+              disabled={enterCourseCodeMutation.isPending}
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleActivateCode}
+              disabled={
+                enterCourseCodeMutation.isPending || activateCode.trim().length === 0
+              }
+            >
+              {enterCourseCodeMutation.isPending ? "Đang kích hoạt..." : "Xác nhận"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

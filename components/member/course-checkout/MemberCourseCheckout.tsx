@@ -1,18 +1,20 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { IoChevronBackOutline } from "react-icons/io5";
 
 import EmptyState from "@/components/common/EmptyState";
 import CourseOverviewHero from "@/components/course/CourseOverviewHero";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetClubCourseOverview } from "@/hooks/club/useClubCourse";
-import { useCreatePaymentOrder, useGetPaymentDetail } from "@/hooks/payment/usePayment";
+import {
+  useCreatePaymentOrder,
+  useGetPaymentDetail,
+} from "@/hooks/payment/usePayment";
 import { useLocale } from "@/providers/i18n-provider";
-import Image from "next/image";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -25,7 +27,7 @@ const formatPrice = (value: number, currency: "USD" | "VND") => {
   return `${value.toLocaleString("vi-VN")} VND`;
 };
 
-export default function ManagerCourseCheckout() {
+export default function MemberCourseCheckout() {
   const router = useRouter();
   const locale = useLocale();
   const params = useParams<{ clubSlug?: string; courseSlug?: string }>();
@@ -51,8 +53,6 @@ export default function ManagerCourseCheckout() {
     courseId,
   );
 
-  const [quantity, setQuantity] = React.useState(1);
-  const [paymentMethod, setPaymentMethod] = React.useState<"VNPAY">("VNPAY");
   const [createdOrderId, setCreatedOrderId] = React.useState<string | undefined>(
     undefined,
   );
@@ -72,7 +72,9 @@ export default function ManagerCourseCheckout() {
   const hasProduct = !!data?.miniProduct;
   const unitPrice = data?.miniProduct?.price ?? 0;
   const currency = data?.miniProduct?.currency ?? "VND";
-  const total = unitPrice * quantity;
+  const quantity = 1;
+  const clubMaintenanceFee = unitPrice * 0.1;
+  const total = unitPrice + clubMaintenanceFee;
   const isProcessingPayment =
     createPaymentOrderMutation.isPending || isFetchingPaymentDetail;
 
@@ -92,7 +94,7 @@ export default function ManagerCourseCheckout() {
       const createdOrder = await createPaymentOrderMutation.mutateAsync({
         clubId,
         data: {
-          paymentMethod,
+          paymentMethod: "VNPAY",
           item: {
             productID: data.miniProduct.productId,
             productNameVN: data.titleVN,
@@ -104,23 +106,26 @@ export default function ManagerCourseCheckout() {
       });
 
       setCreatedOrderId(createdOrder.data.orderID);
-    } catch (error) {
+    } catch (checkoutError) {
       const message =
-        (error as { response?: { data?: { message?: string } }; message?: string })
-          ?.response?.data?.message ||
-        (error as { message?: string })?.message ||
+        (
+          checkoutError as {
+            response?: { data?: { message?: string } };
+            message?: string;
+          }
+        )?.response?.data?.message ||
+        (checkoutError as { message?: string })?.message ||
         "Không tạo được đơn hàng thanh toán.";
       setPaymentError(message);
     }
   }, [
-    createPaymentOrderMutation,
     clubId,
+    createPaymentOrderMutation,
     data?.miniProduct,
     data?.titleEN,
     data?.titleVN,
     hasProduct,
     isProcessingPayment,
-    paymentMethod,
     quantity,
   ]);
 
@@ -160,7 +165,7 @@ export default function ManagerCourseCheckout() {
         <Button
           icon={<IoChevronBackOutline />}
           variant="outline"
-          onClick={() => router.push(`/manager/${clubSlug}/${courseSlug}`)}
+          onClick={() => router.push(`/member/${clubSlug}/${courseSlug}`)}
         >
           Quay lại
         </Button>
@@ -170,9 +175,7 @@ export default function ManagerCourseCheckout() {
         <section>
           <CourseOverviewHero
             title={title}
-            description={
-              locale === "vi" ? data.descriptionVN : data.descriptionEN
-            }
+            description={locale === "vi" ? data.descriptionVN : data.descriptionEN}
             level={data.level}
             estimatedDuration={data.estimatedDuration}
             averageRating={data.averageRating}
@@ -202,11 +205,7 @@ export default function ManagerCourseCheckout() {
                   <p className="mb-2 text-sm font-medium text-greyscale-25">
                     Phương thức thanh toán
                   </p>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between rounded border border-primary/40 bg-primary/10 px-3 py-2 text-left"
-                    onClick={() => setPaymentMethod("VNPAY")}
-                  >
+                  <div className="flex w-full items-center justify-between rounded border border-primary/40 bg-primary/10 px-3 py-2 text-left">
                     <div className="flex items-center gap-2">
                       <Image
                         src="/images/payOS.png"
@@ -220,65 +219,15 @@ export default function ManagerCourseCheckout() {
                       </span>
                     </div>
 
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        paymentMethod === "VNPAY"
-                          ? "bg-primary"
-                          : "bg-greyscale-500"
-                      }`}
-                    />
-                  </button>
+                    <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                  </div>
                 </div>
 
                 <div className="rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-greyscale-25">
-                      Số lượng mã{" "}
-                      <span className="text-xs text-primary">(Tối đa 100)</span>
-                    </p>
-
-                    {data.clubCourseOwn && (
-                      <p className="text-sm font-medium text-greyscale-25">
-                        Số mã còn lại: {data.clubCourseOwn.remainingQuantity}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() =>
-                        setQuantity((prev) => Math.max(1, prev - 1))
-                      }
-                    >
-                      -
-                    </Button>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={quantity}
-                      onChange={(event) => {
-                        const value = Number(event.target.value || 1);
-                        setQuantity(
-                          Number.isNaN(value)
-                            ? 1
-                            : Math.min(100, Math.max(1, value)),
-                        );
-                      }}
-                      className="w-28 text-center"
-                    />
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={() =>
-                        setQuantity((prev) => Math.min(100, prev + 1))
-                      }
-                    >
-                      +
-                    </Button>
-                  </div>
+                  <p className="text-sm font-medium text-greyscale-25">Số lượng mã</p>
+                  <p className="mt-2 inline-flex rounded bg-greyscale-800 px-3 py-1 text-sm font-semibold text-greyscale-0">
+                    1
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 rounded border border-greyscale-700 bg-greyscale-900/80 p-4 text-sm text-greyscale-100">
@@ -290,8 +239,12 @@ export default function ManagerCourseCheckout() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Số lượng</span>
+                    <span className="font-semibold text-greyscale-0">1</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Phí duy trì CLB (10%)</span>
                     <span className="font-semibold text-greyscale-0">
-                      {quantity}
+                      {formatPrice(clubMaintenanceFee, currency)}
                     </span>
                   </div>
                   <div className="my-1 h-px bg-greyscale-700" />

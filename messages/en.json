@@ -542,6 +542,7 @@
       "manager": "Club Manager",
       "courses": "Owned Courses",
       "out": "Leave Club",
+      "edit": "Edit Club Info",
       "privacy": {
         "public": "Public",
         "private": "Private"

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-
+import { useParams, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetUserQuizAttemptReview } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
@@ -19,6 +19,8 @@ export default function MemberQuizAttemptReviewContent({
   quizId,
 }: MemberQuizAttemptReviewContentProps) {
   const locale = useLocale();
+  const router = useRouter();
+  const params = useParams<{ clubSlug?: string }>();
   const reviewQuery = useGetUserQuizAttemptReview({ enrollmentId, quizId });
   const { handleExit } = useLessonNavigation(enrollmentId, quizId);
 
@@ -45,6 +47,7 @@ export default function MemberQuizAttemptReviewContent({
   }
 
   const { quiz, attempt, questions } = reviewQuery.data;
+  const canGoBack = Boolean(params?.clubSlug);
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 rounded-lg border border-greyscale-700 bg-greyscale-900/60 p-6">
@@ -54,10 +57,9 @@ export default function MemberQuizAttemptReviewContent({
         </h2>
         <Button
           variant="outline"
-          size="sm"
           icon={<FaArrowLeft />}
           onClick={handleExit}
-          className="border-greyscale-700 text-greyscale-200"
+          className="border-greyscale-700 text-greyscale-0"
         >
           {locale === "en" ? "Back" : "Quay lại"}
         </Button>
