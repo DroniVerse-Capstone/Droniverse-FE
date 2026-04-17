@@ -35,6 +35,7 @@ export interface LabRule {
   sequentialCheckpoints: boolean;
   maxBlocks?: number;
   fuelLimit?: number;
+  allowedBlocks?: string[];
 }
 
 export interface LabSolution {

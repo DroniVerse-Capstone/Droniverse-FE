@@ -81,6 +81,7 @@
       "notFinished": "PENDING",
       "time": "Time",
       "timeUp": "TIMEOUT",
+      "blockCount": "Block Count",
       "patternCheck": "Pattern Check",
       "pattern": "Pattern",
       "shape_square": "SQUARE",
@@ -108,7 +109,8 @@
         "math": "➗ Math",
         "effects": "🎵 Effects",
         "input": "⌨️ Input",
-        "variables": "📦 Variables"
+        "variables": "📦 Variables",
+        "functions": "🧩 Functions"
       },
       "simulator": {
         "title": "Simulator 3D"
@@ -182,9 +184,29 @@
           "message": "Play sound %1",
           "tooltip": "Play sound for drone"
         },
+        "procedures": {
+          "defNoReturnTitle": "Define function",
+          "defReturnTitle": "Define function with result",
+          "do": "do",
+          "call": "call",
+          "return": "return result"
+        },
+        "variables": {
+          "set": "set %1 to %2",
+          "change": "change %1 by %2"
+        },
         "inputNumber": {
           "message": "Input number %1",
           "tooltip": "Input a number from user"
+        },
+        "logic": {
+          "true": "TRUE",
+          "false": "FALSE",
+          "and": "AND",
+          "or": "OR"
+        },
+        "math": {
+          "modulo": "remainder of %1 ÷ %2"
         }
       }
     }
@@ -1177,8 +1199,12 @@
       "saving": "Saving...",
       "saved": "Saved!",
       "offline": "Offline",
-      "configureRules": "Config Rules",
-      "viewConfig": "View Config",
+      "configureRules": "Configure Rules",
+      "viewConfig": "View Map Config",
+      "blocklyConfig": "Blockly Config",
+      "viewBlocklyConfig": "View Blockly Config",
+      "viewSolution": "View Solution",
+      "trySolve": "Try Solve",
       "readOnlyHUD": "READ-ONLY (LOCKED)",
       "readOnlyDesc": "Locked in READ-ONLY mode",
       "mapSize": "Map Size",
@@ -1281,52 +1307,6 @@
     "backToBase": "Back to Headquarters",
     "connectionTerminated": "Connection Terminated",
     "loadingSystems": "Loading Systems..."
-  },
-  "ManagerCompetitions": {
-    "errors": {
-      "resolveClub": "Unable to resolve current club.",
-      "loadCompetitions": "Unable to load competitions."
-    },
-    "empty": {
-      "title": "No competitions yet",
-      "description": "Competitions created by this club will appear here."
-    },
-    "summary": {
-      "total": "{{count}} competitions in total"
-    },
-    "filters": {
-      "label": "Filter by status",
-      "all": "All"
-    },
-    "fallback": {
-      "noDescription": "No description"
-    },
-    "status": {
-      "ALL": "All",
-      "DRAFT": "Draft",
-      "PUBLISHED": "Published",
-      "REGISTRATION_OPEN": "Registration Open",
-      "REGISTRATION_CLOSED": "Registration Closed",
-      "ONGOING": "Ongoing",
-      "FINISHED": "Finished",
-      "RESULT_PUBLISHED": "Result Published",
-      "CANCELLED": "Cancelled",
-      "INVALID": "Invalid"
-    },
-    "metrics": {
-      "rounds": "Rounds",
-      "competitors": "Competitors",
-      "prizes": "Prizes",
-      "visible": "Visible"
-    },
-    "timeline": {
-      "registration": "Registration",
-      "competition": "Competition"
-    },
-    "meta": {
-      "createdAt": "Created at",
-      "invalidReason": "Invalid reason"
-    }
   },
   "ManagerMembers": {
     "errors": "Unable to determine the current club.",
@@ -1457,5 +1437,247 @@
     "remaining": "codes remaining",
     "notOwned": "Not owned",
     "learners": "learners"
+  },
+  "BlocklyManager": {
+    "title": "Blockly Configuration",
+    "description": "Select blocks allowed for students",
+    "search": "Search...",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selectedCount": "Total selected:",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save Config",
+    "required": "Default",
+    "categories": {
+      "motion": "Motion",
+      "loops": "Loops",
+      "logic": "Logic",
+      "sensors": "Sensors",
+      "math": "Math",
+      "variables": "Variables",
+      "functions": "Functions"
+    },
+    "blocks": {
+      "drone_take_off": "Take off",
+      "drone_take_off_desc": "Start drone",
+      "drone_land": "Land",
+      "drone_land_desc": "Land safely",
+      "drone_up": "Fly up",
+      "drone_up_desc": "Fly upwards",
+      "drone_down": "Fly down",
+      "drone_down_desc": "Fly downwards",
+      "drone_forward": "Forward",
+      "drone_forward_desc": "Move forward",
+      "drone_back": "Backward",
+      "drone_back_desc": "Move backward",
+      "drone_left": "Move left",
+      "drone_left_desc": "Move to the left",
+      "drone_right": "Move right",
+      "drone_right_desc": "Move to the right",
+      "drone_turn_left": "Turn left",
+      "drone_turn_left_desc": "Rotate drone left",
+      "drone_turn_right": "Turn right",
+      "drone_turn_right_desc": "Rotate drone right",
+      "drone_repeat": "Repeat",
+      "drone_repeat_desc": "Loop N times",
+      "drone_if": "If",
+      "drone_if_desc": "Conditional branch",
+      "drone_if_else": "If... Else",
+      "drone_if_else_desc": "Full branch",
+      "logic_compare": "Compare",
+      "logic_compare_desc": "Compare values",
+      "logic_operation": "Logic",
+      "logic_operation_desc": "And / Or",
+      "logic_negate": "Negate",
+      "logic_negate_desc": "Invert value",
+      "logic_boolean": "True/False",
+      "logic_boolean_desc": "Boolean",
+      "drone_is_obstacle_ahead": "Obstacle Ahead?",
+      "drone_is_obstacle_ahead_desc": "Front sensor",
+      "math_number": "Number",
+      "math_number_desc": "Numeric value",
+      "math_arithmetic": "Arithmetic",
+      "math_arithmetic_desc": "Add, subtract, multiply, divide, power",
+      "math_modulo": "Modulo",
+      "math_modulo_desc": "Remainder",
+      "drone_amount_value": "Distance Value",
+      "drone_amount_value_desc": "Numeric value for movement",
+      "drone_math_operation": "Compact Operator",
+      "drone_math_operation_desc": "Add, subtract, multiply, divide",
+      "category_variables": "Variables Group",
+      "category_variables_desc": "Enable/Disable variables",
+      "category_functions": "Functions Group",
+      "category_functions_desc": "Enable/Disable custom functions"
+    }
+  },
+  "ManagerCompetitions": {
+    "filter": "Filter",
+    "status": {
+      "label": "Status:",
+      "all": "All",
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "REGISTRATION_OPEN": "Registration Open",
+      "REGISTRATION_CLOSED": "Registration Closed",
+      "ONGOING": "Ongoing",
+      "FINISHED": "Finished",
+      "RESULT_PUBLISHED": "Result Published",
+      "CANCELLED": "Cancelled",
+      "INVALID": "Invalid"
+    },
+    "search": "Search",
+    "searchPlaceholder": "Search competition name...",
+    "clearSearch": "Clear search",
+    "create": "Create Competition",
+    "summary": {
+      "total": "Found {count} competitions"
+    },
+    "empty": {
+      "title": "No competitions found",
+      "description": "Start by creating your first competition or change your filters."
+    },
+    "errors": {
+      "resolveClub": "Unable to resolve current club.",
+      "loadCompetitions": "Failed to load competition list."
+    },
+    "metrics": {
+      "rounds": "Rounds",
+      "competitors": "Competitors",
+      "prizes": "Prizes",
+      "visible": "Visible at"
+    },
+    "timeline": {
+      "registration": "Registration Period",
+      "competition": "Competition Period"
+    },
+    "meta": {
+      "createdAt": "Created At",
+      "invalidReason": "Invalid Reason"
+    },
+    "fallback": {
+      "noDescription": "No description available for this competition."
+    },
+    "createDialog": {
+      "title": "Create New Competition",
+      "subtitle": "Fill in the basic info to initialize a competition (DRAFT status). You can edit it later.",
+      "fields": {
+        "nameVn": "Competition Name (Vietnamese)",
+        "nameVnPlaceholder": "Enter competition name...",
+        "nameEn": "Competition Name (English)",
+        "nameEnPlaceholder": "Enter competition name...",
+        "descVn": "Description (Vietnamese)",
+        "descVnPlaceholder": "Enter short description...",
+        "descEn": "Description (English)",
+        "descEnPlaceholder": "Enter short description...",
+        "ruleContent": "Rule Content",
+        "ruleContentPlaceholder": "Enter competition rules...",
+        "maxParticipants": "Max Participants",
+        "visibleAt": "Visible At",
+        "registrationStartDate": "Registration Start Date",
+        "registrationEndDate": "Registration End Date",
+        "startDate": "Competition Start Date",
+        "endDate": "Competition End Date",
+        "resultPublishedAt": "Result Published At (Optional)"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create Competition"
+      },
+      "toast": {
+        "success": "Competition created successfully",
+        "error": "Error filling data"
+      }
+    },
+    "updateDialog": {
+      "title": "Update Competition",
+      "subtitle": "Edit the current competition information.",
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "edit": "Edit"
+      },
+      "toast": {
+        "success": "Competition updated successfully",
+        "error": "Error updating data"
+      }
+    },
+    "detailsDialog": {
+      "title": "Competition Details",
+      "subtitle": "View full information about the competition.",
+      "sections": {
+        "info": "General Info",
+        "timeline": "Timeline",
+        "rules": "Rules"
+      },
+      "buttons": {
+        "close": "Close",
+        "edit": "Edit",
+        "details": "Details"
+      }
+    },
+    "detailPage": {
+      "tabs": {
+        "overview": "Overview",
+        "rounds": "Rounds",
+        "certificates": "Required Certificates",
+        "prizes": "Prizes"
+      },
+      "rounds": {
+        "title": "Round Management",
+        "description": "Configure the rounds for this competition.",
+        "empty": "No rounds have been configured yet.",
+        "create": {
+          "title": "Add New Round",
+          "subtitle": "Select a Lab and set the timing for this round.",
+          "fields": {
+            "lab": "Select Lab",
+            "labPlaceholder": "Search and select a Lab...",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "limitTime": "Time Limit (Minutes)",
+            "limitTimePlaceholder": "Example: 15"
+          },
+          "buttons": {
+            "create": "Create Round",
+            "cancel": "Cancel"
+          },
+          "toast": {
+            "success": "Round created successfully",
+            "error": "Failed to create round"
+          }
+        },
+        "phases": {
+          "Upcoming": "Upcoming",
+          "Ongoing": "Ongoing",
+          "Finished": "Finished"
+        },
+        "table": {
+          "round": "Round",
+          "lab": "Lab",
+          "time": "Time Range",
+          "limit": "Duration",
+          "actions": "Actions"
+        }
+      },
+      "certificates": {
+        "title": "Required Certificates",
+        "description": "List of certificates that participants must possess to join this competition.",
+        "empty": "No required certificates have been added yet."
+      },
+      "prizes": {
+        "title": "Prize Configuration",
+        "description": "Configure prizes for participants based on their rankings.",
+        "empty": {
+          "title": "No prizes yet",
+          "description": "Start adding prizes for this competition."
+        },
+        "create": {
+          "title": "Add New Prize",
+          "description": "Enter the details for this competition prize."
+        }
+      },
+      "backButton": "Back"
+    }
   }
 }

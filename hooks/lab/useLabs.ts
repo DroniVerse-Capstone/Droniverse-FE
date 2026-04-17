@@ -21,8 +21,10 @@ const sanitizeEnvironment = (env: any) => {
       timeLimit: env.rule.timeLimit || 0,
       requiredScore: env.rule.requiredScore || 0,
       sequentialCheckpoints: !!env.rule.sequentialCheckpoints,
-      maxBlocks: env.rule.maxBlocks || 0
-    } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0 },
+      maxBlocks: env.rule.maxBlocks || 0,
+      fuelLimit: env.rule.fuelLimit || 0,
+      allowedBlocks: env.rule.allowedBlocks || []
+    } : { timeLimit: 0, requiredScore: 0, sequentialCheckpoints: false, maxBlocks: 0, fuelLimit: 0, allowedBlocks: [] },
     hasSolution: env.hasSolution || env.rule?.hasSolution || false,
     solution: env.solution
   };

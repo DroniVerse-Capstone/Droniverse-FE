@@ -10,6 +10,9 @@ import CompetitonStatusBadge from "@/components/competition/CompetitonStatusBadg
 import { formatDateTime } from "@/lib/utils/format-date"
 import { useLocale, useTranslations } from "@/providers/i18n-provider"
 import { Competition } from "@/validations/competitions/competitions"
+import { Button } from "@/components/ui/button"
+import UpdateCompetitionDialog from "@/components/manager/competitons/UpdateCompetitionDialog"
+import { useParams, useRouter } from "next/navigation"
 
 type ManagerCompetitionCardProps = {
 	competition: Competition
@@ -25,6 +28,10 @@ export default function ManagerCompetitionCard({
 		locale === "en"
 			? competition.nameEN || competition.nameVN
 			: competition.nameVN || competition.nameEN
+
+	const [isUpdateOpen, setIsUpdateOpen] = React.useState(false)
+	const router = useRouter()
+	const { clubSlug } = useParams()
 
 	const description =
 		locale === "en"
@@ -43,7 +50,7 @@ export default function ManagerCompetitionCard({
 					</p>
 				</div>
 
-				<CompetitonStatusBadge status={competition.status} />
+				<CompetitonStatusBadge status={competition.competitionStatus} />
 			</div>
 
 			<div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -135,6 +142,30 @@ export default function ManagerCompetitionCard({
 					{competition.invalidReason}
 				</div>
 			)}
+
+			<div className="mt-4 flex gap-2 pt-1">
+				<Button
+					size="sm"
+					variant="outline"
+					onClick={() => router.push(`/manager/${clubSlug}/competitions/${competition.competitionID}`)}
+					className="flex-1 border-greyscale-600 bg-greyscale-800/50 hover:bg-greyscale-700 hover:text-white"
+				>
+					{t("detailsDialog.buttons.details")}
+				</Button>
+				<Button
+					size="sm"
+					onClick={() => setIsUpdateOpen(true)}
+					className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+				>
+					{t("updateDialog.buttons.edit")}
+				</Button>
+			</div>
+
+			<UpdateCompetitionDialog
+				competition={competition}
+				open={isUpdateOpen}
+				onOpenChange={setIsUpdateOpen}
+			/>
 		</article>
 	)
 }
