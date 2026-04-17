@@ -1304,52 +1304,6 @@
     "connectionTerminated": "Kết nối đã ngắt",
     "loadingSystems": "Đang tải hệ thống..."
   },
-  "ManagerCompetitions": {
-    "errors": {
-      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
-      "loadCompetitions": "Không thể tải danh sách cuộc thi."
-    },
-    "empty": {
-      "title": "Chưa có cuộc thi nào",
-      "description": "Khi câu lạc bộ tạo cuộc thi, danh sách sẽ hiển thị ở đây."
-    },
-    "summary": {
-      "total": "Tổng cộng {{count}} cuộc thi"
-    },
-    "filters": {
-      "label": "Lọc trạng thái",
-      "all": "Tất cả"
-    },
-    "fallback": {
-      "noDescription": "Chưa có mô tả"
-    },
-    "status": {
-      "ALL": "Tất cả",
-      "DRAFT": "Bản nháp",
-      "PUBLISHED": "Đã công khai",
-      "REGISTRATION_OPEN": "Đang mở đăng ký",
-      "REGISTRATION_CLOSED": "Đóng đăng ký",
-      "ONGOING": "Đang diễn ra",
-      "FINISHED": "Đã kết thúc",
-      "RESULT_PUBLISHED": "Đã công bố kết quả",
-      "CANCELLED": "Đã hủy",
-      "INVALID": "Không hợp lệ"
-    },
-    "metrics": {
-      "rounds": "Số vòng",
-      "competitors": "Thí sinh",
-      "prizes": "Giải thưởng",
-      "visible": "Công khai"
-    },
-    "timeline": {
-      "registration": "Đăng ký",
-      "competition": "Thi đấu"
-    },
-    "meta": {
-      "createdAt": "Tạo lúc",
-      "invalidReason": "Lý do không hợp lệ"
-    }
-  },
   "ManagerMembers": {
     "errors": "Không xác định được câu lạc bộ hiện tại.",
     "memberlist": "Danh sách thành viên",
@@ -1551,6 +1505,175 @@
       "category_variables_desc": "Bật/Tắt biến số",
       "category_functions": "Nhóm lệnh Hàm khối",
       "category_functions_desc": "Bật/Tắt hàm tự tạo"
+    }
+  },
+  "ManagerCompetitions": {
+    "filter": "Bộ lọc",
+    "status": {
+      "label": "Trạng thái:",
+      "all": "Tất cả",
+      "DRAFT": "Bản nháp",
+      "PUBLISHED": "Đã xuất bản",
+      "REGISTRATION_OPEN": "Đang mở đăng ký",
+      "REGISTRATION_CLOSED": "Đã đóng đăng ký",
+      "ONGOING": "Đang diễn ra",
+      "FINISHED": "Đã kết thúc",
+      "RESULT_PUBLISHED": "Đã công bố kết quả",
+      "CANCELLED": "Đã hủy",
+      "INVALID": "Không hợp lệ"
+    },
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Nhập tên cuộc thi...",
+    "clearSearch": "Xóa tìm kiếm",
+    "create": "Tạo cuộc thi mới",
+    "summary": {
+      "total": "Tìm thấy {count} cuộc thi"
+    },
+    "empty": {
+      "title": "Chưa có cuộc thi nào",
+      "description": "Bắt đầu bằng cách tạo cuộc thi đầu tiên của bạn hoặc thay đổi bộ lọc."
+    },
+    "errors": {
+      "resolveClub": "Không xác định được câu lạc bộ hiện tại.",
+      "loadCompetitions": "Không thể tải danh sách cuộc thi."
+    },
+    "metrics": {
+      "rounds": "Vòng thi",
+      "competitors": "Thí sinh",
+      "prizes": "Giải thưởng",
+      "visible": "Hiển thị lúc"
+    },
+    "timeline": {
+      "registration": "Thời gian đăng ký",
+      "competition": "Thời gian thi đấu"
+    },
+    "meta": {
+      "createdAt": "Ngày tạo",
+      "invalidReason": "Lý do không hợp lệ"
+    },
+    "fallback": {
+      "noDescription": "Không có mô tả cho cuộc thi này."
+    },
+    "createDialog": {
+      "title": "Tạo cuộc thi mới",
+      "subtitle": "Điền thông tin cơ bản để khởi tạo một cuộc thi (trạng thái DRAFT). Bạn có thể chỉnh sửa thêm sau.",
+      "fields": {
+        "nameVn": "Tên cuộc thi (Tiếng Việt)",
+        "nameVnPlaceholder": "Nhập tên cuộc thi...",
+        "nameEn": "Tên cuộc thi (English)",
+        "nameEnPlaceholder": "Enter competition name...",
+        "descVn": "Mô tả (Tiếng Việt)",
+        "descVnPlaceholder": "Nhập mô tả ngắn gọn...",
+        "descEn": "Mô tả (English)",
+        "descEnPlaceholder": "Enter short description...",
+        "ruleContent": "Nội dung quy định",
+        "ruleContentPlaceholder": "Nhập quy định cuộc thi...",
+        "maxParticipants": "Số lượng người tham gia tối đa",
+        "visibleAt": "Thời gian hiển thị",
+        "registrationStartDate": "Thời gian bắt đầu đăng ký",
+        "registrationEndDate": "Thời gian kết thúc đăng ký",
+        "startDate": "Thời gian bắt đầu thi",
+        "endDate": "Thời gian kết thúc thi",
+        "resultPublishedAt": "Thời gian công bố kết quả (Không bắt buộc)"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "create": "Tạo cuộc thi"
+      },
+      "toast": {
+        "success": "Tạo cuộc thi thành công",
+        "error": "Có lỗi khi điền dữ liệu"
+      }
+    },
+    "updateDialog": {
+      "title": "Cập nhật cuộc thi",
+      "subtitle": "Chỉnh sửa thông tin cuộc thi hiện tại.",
+      "buttons": {
+        "cancel": "Hủy",
+        "save": "Lưu thay đổi",
+        "edit": "Chỉnh sửa"
+      },
+      "toast": {
+        "success": "Cập nhật cuộc thi thành công",
+        "error": "Có lỗi khi cập nhật dữ liệu"
+      }
+    },
+    "detailsDialog": {
+      "title": "Chi tiết cuộc thi",
+      "subtitle": "Xem đầy đủ thông tin về cuộc thi.",
+      "sections": {
+        "info": "Thông tin chung",
+        "timeline": "Lộ trình",
+        "rules": "Quy định"
+      },
+      "buttons": {
+        "close": "Đóng",
+        "edit": "Chỉnh sửa",
+        "details": "Chi tiết"
+      }
+    },
+    "detailPage": {
+      "tabs": {
+        "overview": "Tổng quan",
+        "rounds": "Vòng thi",
+        "certificates": "Chứng chỉ yêu cầu",
+        "prizes": "Giải thưởng"
+      },
+      "rounds": {
+        "title": "Quản lý vòng thi",
+        "description": "Cấu hình các vòng thi cho cuộc thi này.",
+        "empty": "Chưa có vòng thi nào được cấu hình.",
+        "create": {
+          "title": "Thêm vòng thi mới",
+          "subtitle": "Chọn Lab và thiết lập thời gian cho vòng thi này.",
+          "fields": {
+            "lab": "Chọn bài Lab",
+            "labPlaceholder": "Tìm kiếm và chọn bài Lab...",
+            "startTime": "Thời gian bắt đầu",
+            "endTime": "Thời gian kết thúc",
+            "limitTime": "Thời gian làm bài (Phút)",
+            "limitTimePlaceholder": "Ví dụ: 15"
+          },
+          "buttons": {
+            "create": "Tạo vòng thi",
+            "cancel": "Hủy"
+          },
+          "toast": {
+            "success": "Tạo vòng thi thành công",
+            "error": "Tạo vòng thi thất bại"
+          }
+        },
+        "phases": {
+          "Upcoming": "Chưa tới giờ",
+          "Ongoing": "Đang diễn ra",
+          "Finished": "Đã kết thúc"
+        },
+        "table": {
+          "round": "Vòng",
+          "lab": "Bài Lab",
+          "time": "Thời gian",
+          "limit": "Thời lượng",
+          "actions": "Thao tác"
+        }
+      },
+      "certificates": {
+        "title": "Chứng chỉ yêu cầu",
+        "description": "Danh sách các chứng chỉ mà thí sinh cần phải có để tham gia cuộc thi này.",
+        "empty": "Chưa có chứng chỉ yêu cầu nào."
+      },
+      "prizes": {
+        "title": "Cấu hình giải thưởng",
+        "description": "Cấu hình các giải thưởng dành cho các thí sinh đạt thứ hạng cao.",
+        "empty": {
+          "title": "Chưa có giải thưởng nào",
+          "description": "Bắt đầu thêm giải thưởng cho cuộc thi này."
+        },
+        "create": {
+          "title": "Thêm giải thưởng mới",
+          "description": "Nhập thông tin chi tiết cho giải thưởng này."
+        }
+      },
+      "backButton": "Quay lại"
     }
   }
 }
