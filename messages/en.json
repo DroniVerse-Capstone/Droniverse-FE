@@ -1308,6 +1308,45 @@
     "connectionTerminated": "Connection Terminated",
     "loadingSystems": "Loading Systems..."
   },
+  "ManagerSidebar": {
+    "subtitle": "Club management",
+    "switchClub": "Switch club",
+    "overview": "Overview",
+    "members": {
+      "title": "Members",
+      "subitems": {
+        "management": "Member management",
+        "requests": "Join requests",
+        "transactions": "Transaction management"
+      }
+    },
+    "courses": {
+      "title": "Courses",
+      "subitems": {
+        "available": "Available courses",
+        "progress": "Learning progress"
+      }
+    },
+    "competitions": "Competitions",
+    "finance": {
+      "title": "Finance",
+      "subitems": {
+        "wallet": "Wallet",
+        "withdrawHistory": "Withdrawal history"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subitems": {
+        "clubInfo": "Club information",
+        "clubRules": "Club rules"
+      }
+    },
+    "aria": {
+      "collapseSidebar": "Collapse manager sidebar",
+      "switchClub": "Switch club"
+    }
+  },
   "ManagerMembers": {
     "errors": "Unable to determine the current club.",
     "memberlist": "Member List",

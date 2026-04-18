@@ -91,6 +91,7 @@ export default function ManagerCompetitons() {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-greyscale-0 ">Cuộc thi của Câu lạc bộ</h2>
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-greyscale-0">

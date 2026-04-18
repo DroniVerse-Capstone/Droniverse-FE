@@ -122,6 +122,9 @@ export default function ManagerCourse() {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-greyscale-0 ">
+        Khóa học hiện có
+      </h2>
       <div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">

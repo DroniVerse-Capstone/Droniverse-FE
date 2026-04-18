@@ -1,4 +1,5 @@
 import ManagerSidebar from "@/components/layouts/manager/ManagerSidebar";
+import ManagerMainHeader from "@/components/layouts/manager/ManagerMainHeader";
 
 export default function ManagerClubLayout({
 	children,
@@ -12,6 +13,7 @@ export default function ManagerClubLayout({
 			<div className="flex h-screen">
 				<ManagerSidebar clubSlug={params.clubSlug} />
 				<main className="min-w-0 flex-1 overflow-y-auto bg-greyscale-900">
+					<ManagerMainHeader />
 					<div className="min-w-0 p-4 md:p-6">{children}</div>
 				</main>
 			</div>

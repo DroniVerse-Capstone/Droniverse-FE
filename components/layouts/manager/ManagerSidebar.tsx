@@ -6,19 +6,18 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import {
-    Album,
+  Album,
   BarChart,
-  BarChart3,
   ChevronLeft,
   ChevronRight,
-  HandCoins,
   History,
   House,
+  Info,
   Library,
   MinusCircle,
   PlusCircle,
   Receipt,
-  ReceiptText,
+  ScrollText,
   Settings,
   Trophy,
   UserCheck,
@@ -32,7 +31,7 @@ import { IoPeople } from "react-icons/io5";
 import { useGetMyClubs } from "@/hooks/club/useClub";
 import { slugify } from "@/lib/utils/slugify";
 import { cn } from "@/lib/utils";
-import { useLocale } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import {
   Tooltip,
   TooltipContent,
@@ -40,9 +39,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ClubSwitcherDialog from "@/components/layouts/ClubSwitcherDialog";
-import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
-import UserDropdown from "@/components/layouts/UserDropdown";
-import { useAuthStore } from "@/stores/auth-store";
 
 type ManagerSidebarProps = {
   clubSlug: string;
@@ -56,6 +52,7 @@ type ManagerNavSubItem = {
 };
 
 type ManagerNavItem = {
+  id: string;
   title: string;
   href?: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -63,54 +60,58 @@ type ManagerNavItem = {
   isActive?: (pathname: string, searchParams: URLSearchParams) => boolean;
 };
 
-function buildManagerNavItems(clubSlug: string): ManagerNavItem[] {
+function buildManagerNavItems(
+  clubSlug: string,
+  t: (key: string) => string,
+): ManagerNavItem[] {
   const base = `/manager/${clubSlug}`;
 
   return [
     {
-      title: "Tổng quan",
+      id: "overview",
+      title: t("overview"),
       href: base,
       icon: House,
       isActive: (pathname) => pathname === base,
     },
     {
-      title: "Thành viên",
+      id: "members",
+      title: t("members.title"),
       icon: Users,
       subItems: [
         {
-          title: "Quản lý thành viên",
+          title: t("members.subitems.management"),
           href: `${base}/members`,
           icon: Users,
           isActive: (pathname) => pathname === `${base}/members`,
         },
         {
-          title: "Yêu cầu tham gia",
+          title: t("members.subitems.requests"),
           href: `${base}/members-requests`,
           icon: UserCheck,
-          isActive: (pathname) =>
-            pathname === `${base}/members-requests`,
+          isActive: (pathname) => pathname === `${base}/members-requests`,
         },
         {
-          title: "Quản lý giao dịch",
+          title: t("members.subitems.transactions"),
           href: `${base}/members-transactions`,
           icon: Receipt,
-          isActive: (pathname) =>
-            pathname === `${base}/members-transactions`,
+          isActive: (pathname) => pathname === `${base}/members-transactions`,
         },
       ],
     },
     {
-      title: "Khóa học",
+      id: "courses",
+      title: t("courses.title"),
       icon: Library,
       subItems: [
         {
-          title: "Khóa học hiện có",
+          title: t("courses.subitems.available"),
           href: `${base}/courses`,
           icon: Album,
           isActive: (pathname) => pathname === `${base}/courses`,
         },
         {
-          title: "Theo dõi tiến trình học",
+          title: t("courses.subitems.progress"),
           href: `${base}/courses-learning-progress`,
           icon: BarChart,
           isActive: (pathname) =>
@@ -119,24 +120,27 @@ function buildManagerNavItems(clubSlug: string): ManagerNavItem[] {
       ],
     },
     {
-      title: "Cuộc thi",
+      id: "competitions",
+      title: t("competitions"),
       href: `${base}/competitions`,
       icon: Trophy,
-      isActive: (pathname) => pathname === `${base}/competitions` || pathname.startsWith(`${base}/competitions/`),
+      isActive: (pathname) =>
+        pathname === `${base}/competitions` ||
+        pathname.startsWith(`${base}/competitions/`),
     },
     {
-      title: "Tài chính",
+      id: "finance",
+      title: t("finance.title"),
       icon: Wallet,
       subItems: [
         {
-          title: "Ví",
+          title: t("finance.subitems.wallet"),
           href: `${base}/my-wallet`,
           icon: WalletCards,
-          isActive: (pathname) =>
-             pathname === `${base}/my-wallet`,
+          isActive: (pathname) => pathname === `${base}/my-wallet`,
         },
         {
-          title: "Lịch sử rút tiền",
+          title: t("finance.subitems.withdrawHistory"),
           href: `${base}/withdraw-history`,
           icon: History,
           isActive: (pathname) => pathname === `${base}/withdraw-history`,
@@ -144,19 +148,20 @@ function buildManagerNavItems(clubSlug: string): ManagerNavItem[] {
       ],
     },
     {
-      title: "Thiết lập",
+      id: "settings",
+      title: t("settings.title"),
       icon: Settings,
       subItems: [
         {
-          title: "Thông tin câu lạc bộ",
+          title: t("settings.subitems.clubInfo"),
           href: `${base}/club-info`,
-          icon: WalletCards,
+          icon: Info,
           isActive: (pathname) => pathname === `${base}/club-info`,
         },
         {
-          title: "Nội quy câu lạc bộ",
+          title: t("settings.subitems.clubRules"),
           href: `${base}/club-rules`,
-          icon: History,
+          icon: ScrollText,
           isActive: (pathname) => pathname === `${base}/club-rules`,
         },
       ],
@@ -164,7 +169,11 @@ function buildManagerNavItems(clubSlug: string): ManagerNavItem[] {
   ];
 }
 
-function isItemActive(pathname: string, searchParams: URLSearchParams, item: ManagerNavItem) {
+function isItemActive(
+  pathname: string,
+  searchParams: URLSearchParams,
+  item: ManagerNavItem,
+) {
   if (item.isActive && item.isActive(pathname, searchParams)) {
     return true;
   }
@@ -251,12 +260,15 @@ function NavEntry({
           <span
             className={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/4 text-greyscale-50 transition-colors duration-300",
-              (active || open) && "border-greyscale-600 bg-white/12 text-greyscale-0",
+              (active || open) &&
+                "border-greyscale-600 bg-white/12 text-greyscale-0",
             )}
           >
             <Icon className="h-4.5 w-4.5" />
           </span>
-          <span className={cn("min-w-0 flex-1", labelClassName)}>{item.title}</span>
+          <span className={cn("min-w-0 flex-1", labelClassName)}>
+            {item.title}
+          </span>
         </span>
 
         {!collapsed && (
@@ -296,7 +308,9 @@ function NavEntry({
         <div
           className={cn(
             "grid overflow-hidden transition-all duration-300",
-            !collapsed && open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            !collapsed && open
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0",
           )}
         >
           <Collapsible.Content forceMount className="min-h-0">
@@ -361,19 +375,24 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const locale = useLocale();
-  const user = useAuthStore((state) => state.user);
+  const t = useTranslations("ManagerSidebar");
 
   const [openClubSwitcher, setOpenClubSwitcher] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
-  const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>(() => ({
-    "Thành viên": false,
-    "Tài chính": false,
-    "Câu lạc bộ": false,
-  }));
+  const [openMenus, setOpenMenus] = React.useState<Record<string, boolean>>(
+    () => ({
+      members: false,
+      finance: false,
+      settings: false,
+    }),
+  );
 
   const { data: clubs = [] } = useGetMyClubs({});
 
-  const navItems = React.useMemo(() => buildManagerNavItems(clubSlug), [clubSlug]);
+  const navItems = React.useMemo(
+    () => buildManagerNavItems(clubSlug, t),
+    [clubSlug, t],
+  );
 
   const currentClub = React.useMemo(
     () => clubs.find((club) => clubSlug.endsWith(`-${club.clubID}`)),
@@ -384,7 +403,7 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
     ? locale === "en"
       ? currentClub.nameEN || currentClub.nameVN
       : currentClub.nameVN
-    : "Đổi câu lạc bộ";
+    : t("switchClub");
 
   const handleSwitchClub = (clubName: string, clubId: string) => {
     router.push(`/manager/${slugify(clubName)}-${clubId}`);
@@ -394,17 +413,26 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
   React.useEffect(() => {
     setOpenMenus((current) => {
       const nextState = { ...current };
+      let hasChanged = false;
 
       for (const item of navItems) {
-        if (
+        const isActiveGroup = Boolean(
           item.subItems?.some((subItem) =>
             subItem.isActive
               ? subItem.isActive(pathname, searchParams)
               : subItem.href === pathname,
-          )
-        ) {
-          nextState[item.title] = true;
+          ),
+        );
+
+        // Keep manual toggle state; only auto-open the currently active group.
+        if (isActiveGroup && !nextState[item.id]) {
+          hasChanged = true;
+          nextState[item.id] = true;
         }
+      }
+
+      if (!hasChanged) {
+        return current;
       }
 
       return nextState;
@@ -425,7 +453,7 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
             collapsed ? "justify-center px-2" : "gap-3 px-2",
           )}
         >
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10" onClick={() => router.push("/manager")}>
             <Image
               src="/images/Logo-NoBg.png"
               alt="Droniverse"
@@ -441,8 +469,12 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
               collapsed ? "max-w-0 opacity-0" : "max-w-45 opacity-100",
             )}
           >
-            <div className="truncate text-base font-semibold tracking-tight">Droniverse</div>
-            <div className="truncate text-xs text-greyscale-200">Quản lý câu lạc bộ</div>
+            <div className="truncate text-base font-semibold tracking-tight">
+              Droniverse
+            </div>
+            <div className="truncate text-xs text-greyscale-200">
+              {t("subtitle")}
+            </div>
           </div>
 
           <button
@@ -452,7 +484,7 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/5 text-greyscale-50 transition-colors duration-200 hover:bg-white/10",
               collapsed && "absolute left-18 top-0",
             )}
-            aria-label="Collapse manager sidebar"
+            aria-label={t("aria.collapseSidebar")}
           >
             {collapsed ? (
               <ChevronRight className="h-4.5 w-4.5" />
@@ -474,7 +506,7 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
                   "group w-full rounded border border-greyscale-700 bg-greyscale-800 px-3 py-2 text-left transition-all hover:border-greyscale-600 hover:bg-greyscale-700",
                   collapsed && "flex justify-center px-0",
                 )}
-                aria-label="Switch club"
+                aria-label={t("aria.switchClub")}
               >
                 {collapsed ? (
                   <AiOutlineSwap size={16} className="text-greyscale-200" />
@@ -488,7 +520,10 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
                         {currentClubName}
                       </span>
                     </div>
-                    <AiOutlineSwap size={15} className="shrink-0 text-greyscale-300" />
+                    <AiOutlineSwap
+                      size={15}
+                      className="shrink-0 text-greyscale-300"
+                    />
                   </div>
                 )}
               </button>
@@ -500,39 +535,27 @@ export default function ManagerSidebar({ clubSlug }: ManagerSidebarProps) {
           <div className="space-y-2 px-1">
             {navItems.map((item) => (
               <NavEntry
-                key={item.title}
+                key={item.id}
                 item={item}
                 pathname={pathname}
                 searchParams={searchParams}
                 collapsed={collapsed}
-                open={Boolean(openMenus[item.title])}
+                open={Boolean(openMenus[item.id])}
                 onToggle={(nextOpen) =>
                   setOpenMenus((current) => ({
                     ...current,
-                    [item.title]: nextOpen,
+                    [item.id]: nextOpen,
                   }))
                 }
                 onExpand={() => {
                   setCollapsed(false);
                   setOpenMenus((current) => ({
                     ...current,
-                    [item.title]: true,
+                    [item.id]: true,
                   }));
                 }}
               />
             ))}
-          </div>
-        </div>
-
-        <div className="mt-3 border-t border-greyscale-700 px-2 pt-3">
-          <div
-            className={cn(
-              "flex items-center",
-              collapsed ? "flex-col gap-2" : "justify-between gap-3",
-            )}
-          >
-            <LanguageSwitcher />
-            <UserDropdown user={user} />
           </div>
         </div>
       </aside>
