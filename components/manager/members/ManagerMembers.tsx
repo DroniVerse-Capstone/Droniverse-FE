@@ -42,7 +42,7 @@ export default function ManagerMembers() {
   }
 
   return (
-    <div className="space-y-4 px-6 py-4">
+    <div className="space-y-4">
       <Tabs defaultValue="members" className="w-full">
         <TabsList>
           <TabsTrigger value="members">{t("memberlist")}</TabsTrigger>
