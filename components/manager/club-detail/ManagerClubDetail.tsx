@@ -70,7 +70,7 @@ export default function ManagerClubDetail() {
   const hasAnyError = overviewQuery.isError || growthQuery.isError;
 
   return (
-    <div className="space-y-6 px-6 pb-6">
+    <div className="space-y-6">
       <FadeIn from="bottom" duration={0.8} delay={0.2}>
         <ManagerClubInfo clubId={clubId} />
       </FadeIn>
