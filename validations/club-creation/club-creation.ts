@@ -2,14 +2,14 @@ import { z } from 'zod'
 import { categorySchema } from '@/validations/category/category'
 
 export const clubCreationRequestSchema = z.object({
+    droneID: z.string().uuid(),
+    clubPolicy: z.string().min(1),
+    media: z.string().uuid(),
     nameVN: z.string().min(1),
     nameEN: z.string().min(1),
     description: z.string().min(1),
-    isPublic: z.boolean(),
     limitParticipant: z.number().int().positive(),
-    limitClubManager: z.number().int().positive(),
     image: z.string(),
-    categoryIDs: z.array(z.string()).min(1)
 })
 
 export const clubCreationResponseDataSchema = z.object({
@@ -28,6 +28,9 @@ export const clubCreationResponseSchema = z.object({
 
 export const clubCreationRequestItemSchema = z.object({
     clubCreationRequestID: z.string(),
+    droneID: z.string().nullable().optional(),
+    clubPolicy: z.string().nullable().optional(),
+    media: z.string().nullable().optional(),
     nameVN: z.string(),
     nameEN: z.string(),
     description: z.string(),

@@ -95,6 +95,7 @@ export default function AssignCourseVersionRequiredDronesDialog({
           </DialogHeader>
 
           <DroneDropdown
+            multiple
             value={selectedDroneIDs}
             onChange={setSelectedDroneIDs}
             placeholder={t("selectPlaceholder")}

@@ -7,6 +7,18 @@ export const courseUserSchema = z.object({
 	email: z.string(),
 })
 
+export const courseLevelSchema = z.object({
+	levelID: z.string(),
+	levelNumber: z.number().int().nonnegative(),
+	name: z.string(),
+})
+
+export const courseDroneSchema = z.object({
+	droneID: z.string(),
+	name: z.string(),
+	imgURL: z.string(),
+})
+
 export const miniProductSchema = z.object({
 	productId: z.string(),
 	referenceId: z.string(),
@@ -53,7 +65,6 @@ export const courseVersionSchema = z.object({
 	status: z.enum(['DRAFT', 'ACTIVE', 'INACTIVE', 'DEPRECATED']),
 	version: z.number().int(),
 	imageUrl: z.string().nullable(),
-	level: z.enum(['EASY', 'MEDIUM', 'HARD']),
 	estimatedDuration: z.number().int().nonnegative(),
 	changeLog: z.string().nullable(),
 	updater: courseUserSchema.nullable(),
@@ -61,8 +72,6 @@ export const courseVersionSchema = z.object({
 	contextVN: z.string(),
 	contextEN: z.string(),
 	certificate: certificateInfoSchema.nullable(),
-	categories: z.array(z.unknown()),
-	requiredDrones: z.array(z.unknown()),
 })
 
 export const courseSchema = z.object({
@@ -70,6 +79,8 @@ export const courseSchema = z.object({
 	creator: courseUserSchema,
 	createAt: z.string(),
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
+	level: courseLevelSchema.nullable(),
+	drone: courseDroneSchema.nullable(),
 	currentVersion: courseVersionSchema.nullable(),
 	courseVersions: z.array(courseVersionSchema).default([]),
 	miniProduct: miniProductSchema.nullable().optional(),

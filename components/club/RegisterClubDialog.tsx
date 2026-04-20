@@ -4,7 +4,9 @@ import React, { useEffect } from "react";
 import toast from "react-hot-toast";
 import { MdOutlineCreateNewFolder } from "react-icons/md";
 
-import CategoryDropdown from "@/components/common/CategoryDropdown";
+import DroneDropdown from "@/components/common/DroneDropdown";
+import QuillEditor from "@/components/common/QuillEditor";
+import { MediaTypeUpload } from "@/components/club/MediaTypeUpload";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -54,27 +56,28 @@ export default function RegisterClubDialog({
   const [clubName, setClubName] = React.useState("");
   const [clubNameEn, setClubNameEn] = React.useState("");
   const [clubDescription, setClubDescription] = React.useState("");
-  const [categoryIds, setCategoryIds] = React.useState<string[]>([]);
-  const [isPublic, setIsPublic] = React.useState(true);
+  const [droneId, setDroneId] = React.useState("");
+  const [clubPolicy, setClubPolicy] = React.useState("");
+  const [mediaId, setMediaId] = React.useState("");
   const [memberLimit, setMemberLimit] = React.useState(10);
-  const [managerLimit, setManagerLimit] = React.useState(1);
   const [clubImageUrl, setClubImageUrl] = React.useState("");
 
   const createMutation = useClubCreation();
   const updateMutation = useUpdateClubCreationRequestInformation();
 
-  const { data: detail, isLoading: isDetailLoading } = useGetClubCreationRequestDetail(
-    mode === "edit" && open ? requestId : undefined
-  );
+  const { data: detail, isLoading: isDetailLoading } =
+    useGetClubCreationRequestDetail(
+      mode === "edit" && open ? requestId : undefined,
+    );
 
   const resetForm = () => {
     setClubName("");
     setClubNameEn("");
     setClubDescription("");
-    setCategoryIds([]);
-    setIsPublic(true);
+    setDroneId("");
+    setClubPolicy("");
+    setMediaId("");
     setMemberLimit(10);
-    setManagerLimit(1);
     setClubImageUrl("");
   };
 
@@ -86,10 +89,10 @@ export default function RegisterClubDialog({
     setClubName(detail.nameVN);
     setClubNameEn(detail.nameEN);
     setClubDescription(detail.description);
-    setCategoryIds(detail.categories.map((c) => c.categoryId));
-    setIsPublic(detail.isPublic);
+    setDroneId(detail.droneID ?? "");
+    setClubPolicy(detail.clubPolicy ?? "");
+    setMediaId(detail.media ?? "");
     setMemberLimit(detail.limitParticipant);
-    setManagerLimit(detail.limitClubManager);
     setClubImageUrl(detail.imageUrl ?? "");
   }, [open, mode, detail]);
 
@@ -97,14 +100,14 @@ export default function RegisterClubDialog({
 
   const handleSubmit = () => {
     const payload = {
+      droneID: droneId.trim(),
+      clubPolicy: clubPolicy.trim(),
+      media: mediaId.trim(),
       nameVN: clubName.trim(),
       nameEN: clubNameEn.trim(),
       description: clubDescription.trim(),
-      isPublic,
       limitParticipant: memberLimit,
-      limitClubManager: managerLimit,
       image: clubImageUrl.trim(),
-      categoryIDs: categoryIds,
     };
 
     const result = clubCreationRequestSchema.safeParse(payload);
@@ -125,10 +128,10 @@ export default function RegisterClubDialog({
           },
           onError: (error) => {
             toast.error(
-              error.response?.data?.message || error.message || t("error")
+              error.response?.data?.message || error.message || t("error"),
             );
           },
-        }
+        },
       );
       return;
     }
@@ -141,18 +144,16 @@ export default function RegisterClubDialog({
       },
       onError: (error) => {
         toast.error(
-          error.response?.data?.message || error.message || t("error")
+          error.response?.data?.message || error.message || t("error"),
         );
       },
     });
   };
 
   const dialogTitle = mode === "edit" ? t("editTitle") : t("title");
-  const dialogSubtitle =
-    mode === "edit"
-      ? t("editSubtitle")
-      : t("subtitle");
-  const submitLabel = mode === "edit" ? t("buttons.update") : t("buttons.submit");
+  const dialogSubtitle = mode === "edit" ? t("editSubtitle") : t("subtitle");
+  const submitLabel =
+    mode === "edit" ? t("buttons.update") : t("buttons.submit");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -166,7 +167,7 @@ export default function RegisterClubDialog({
         </DialogTrigger>
       )}
 
-      <DialogContent className="w-[min(96vw,760px)] max-h-[85vh] overflow-hidden p-0">
+      <DialogContent className="w-full max-w-3xl max-h-[85vh] overflow-hidden p-0">
         <div className="flex max-h-[85vh] flex-col">
           <DialogHeader className="px-6 pt-6">
             <DialogTitle>{dialogTitle}</DialogTitle>
@@ -180,24 +181,26 @@ export default function RegisterClubDialog({
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="club-name">{t("fields.nameVi")}</Label>
-                  <Input
-                    id="club-name"
-                    placeholder={t("fields.nameVi")}
-                    value={clubName}
-                    onChange={(e) => setClubName(e.target.value)}
-                  />
-                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="club-name">{t("fields.nameVi")}</Label>
+                    <Input
+                      id="club-name"
+                      placeholder={t("fields.nameVi")}
+                      value={clubName}
+                      onChange={(e) => setClubName(e.target.value)}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="club-name-en">{t("fields.nameEn")}</Label>
-                  <Input
-                    id="club-name-en"
-                    placeholder={t("fields.nameEn")}
-                    value={clubNameEn}
-                    onChange={(e) => setClubNameEn(e.target.value)}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="club-name-en">{t("fields.nameEn")}</Label>
+                    <Input
+                      id="club-name-en"
+                      placeholder={t("fields.nameEn")}
+                      value={clubNameEn}
+                      onChange={(e) => setClubNameEn(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <ClubImageUpload
@@ -206,15 +209,36 @@ export default function RegisterClubDialog({
                   onChange={setClubImageUrl}
                 />
 
-                <CategoryDropdown
-                  value={categoryIds}
-                  onChange={setCategoryIds}
-                  label={t("fields.category")}
-                  placeholder={t("fields.categoryPlaceholder")}
+                <DroneDropdown
+                  value={droneId}
+                  onChange={setDroneId}
+                  label="Chọn drone bắt buộc của câu lạc bộ"
+                  placeholder="Chọn drone"
+                />
+
+                <MediaTypeUpload
+                  label="Bằng chứng sở hữu drone (ảnh hoặc video)"
+                  value={mediaId}
+                  onChange={setMediaId}
+                  onUploaded={(media) => {
+                    if (!clubImageUrl) {
+                      setClubImageUrl(media.url);
+                    }
+                  }}
+                />
+
+                <QuillEditor
+                  label="Thiết lập nội quy câu lạc bộ"
+                  value={clubPolicy}
+                  onChange={setClubPolicy}
+                  placeholder="Nhập nội quy của câu lạc bộ"
+                  minHeight={140}
                 />
 
                 <div className="space-y-2">
-                  <Label htmlFor="club-description">{t("fields.description")}</Label>
+                  <Label htmlFor="club-description">
+                    {t("fields.description")}
+                  </Label>
                   <Textarea
                     id="club-description"
                     placeholder={t("fields.description")}
@@ -223,37 +247,17 @@ export default function RegisterClubDialog({
                   />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Switch
-                    id="club-public"
-                    checked={isPublic}
-                    onCheckedChange={setIsPublic}
-                  />
-                  <Label htmlFor="club-public" className="text-base">
-                    {t("fields.isPublic")}
-                  </Label>
-                </div>
-
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="member-limit">{t("fields.limitMembers")}</Label>
+                    <Label htmlFor="member-limit">
+                      {t("fields.limitMembers")}
+                    </Label>
                     <Input
                       id="member-limit"
                       type="number"
                       min="10"
                       value={memberLimit}
                       onChange={(e) => setMemberLimit(Number(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="manager-limit">{t("fields.limitManagers")}</Label>
-                    <Input
-                      id="manager-limit"
-                      type="number"
-                      min="1"
-                      value={managerLimit}
-                      onChange={(e) => setManagerLimit(Number(e.target.value))}
                     />
                   </div>
                 </div>
@@ -267,7 +271,11 @@ export default function RegisterClubDialog({
                 {t("buttons.cancel")}
               </Button>
             </DialogClose>
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? <Spinner /> : submitLabel}
             </Button>
           </DialogFooter>
