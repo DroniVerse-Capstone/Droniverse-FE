@@ -5,6 +5,7 @@ export const courseUserSchema = z.object({
 	userId: z.string(),
 	fullName: z.string(),
 	email: z.string(),
+	avatarUrl: z.string().nullable().optional(),
 })
 
 export const courseLevelSchema = z.object({
@@ -41,6 +42,23 @@ export const createCourseProductRequestSchema = z.object({
 })
 
 export const updateCourseProductRequestSchema = createCourseProductRequestSchema
+
+export const createCourseInitialVersionSchema = z.object({
+	titleVN: z.string().min(1),
+	titleEN: z.string().min(1),
+	descriptionVN: z.string().min(1),
+	descriptionEN: z.string().min(1),
+	contextVN: z.string().min(1),
+	contextEN: z.string().min(1),
+	imageUrl: z.string().min(1),
+	estimatedDuration: z.number().int().nonnegative(),
+	changeLog: z.string().nullable().optional(),
+})
+
+export const createCourseRequestSchema = z.object({
+	levelID: z.string().min(1),
+	version: createCourseInitialVersionSchema,
+})
 
 export const courseProductSchema = z.object({
 	productId: z.string(),
@@ -133,6 +151,7 @@ export const updateCourseProductResponseSchema = courseProductSchema
 export type CourseVersion = z.infer<typeof courseVersionSchema>
 export type Course = z.infer<typeof courseSchema>
 export type CourseProductStatus = z.infer<typeof courseProductStatusSchema>
+export type CreateCourseRequest = z.infer<typeof createCourseRequestSchema>
 export type CreateCourseProductRequest = z.infer<
 	typeof createCourseProductRequestSchema
 >

@@ -148,10 +148,9 @@ export default function ClubManagement() {
   const headers = [
     t("table.headers.name"),
     t("table.headers.managers"),
-    t("table.headers.mode"),
+    "Drone",
     t("table.headers.image"),
     t("table.headers.members"),
-    t("table.headers.category"),
     t("table.headers.status"),
     t("table.headers.actions"),
   ];
@@ -255,21 +254,37 @@ export default function ClubManagement() {
                 </TableCell>
 
                 <TableCell>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded border px-2 py-1 text-xs",
-                      club.isPublic
-                        ? "border-secondary/40 bg-secondary/15 text-secondary"
-                        : "border-primary/40 bg-primary/15 text-primary",
-                    )}
-                  >
-                    {club.isPublic ? (
-                      <CiUnlock size={13} />
-                    ) : (
-                      <CiLock size={13} />
-                    )}
-                    {club.isPublic ? t("privacy.public") : t("privacy.private")}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded border border-greyscale-700">
+                      <Image
+                        src={
+                          club?.drone?.imgURL || "/images/drone-placeholder.jpg"
+                        }
+                        alt={
+                          (locale === "vi"
+                            ? club?.drone?.droneNameVN
+                            : club?.drone?.droneNameEN) ?? "Drone"
+                        }
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-greyscale-0">
+                        {locale === "vi"
+                          ? club?.drone?.droneNameVN
+                          : club?.drone?.droneNameEN}
+                      </p>
+                      <p className="text-xs text-greyscale-100">
+                        {locale === "vi"
+                          ? club?.drone?.droneTypeNameVN
+                          : club?.drone?.droneTypeNameEN}
+                      </p>
+                      <p className="text-xs text-greyscale-100">
+                        {club?.drone?.manufacturer}
+                      </p>
+                    </div>
+                  </div>
                 </TableCell>
 
                 <TableCell>
@@ -288,30 +303,6 @@ export default function ClubManagement() {
                     <IoPeopleOutline size={14} />
                     {club.totalMembers}/{club.limitParticipation}
                   </span>
-                </TableCell>
-
-                <TableCell>
-                  {club.categories.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {club.categories.slice(0, 2).map((category) => (
-                        <span
-                          key={category.categoryId}
-                          className="rounded border border-greyscale-600 px-2 py-0.5 text-xs text-greyscale-100"
-                        >
-                          {locale === "vi"
-                            ? category.typeNameVN
-                            : category.typeNameEN}
-                        </span>
-                      ))}
-                      {club.categories.length > 2 && (
-                        <span className="text-xs text-greyscale-100">
-                          +{club.categories.length - 2}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-greyscale-100">-</span>
-                  )}
                 </TableCell>
 
                 <TableCell>
@@ -347,7 +338,9 @@ export default function ClubManagement() {
                       <ConfirmActionPopover
                         trigger={
                           <TooltipWrapper
-                            label={locale === "vi" ? "Tái kích hoạt" : "Activate"}
+                            label={
+                              locale === "vi" ? "Tái kích hoạt" : "Activate"
+                            }
                           >
                             <Button
                               variant="successIcon"
@@ -443,7 +436,7 @@ export default function ClubManagement() {
       </Dialog>
 
       <Dialog open={!!viewId} onOpenChange={() => setViewId(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-greyscale-0">
               {locale === "vi"
@@ -463,100 +456,151 @@ export default function ClubManagement() {
                 : "Unable to find club details"}
             </p>
           ) : (
-            <div className="space-y-4">
-              <div className="relative h-44 w-full overflow-hidden rounded border border-greyscale-700">
-                <Image
-                  src={detail.imageUrl || "/images/club-placeholder.jpg"}
-                  alt={locale === "vi" ? detail.nameVN : detail.nameEN}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <ClubStatusBadge status={detail.status} />
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded border px-2 py-1 text-xs",
-                    detail.isPublic
-                      ? "border-secondary/40 bg-secondary/15 text-secondary"
-                      : "border-primary/40 bg-primary/15 text-primary",
-                  )}
-                >
-                  {detail.isPublic ? (
-                    <CiUnlock size={13} />
-                  ) : (
-                    <CiLock size={13} />
-                  )}
-                  {detail.isPublic ? t("privacy.public") : t("privacy.private")}
-                </span>
-                <span className="rounded border border-secondary/40 bg-secondary/15 text-secondary px-2 py-1 text-xs">
-                  Code: {detail.clubCode}
-                </span>
-              </div>
-
-              {detail.status === "SUSPENDED" && (
-                <div className="rounded border bg-primary/15 border-primary-300 p-2">
-                  <p className="text-xs text-primary-300">
-                    {locale === "vi"
-                      ? "Lý do đình chỉ"
-                      : "Reason for suspension"}
-                  </p>
-                  <p className="text-sm font-medium text-primary-200">
-                    {detail.suspendedReason}
-                  </p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="rounded border border-greyscale-700 p-2">
-                  <p className="text-xs text-greyscale-100">
-                    {locale === "vi" ? "Số thành viên" : "Members"}
-                  </p>
-                  <p className="text-sm font-medium text-greyscale-0">
-                    {detail.totalMembers}/{detail.limitParticipation}
-                  </p>
+            <div className="flex-1 overflow-y-auto pr-1">
+              <div className="space-y-4">
+                <div className="relative h-44 w-full overflow-hidden rounded border border-greyscale-700">
+                  <Image
+                    src={detail.imageUrl || "/images/club-placeholder.jpg"}
+                    alt={locale === "vi" ? detail.nameVN : detail.nameEN}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
 
-                <div className="rounded border border-greyscale-700 p-2">
-                  <p className="text-xs text-greyscale-100">
-                    {locale === "vi" ? "Quản lý CLB" : "Club managers"}
-                  </p>
-                  <p className="text-sm font-medium text-greyscale-0">
-                    {detail.limitClubManagers}
-                  </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <ClubStatusBadge status={detail.status} />
+                  <span className="rounded border border-secondary/40 bg-secondary/15 px-2 py-1 text-xs text-secondary">
+                    Code: {detail.clubCode}
+                  </span>
                 </div>
 
-                <div className="rounded border border-greyscale-700 p-2 col-span-2">
-                  <p className="text-xs text-greyscale-100">
-                    {locale === "vi" ? "Tổng khóa học" : "Total courses"}
-                  </p>
-                  <p className="text-sm font-medium text-greyscale-0">
-                    {detail.totalCourses}
-                  </p>
-                </div>
-              </div>
+                {detail.status === "SUSPENDED" && (
+                  <div className="rounded border border-primary-300 bg-primary/15 p-2">
+                    <p className="text-xs text-primary-300">
+                      {locale === "vi"
+                        ? "Lý do đình chỉ"
+                        : "Reason for suspension"}
+                    </p>
+                    <p className="text-sm font-medium text-primary-200">
+                      {detail.suspendedReason}
+                    </p>
+                  </div>
+                )}
 
-              <div>
-                <p className="text-sm font-medium text-greyscale-0">
-                  {t("table.headers.category")}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {detail.categories.length > 0 ? (
-                    detail.categories.map((category) => (
-                      <span
-                        key={category.categoryId}
-                        className="rounded border border-greyscale-600 px-2 py-0.5 text-xs text-greyscale-100"
-                      >
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded border border-greyscale-700 p-2">
+                    <p className="text-xs text-greyscale-100">
+                      {locale === "vi" ? "Số thành viên" : "Members"}
+                    </p>
+                    <p className="text-sm font-medium text-greyscale-0">
+                      {detail.totalMembers}/{detail.limitParticipation}
+                    </p>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 p-2">
+                    <p className="text-xs text-greyscale-100">
+                      {locale === "vi" ? "Tổng khóa học" : "Total courses"}
+                    </p>
+                    <p className="text-sm font-medium text-greyscale-0">
+                      {detail.totalCourses}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {detail.creator && (
+                    <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                      <p className="mb-2 text-sm font-medium text-greyscale-0">
                         {locale === "vi"
-                          ? category.typeNameVN
-                          : category.typeNameEN}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-greyscale-100">-</span>
+                          ? "Quản lý câu lạc bộ"
+                          : "Club manager"}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-greyscale-700">
+                          <Image
+                            src={
+                              detail.creator.imageUrl ||
+                              "/images/avatar-placeholder.jpg"
+                            }
+                            alt={detail.creator.username}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-greyscale-0">
+                            {detail.creator.username}
+                          </p>
+                          <p className="text-xs text-greyscale-100">
+                            {detail.creator.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {detail.drone && (
+                    <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                      <p className="mb-2 text-sm font-medium text-greyscale-0">
+                        {locale === "vi" ? "Drone yêu cầu" : "Required drone"}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded border border-greyscale-700">
+                          <Image
+                            src={
+                              detail.drone.imgURL ||
+                              "/images/drone-placeholder.jpg"
+                            }
+                            alt={
+                              locale === "vi"
+                                ? detail.drone.droneNameVN
+                                : detail.drone.droneNameEN
+                            }
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-greyscale-0">
+                            {locale === "vi"
+                              ? detail.drone.droneNameVN
+                              : detail.drone.droneNameEN}
+                          </p>
+                          <p className="text-xs text-greyscale-100">
+                            {locale === "vi"
+                              ? detail.drone.droneTypeNameVN
+                              : detail.drone.droneTypeNameEN}
+                          </p>
+                          <p className="text-xs text-greyscale-100">
+                            {detail.drone.manufacturer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
+
+                {(detail.clubPolicyVN || detail.clubPolicyEN) && (
+                  <div className="space-y-3">
+                    {detail.clubPolicyVN && (
+                      <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                        <p className="mb-2 text-sm font-medium text-greyscale-0">
+                          {locale === "vi"
+                            ? "Nội quy câu lạc bộ"
+                            : "Club Policy"}
+                        </p>
+                        <div
+                          className="dv-quill-render ql-editor"
+                          dangerouslySetInnerHTML={
+                            locale === "vi"
+                              ? { __html: detail.clubPolicyVN }
+                              : { __html: detail.clubPolicyEN }
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

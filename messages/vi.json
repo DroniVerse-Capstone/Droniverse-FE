@@ -574,7 +574,8 @@
       "all": "Tất cả",
       "easy": "Cơ bản",
       "medium": "Trung bình",
-      "hard": "Nâng cao"
+      "hard": "Nâng cao",
+      "master": "Bậc thầy"
     },
     "management": {
       "total": "Tổng số khóa học",
@@ -630,7 +631,8 @@
       "level": {
         "easy": "Cơ bản",
         "medium": "Trung bình",
-        "hard": "Nâng cao"
+        "hard": "Nâng cao",
+        "master": "Bậc thầy"
       }
     },
     "AdminCourseCard": {

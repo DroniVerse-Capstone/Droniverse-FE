@@ -23,6 +23,12 @@ type UploadedMediaInfo = {
   url: string;
 };
 
+type InitialMediaInfo = {
+  mediaID: string;
+  mediaType?: MediaType;
+  url?: string;
+};
+
 type MediaTypeUploadProps = {
   value?: string;
   onChange: (mediaID: string) => void;
@@ -30,6 +36,7 @@ type MediaTypeUploadProps = {
   disabled?: boolean;
   defaultMediaType?: MediaType;
   onUploaded?: (media: UploadedMediaInfo) => void;
+  initialMedia?: InitialMediaInfo | null;
 };
 
 export function MediaTypeUpload({
@@ -39,6 +46,7 @@ export function MediaTypeUpload({
   disabled = false,
   defaultMediaType = "IMAGE",
   onUploaded,
+  initialMedia = null,
 }: MediaTypeUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedMediaType, setSelectedMediaType] =
@@ -58,6 +66,30 @@ export function MediaTypeUpload({
       }
     };
   }, [localPreviewUrl]);
+
+  useEffect(() => {
+    if (!initialMedia) return;
+    if (!initialMedia.mediaID) return;
+
+    if (localPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+
+    setLocalPreviewUrl("");
+    setUploadedUrl(initialMedia.url ?? "");
+    setUploadedMediaType(initialMedia.mediaType ?? null);
+
+    if (initialMedia.mediaType) {
+      setSelectedMediaType(initialMedia.mediaType);
+    }
+
+    if (initialMedia.url) {
+      const fileNameFromUrl = decodeURIComponent(
+        initialMedia.url.split("/").pop() || "Media"
+      );
+      setFileName(fileNameFromUrl);
+    }
+  }, [initialMedia]);
 
   const uploadMutation = useUploadTempMedia({
     onSuccess: ({ data }) => {

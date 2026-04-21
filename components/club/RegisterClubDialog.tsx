@@ -28,6 +28,7 @@ import {
   useGetClubCreationRequestDetail,
   useUpdateClubCreationRequestInformation,
 } from "@/hooks/club-creation/useClubCreation";
+import { MediaType } from "@/validations/media/media";
 import { clubCreationRequestSchema } from "@/validations/club-creation/club-creation";
 import { useTranslations } from "@/providers/i18n-provider";
 import { Spinner } from "@/components/ui/spinner";
@@ -57,10 +58,12 @@ export default function RegisterClubDialog({
   const [clubNameEn, setClubNameEn] = React.useState("");
   const [clubDescription, setClubDescription] = React.useState("");
   const [droneId, setDroneId] = React.useState("");
-  const [clubPolicy, setClubPolicy] = React.useState("");
+  const [clubPolicyVN, setClubPolicyVN] = React.useState("");
+  const [clubPolicyEN, setClubPolicyEN] = React.useState("");
   const [mediaId, setMediaId] = React.useState("");
   const [memberLimit, setMemberLimit] = React.useState(10);
   const [clubImageUrl, setClubImageUrl] = React.useState("");
+  const [clubMediaUrl, setClubMediaUrl] = React.useState("");
 
   const createMutation = useClubCreation();
   const updateMutation = useUpdateClubCreationRequestInformation();
@@ -70,30 +73,52 @@ export default function RegisterClubDialog({
       mode === "edit" && open ? requestId : undefined,
     );
 
+  const initialMedia = React.useMemo(() => {
+    if (!detail?.media) return null;
+
+    const rawType = (detail.media.mediaTypeName ?? detail.media.mediaType ?? "")
+      .toString()
+      .toUpperCase();
+
+    const mediaType =
+      rawType === "IMAGE" || rawType === "VIDEO"
+        ? (rawType as MediaType)
+        : undefined;
+
+    return {
+      mediaID: detail.media.mediaID,
+      mediaType,
+      url: detail.media.url,
+    };
+  }, [detail]);
+
   const resetForm = () => {
     setClubName("");
     setClubNameEn("");
     setClubDescription("");
     setDroneId("");
-    setClubPolicy("");
+    setClubPolicyVN("");
+    setClubPolicyEN("");
     setMediaId("");
     setMemberLimit(10);
     setClubImageUrl("");
+    setClubMediaUrl("");
   };
 
   useEffect(() => {
     if (!open) return;
     if (mode !== "edit") return;
     if (!detail) return;
-
     setClubName(detail.nameVN);
     setClubNameEn(detail.nameEN);
     setClubDescription(detail.description);
-    setDroneId(detail.droneID ?? "");
-    setClubPolicy(detail.clubPolicy ?? "");
-    setMediaId(detail.media ?? "");
+    setDroneId(detail.drone?.droneID ?? "");
+    setClubPolicyVN(detail.clubPolicyVN ?? "");
+    setClubPolicyEN(detail.clubPolicyEN ?? "");
+    setMediaId(detail.media?.mediaID ?? "");
     setMemberLimit(detail.limitParticipant);
     setClubImageUrl(detail.imageUrl ?? "");
+    setClubMediaUrl(detail.media?.url ?? "");
   }, [open, mode, detail]);
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -101,7 +126,8 @@ export default function RegisterClubDialog({
   const handleSubmit = () => {
     const payload = {
       droneID: droneId.trim(),
-      clubPolicy: clubPolicy.trim(),
+      clubPolicyVN: clubPolicyVN.trim(),
+      clubPolicyEN: clubPolicyEN.trim(),
       media: mediaId.trim(),
       nameVN: clubName.trim(),
       nameEN: clubNameEn.trim(),
@@ -220,18 +246,27 @@ export default function RegisterClubDialog({
                   label="Bằng chứng sở hữu drone (ảnh hoặc video)"
                   value={mediaId}
                   onChange={setMediaId}
+                  initialMedia={initialMedia}
                   onUploaded={(media) => {
-                    if (!clubImageUrl) {
-                      setClubImageUrl(media.url);
+                    if (!clubMediaUrl) {
+                      setClubMediaUrl(media.url);
                     }
                   }}
                 />
 
                 <QuillEditor
-                  label="Thiết lập nội quy câu lạc bộ"
-                  value={clubPolicy}
-                  onChange={setClubPolicy}
-                  placeholder="Nhập nội quy của câu lạc bộ"
+                  label="Thiết lập nội quy câu lạc bộ (Tiếng Việt)"
+                  value={clubPolicyVN}
+                  onChange={setClubPolicyVN}
+                  placeholder="Nhập nội quy của câu lạc bộ (Tiếng Việt)"
+                  minHeight={140}
+                />
+
+                <QuillEditor
+                  label="Thiết lập nội quy câu lạc bộ (Tiếng Anh)"
+                  value={clubPolicyEN}
+                  onChange={setClubPolicyEN}
+                  placeholder="Nhập nội quy của câu lạc bộ (Tiếng Anh)"
                   minHeight={140}
                 />
 
