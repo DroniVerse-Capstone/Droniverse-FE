@@ -108,7 +108,7 @@ export function buildToolboxXml(
 	};
 	const CATEGORY_DEFINITIONS = getCategoryDefinitions(translations || defaultTranslations);
 	const seen = new Set<ToolboxCategory>();
-	
+
 	// Ensure allowedBlocks is treated as a restriction if it's an array or a valid JSON string
 	let allowedArray: string[] | null = null;
 	try {
@@ -144,14 +144,14 @@ export function buildToolboxXml(
 				}
 				return `<category name="${def.name}" colour="${def.colour}" custom="${def.custom}"></category>`;
 			}
-			
+
 			const availableBlocks = (def.blocks || []).filter(type => {
 				if (!isRestricted) return true;
 				return (allowedArray as string[]).includes(type);
 			});
-			
+
 			if (isRestricted && (!availableBlocks || availableBlocks.length === 0)) return "";
-			
+
 			const blocks = availableBlocks.map((type) => {
 				// Thêm shadow blocks cho các khối di chuyển để vừa nhập số được, vừa lắp biến được
 				if (type === "drone_up" || type === "drone_down") {
