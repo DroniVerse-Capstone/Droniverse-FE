@@ -22,7 +22,9 @@ export const userSchema = z.object({
   lastName: z.string(),
   email: z.string().email(),
   dateOfBirth: z.string().nullable(),
-  roleName: z.string()
+  roleName: z.string(),
+  imageUrl: z.string().nullable().optional(),
+  gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).nullable().optional(),
 })
 
 export const loginDataSchema = z.object({

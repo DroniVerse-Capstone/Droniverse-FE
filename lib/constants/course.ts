@@ -16,9 +16,10 @@ export const COURSE_VERSION_STATUS = [
 
 export const COURSE_LEVELS = [
   { value: null, label: "level.all" },
-  { value: "EASY", label: "level.easy" },
-  { value: "MEDIUM", label: "level.medium" },
-  { value: "HARD", label: "level.hard" },
+  { value: "BEGINNER", label: "level.easy" },
+  { value: "INTERMEDIATE", label: "level.medium" },
+  { value: "ADVANCED", label: "level.hard" },
+  { value: "MASTER", label: "level.master" },
 ];
 
 export const getCourseStatus = (value: string ) =>
@@ -28,4 +29,14 @@ export const getCourseVersionStatus = (value: string) =>
   COURSE_VERSION_STATUS.find((e) => e.value === value)?.label || value;
 
 export const getCourseLevel = (value: string) =>
-  COURSE_LEVELS.find((e) => e.value === value)?.label || value;
+  (
+    {
+      EASY: "level.easy",
+      MEDIUM: "level.medium",
+      HARD: "level.hard",
+      BEGINNER: "level.easy",
+      INTERMEDIATE: "level.medium",
+      ADVANCED: "level.hard",
+      MASTER: "level.master",
+    } as Record<string, string>
+  )[value] || COURSE_LEVELS.find((e) => e.value === value)?.label || value;

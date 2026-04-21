@@ -5,6 +5,7 @@ import apiClient from "@/lib/api/client"
 import { ApiError } from "@/types/api/common"
 import {
 	Course,
+	CreateCourseRequest,
 	CreateCourseProductRequest,
 	CreateCourseProductResponse,
 	DeleteCourseResponse,
@@ -13,6 +14,7 @@ import {
 	UpdateCourseProductRequest,
 	UpdateCourseProductResponse,
 	UnpublishCourseResponse,
+	createCourseRequestSchema,
 	createCourseProductRequestSchema,
 	createCourseProductResponseSchema,
 	createCourseResponseSchema,
@@ -83,9 +85,13 @@ export const useGetCourseDetail = (courseId?: string) => {
 export const useCreateCourse = () => {
 	const queryClient = useQueryClient()
 
-	return useMutation<Course, AxiosError<ApiError>, void>({
-		mutationFn: async () => {
-			const response = await apiClient.post("/academy/courses")
+	return useMutation<Course, AxiosError<ApiError>, CreateCourseRequest | void>({
+		mutationFn: async (payload) => {
+			const requestBody = payload
+				? createCourseRequestSchema.parse(payload)
+				: undefined
+
+			const response = await apiClient.post("/academy/courses", requestBody)
 			const parsed = createCourseResponseSchema.parse(response.data)
 			return parsed.data
 		},

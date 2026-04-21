@@ -2,13 +2,19 @@
 
 import React from "react";
 import toast from "react-hot-toast";
-import { Check, X } from "lucide-react";
+import { Check, Eye, X } from "lucide-react";
 
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
 import ClubRequestStatusBadge from "@/components/club/ClubRequestStatusBadge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { TableCell } from "@/components/ui/table";
 import {
@@ -18,7 +24,7 @@ import {
 import { formatDateTime } from "@/lib/utils/format-date";
 import { cn } from "@/lib/utils";
 import { CLUB_ATTEMPT_REQUEST_STATUS } from "@/lib/constants/club";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type JoinRequestsTabProps = {
   clubId: string;
@@ -30,10 +36,17 @@ const PAGE_SIZE = 10;
 
 export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
   const t = useTranslations("ManagerMembers");
-  const [selectedStatus, setSelectedStatus] = React.useState<
-    RequestStatus | null
-  >(null);
+  const locale = useLocale();
+  const [selectedStatus, setSelectedStatus] =
+    React.useState<RequestStatus | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [selectedEvidence, setSelectedEvidence] = React.useState<{
+    requesterName: string | null;
+    clubNameVN: string;
+    clubNameEN: string;
+    mediaTypeName: "IMAGE" | "VIDEO";
+    url: string;
+  } | null>(null);
 
   const updateStatusMutation = useUpdateClubAttemptRequestStatus();
 
@@ -58,9 +71,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
         {
           onSuccess: () => {
             toast.success(
-              status === "APPROVED"
-                ? t("approved.toast")
-                : t("rejected.toast"), 
+              status === "APPROVED" ? t("approved.toast") : t("rejected.toast"),
             );
           },
           onError: (err) => {
@@ -161,48 +172,133 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                 {formatDateTime(request.processedAt)}
               </TableCell>
               <TableCell>
-                {request.status === "PENDING" ? (
-                  <div className="flex items-center gap-2">
-                    <ConfirmActionPopover
-                      trigger={
-                        <Button className="h-8 rounded border border-secondary/40 bg-secondary/15 px-2.5 text-secondary hover:bg-secondary/25">
-                          <Check size={16} />
-                        </Button>
-                      }
-                      title={t("approved.title")}
-                      description={t("approved.description")}
-                      confirmText={t("approved.confirmText")}
-                      cancelText={t("approved.cancelText")}
-                      isLoading={updateStatusMutation.isPending}
-                      onConfirm={() =>
-                        handleUpdateStatus(request.clubRequestID, "APPROVED")
-                      }
-                    />
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="viewIcon"
+                    size="icon"
+                    disabled={!request.media?.url}
+                    onClick={() => {
+                      if (!request.media?.url) return;
 
-                    <ConfirmActionPopover
-                      trigger={
-                        <Button className="h-8 rounded border border-error/40 bg-error/15 px-2.5 text-error hover:bg-error/25">
-                          <X size={16} />
-                        </Button>
-                      }
-                      title={t("rejected.title")}
-                      description={t("rejected.description")}
-                      confirmText={t("rejected.confirmText")}
-                      cancelText={t("rejected.cancelText")}
-                      isLoading={updateStatusMutation.isPending}
-                      onConfirm={() =>
-                        handleUpdateStatus(request.clubRequestID, "REJECT")
-                      }
-                    />
-                  </div>
-                ) : (
-                  <span className="text-sm text-greyscale-0">{t("done")}</span>
-                )}
+                      const mediaTypeName =
+                        request.media.mediaTypeName === "VIDEO"
+                          ? "VIDEO"
+                          : "IMAGE";
+
+                      setSelectedEvidence({
+                        requesterName: request.requesterName,
+                        clubNameVN: request.clubNameVN,
+                        clubNameEN: request.clubNameEN,
+                        mediaTypeName,
+                        url: request.media.url,
+                      });
+                    }}
+                  >
+                    <Eye size={16} />
+                  </Button>
+
+                  {request.status === "PENDING" ? (
+                    <>
+                      <ConfirmActionPopover
+                        trigger={
+                          <Button variant={"secondaryIcon"} size={"icon"}>
+                            <Check size={16} />
+                          </Button>
+                        }
+                        title={t("approved.title")}
+                        description={t("approved.description")}
+                        confirmText={t("approved.confirmText")}
+                        cancelText={t("approved.cancelText")}
+                        isLoading={updateStatusMutation.isPending}
+                        onConfirm={() =>
+                          handleUpdateStatus(request.clubRequestID, "APPROVED")
+                        }
+                      />
+
+                      <ConfirmActionPopover
+                        trigger={
+                          <Button variant="deleteIcon" size={"icon"}>
+                            <X size={16} />
+                          </Button>
+                        }
+                        title={t("rejected.title")}
+                        description={t("rejected.description")}
+                        confirmText={t("rejected.confirmText")}
+                        cancelText={t("rejected.cancelText")}
+                        isLoading={updateStatusMutation.isPending}
+                        onConfirm={() =>
+                          handleUpdateStatus(request.clubRequestID, "REJECT")
+                        }
+                      />
+                    </>
+                  ) : (
+                    <span className="text-sm text-greyscale-0">
+                      {t("done")}
+                    </span>
+                  )}
+                </div>
               </TableCell>
             </>
           )}
         />
       )}
+
+      <Dialog
+        open={!!selectedEvidence}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEvidence(null);
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {locale === "vi"
+                ? "Bằng chứng sở hữu Drone"
+                : "Drone ownership evidence"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedEvidence && (
+            <div className="space-y-3">
+              <div className="rounded border border-greyscale-700 bg-greyscale-900/40 p-3 text-sm">
+                <p className="text-greyscale-0">
+                  {locale === "vi" ? "Người gửi" : "Requester"}:{" "}
+                  {selectedEvidence.requesterName || "-"}
+                </p>
+                <p className="text-greyscale-25">
+                  {locale === "vi" ? "Định dạng" : "Media Type"}:{" "}
+                  {selectedEvidence.mediaTypeName === "IMAGE"
+                    ? locale === "vi"
+                      ? "Hình ảnh"
+                      : "Image"
+                    : selectedEvidence.mediaTypeName === "VIDEO"
+                      ? locale === "vi"
+                        ? "Video"
+                        : "Video"
+                      : "-"}
+                </p>
+              </div>
+
+              <div className="overflow-hidden rounded border border-greyscale-700 bg-black/40">
+                {selectedEvidence.mediaTypeName === "VIDEO" ? (
+                  <video
+                    src={selectedEvidence.url}
+                    controls
+                    className="max-h-[70vh] w-full object-contain"
+                  />
+                ) : (
+                  <img
+                    src={selectedEvidence.url}
+                    alt="Drone ownership evidence"
+                    className="max-h-[70vh] w-full object-contain"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

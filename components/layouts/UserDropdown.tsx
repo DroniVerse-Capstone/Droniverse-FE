@@ -22,8 +22,10 @@ interface UserDropdownProps {
     firstName?: string;
     lastName?: string;
     email?: string;
+    dateOfBirth?: string | null;
     roleName?: string;
-    avatar?: string;
+    imageUrl?: string | null;
+    gender?: "MALE" | "FEMALE" | "UNKNOWN" | null;
   } | null;
 }
 
@@ -51,9 +53,9 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           variant="ghost"
           className="rounded-full p-0 w-11 h-11 border-2 border-greyscale-700 hover:border-primary-200 transition-colors overflow-hidden"
         >
-          {user?.avatar ? (
+          {user?.imageUrl ? (
             <Image
-              src={user.avatar}
+              src={user.imageUrl}
               alt={user.username || 'User'}
               width={40}
               height={40}

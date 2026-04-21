@@ -5,6 +5,19 @@ export const courseUserSchema = z.object({
 	userId: z.string(),
 	fullName: z.string(),
 	email: z.string(),
+	avatarUrl: z.string().nullable().optional(),
+})
+
+export const courseLevelSchema = z.object({
+	levelID: z.string(),
+	levelNumber: z.number().int().nonnegative(),
+	name: z.string(),
+})
+
+export const courseDroneSchema = z.object({
+	droneID: z.string(),
+	name: z.string(),
+	imgURL: z.string(),
 })
 
 export const miniProductSchema = z.object({
@@ -30,6 +43,23 @@ export const createCourseProductRequestSchema = z.object({
 
 export const updateCourseProductRequestSchema = createCourseProductRequestSchema
 
+export const createCourseInitialVersionSchema = z.object({
+	titleVN: z.string().min(1),
+	titleEN: z.string().min(1),
+	descriptionVN: z.string().min(1),
+	descriptionEN: z.string().min(1),
+	contextVN: z.string().min(1),
+	contextEN: z.string().min(1),
+	imageUrl: z.string().min(1),
+	estimatedDuration: z.number().int().nonnegative(),
+	changeLog: z.string().nullable().optional(),
+})
+
+export const createCourseRequestSchema = z.object({
+	levelID: z.string().min(1),
+	version: createCourseInitialVersionSchema,
+})
+
 export const courseProductSchema = z.object({
 	productId: z.string(),
 	referenceId: z.string(),
@@ -53,7 +83,6 @@ export const courseVersionSchema = z.object({
 	status: z.enum(['DRAFT', 'ACTIVE', 'INACTIVE', 'DEPRECATED']),
 	version: z.number().int(),
 	imageUrl: z.string().nullable(),
-	level: z.enum(['EASY', 'MEDIUM', 'HARD']),
 	estimatedDuration: z.number().int().nonnegative(),
 	changeLog: z.string().nullable(),
 	updater: courseUserSchema.nullable(),
@@ -61,8 +90,6 @@ export const courseVersionSchema = z.object({
 	contextVN: z.string(),
 	contextEN: z.string(),
 	certificate: certificateInfoSchema.nullable(),
-	categories: z.array(z.unknown()),
-	requiredDrones: z.array(z.unknown()),
 })
 
 export const courseSchema = z.object({
@@ -70,6 +97,8 @@ export const courseSchema = z.object({
 	creator: courseUserSchema,
 	createAt: z.string(),
 	status: z.enum(['DRAFT', 'PUBLISH', 'UNPUBLISH', 'ARCHIVED']),
+	level: courseLevelSchema.nullable(),
+	drone: courseDroneSchema.nullable(),
 	currentVersion: courseVersionSchema.nullable(),
 	courseVersions: z.array(courseVersionSchema).default([]),
 	miniProduct: miniProductSchema.nullable().optional(),
@@ -122,6 +151,7 @@ export const updateCourseProductResponseSchema = courseProductSchema
 export type CourseVersion = z.infer<typeof courseVersionSchema>
 export type Course = z.infer<typeof courseSchema>
 export type CourseProductStatus = z.infer<typeof courseProductStatusSchema>
+export type CreateCourseRequest = z.infer<typeof createCourseRequestSchema>
 export type CreateCourseProductRequest = z.infer<
 	typeof createCourseProductRequestSchema
 >

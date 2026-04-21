@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { CiLock, CiUnlock } from "react-icons/ci";
 import { GrUserManager } from "react-icons/gr";
 import { IoPeopleOutline } from "react-icons/io5";
 
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { formatDateWithTime } from "@/lib/utils/format-date";
 import { ClubCreationRequestItem } from "@/validations/club-creation/club-creation";
 import ClubRequestStatusBadge from "@/components/club/ClubRequestStatusBadge";
@@ -40,6 +38,11 @@ type FieldBlockProps = {
 type DateBlockProps = {
   label: string;
   date?: string | null;
+};
+
+type RichTextBlockProps = {
+  label: string;
+  html?: string | null;
 };
 
 function FieldBlock({ label, children }: FieldBlockProps) {
@@ -67,6 +70,22 @@ function DateBlock({ label, date }: DateBlockProps) {
   );
 }
 
+function RichTextBlock({ label, html }: RichTextBlockProps) {
+  if (!html?.trim()) return null;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-greyscale-0">{label}</p>
+      <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+        <div
+          className="dv-quill-render ql-editor"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function ClubRequestDetailModal({
   open,
   onOpenChange,
@@ -78,6 +97,11 @@ export function ClubRequestDetailModal({
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const updateStatusMutation = useUpdateClubCreationRequestStatus();
+
+  const mediaType = (detail?.media?.mediaTypeName ?? detail?.media?.mediaType ?? "")
+    .toString()
+    .toUpperCase();
+  const isVideoEvidence = mediaType === "VIDEO";
 
   const handleApprove = () => {
     if (!detail) return;
@@ -154,7 +178,7 @@ export function ClubRequestDetailModal({
           }
         }}
       >
-        <DialogContent className="max-w-lg flex flex-col max-h-[90vh]">
+        <DialogContent className="max-w-2xl flex flex-col max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-lg text-greyscale-0">
               {locale === "vi"
@@ -169,7 +193,7 @@ export function ClubRequestDetailModal({
             </div>
           ) : detail ? (
             <div className="flex-1 overflow-y-auto">
-              <div className="space-y-3 pr-4">
+              <div className="space-y-4 pr-4">
                 {/* Status Badge */}
                 <div className="flex items-center gap-2">
                   <ClubRequestStatusBadge status={detail.status} />
@@ -217,25 +241,6 @@ export function ClubRequestDetailModal({
                   </FieldBlock>
                 )}
 
-                {/* Danh mục */}
-                {detail.categories.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-greyscale-0 font-medium">
-                      {t("fields.category")}
-                    </p>
-                    <div className="flex flex-wrap gap-1 px-2">
-                      {detail.categories.map((cat) => (
-                        <span
-                          key={cat.categoryId}
-                          className="rounded border border-greyscale-600 px-2 py-0.5 text-xs text-greyscale-100"
-                        >
-                          {locale === "vi" ? cat.typeNameVN : cat.typeNameEN}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Ảnh */}
                 {detail.imageUrl && (
                   <FieldBlock label={t("fields.coverImage")}>
@@ -250,32 +255,90 @@ export function ClubRequestDetailModal({
                   </FieldBlock>
                 )}
 
+                {/* Drone yêu cầu */}
+                {detail.drone ? (
+                  <FieldBlock label="Drone yêu cầu">
+                    <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded border border-greyscale-700">
+                          <Image
+                            src={detail.drone.imgURL || "/images/drone-placeholder.jpg"}
+                            alt={locale === "vi" ? detail.drone.droneNameVN : detail.drone.droneNameEN}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium text-greyscale-0">
+                            {locale === "vi" ? detail.drone.droneNameVN : detail.drone.droneNameEN}
+                          </p>
+                          <p className="text-xs text-greyscale-100">
+                            {locale === "vi" ? detail.drone.droneTypeNameVN : detail.drone.droneTypeNameEN}
+                          </p>
+                          <p className="text-xs text-greyscale-100">
+                            {detail.drone.manufacturer}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </FieldBlock>
+                ) : null}
+
+                {/* Bằng chứng sở hữu drone */}
+                {detail.media ? (
+                  <FieldBlock label="Bằng chứng sở hữu Drone">
+                    <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+                        <span className="rounded border border-greyscale-600 px-2 py-0.5 text-greyscale-50">
+                          {mediaType || "MEDIA"}
+                        </span>
+                        <span className="text-greyscale-100">
+                          {formatDateWithTime(detail.media.createdAt).day}
+                        </span>
+                      </div>
+
+                      <div className="overflow-hidden rounded border border-greyscale-700 bg-greyscale-950">
+                        {isVideoEvidence ? (
+                          <video
+                            src={detail.media.url}
+                            controls
+                            className="max-h-64 w-full object-contain"
+                          />
+                        ) : (
+                          <div className="relative h-48 w-full">
+                            <Image
+                              src={detail.media.url}
+                              alt="Drone ownership evidence"
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </FieldBlock>
+                ) : null}
+
+                <RichTextBlock
+                  label={
+                    locale === "vi"
+                      ? "Nội quy câu lạc bộ (Tiếng Việt)"
+                      : "Club policy (Vietnamese)"
+                  }
+                  html={detail.clubPolicyVN}
+                />
+
+                <RichTextBlock
+                  label={
+                    locale === "vi"
+                      ? "Nội quy câu lạc bộ (Tiếng Anh)"
+                      : "Club policy (English)"
+                  }
+                  html={detail.clubPolicyEN}
+                />
+
                 {/* Chế độ, Giới hạn thành viên, Giới hạn quản lý */}
                 <div className="grid grid-cols-3 gap-2 border-t border-greyscale-700 pt-2">
-                  <div>
-                    <p className="text-sm font-medium text-greyscale-0 mb-0.5">
-                      {t("fields.mode")}
-                    </p>
-                    <div className="p-2">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded px-2 py-1 text-xs border",
-                          detail.isPublic
-                            ? "bg-secondary/15 text-secondary border-secondary/40"
-                            : "bg-primary/15 text-primary border-primary/40",
-                        )}
-                      >
-                        {detail.isPublic ? (
-                          <CiUnlock size={13} />
-                        ) : (
-                          <CiLock size={13} />
-                        )}
-                        {detail.isPublic
-                          ? t("privacy.public")
-                          : t("privacy.private")}
-                      </span>
-                    </div>
-                  </div>
                   <div>
                     <p className="text-sm font-medium text-greyscale-0 mb-0.5">
                       {t("fields.limitMembers")}

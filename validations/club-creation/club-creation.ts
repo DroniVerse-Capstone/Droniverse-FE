@@ -1,15 +1,15 @@
 import { z } from 'zod'
-import { categorySchema } from '@/validations/category/category'
 
 export const clubCreationRequestSchema = z.object({
+    droneID: z.string().uuid(),
+    clubPolicyVN: z.string().min(1),
+    clubPolicyEN: z.string().min(1),
+    media: z.string().uuid(),
     nameVN: z.string().min(1),
     nameEN: z.string().min(1),
     description: z.string().min(1),
-    isPublic: z.boolean(),
     limitParticipant: z.number().int().positive(),
-    limitClubManager: z.number().int().positive(),
     image: z.string(),
-    categoryIDs: z.array(z.string()).min(1)
 })
 
 export const clubCreationResponseDataSchema = z.object({
@@ -26,28 +26,55 @@ export const clubCreationResponseSchema = z.object({
 
 // ---- GET my requests ----
 
+export const clubCreationMediaSchema = z.object({
+    mediaID: z.string(),
+    mediaTypeID: z.string().optional(),
+    mediaTypeName: z.enum(["IMAGE", "VIDEO"]).optional(),
+    mediaType: z.string().optional(),
+    url: z.string(),
+    createdAt: z.string(),
+})
+
+export const clubCreationDroneSchema = z.object({
+    droneID: z.string(),
+    droneTypeID: z.string(),
+    droneTypeNameVN: z.string(),
+    droneTypeNameEN: z.string(),
+    droneNameVN: z.string(),
+    droneNameEN: z.string(),
+    manufacturer: z.string(),
+    descriptionVN: z.string().nullable(),
+    descriptionEN: z.string().nullable(),
+    height: z.number().nonnegative(),
+    weight: z.number().nonnegative(),
+    status: z.string(),
+    imgURL: z.string().nullable(),
+})
+
 export const clubCreationRequestItemSchema = z.object({
     clubCreationRequestID: z.string(),
     nameVN: z.string(),
     nameEN: z.string(),
     description: z.string(),
-    isPublic: z.boolean(),
     limitParticipant: z.number().int(),
     limitClubManager: z.number().int(),
     imageUrl: z.string().nullable(),
     createdAt: z.string(),
-    updatedAt: z.string().nullable(),
-    approvedAt: z.string().nullable(),
-    rejectReason: z.string().nullable(),
-    clubID: z.string().nullable(),
+    updatedAt: z.string().nullable().optional(),
+    approvedAt: z.string().nullable().optional(),
+    rejectReason: z.string().nullable().optional(),
+    clubID: z.string().nullable().optional(),
     requesterID: z.string(),
-    approverID: z.string().nullable(),
-    approverName: z.string().nullable(),
-    approverEmail: z.string().nullable(),
+    approverID: z.string().nullable().optional(),
+    approverName: z.string().nullable().optional(),
+    approverEmail: z.string().nullable().optional(),
     requesterName: z.string().nullable(),
     requesterEmail: z.string().nullable(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "CANCEL"]),
-    categories: z.array(categorySchema),
+    clubPolicyVN: z.string().nullable().optional(),
+    clubPolicyEN: z.string().nullable().optional(),
+    media: clubCreationMediaSchema.nullable(),
+    drone: clubCreationDroneSchema.nullable().optional(),
 })
 
 export const getMyClubCreationRequestsResponseSchema = z.object({
@@ -85,21 +112,35 @@ export const clubCreationRequestDetailResponseSchema = z.object({
 // ---- Update request information ----
 
 export const updateClubCreationRequestDataSchema = z.object({
+    droneID: z.string().uuid(),
+    clubPolicyVN: z.string().min(1),
+    clubPolicyEN: z.string().min(1),
+    media: z.string().uuid(),
+    nameVN: z.string().min(1),
+    nameEN: z.string().min(1),
+    description: z.string().min(1),
+    limitParticipant: z.number().int().positive(),
+    image: z.string(),
+})
+
+export const updateClubCreationResponseDataSchema = z.object({
     clubCreationRequestID: z.string(),
     nameVN: z.string(),
     nameEN: z.string(),
     description: z.string(),
-    isPublic: z.boolean(),
     limitParticipant: z.number().int(),
     limitClubManager: z.number().int(),
-    imageUrl: z.string(),
+    imageUrl: z.string().nullable(),
     updatedAt: z.string(),
     status: z.enum(["PENDING", "APPROVED", "REJECTED", "CANCEL"]),
-    categories: z.array(categorySchema),
+    droneID: z.string().uuid(),
+    clubPolicyVN: z.string().min(1),
+    clubPolicyEN: z.string().min(1),
+    media: clubCreationMediaSchema.nullable(),
 })
 
 export const updateClubCreationRequestResponseSchema = z.object({
-    data: updateClubCreationRequestDataSchema,
+    data: updateClubCreationResponseDataSchema,
     isSuccess: z.boolean(),
     message: z.string(),
 })

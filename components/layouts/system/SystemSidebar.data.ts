@@ -104,8 +104,7 @@ export const primaryItems: NavItem[] = [
     title: "category.title",
     icon: Grid2x2,
     subItems: [
-      { title: "category.subitems.drone", href: "/drone-category", icon: Plane },
-      { title: "category.subitems.club", href: "/club-category", icon: Settings },
+      { title: "category.subitems.drone", href: "/drone-category", icon: Settings },
     ],
   },
   {

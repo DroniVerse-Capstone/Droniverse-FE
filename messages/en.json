@@ -578,7 +578,8 @@
       "all": "All",
       "easy": "Beginner",
       "medium": "Intermediate",
-      "hard": "Advanced"
+      "hard": "Advanced",
+      "master": "Master"
     },
     "management": {
       "total": "Total courses",
@@ -634,7 +635,8 @@
       "level": {
         "easy": "Beginner",
         "medium": "Intermediate",
-        "hard": "Advanced"
+        "hard": "Advanced",
+        "master": "Master"
       }
     },
     "AdminCourseCard": {
