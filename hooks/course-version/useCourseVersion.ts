@@ -14,9 +14,7 @@ import {
 	ActivateCourseVersionResponse,
 	activateCourseVersionResponseSchema,
 	assignCourseVersionCategoriesRequestSchema,
-	assignCourseVersionCategoriesResponseSchema,
 	assignCourseVersionRequiredDronesRequestSchema,
-	assignCourseVersionRequiredDronesResponseSchema,
 	createCourseVersionCertificateRequestSchema,
 	createCourseVersionCertificateResponseSchema,
 	createCourseVersionRequestSchema,
@@ -29,8 +27,6 @@ import {
 	deleteCourseVersionResponseSchema,
 	DeleteCourseVersionResponse,
 	DuplicateCourseVersionResponse,
-	AssignCourseVersionCategoriesResponse,
-	AssignCourseVersionRequiredDronesResponse,
 	CreateCourseVersionCertificateData,
 } from "@/validations/course-version/course-version"
 
@@ -53,18 +49,6 @@ type ToggleCourseVersionStatusVariables = {
 type DuplicateCourseVersionVariables = {
 	courseId: string
 	versionId: string
-}
-
-type AssignCourseVersionCategoriesVariables = {
-	courseId: string
-	versionId: string
-	payload: AssignCourseVersionCategoriesRequest
-}
-
-type AssignCourseVersionRequiredDronesVariables = {
-	courseId: string
-	versionId: string
-	payload: AssignCourseVersionRequiredDronesRequest
 }
 
 type CreateCourseVersionCertificateVariables = {
@@ -268,62 +252,6 @@ export const useDuplicateCourseVersion = () => {
 	})
 }
 
-export const useAssignCourseVersionCategories = () => {
-	const queryClient = useQueryClient()
-
-	return useMutation<
-		AssignCourseVersionCategoriesResponse,
-		AxiosError<ApiError>,
-		AssignCourseVersionCategoriesVariables
-	>({
-		mutationFn: async ({ courseId, versionId, payload }) => {
-			const requestBody = assignCourseVersionCategoriesRequestSchema.parse(payload)
-			const response = await apiClient.post(
-				`/academy/courses/${courseId}/versions/${versionId}/categories/bulk`,
-				requestBody
-			)
-
-			return assignCourseVersionCategoriesResponseSchema.parse(response.data)
-		},
-		onSuccess: async () => {
-			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ["courses"] }),
-				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
-				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
-			])
-		},
-	})
-}
-
-export const useAssignCourseVersionRequiredDrones = () => {
-	const queryClient = useQueryClient()
-
-	return useMutation<
-		AssignCourseVersionRequiredDronesResponse,
-		AxiosError<ApiError>,
-		AssignCourseVersionRequiredDronesVariables
-	>({
-		mutationFn: async ({ courseId, versionId, payload }) => {
-			const requestBody = assignCourseVersionRequiredDronesRequestSchema.parse(
-				payload
-			)
-			const response = await apiClient.post(
-				`/academy/courses/${courseId}/versions/${versionId}/required-drones/bulk`,
-				requestBody
-			)
-
-			return assignCourseVersionRequiredDronesResponseSchema.parse(response.data)
-		},
-		onSuccess: async () => {
-			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ["courses"] }),
-				queryClient.invalidateQueries({ queryKey: ["course-versions"] }),
-				queryClient.invalidateQueries({ queryKey: ["course-version-detail"] }),
-			])
-		},
-	})
-}
-
 export const useCreateCourseVersionCertificate = () => {
 	const queryClient = useQueryClient()
 
@@ -359,8 +287,6 @@ export type {
 	UpdateCourseVersionVariables,
 	ToggleCourseVersionStatusVariables,
 	DuplicateCourseVersionVariables,
-	AssignCourseVersionCategoriesVariables,
-	AssignCourseVersionRequiredDronesVariables,
 	CreateCourseVersionCertificateVariables,
 	UseGetCourseVersionsOptions,
 	UseGetCourseVersionDetailOptions,

@@ -587,7 +587,7 @@
       "subtitle": "Điền thông tin cơ bản để tạo khóa học mới",
       "titleEdit": "Cập nhật",
       "subtitleEdit": "Chỉnh sửa thông tin phiên bản hiện tại và thêm ghi chú thay đổi.",
-      "tileVersion": "Tạo phiên bản mới",
+      "titleVersion": "Tạo phiên bản mới",
       "subtitleVersion": "Nhập thông tin để tạo phiên bản khóa học mới.",
       "fields": {
         "title": {
