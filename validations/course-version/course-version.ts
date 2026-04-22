@@ -14,22 +14,6 @@ export const courseCategorySchema = z.object({
   descriptionEN: z.string(),
 });
 
-export const requiredDroneSchema = z.object({
-  droneID: z.string(),
-  droneTypeID: z.string(),
-  droneTypeNameVN: z.string(),
-  droneTypeNameEN: z.string(),
-  droneNameVN: z.string(),
-  droneNameEN: z.string(),
-  manufacturer: z.string(),
-  descriptionVN: z.string(),
-  descriptionEN: z.string(),
-  height: z.number(),
-  weight: z.number(),
-  status: z.string(),
-  model3DLink: z.string(),
-});
-
 export const createCourseVersionRequestSchema = z.object({
   titleVN: z.string(),
   titleEN: z.string(),
@@ -38,7 +22,6 @@ export const createCourseVersionRequestSchema = z.object({
   contextVN: z.string(),
   contextEN: z.string(),
   imageUrl: z.string(),
-  level: z.enum(["EASY", "MEDIUM", "HARD"]),
   estimatedDuration: z.number().int().nonnegative(),
 });
 
@@ -50,7 +33,6 @@ export const updateCourseVersionRequestSchema = z.object({
   contextVN: z.string(),
   contextEN: z.string(),
   imageUrl: z.string(),
-  level: z.enum(["EASY", "MEDIUM", "HARD"]),
   estimatedDuration: z.number().int().nonnegative(),
   changeLog: z.string().trim().min(1),
 });
@@ -84,7 +66,6 @@ export const courseVersionSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "INACTIVE", "DEPRECATED"]),
   version: z.number().int(),
   imageUrl: z.string().nullable(),
-  level: z.enum(["EASY", "MEDIUM", "HARD"]),
   estimatedDuration: z.number().int().nonnegative(),
   changeLog: z.string().nullable(),
   updater: courseVersionUserSchema.nullable(),
@@ -92,8 +73,6 @@ export const courseVersionSchema = z.object({
   contextVN: z.string(),
   contextEN: z.string(),
   certificate: certificateInfoSchema.nullable(),
-  categories: z.array(courseCategorySchema),
-  requiredDrones: z.array(requiredDroneSchema),
 });
 
 export const createCourseVersionResponseSchema = z.object({
@@ -120,17 +99,6 @@ export const deleteCourseVersionResponseSchema = z.object({
 
 export const duplicateCourseVersionResponseSchema = z.object({
   data: courseVersionSchema,
-  isSuccess: z.boolean(),
-  message: z.string(),
-});
-
-export const assignCourseVersionCategoriesResponseSchema = z.object({
-  isSuccess: z.boolean(),
-  message: z.string(),
-});
-
-export const assignCourseVersionRequiredDronesResponseSchema = z.object({
-  data: z.array(requiredDroneSchema),
   isSuccess: z.boolean(),
   message: z.string(),
 });
@@ -171,15 +139,12 @@ export type AssignCourseVersionCategoriesRequest = z.infer<typeof assignCourseVe
 export type AssignCourseVersionRequiredDronesRequest = z.infer<typeof assignCourseVersionRequiredDronesRequestSchema>;
 export type CreateCourseVersionCertificateRequest = z.infer<typeof createCourseVersionCertificateRequestSchema>;
 export type CourseCategory = z.infer<typeof courseCategorySchema>;
-export type RequiredDrone = z.infer<typeof requiredDroneSchema>;
 export type CourseVersion = z.infer<typeof courseVersionSchema>;
 export type CreateCourseVersionResponse = z.infer<typeof createCourseVersionResponseSchema>;
 export type UpdateCourseVersionResponse = z.infer<typeof updateCourseVersionResponseSchema>;
 export type ActivateCourseVersionResponse = z.infer<typeof activateCourseVersionResponseSchema>;
 export type DeleteCourseVersionResponse = z.infer<typeof deleteCourseVersionResponseSchema>;
 export type DuplicateCourseVersionResponse = z.infer<typeof duplicateCourseVersionResponseSchema>;
-export type AssignCourseVersionCategoriesResponse = z.infer<typeof assignCourseVersionCategoriesResponseSchema>;
-export type AssignCourseVersionRequiredDronesResponse = z.infer<typeof assignCourseVersionRequiredDronesResponseSchema>;
 export type CreateCourseVersionCertificateData = z.infer<typeof createCourseVersionCertificateDataSchema>;
 export type CreateCourseVersionCertificateResponse = z.infer<typeof createCourseVersionCertificateResponseSchema>;
 export type GetCourseVersionsData = z.infer<typeof getCourseVersionsDataSchema>;
