@@ -11,6 +11,8 @@ import {
 	DeleteCourseResponse,
 	GetCoursesData,
 	PublishCourseResponse,
+	UpdateCoursePrerequisitesRequest,
+	UpdateCoursePrerequisitesResponse,
 	UpdateCourseProductRequest,
 	UpdateCourseProductResponse,
 	UnpublishCourseResponse,
@@ -22,6 +24,8 @@ import {
 	getCourseDetailResponseSchema,
 	getCoursesResponseSchema,
 	publishCourseResponseSchema,
+	updateCoursePrerequisitesRequestSchema,
+	updateCoursePrerequisitesResponseSchema,
 	updateCourseProductRequestSchema,
 	updateCourseProductResponseSchema,
 	unpublishCourseResponseSchema,
@@ -34,6 +38,9 @@ type UseGetCoursesOptions = {
 	pageSize?: number
 	search?: string
 	status?: CourseStatus | null
+	droneId?: string
+	levelId?: string
+	enabled?: boolean
 }
 
 type CourseActionVariables = {
@@ -48,7 +55,10 @@ export const useGetCourses = (options?: UseGetCoursesOptions) => {
 			options?.pageSize,
 			options?.search,
 			options?.status,
+			options?.droneId,
+			options?.levelId,
 		],
+		enabled: options?.enabled ?? true,
 		queryFn: async () => {
 			const response = await apiClient.get("/academy/courses", {
 				params: {
@@ -56,6 +66,8 @@ export const useGetCourses = (options?: UseGetCoursesOptions) => {
 					...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
 					...(options?.search && { search: options.search }),
 					...(options?.status && { status: options.status }),
+					...(options?.droneId && { droneId: options.droneId }),
+					...(options?.levelId && { levelId: options.levelId }),
 				},
 			})
 
@@ -206,6 +218,33 @@ export const useUpdateCourseProduct = () => {
 		},
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ["courses"] })
+		},
+	})
+}
+
+export const useUpdateCoursePrerequisites = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		UpdateCoursePrerequisitesResponse,
+		AxiosError<ApiError>,
+		{ courseId: string; data: UpdateCoursePrerequisitesRequest }
+	>({
+		mutationFn: async ({ courseId, data }) => {
+			const payload = updateCoursePrerequisitesRequestSchema.parse(data)
+			const response = await apiClient.post(
+				`/academy/courses/${courseId}/prerequisites`,
+				payload
+			)
+			return updateCoursePrerequisitesResponseSchema.parse(response.data)
+		},
+		onSuccess: async (_, variables) => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["courses"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["course-detail", variables.courseId],
+				}),
+			])
 		},
 	})
 }

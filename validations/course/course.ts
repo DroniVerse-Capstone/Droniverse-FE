@@ -92,6 +92,12 @@ export const courseVersionSchema = z.object({
 	certificate: certificateInfoSchema.nullable(),
 })
 
+export const prerequisiteCoursesDataSchema = z.object({
+	courseID: z.string(),
+	titleVN: z.string(),
+	titleEN: z.string(),
+})
+
 export const courseSchema = z.object({
 	courseID: z.string(),
 	creator: courseUserSchema,
@@ -101,8 +107,11 @@ export const courseSchema = z.object({
 	drone: courseDroneSchema.nullable(),
 	currentVersion: courseVersionSchema.nullable(),
 	courseVersions: z.array(courseVersionSchema).default([]),
+	prerequisiteCourses: z.array(prerequisiteCoursesDataSchema).default([]),
 	miniProduct: miniProductSchema.nullable().optional(),
 })
+
+
 
 export const getCoursesDataSchema = z.object({
 	data: z.array(courseSchema),
@@ -145,6 +154,18 @@ export const getCourseDetailResponseSchema = z.object({
 	message: z.string(),
 })
 
+export const updateCoursePrerequisitesRequestSchema = z.object({
+	prerequisiteCourseIds: z.array(z.string().uuid()),
+})
+
+export const updateCoursePrerequisitesResponseSchema = z.object({
+	data: z.object({
+		created: z.number().int().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export const createCourseProductResponseSchema = courseProductSchema
 export const updateCourseProductResponseSchema = courseProductSchema
 
@@ -172,3 +193,9 @@ export type PublishCourseResponse = z.infer<typeof publishCourseResponseSchema>
 export type UnpublishCourseResponse = z.infer<typeof unpublishCourseResponseSchema>
 export type DeleteCourseResponse = z.infer<typeof deleteCourseResponseSchema>
 export type GetCourseDetailResponse = z.infer<typeof getCourseDetailResponseSchema>
+export type UpdateCoursePrerequisitesRequest = z.infer<
+	typeof updateCoursePrerequisitesRequestSchema
+>
+export type UpdateCoursePrerequisitesResponse = z.infer<
+	typeof updateCoursePrerequisitesResponseSchema
+>
