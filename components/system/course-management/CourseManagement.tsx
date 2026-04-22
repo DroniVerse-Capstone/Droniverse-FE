@@ -3,16 +3,19 @@
 import React, { useEffect, useState } from "react";
 
 import AppPagination from "@/components/common/AppPagination";
+import CommonDropdown from "@/components/common/CommonDropdown";
+import DroneDropdown from "@/components/common/DroneDropdown";
 import AdminCourseCard from "@/components/course/AdminCourseCard";
 import CreateCourseDialog from "@/components/system/course-management/CreateCourseDialog";
 import { Empty } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetCourses } from "@/hooks/course/useCourse";
+import { useGetLevelsByDrone } from "@/hooks/level/useLevel";
 import { cn } from "@/lib/utils";
 import { COURSE_STATUS } from "@/lib/constants/course";
 import EmptyState from "@/components/common/EmptyState";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 const PAGE_SIZE = 12;
 
@@ -20,10 +23,41 @@ type CourseStatus = "DRAFT" | "PUBLISH" | "UNPUBLISH" | "ARCHIVED" | null;
 
 export default function CourseManagement() {
   const t = useTranslations("CourseManagement");
+  const locale = useLocale();
   const [selectedStatus, setSelectedStatus] = useState<CourseStatus>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [pageIndex, setPageIndex] = useState(1);
+  const [selectedDroneId, setSelectedDroneId] = useState("");
+  const [selectedLevelId, setSelectedLevelId] = useState("");
+
+  const { data: levels = [], isLoading: isLevelsLoading } = useGetLevelsByDrone(
+    selectedDroneId || undefined,
+  );
+
+  const levelOptions = levels.map((level) => {
+    const levelNameMapVi: Record<number, string> = {
+      1: "Cơ bản",
+      2: "Trung cấp",
+      3: "Nâng cao",
+      4: "Master",
+    };
+
+    const levelNameMapEn: Record<number, string> = {
+      1: "Beginner",
+      2: "Intermediate",
+      3: "Advanced",
+      4: "Master",
+    };
+
+    return {
+      value: level.levelID,
+      label:
+        locale === "en"
+          ? levelNameMapEn[level.levelNumber] || level.name
+          : levelNameMapVi[level.levelNumber] || level.name,
+    };
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,6 +73,8 @@ export default function CourseManagement() {
     pageSize: PAGE_SIZE,
     search: search || undefined,
     status: selectedStatus || undefined,
+    droneId: selectedDroneId || undefined,
+    levelId: selectedLevelId || undefined,
   });
 
   const courses = data?.data ?? [];
@@ -78,12 +114,65 @@ export default function CourseManagement() {
               </button>
             ))}
           </div>
+
           <div className="w-full md:max-w-md">
             <Input
               type="search"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder={t("management.search")}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-start">
+          <div>
+            Lọc theo:
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-greyscale-50">
+              {locale === "en" ? "Drone" : "Drone"}
+            </label>
+            <DroneDropdown
+              haslabel={false}
+              value={selectedDroneId}
+              onChange={(value) => {
+                setSelectedDroneId(value);
+                setSelectedLevelId("");
+                setPageIndex(1);
+              }}
+              placeholder={locale === "en" ? "Filter by drone" : "Lọc theo drone"}
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-greyscale-50">
+              {locale === "en" ? "Level" : "Cấp độ"}
+            </label>
+            <CommonDropdown
+              value={selectedLevelId}
+              onChange={(value) => {
+                setSelectedLevelId(value);
+                setPageIndex(1);
+              }}
+              options={levelOptions}
+              placeholder={
+                selectedDroneId
+                  ? locale === "en"
+                    ? "Filter by level"
+                    : "Lọc theo cấp độ"
+                  : locale === "en"
+                    ? "Select drone first"
+                    : "Chọn drone trước"
+              }
+              menuLabel={locale === "en" ? "Level" : "Cấp độ"}
+              emptyMessage={
+                locale === "en"
+                  ? "No levels found for this drone"
+                  : "Không có level cho drone này"
+              }
+              disabled={!selectedDroneId || isLevelsLoading}
+              isLoading={isLevelsLoading}
             />
           </div>
         </div>

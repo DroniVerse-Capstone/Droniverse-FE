@@ -7,6 +7,7 @@ type DroneDropdownBaseProps = {
   className?: string
   disabled?: boolean
   label?: string
+  haslabel?: boolean
 }
 
 type SingleDroneDropdownProps = DroneDropdownBaseProps & {
@@ -29,6 +30,7 @@ export default function DroneDropdown(props: DroneDropdownProps) {
     className,
     disabled = false,
     label = "Drone",
+    haslabel = true,
   } = props
   const { data: drones = [], isLoading, isError, error } = useGetDrones({
     status: "Active",
@@ -51,7 +53,7 @@ export default function DroneDropdown(props: DroneDropdownProps) {
         placeholder={placeholder}
         className={className}
         disabled={disabled}
-        label={label}
+        label={haslabel ? label : undefined}
         menuLabel={placeholder}
         emptyMessage="Không có drone khả dụng"
         errorMessage={isError ? error?.message || "Không tải được danh sách drone" : undefined}
@@ -69,7 +71,7 @@ export default function DroneDropdown(props: DroneDropdownProps) {
       placeholder={placeholder}
       className={className}
       disabled={disabled}
-      label={label}
+      label={haslabel ? label : undefined}
       menuLabel={placeholder}
       emptyMessage="Không có drone khả dụng"
       errorMessage={isError ? error?.message || "Không tải được danh sách drone" : undefined}
