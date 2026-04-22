@@ -29,7 +29,7 @@ type Props = {
   };
 };
 
-const DRONE_GROUND_CLEARANCE = 0.5; 
+const DRONE_GROUND_CLEARANCE = 0.5;
 
 type RotorProps = {
   position: [number, number, number];
@@ -49,10 +49,10 @@ function Rotor({ position, isFlying, colorConfig }: RotorProps) {
     const targetSpinSpeed = isFlying
       ? DRONE_ROTOR_CONFIG.SPIN_SPEED_FLYING
       : DRONE_ROTOR_CONFIG.SPIN_SPEED_IDLE;
-    
+
     // Smoothly interpolate current spin speed towards target
     spinVelocity.current += (targetSpinSpeed - spinVelocity.current) * delta * 2;
-    
+
     if (spinVelocity.current <= 0.01) return;
     groupRef.current.rotation.y += spinVelocity.current * delta;
   });
@@ -104,27 +104,29 @@ function Rotor({ position, isFlying, colorConfig }: RotorProps) {
   );
 }
 
-function DroneBody({ state, colorConfig }: Props) {
-  const customModel =
-    DRONE_MODEL_CONFIG.useCustomModel && DRONE_MODEL_CONFIG.modelPath
-      ? useGLTF(DRONE_MODEL_CONFIG.modelPath)
-      : null;
+function CustomDroneModel({ url, state }: { url: string; state: Props["state"] }) {
+  const { scene } = useGLTF(url);
+  return (
+    <group
+      position={state.position}
+      rotation={[0, state.headingRad, 0]}
+      scale={DRONE_MODEL_CONFIG.scale}
+    >
+      <primitive
+        object={scene}
+        position={DRONE_MODEL_CONFIG.position}
+        rotation={DRONE_MODEL_CONFIG.rotation}
+      />
+    </group>
+  );
+}
 
-      
-  if (customModel) {
-    console.log("cc",customModel);
+function DroneBody({ state, colorConfig }: Props) {
+  const useCustomModel = DRONE_MODEL_CONFIG.useCustomModel && DRONE_MODEL_CONFIG.modelPath;
+
+  if (useCustomModel) {
     return (
-      <group
-        position={state.position}
-        rotation={[0, state.headingRad, 0]}
-        scale={DRONE_MODEL_CONFIG.scale}
-      >
-        <primitive
-          object={customModel.scene}
-          position={DRONE_MODEL_CONFIG.position}
-          rotation={DRONE_MODEL_CONFIG.rotation}
-        />
-      </group>
+      <CustomDroneModel url={DRONE_MODEL_CONFIG.modelPath} state={state} />
     );
   }
 
@@ -157,22 +159,22 @@ function DroneBody({ state, colorConfig }: Props) {
           <sphereGeometry args={[0.25, 16, 16]} />
           <meshBasicMaterial color={state.isFlying ? "#10b981" : "#ef4444"} />
         </mesh>
-        
+
         {/* Glowing Aura for High Visibility */}
         <mesh scale={2.5}>
           <sphereGeometry args={[0.25, 16, 16]} />
-          <meshBasicMaterial 
-            color={state.isFlying ? "#34d399" : "#f87171"} 
-            transparent 
-            opacity={0.3} 
+          <meshBasicMaterial
+            color={state.isFlying ? "#34d399" : "#f87171"}
+            transparent
+            opacity={0.3}
             depthWrite={false}
           />
         </mesh>
 
-        <pointLight 
-          color={state.isFlying ? "#10b981" : "#ef4444"} 
-          intensity={state.isFlying ? 15 : 5} 
-          distance={10} 
+        <pointLight
+          color={state.isFlying ? "#10b981" : "#ef4444"}
+          intensity={state.isFlying ? 15 : 5}
+          distance={10}
         />
       </group>
 

@@ -61,7 +61,7 @@ export default function MemberLabLessonContent({
   const levelLabelMap = {
     EASY: { vi: "Cơ bản", en: "Easy" },
     MEDIUM: { vi: "Trung bình", en: "Medium" },
-    HARD: { vi: "Nâng cao", en: "HARD" },
+    HARD: { vi: "Nâng cao", en: "Hard" },
   } as const;
   const levelConfig = levelLabelMap[lab.level as keyof typeof levelLabelMap];
   const levelLabel =

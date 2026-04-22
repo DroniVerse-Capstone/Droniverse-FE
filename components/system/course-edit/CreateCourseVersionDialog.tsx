@@ -21,17 +21,8 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourseVersion } from "@/hooks/course-version/useCourseVersion";
-import { COURSE_LEVELS } from "@/lib/constants/course";
 import { useTranslations } from "@/providers/i18n-provider";
 import { createCourseVersionRequestSchema } from "@/validations/course-version/course-version";
-
-type CourseLevel = "EASY" | "MEDIUM" | "HARD";
-
-const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> =
-  COURSE_LEVELS.filter((item) => item.value !== null).map((item) => ({
-    value: item.value as CourseLevel,
-    label: item.label,
-  }));
 
 const DEFAULT_FORM = {
   titleVN: "",
@@ -41,7 +32,6 @@ const DEFAULT_FORM = {
   contextVN: "",
   contextEN: "",
   imageUrl: "",
-  level: "EASY" as CourseLevel,
   estimatedDuration: 60,
 };
 
@@ -78,7 +68,6 @@ export default function CreateCourseVersionDialog({
       contextVN: form.contextVN.trim(),
       contextEN: form.contextEN.trim(),
       imageUrl: form.imageUrl.trim(),
-      level: form.level,
       estimatedDuration: Number(form.estimatedDuration),
     }),
     [form]
@@ -207,26 +196,6 @@ export default function CreateCourseVersionDialog({
                     setField("estimatedDuration", Number(event.target.value || 0))
                   }
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t("fields.level")}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {COURSE_LEVEL_OPTIONS.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => setField("level", item.value)}
-                      className={
-                        form.level === item.value
-                          ? "rounded border border-primary bg-primary px-3 py-1.5 text-sm text-greyscale-0"
-                          : "rounded border border-greyscale-600 bg-greyscale-800 px-3 py-1.5 text-sm text-greyscale-100 hover:border-greyscale-400"
-                      }
-                    >
-                      {t(item.label)}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
 

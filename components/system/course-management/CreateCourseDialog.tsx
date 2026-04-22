@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { MdOutlineAddCircleOutline } from "react-icons/md";
 
 import QuillEditor from "@/components/common/QuillEditor";
+import CommonDropdown from "@/components/common/CommonDropdown";
+import DroneDropdown from "@/components/common/DroneDropdown";
 import { ClubImageUpload } from "@/components/manager/dashboard/ClubImageUpload";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,19 +24,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourse } from "@/hooks/course/useCourse";
-import { useCreateCourseVersion } from "@/hooks/course-version/useCourseVersion";
-import { createCourseVersionRequestSchema } from "@/validations/course-version/course-version";
-import { COURSE_LEVELS } from "@/lib/constants/course";
+import { useGetLevelsByDrone } from "@/hooks/level/useLevel";
 import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale } from "@/providers/i18n-provider";
 import { Spinner } from "@/components/ui/spinner";
-
-type CourseLevel = "EASY" | "MEDIUM" | "HARD";
-
-const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> =
-  COURSE_LEVELS.filter((item) => item.value !== null).map((item) => ({
-    value: item.value as CourseLevel,
-    label: item.label,
-  }));
+import { createCourseRequestSchema } from "@/validations/course/course";
 
 const DEFAULT_FORM = {
   titleVN: "",
@@ -44,23 +38,55 @@ const DEFAULT_FORM = {
   contextVN: "",
   contextEN: "",
   imageUrl: "",
-  level: "EASY" as CourseLevel,
   estimatedDuration: 60,
 };
 
 export default function CreateCourseDialog() {
   const [open, setOpen] = React.useState(false);
   const [form, setForm] = React.useState(DEFAULT_FORM);
+  const [droneId, setDroneId] = React.useState("");
+  const [levelId, setLevelId] = React.useState("");
 
   const t = useTranslations("CourseManagement.CreateCourseDialog");
+  const locale = useLocale();
 
   const createCourseMutation = useCreateCourse();
-  const createCourseVersionMutation = useCreateCourseVersion();
+  const { data: levels = [], isLoading: isLevelsLoading } =
+    useGetLevelsByDrone(droneId || undefined);
 
-  const isSubmitting =
-    createCourseMutation.isPending || createCourseVersionMutation.isPending;
+  const isSubmitting = createCourseMutation.isPending;
 
-  const normalizedPayload = React.useMemo(
+  const levelOptions = React.useMemo(
+    () =>
+      levels.map((level) => ({
+        value: level.levelID,
+        label: (() => {
+          const levelNameMapVi: Record<number, string> = {
+            1: "Cơ bản",
+            2: "Trung cấp",
+            3: "Nâng cao",
+            4: "Master",
+          };
+
+          const levelNameMapEn: Record<number, string> = {
+            1: "Beginner",
+            2: "Intermediate",
+            3: "Advanced",
+            4: "Master",
+          };
+
+          const localizedName =
+            locale === "vi"
+              ? levelNameMapVi[level.levelNumber]
+              : levelNameMapEn[level.levelNumber];
+
+          return `${level.levelNumber}. ${localizedName ?? level.name}`;
+        })(),
+      })),
+    [levels, locale]
+  );
+
+  const normalizedVersionPayload = React.useMemo(
     () => ({
       titleVN: form.titleVN.trim(),
       titleEN: form.titleEN.trim(),
@@ -69,29 +95,39 @@ export default function CreateCourseDialog() {
       contextVN: form.contextVN.trim(),
       contextEN: form.contextEN.trim(),
       imageUrl: form.imageUrl.trim(),
-      level: form.level,
       estimatedDuration: Number(form.estimatedDuration),
     }),
     [form]
   );
 
-  const formValidation = React.useMemo(
-    () => createCourseVersionRequestSchema.safeParse(normalizedPayload),
-    [normalizedPayload]
+  const createPayload = React.useMemo(
+    () => ({
+      levelID: levelId.trim(),
+      version: {
+        ...normalizedVersionPayload,
+        changeLog: null,
+      },
+    }),
+    [levelId, normalizedVersionPayload]
   );
+
+  const formValidation = React.useMemo(() => {
+    return createCourseRequestSchema.safeParse(createPayload);
+  }, [createPayload]);
 
   const hasAllRequiredFields = React.useMemo(
     () =>
       [
-        normalizedPayload.titleVN,
-        normalizedPayload.titleEN,
-        normalizedPayload.descriptionVN,
-        normalizedPayload.descriptionEN,
-        normalizedPayload.contextVN,
-        normalizedPayload.contextEN,
-        normalizedPayload.imageUrl,
+        normalizedVersionPayload.titleVN,
+        normalizedVersionPayload.titleEN,
+        normalizedVersionPayload.descriptionVN,
+        normalizedVersionPayload.descriptionEN,
+        normalizedVersionPayload.contextVN,
+        normalizedVersionPayload.contextEN,
+        normalizedVersionPayload.imageUrl,
+        levelId,
       ].every((value) => value.length > 0),
-    [normalizedPayload]
+    [normalizedVersionPayload, levelId]
   );
 
   const isFormValid = formValidation.success && hasAllRequiredFields;
@@ -102,6 +138,8 @@ export default function CreateCourseDialog() {
 
   const resetForm = () => {
     setForm(DEFAULT_FORM);
+    setDroneId("");
+    setLevelId("");
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -119,12 +157,7 @@ export default function CreateCourseDialog() {
     }
 
     try {
-      const createdCourse = await createCourseMutation.mutateAsync();
-
-      await createCourseVersionMutation.mutateAsync({
-        courseId: createdCourse.courseID,
-        payload: formValidation.data,
-      });
+      await createCourseMutation.mutateAsync(formValidation.data);
 
       toast.success(t("toast.success"));
       setOpen(false);
@@ -199,10 +232,11 @@ export default function CreateCourseDialog() {
               </div>
             </div>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="course-duration">{t("fields.estimatedTime")}</Label>
                 <Input
+                  className="mt-2"
                   id="course-duration"
                   type="number"
                   min={0}
@@ -214,23 +248,42 @@ export default function CreateCourseDialog() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t("fields.level")}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {COURSE_LEVEL_OPTIONS.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => setField("level", item.value)}
-                      className={
-                        form.level === item.value
-                          ? "rounded border border-primary bg-primary px-3 py-1.5 text-sm text-greyscale-0"
-                          : "rounded border border-greyscale-600 bg-greyscale-800 px-3 py-1.5 text-sm text-greyscale-100 hover:border-greyscale-400"
-                      }
-                    >
-                      {t(item.label)}
-                    </button>
-                  ))}
-                </div>
+                <DroneDropdown
+                  value={droneId}
+                  onChange={(value) => {
+                    setDroneId(value);
+                    setLevelId("");
+                  }}
+                  label={locale === "en" ? "Drone" : "Drone yêu cầu"}
+                  placeholder={locale === "en" ? "Select drone" : "Chọn drone"}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <CommonDropdown
+                  value={levelId}
+                  onChange={setLevelId}
+                  options={levelOptions}
+                  label={t("fields.level")}
+                  placeholder={
+                    droneId
+                      ? locale === "en"
+                        ? "Select level"
+                        : "Chọn level"
+                      : locale === "en"
+                        ? "Select drone first"
+                        : "Chọn drone trước"
+                  }
+                  menuLabel={t("fields.level")}
+                  emptyMessage={
+                    locale === "en"
+                      ? "No levels found for this drone"
+                      : "Không có level nào phù hợp với drone này"
+                  }
+                  disabled={!droneId || isSubmitting || isLevelsLoading}
+                  isLoading={isLevelsLoading}
+                />
               </div>
             </div>
 

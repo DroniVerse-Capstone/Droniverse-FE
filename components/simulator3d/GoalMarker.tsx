@@ -17,16 +17,22 @@ type GoalProps = {
   };
 };
 
+function CustomGoalModel({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
+  return (
+    <primitive
+      object={scene}
+      scale={MARKER_MODEL_CONFIG.goal.scale}
+      position={MARKER_MODEL_CONFIG.goal.position}
+    />
+  );
+}
+
 export default function GoalMarker({ goal }: GoalProps) {
   const { position, shape, radius, size, coords, rotation } = goal;
   const baseY = Math.max(position.y, 0);
 
-  const customModel = MARKER_MODEL_CONFIG.goal.useCustomModel &&
-    MARKER_MODEL_CONFIG.goal.modelPath
-    ? useGLTF(MARKER_MODEL_CONFIG.goal.modelPath)
-    : null;
-
-
+  const useCustomModel = MARKER_MODEL_CONFIG.goal.useCustomModel && MARKER_MODEL_CONFIG.goal.modelPath;
 
   const rotationRad: [number, number, number] = rotation
     ? [(rotation[0] * Math.PI) / 180, (rotation[1] * Math.PI) / 180, (rotation[2] * Math.PI) / 180]
@@ -34,15 +40,9 @@ export default function GoalMarker({ goal }: GoalProps) {
 
   return (
     <group position={[position.x, baseY, position.z]} rotation={rotationRad}>
-      {customModel && (
-        <primitive
-          object={customModel.scene}
-          scale={MARKER_MODEL_CONFIG.goal.scale}
-          position={MARKER_MODEL_CONFIG.goal.position}
-        />
-      )}
-
-      {!customModel && (
+      {useCustomModel ? (
+        <CustomGoalModel url={MARKER_MODEL_CONFIG.goal.modelPath} />
+      ) : (
         <>
           {shape === "square" && size ? (
             <SquareGoal size={size} />

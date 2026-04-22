@@ -93,8 +93,11 @@ export default function MemberCourseOverview() {
       router.push(`/learn/${clubSlug}/${response.data.enrollmentID}`);
     } catch (createEnrollmentError) {
       const message =
-        (createEnrollmentError as { response?: { data?: { message?: string } } })
-          ?.response?.data?.message ||
+        (
+          createEnrollmentError as {
+            response?: { data?: { message?: string } };
+          }
+        )?.response?.data?.message ||
         (createEnrollmentError as { message?: string })?.message ||
         "Không thể tạo enrollment. Vui lòng thử lại.";
       toast.error(message);
@@ -269,18 +272,8 @@ export default function MemberCourseOverview() {
           <div className="rounded bg-linear-120 from-greyscale-900 to-greyscale-700 p-6">
             <p className="text-3xl font-semibold text-primary">
               {data.miniProduct
-                ? data.clubCourseOwn?.profitType === "NONPROFIT"
-                  ? "Miễn phí"
-                  : formatPrice(
-                      data.miniProduct.price,
-                      data.miniProduct.currency,
-                    )
+                ? formatPrice(data.miniProduct.price, data.miniProduct.currency)
                 : "-"}
-            </p>
-            <p className="mt-2 text-base font-semibold text-greyscale-0">
-              {data.clubCourseOwn
-                ? `${data.clubCourseOwn.remainingQuantity} mã còn lại`
-                : "Chưa sở hữu"}
             </p>
 
             <div className="my-4 h-px bg-greyscale-600" />
@@ -324,39 +317,21 @@ export default function MemberCourseOverview() {
                 </Button>
               ) : (
                 <>
-                  {data.clubCourseOwn?.profitType === "NONPROFIT" ? (
-                    <Button
-                      variant={"default"}
-                      className="w-full"
-                      onClick={handleReceiveCode}
-                      disabled={receiveCourseCodeMutation.isPending}
-                    >
-                      {receiveCourseCodeMutation.isPending
-                        ? "Đang nhận mã..."
-                        : "Nhận mã"}
-                    </Button>
-                  ) : null 
-                  // (
-                  //   <Button
-                  //     variant="default"
-                  //     className="w-full"
-                  //     disabled={
-                  //       !data.miniProduct ||
-                  //       data.clubCourseOwn?.remainingQuantity === 0
-                  //     }
-                  //     onClick={() => {
-                  //       if (!clubSlug || !courseSlug) return;
-                  //       router.push(
-                  //         `/member/${clubSlug}/${courseSlug}/checkout`,
-                  //       );
-                  //     }}
-                  //   >
-                  //     {data.clubCourseOwn?.remainingQuantity === 0
-                  //       ? "Đã hết mã"
-                  //       : "Mua ngay"}
-                  //   </Button>
-                  // )}
-                }
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    disabled={
+                      !data.miniProduct ||
+                      data.clubCourseOwn?.remainingQuantity === 0
+                    }
+                    onClick={() => {
+                      if (!clubSlug || !courseSlug) return;
+                      router.push(`/member/${clubSlug}/${courseSlug}/checkout`);
+                    }}
+                  >
+                    Mua ngay
+                  </Button>
+
                   <Button
                     variant="secondary"
                     className="w-full"
@@ -415,10 +390,13 @@ export default function MemberCourseOverview() {
             <Button
               onClick={handleActivateCode}
               disabled={
-                enterCourseCodeMutation.isPending || activateCode.trim().length === 0
+                enterCourseCodeMutation.isPending ||
+                activateCode.trim().length === 0
               }
             >
-              {enterCourseCodeMutation.isPending ? "Đang kích hoạt..." : "Xác nhận"}
+              {enterCourseCodeMutation.isPending
+                ? "Đang kích hoạt..."
+                : "Xác nhận"}
             </Button>
           </DialogFooter>
         </DialogContent>

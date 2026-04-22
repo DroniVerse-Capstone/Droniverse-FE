@@ -9,13 +9,16 @@ import { GoZap } from "react-icons/go";
 import { MdDeleteOutline } from "react-icons/md";
 
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
+import PrerequisiteCourseDialog from "@/components/course/PrerequisiteCourseDialog";
 import CourseProductPriceSection from "@/components/course/CourseProductPriceSection";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import { Button } from "@/components/ui/button";
 import {
+  useGetCourses,
   useDeleteCourse,
   usePublishCourse,
+  useUpdateCoursePrerequisites,
   useUnpublishCourse,
 } from "@/hooks/course/useCourse";
 import { formatDateTime } from "@/lib/utils/format-date";
@@ -35,12 +38,26 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const publishCourseMutation = usePublishCourse();
   const unpublishCourseMutation = useUnpublishCourse();
   const deleteCourseMutation = useDeleteCourse();
+  const updateCoursePrerequisitesMutation = useUpdateCoursePrerequisites();
+  const [isPrerequisiteDialogOpen, setIsPrerequisiteDialogOpen] = React.useState(false);
+  const [selectedPrerequisiteIds, setSelectedPrerequisiteIds] = React.useState<string[]>([]);
+  const [prerequisiteSearch, setPrerequisiteSearch] = React.useState("");
+
+  const droneId = course.drone?.droneID;
+  const { data: prerequisiteCourseListData, isLoading: isPrerequisiteCourseListLoading } = useGetCourses({
+    pageIndex: 1,
+    pageSize: 100,
+    droneId,
+    enabled: isPrerequisiteDialogOpen && Boolean(droneId),
+  });
   const version = course.currentVersion;
   const title = locale === "en" ? version?.titleEN || version?.titleVN || t("title") : version?.titleVN || version?.titleEN || t("title");
   const titleVN = version?.titleVN || "";
   const titleEN = version?.titleEN || "";
   const courseSlug = `${slugify(title)}-${course.courseID}`;
   const imageUrl = version?.imageUrl || "/images/club-placeholder.jpg";
+  const droneName = course.drone?.name || "";
+  const droneImageUrl = course.drone?.imgURL || "/images/drone-placeholder.jpg";
   const description = locale === "en" ? version?.descriptionEN || version?.descriptionVN || t("description") : version?.descriptionVN || version?.descriptionEN || t("description");
   const creatorDisplay = course.creator?.fullName
     ? `${course.creator.fullName}${course.creator.email ? ` (${course.creator.email})` : ""}`
@@ -69,6 +86,62 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
       : "mt-3 flex items-center justify-end gap-2 border-t border-greyscale-700 pt-3";
   const triggerClassName = isTwoActions ? "w-full" : isOneAction ? "w-1/2" : undefined;
   const actionButtonClassName = isTwoActions || isOneAction ? "w-full justify-center" : undefined;
+
+  React.useEffect(() => {
+    if (!isPrerequisiteDialogOpen) {
+      return;
+    }
+
+    setSelectedPrerequisiteIds(course.prerequisiteCourses.map((item) => item.courseID));
+  }, [course.prerequisiteCourses, isPrerequisiteDialogOpen]);
+
+  const prerequisiteCourses = React.useMemo(() => {
+    const list = prerequisiteCourseListData?.data ?? [];
+    const lowerSearch = prerequisiteSearch.trim().toLowerCase();
+
+    return list.filter((item) => {
+      if (item.courseID === course.courseID) {
+        return false;
+      }
+
+      const itemTitle = locale === "en"
+        ? item.currentVersion?.titleEN || item.currentVersion?.titleVN || ""
+        : item.currentVersion?.titleVN || item.currentVersion?.titleEN || "";
+
+      if (!lowerSearch) {
+        return true;
+      }
+
+      return itemTitle.toLowerCase().includes(lowerSearch);
+    });
+  }, [course.courseID, locale, prerequisiteCourseListData?.data, prerequisiteSearch]);
+
+  const isSavingPrerequisites = updateCoursePrerequisitesMutation.isPending;
+
+  const handleTogglePrerequisite = (courseId: string) => {
+    setSelectedPrerequisiteIds((prev) =>
+      prev.includes(courseId) ? prev.filter((id) => id !== courseId) : [...prev, courseId]
+    );
+  };
+
+  const handleSavePrerequisites = async () => {
+    try {
+      const response = await updateCoursePrerequisitesMutation.mutateAsync({
+        courseId: course.courseID,
+        data: { prerequisiteCourseIds: selectedPrerequisiteIds },
+      });
+
+      toast.success(response.message || (locale === "en" ? "Prerequisites updated successfully." : "Cập nhật điều kiện tiên quyết thành công."));
+      setIsPrerequisiteDialogOpen(false);
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          (locale === "en" ? "Failed to update prerequisites." : "Không thể cập nhật điều kiện tiên quyết.")
+      );
+    }
+  };
 
   const handlePublishCourse = async () => {
     if (!hasMiniProduct) {
@@ -149,8 +222,8 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
 
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {version?.level ? (
-            <CourseLevelBadge level={version.level} />
+          {course?.level ? (
+            <CourseLevelBadge level={course.level} />
           ) : null}
           <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {version?.estimatedDuration ?? t("unknown")} {t("min")}
@@ -165,11 +238,54 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
 
       <p className="mb-4 line-clamp-3 text-sm text-greyscale-100">{description}</p>
 
+      {course.drone ? (
+        <div className="mb-4 rounded border border-greyscale-700 bg-greyscale-850/50 p-2.5">
+          <p className="mb-2 text-xs font-semibold text-greyscale-300">
+            {locale === "en" ? "Required Drone" : "Drone yêu cầu"}
+          </p>
+          <div className="flex items-center gap-2.5">
+            <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded border border-greyscale-700">
+              <Image
+                src={droneImageUrl}
+                alt={droneName}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <p className="line-clamp-1 text-sm text-greyscale-100">{droneName}</p>
+          </div>
+        </div>
+      ) : null}
+
       <CourseProductPriceSection
         course={course}
         version={version}
         canManagePrice={isDraft}
       />
+
+      <div
+        className="mt-3 border-t border-greyscale-700 pt-3"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        <Button
+          type="button"
+          size="sm"
+          variant="viewIcon"
+          className="w-full justify-center"
+          disabled={!droneId}
+          onClick={() => setIsPrerequisiteDialogOpen(true)}
+        >
+          {locale === "en" ? "Configure Prerequisites" : "Thiết lập điều kiện tiên quyết"}
+        </Button>
+        {!droneId ? (
+          <p className="mt-2 text-center text-xs text-greyscale-300">
+            {locale === "en"
+              ? "Please assign a required drone first."
+              : "Vui lòng gán drone yêu cầu trước khi cấu hình."}
+          </p>
+        ) : null}
+      </div>
 
       <div className="mt-3 space-y-1.5 border-t border-greyscale-700 pt-2 text-xs">
         <div className="flex items-center justify-between gap-3">
@@ -266,6 +382,20 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
           />
         ) : null}
       </div>
+
+      <PrerequisiteCourseDialog
+        locale={locale}
+        open={isPrerequisiteDialogOpen}
+        onOpenChange={setIsPrerequisiteDialogOpen}
+        search={prerequisiteSearch}
+        onSearchChange={setPrerequisiteSearch}
+        courses={prerequisiteCourses}
+        selectedIds={selectedPrerequisiteIds}
+        isLoading={isPrerequisiteCourseListLoading}
+        isSaving={isSavingPrerequisites}
+        onToggle={handleTogglePrerequisite}
+        onSave={() => void handleSavePrerequisites()}
+      />
     </article>
   );
 }

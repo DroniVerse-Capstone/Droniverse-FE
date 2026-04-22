@@ -22,6 +22,25 @@ export function formatDateTime(dateStr: string | null) {
   }).replace(",", " -");
 }
 
+/**
+ * Converts a date string/object to a format compatible with <input type="datetime-local"> (YYYY-MM-DDTHH:mm)
+ * preserving the local time.
+ */
+export function toLocalDatetimeString(dateInput: string | Date | null) {
+  if (!dateInput) return "";
+
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) return "";
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 export function formatDateWithTime(dateStr: string | null) {
   if (!dateStr) return { day: "—", time: "" };
 

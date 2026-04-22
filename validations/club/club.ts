@@ -17,6 +17,24 @@ export const creatorSchema = z.object({
   lastName: z.string(),
   dateOfBirth: z.string().nullable(),
   roleName: z.string(),
+  imageUrl: z.string().nullable().optional(),
+  gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).nullable().optional(),
+})
+
+export const clubDroneSchema = z.object({
+  droneID: z.string(),
+  droneTypeID: z.string(),
+  droneTypeNameVN: z.string(),
+  droneTypeNameEN: z.string(),
+  droneNameVN: z.string(),
+  droneNameEN: z.string(),
+  manufacturer: z.string(),
+  descriptionVN: z.string().nullable(),
+  descriptionEN: z.string().nullable(),
+  height: z.number().nonnegative(),
+  weight: z.number().nonnegative(),
+  status: z.string(),
+  imgURL: z.string().nullable(),
 })
 
 export const clubParticipationSchema = z.object({
@@ -35,19 +53,20 @@ export const clubSchema = z.object({
   clubID: z.string(),
   nameVN: z.string(),
   nameEN: z.string(),
-  descriptionVN: z.string().nullable(),
-  descriptionEN: z.string().nullable(),
+  descriptionVN: z.string().nullable().optional(),
+  descriptionEN: z.string().nullable().optional(),
   clubCode: z.string(),
   status: clubStatusSchema,
-  isPublic: z.boolean(),
   imageUrl: z.string().nullable(),
   limitParticipation: z.number().int().nonnegative(),
   limitClubManagers: z.number().int().nonnegative(),
   totalMembers: z.number().int().nonnegative(),
   totalCourses: z.number().int().nonnegative(),
-  suspendedReason: z.string().nullable(),
+  suspendedReason: z.string().nullable().optional(),
+  clubPolicyVN: z.string(),
+  clubPolicyEN: z.string(),
+  drone: clubDroneSchema.optional().nullable(),
   creator: creatorSchema.nullable(),
-  categories: z.array(categorySchema),
 })
 
 export const getMyClubsResponseSchema = z.object({
@@ -114,6 +133,7 @@ export const updateClubStatusResponseSchema = z.object({
 export type Club = z.infer<typeof clubSchema>
 export type ClubStatus = z.infer<typeof clubStatusSchema>
 export type ClubParticipation = z.infer<typeof clubParticipationSchema>
+export type ClubDrone = z.infer<typeof clubDroneSchema>
 export type GetAllClubsData = z.infer<typeof getAllClubsDataSchema>
 export type GetAllClubsResponse = z.infer<typeof getAllClubsResponseSchema>
 export type GetClubParticipationsData = z.infer<

@@ -28,6 +28,15 @@ export const paymentOrderStatusSchema = z.enum([
 	"CANCELLED",
 ])
 
+export const paymentSchema = z.object({
+	transactionId: z.string().uuid(),
+	orderId: z.string().uuid(),
+	paymentMethod: paymentMethodSchema,
+	paymentUrl: z.string().url(),
+	status: paymentOrderStatusSchema,
+	transactionDate: z.string(),
+})
+
 export const paymentOrderDataSchema = z.object({
 	orderID: z.string().uuid(),
 	type: z.string().min(1),
@@ -35,7 +44,8 @@ export const paymentOrderDataSchema = z.object({
 	status: paymentOrderStatusSchema,
 	createAt: z.string(),
 	item: createPaymentOrderItemSchema.nullable(),
-	payment: z.unknown().nullable(),
+	payment: paymentSchema.nullable(),
+	user: z.unknown().nullable(),
 })
 
 export const createPaymentOrderResponseSchema = z.object({

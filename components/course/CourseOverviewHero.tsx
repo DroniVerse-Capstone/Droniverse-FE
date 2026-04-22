@@ -8,11 +8,12 @@ import { Star } from "lucide-react";
 
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { formatDate } from "@/lib/utils/format-date";
+import { Level } from "@/validations/level/level";
 
 type CourseOverviewHeroProps = {
   title: string;
   description: string;
-  level: "EASY" | "MEDIUM" | "HARD";
+  level: Level;
   estimatedDuration: number;
   averageRating: number;
   totalLearners: number;

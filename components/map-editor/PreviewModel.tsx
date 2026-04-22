@@ -123,8 +123,10 @@ export default function PreviewModel({ model }: { model: any }) {
     return null;
   }
 
+  const isPath = model.url.startsWith("/") || model.url.startsWith("http");
+  if (!isPath) return null;
+
   const ext = model.url.split(".").pop()?.toLowerCase();
-  if (!ext) return null;
   if (ext === "fbx") {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const fbx = useLoader(FBXLoader, model.url) as any;
@@ -135,6 +137,7 @@ export default function PreviewModel({ model }: { model: any }) {
       />
     );
   }
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const gltf = useGLTF(model.url) as any;
   return (

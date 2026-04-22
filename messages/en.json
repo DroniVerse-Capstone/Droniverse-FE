@@ -578,7 +578,8 @@
       "all": "All",
       "easy": "Beginner",
       "medium": "Intermediate",
-      "hard": "Advanced"
+      "hard": "Advanced",
+      "master": "Master"
     },
     "management": {
       "total": "Total courses",
@@ -634,7 +635,8 @@
       "level": {
         "easy": "Beginner",
         "medium": "Intermediate",
-        "hard": "Advanced"
+        "hard": "Advanced",
+        "master": "Master"
       }
     },
     "AdminCourseCard": {
@@ -862,7 +864,10 @@
         "lessonTypes": {
           "theory": "Theory",
           "quiz": "Quiz",
-          "lab": "Lab"
+          "lab": "Lab",
+          "physic": "Engine & Physics",
+          "lab_physic": "Physics Lab",
+          "vr": "VR"
         },
         "fields": {
           "titleVN": "Vietnamese Title",
@@ -874,8 +879,13 @@
           "labType": "Type",
           "labNoDescription": "No description",
           "labEmpty": "No matching labs found.",
-          "labSelectHint": "Please select one lab to create a lesson.",
+          "labSelectHint": "Please select a lab to create a lesson.",
           "labSelected": "Lab selected.",
+          "simulatorSearch": "Search simulators",
+          "simulatorSearchPlaceholder": "Enter simulator name or description",
+          "simulatorEmpty": "No matching simulators found.",
+          "simulatorSelectHint": "Please select a simulator to create a lesson.",
+          "simulatorSelected": "Simulator selected.",
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "theoryContentVNPlaceholder": "Enter Vietnamese theory content",
@@ -946,7 +956,10 @@
         "subtitle": {
           "theory": "Theory Lesson Details",
           "quiz": "Quiz Lesson Details",
-          "lab": "Lab Lesson Details"
+          "lab": "Lab Lesson Details",
+          "physic": "Engine & Physics Details",
+          "lab_physic": "Physics Lab Details",
+          "vr": "VR Lesson Details"
         },
         "fields": {
           "titleVN": "Title (Vietnamese)",
@@ -1308,6 +1321,45 @@
     "connectionTerminated": "Connection Terminated",
     "loadingSystems": "Loading Systems..."
   },
+  "ManagerSidebar": {
+    "subtitle": "Club management",
+    "switchClub": "Switch club",
+    "overview": "Overview",
+    "members": {
+      "title": "Members",
+      "subitems": {
+        "management": "Member management",
+        "requests": "Join requests",
+        "transactions": "Transaction management"
+      }
+    },
+    "courses": {
+      "title": "Courses",
+      "subitems": {
+        "available": "Available courses",
+        "progress": "Learning progress"
+      }
+    },
+    "competitions": "Competitions",
+    "finance": {
+      "title": "Finance",
+      "subitems": {
+        "wallet": "Wallet",
+        "withdrawHistory": "Withdrawal history"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subitems": {
+        "clubInfo": "Club information",
+        "clubRules": "Club rules"
+      }
+    },
+    "aria": {
+      "collapseSidebar": "Collapse manager sidebar",
+      "switchClub": "Switch club"
+    }
+  },
   "ManagerMembers": {
     "errors": "Unable to determine the current club.",
     "memberlist": "Member List",
@@ -1368,7 +1420,8 @@
       "all": "All",
       "easy": "Beginner",
       "medium": "Intermediate",
-      "hard": "Advanced"
+      "hard": "Advanced",
+      "master": "Master"
     },
     "sort": {
       "label": "Number of learners:",
@@ -1678,6 +1731,30 @@
         }
       },
       "backButton": "Back"
+    }
+  },
+  "MemberLessonDetail": {
+    "labels": {
+      "THEORY": "Theory Lesson",
+      "QUIZ": "Quiz Lesson",
+      "LAB": "Practical Lab",
+      "PHYSIC": "Engine & Physics",
+      "LAB_PHYSIC": "Physics Lab",
+      "VR": "VR"
+    },
+    "descriptions": {
+      "THEORY": "Read the lesson content to gain foundational knowledge before moving to the next lesson.",
+      "QUIZ": "Test your understanding with multiple-choice questions in the quiz.",
+      "LAB": "Practice maneuvers and simulated situations to build real-world skills.",
+      "PHYSIC": "Learn about engines and physics laws applied in drones.",
+      "LAB_PHYSIC": "Conduct physics experiments to understand drone mechanisms.",
+      "VR": "Experience immersive learning in a virtual reality environment."
+    },
+    "minutes": "{value} minutes",
+    "unlock": "Unlock",
+    "errors": {
+      "unknownEnrollment": "Unknown current enrollment.",
+      "initFailed": "Could not initialize learning data."
     }
   }
 }

@@ -64,9 +64,9 @@ export default function ManagerCourse() {
   const [currentPage, setCurrentPage] = React.useState(1);
 
   const { data, isLoading, isError, error, isFetching } = useGetClubCourses(clubId, {
-    level: selectedLevel,
+    // level: selectedLevel,
     participationSort: selectedSort,
-    courseOwner: selectedOwner,
+    // courseOwner: selectedOwner,
     courseName: searchKeyword,
     currentPage,
     pageSize: 12,
@@ -121,7 +121,10 @@ export default function ManagerCourse() {
   }
 
   return (
-    <div className="space-y-6 px-6 py-4">
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-greyscale-0 ">
+        Khóa học hiện có
+      </h2>
       <div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">
@@ -145,14 +148,6 @@ export default function ManagerCourse() {
               options={sortOptions}
               allLabel={t("level.all")}
               onChange={updateSort}
-            />
-
-            <InlineFilterRow
-              label={t("owner.label")}
-              selectedValue={selectedOwner}
-              options={ownerOptions}
-              allLabel={t("level.all")}
-              onChange={updateOwner}
             />
           </div>
 
@@ -214,10 +209,10 @@ export default function ManagerCourse() {
                 <ClubCourseCard
                   key={course.courseId}
                   course={course}
-                  onClick={() => {
-                    if (!clubSlug) return;
-                    router.push(`/manager/${clubSlug}/${course.courseId}`);
-                  }}
+                  // onClick={() => {
+                  //   if (!clubSlug) return;
+                  //   router.push(`/manager/${clubSlug}/${course.courseId}`);
+                  // }}
                 />
               ))}
             </div>

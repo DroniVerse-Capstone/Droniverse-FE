@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useUploadTempClubImage } from "@/hooks/club/useClub";
+import { useUploadTempMedia } from "@/hooks/media/useMedia";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "@/providers/i18n-provider";
@@ -37,9 +37,9 @@ export function ClubImageUpload({
     };
   }, [localPreview]);
 
-  const uploadMutation = useUploadTempClubImage({
+  const uploadMutation = useUploadTempMedia({
     onSuccess: (data) => {
-      onChange(data.url);
+      onChange(data.data.url);
       toast.success(t("toast.success"));
     },
     onError: (error) => {
@@ -60,7 +60,7 @@ export function ClubImageUpload({
     const previewUrl = URL.createObjectURL(file);
     setLocalPreview(previewUrl);
     setFileName(file.name);
-    uploadMutation.mutate(file);
+    uploadMutation.mutate({ file, mediaType: "IMAGE" });
   };
 
   const handleOpenPicker = () => {

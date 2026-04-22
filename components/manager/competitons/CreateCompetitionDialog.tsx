@@ -65,12 +65,12 @@ export default function CreateCompetitionDialog({
       descriptionEN: form.descriptionEN.trim(),
       ruleContent: form.ruleContent.trim(),
       maxParticipants: Number(form.maxParticipants),
-      visibleAt: form.visibleAt ? new Date(form.visibleAt).toISOString() : "",
-      registrationStartDate: form.registrationStartDate ? new Date(form.registrationStartDate).toISOString() : "",
-      registrationEndDate: form.registrationEndDate ? new Date(form.registrationEndDate).toISOString() : "",
-      startDate: form.startDate ? new Date(form.startDate).toISOString() : "",
-      endDate: form.endDate ? new Date(form.endDate).toISOString() : "",
-      resultPublishedAt: form.resultPublishedAt ? new Date(form.resultPublishedAt).toISOString() : undefined,
+      visibleAt: form.visibleAt ? `${form.visibleAt}:00` : "",
+      registrationStartDate: form.registrationStartDate ? `${form.registrationStartDate}:00` : "",
+      registrationEndDate: form.registrationEndDate ? `${form.registrationEndDate}:00` : "",
+      startDate: form.startDate ? `${form.startDate}:00` : "",
+      endDate: form.endDate ? `${form.endDate}:00` : "",
+      resultPublishedAt: form.resultPublishedAt ? `${form.resultPublishedAt}:00` : undefined,
     };
   }, [form, clubId]);
 
