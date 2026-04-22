@@ -33,8 +33,8 @@ export default function LoginBanner() {
           </h1>
 
           <p className="text-3xl text-secondary-0 mb-6 font-medium">
-            "{t("slogan1")}{" "}
-            <span className="text-secondary-200">{t("slogan2")}</span>"
+            &quot;{t("slogan1")}{" "}
+            <span className="text-secondary-200">{t("slogan2")}</span>&quot;
           </p>
 
           <p className="text-greyscale-200 text-base font-medium leading-relaxed">
