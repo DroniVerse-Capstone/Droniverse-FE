@@ -24,6 +24,28 @@ type Props = {
 const LOGO_OFFSET_X = 13;
 const LOGO_OFFSET_Z = 2;
 
+function CustomTerrain({ 
+  url, 
+  onPointerMove, 
+  onPointerOut 
+}: { 
+  url: string; 
+  onPointerMove?: (event: ThreeEvent<PointerEvent>) => void; 
+  onPointerOut?: () => void; 
+}) {
+  const { scene } = useGLTF(url);
+  return (
+    <primitive
+      object={scene}
+      scale={TERRAIN_MODEL_CONFIG.scale}
+      position={TERRAIN_MODEL_CONFIG.position}
+      onPointerMove={onPointerMove}
+      onPointerOut={onPointerOut}
+      onPointerLeave={onPointerOut}
+    />
+  );
+}
+
 export default function GroundPlane({
   size,
   onPointerMove,
@@ -45,30 +67,17 @@ export default function GroundPlane({
     [-halfW, BORDER_CONFIG.height, -halfH],
   ];
 
-  // const customTerrain =
-  //   TERRAIN_MODEL_CONFIG.useCustomTerrain && TERRAIN_MODEL_CONFIG.terrainPath
-  //     ? useGLTF(TERRAIN_MODEL_CONFIG.terrainPath)
-  //     : null;
-
-  const terrainPath = TERRAIN_MODEL_CONFIG.terrainPath ?? '/fallback.glb';
-  const gltf = useGLTF(terrainPath);
-
-  const customTerrain = TERRAIN_MODEL_CONFIG.useCustomTerrain ? gltf : null;
+  const useCustomTerrain = TERRAIN_MODEL_CONFIG.useCustomTerrain && TERRAIN_MODEL_CONFIG.terrainPath;
 
   return (
     <group>
-      {customTerrain && (
-        <primitive
-          object={customTerrain.scene}
-          scale={TERRAIN_MODEL_CONFIG.scale}
-          position={TERRAIN_MODEL_CONFIG.position}
+      {useCustomTerrain ? (
+        <CustomTerrain 
+          url={TERRAIN_MODEL_CONFIG.terrainPath} 
           onPointerMove={onPointerMove}
           onPointerOut={onPointerOut}
-          onPointerLeave={onPointerOut}
         />
-      )}
-
-      {!customTerrain && (
+      ) : (
         <mesh
           rotation-x={-Math.PI / 2}
           onPointerMove={onPointerMove}

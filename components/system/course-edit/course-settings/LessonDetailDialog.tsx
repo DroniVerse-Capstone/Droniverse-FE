@@ -2,7 +2,7 @@
 
 import React from "react";
 import { MdOutlineTimer } from "react-icons/md";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import {
   Dialog,
@@ -14,12 +14,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetLab } from "@/hooks/lab/useLabs";
+import { useGetWebSimulator } from "@/hooks/simulator/useSimulator";
 import { useGetQuizDetail } from "@/hooks/quiz/useQuiz";
 import { useGetTheoryDetail } from "@/hooks/theory/useTheory";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { Lesson } from "@/validations/lesson/lesson";
 import { RiVerifiedBadgeLine } from "react-icons/ri";
 import { FaRegStar } from "react-icons/fa";
+import { getSimulatorRoute } from "@/lib/physic/simulatorRoutes";
 
 type LessonDetailDialogProps = {
   open: boolean;
@@ -35,15 +37,18 @@ export default function LessonDetailDialog({
   const t = useTranslations("CourseManagement.CourseSettings.LessonDetailDialog");
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const theoryId =
     open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId =
     open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
-  const labId = open && lesson?.type === "LAB" ? lesson.referenceID : null;
+  const labId = open && ["LAB", "LAB_PHYSIC", "VR"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
+  const simulatorId = open && lesson?.type === "PHYSIC" ? (lesson?.referenceID ?? null) : null;
 
   const theoryDetailQuery = useGetTheoryDetail(theoryId);
   const quizDetailQuery = useGetQuizDetail(quizId);
   const labDetailQuery = useGetLab(labId);
+  const simulatorDetailQuery = useGetWebSimulator(simulatorId);
 
   const levelLabelMap = {
     EASY: { vi: "Cơ bản", en: "Easy" },
@@ -67,7 +72,9 @@ export default function LessonDetailDialog({
               ? t("subtitle.theory")
               : lesson?.type === "QUIZ"
                 ? t("subtitle.quiz")
-                : t("subtitle.lab")}
+                : lesson?.type === "PHYSIC"
+                  ? "Chi tiết bài mô phỏng vật lý"
+                  : t("subtitle.lab")}
           </DialogDescription>
         </DialogHeader>
 
@@ -193,7 +200,7 @@ export default function LessonDetailDialog({
                         )}
                       </span>
                       <span className="inline-flex items-center gap-1 rounded border border-warning/40 bg-warning/15 px-2 py-1 text-xs font-medium text-warning">
-                       <RiVerifiedBadgeLine size={14} />
+                        <RiVerifiedBadgeLine size={14} />
                         {t("fields.passScore").replace(
                           "{value}",
                           String(quizDetailQuery.data.passScore)
@@ -224,7 +231,7 @@ export default function LessonDetailDialog({
             </div>
           ) : null}
 
-          {lesson?.type === "LAB" ? (
+          {["LAB", "PHYSICS_LAB", "VR"].includes(lesson?.type || "") ? (
             <div className="space-y-4">
               {labDetailQuery.isLoading ? (
                 <div className="flex items-center justify-center py-3">
@@ -249,44 +256,44 @@ export default function LessonDetailDialog({
                     const levelBadgeClass = levelBadgeClassMap[labLevel];
 
                     return (
-                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
-                    <p className="text-sm tracking-wide text-greyscale-200">
-                      {t("fields.titleVN")}
-                    </p>
-                    <p className="text-base font-medium text-greyscale-25">
-                      {labDetailQuery.data.nameVN}
-                    </p>
+                      <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                        <p className="text-sm tracking-wide text-greyscale-200">
+                          {t("fields.titleVN")}
+                        </p>
+                        <p className="text-base font-medium text-greyscale-25">
+                          {labDetailQuery.data.nameVN}
+                        </p>
 
-                    <p className="mt-3 text-sm tracking-wide text-greyscale-200">
-                      {t("fields.titleEN")}
-                    </p>
-                    <p className="text-base font-medium text-greyscale-25">
-                      {labDetailQuery.data.nameEN || "-"}
-                    </p>
+                        <p className="mt-3 text-sm tracking-wide text-greyscale-200">
+                          {t("fields.titleEN")}
+                        </p>
+                        <p className="text-base font-medium text-greyscale-25">
+                          {labDetailQuery.data.nameEN || "-"}
+                        </p>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium ${levelBadgeClass}`}
-                      >
-                        {t("fields.labLevel")}: {levelLabel}
-                      </span>
-                      <span className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border border-tertiary/40`}>
-                         {labDetailQuery.data.estimatedTime} {locale === "en" ? "minutes" : "phút"}
-                      </span>
-                    </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium ${levelBadgeClass}`}
+                          >
+                            {t("fields.labLevel")}: {levelLabel}
+                          </span>
+                          <span className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border border-tertiary/40`}>
+                            {labDetailQuery.data.estimatedTime} {locale === "en" ? "minutes" : "phút"}
+                          </span>
+                        </div>
 
-                    <div className="mt-3">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => {
-                          router.push(`/map-editor?id=${labDetailQuery.data?.labID || lesson?.referenceID}`);
-                        }}
-                      >
-                        {locale === "en" ? "View Lab" : "Xem bài lab"}
-                      </Button>
-                    </div>
-                  </div>
+                        <div className="mt-3">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => {
+                              router.push(`/map-editor?id=${labDetailQuery.data?.labID || lesson?.referenceID}`);
+                            }}
+                          >
+                            {locale === "en" ? "View Lab" : "Xem bài lab"}
+                          </Button>
+                        </div>
+                      </div>
                     );
                   })()}
 
@@ -305,6 +312,87 @@ export default function LessonDetailDialog({
                     </p>
                     <p className="text-base text-greyscale-25">
                       {labDetailQuery.data.descriptionEN || "-"}
+                    </p>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {lesson?.type === "PHYSIC" ? (
+            <div className="space-y-4">
+              {simulatorDetailQuery.isLoading ? (
+                <div className="flex items-center justify-center py-3">
+                  <Spinner className="h-5 w-5" />
+                </div>
+              ) : null}
+
+              {simulatorDetailQuery.isError ? (
+                <p className="text-sm text-warning">
+                  Không thể tải chi tiết bài mô phỏng.
+                </p>
+              ) : null}
+
+              {simulatorDetailQuery.data ? (
+                <>
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="text-sm tracking-wide text-greyscale-200">
+                      {t("fields.titleVN")}
+                    </p>
+                    <p className="text-base font-medium text-greyscale-25">
+                      {simulatorDetailQuery.data.titleVN}
+                    </p>
+
+                    <p className="mt-3 text-sm tracking-wide text-greyscale-200">
+                      {t("fields.titleEN")}
+                    </p>
+                    <p className="text-base font-medium text-greyscale-25">
+                      {simulatorDetailQuery.data.titleEN}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded border border-secondary/40 bg-secondary/15 px-2 py-1 text-xs font-medium text-secondary">
+                        Loại: {simulatorDetailQuery.data.type}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded border border-tertiary/40 bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
+                        <MdOutlineTimer size={14} />
+                        {simulatorDetailQuery.data.estimatedTime} {locale === "en" ? "minutes" : "phút"}
+                      </span>
+                    </div>
+
+                    <div className="mt-3">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => {
+                          const route = getSimulatorRoute(
+                            simulatorDetailQuery.data?.code || "",
+                            simulatorDetailQuery.data?.webSimulatorID || "",
+                            pathname
+                          );
+                          router.push(route);
+                        }}
+                      >
+                        {locale === "en" ? "View Simulator" : "Xem mô phỏng"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="mb-2 text-sm font-medium text-greyscale-200">
+                      Mục tiêu (Tiếng Việt)
+                    </p>
+                    <p className="whitespace-pre-line text-base text-greyscale-25">
+                      {simulatorDetailQuery.data.objectivesVN}
+                    </p>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="mb-2 text-xs font-medium text-greyscale-200">
+                      Objectives (English)
+                    </p>
+                    <p className="whitespace-pre-line text-base text-greyscale-25">
+                      {simulatorDetailQuery.data.objectivesEN}
                     </p>
                   </div>
                 </>

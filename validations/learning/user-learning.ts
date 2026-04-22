@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const lessonTypeSchema = z.enum(["THEORY", "QUIZ", "LAB"])
+export const lessonTypeSchema = z.enum(["THEORY", "QUIZ", "LAB", "PHYSIC", "LAB_PHYSIC", "VR"])
 
 export const lessonSchema = z.object({
 	lessonID: z.string().uuid(),

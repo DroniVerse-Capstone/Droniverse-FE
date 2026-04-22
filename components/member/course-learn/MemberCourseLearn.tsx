@@ -7,6 +7,7 @@ import MemberLabLessonContent from "@/components/member/course-learn/MemberLabLe
 import MemberLessonDetail from "@/components/member/course-learn/MemberLessonDetail";
 import MemberQuizLessonContent from "@/components/member/course-learn/MemberQuizLessonContent";
 import MemberTheoryLessonContent from "@/components/member/course-learn/MemberTheoryLessonContent";
+import MemberSimulatorLessonContent from "@/components/member/course-learn/MemberSimulatorLessonContent";
 import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
 import LearningPathSideBar from "@/components/member/course-learn/LearningPathSideBar";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,12 @@ export default function MemberCourseLearn() {
             <MemberQuizLessonContent
               quizId={selectedLesson.referenceID}
               enrollmentId={enrollmentId}
+            />
+          ) : ["PHYSIC", "LAB_PHYSIC", "VR"].includes(selectedLesson.type) ? (
+            <MemberSimulatorLessonContent
+              referenceId={selectedLesson.referenceID}
+              enrollmentId={enrollmentId}
+              lessonId={selectedLesson.lessonID}
             />
           ) : (
             <MemberLabLessonContent
