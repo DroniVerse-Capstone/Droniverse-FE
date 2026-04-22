@@ -56,8 +56,8 @@ export default function ModuleLessons({
       const axiosError = deleteError as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-          axiosError.message ||
-          "Không thể xóa bài học.",
+        axiosError.message ||
+        "Không thể xóa bài học.",
       );
     },
   });
@@ -68,7 +68,7 @@ export default function ModuleLessons({
   };
 
   const handleOpenEdit = (lesson: Lesson) => {
-    if (lesson.type === "LAB") {
+    if (["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lesson.type)) {
       toast("Tính năng chỉnh sửa Lab sẽ được cập nhật sau.");
       return;
     }
@@ -144,14 +144,14 @@ export default function ModuleLessons({
 
               <div className="flex items-center gap-2">
                 <TooltipWrapper label={t("tooltip.view")}>
-                <Button
-                  type="button"
-                  variant="viewIcon"
-                  size="icon"
-                  onClick={() => handleOpenView(lesson)}
-                >
-                  <FaRegEye size={16} />
-                </Button>
+                  <Button
+                    type="button"
+                    variant="viewIcon"
+                    size="icon"
+                    onClick={() => handleOpenView(lesson)}
+                  >
+                    <FaRegEye size={16} />
+                  </Button>
                 </TooltipWrapper>
 
                 {lesson.type === "QUIZ" ? (
@@ -169,7 +169,7 @@ export default function ModuleLessons({
 
                 {canManageLessons ? (
                   <>
-                    {lesson.type !== "LAB" ? (
+                    {!["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lesson.type) ? (
                       <TooltipWrapper label={t("tooltip.edit")}>
                         <Button
                           type="button"

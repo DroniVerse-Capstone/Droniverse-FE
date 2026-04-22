@@ -19,8 +19,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useTranslations } from "@/providers/i18n-provider";
-import { useGetLabs } from "@/hooks/lab/useLabs";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
+import { useGetVRSimulators } from "@/hooks/simulator/useSimulator";
 import {
     Competition,
     CreateRoundRequest
@@ -41,10 +41,8 @@ export function CreateRoundDialog({
     competition,
 }: CreateRoundDialogProps) {
     const t = useTranslations("ManagerCompetitions.detailPage.rounds.create");
-    const { data: labs, isLoading: isLoadingLabs } = useGetLabs({
-        type: "COMPETITION",
-        status: "ACTIVE",
-    });
+    const locale = useLocale();
+    const { data: simulators, isLoading: isLoadingSimulators } = useGetVRSimulators();
 
     const createRoundMutation = useCreateCompetitionRound();
 
@@ -105,24 +103,24 @@ export function CreateRoundDialog({
                 <form onSubmit={handleSubmit} className="space-y-6 py-4">
                     <div className="space-y-2">
                         <Label htmlFor="lab" className="text-sm font-medium text-greyscale-300">
-                            {t("fields.lab")}
+                            Chọn Simulator
                         </Label>
                         <Select
                             onValueChange={(value) => setFormData({ ...formData, labID: value })}
                             value={formData.labID}
                         >
                             <SelectTrigger className="bg-greyscale-900 border-greyscale-800 focus:ring-primary h-11">
-                                <SelectValue placeholder={t("fields.labPlaceholder")} />
+                                <SelectValue placeholder="Chọn VR cho vòng thi..." />
                             </SelectTrigger>
                             <SelectContent className="bg-greyscale-900 border-greyscale-800 text-greyscale-0">
-                                {isLoadingLabs ? (
+                                {isLoadingSimulators ? (
                                     <div className="flex items-center justify-center p-4">
                                         <Loader2 className="animate-spin text-primary" size={20} />
                                     </div>
                                 ) : (
-                                    Array.isArray(labs) && labs.map((lab: any) => (
-                                        <SelectItem key={lab.labID} value={lab.labID}>
-                                            {lab.nameVN}
+                                    Array.isArray(simulators) && simulators.map((sim: any) => (
+                                        <SelectItem key={sim.vrSimulatorID} value={sim.vrSimulatorID}>
+                                            {locale === "en" ? sim.titleEN || sim.titleVN : sim.titleVN || sim.titleEN}
                                         </SelectItem>
                                     ))
                                 )}
@@ -173,7 +171,7 @@ export function CreateRoundDialog({
                             className="bg-greyscale-900 border-greyscale-800 focus:ring-primary h-11"
                             required
                         />
-                        <p className="text-[10px] text-greyscale-500 italic">Nhập số phút làm bài bài lab</p>
+                        <p className="text-[10px] text-greyscale-500 italic">Nhập số phút làm bài thi simulator</p>
                     </div>
 
                     <DialogFooter className="pt-4">

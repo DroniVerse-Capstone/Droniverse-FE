@@ -21,6 +21,7 @@ import QuillEditor from "@/components/common/QuillEditor";
 import { useTranslations } from "@/providers/i18n-provider";
 import { useUpdateCompetition } from "@/hooks/competitions/useCompetitions";
 import { Competition, updateCompetitionRequestSchema } from "@/validations/competitions/competitions";
+import { toLocalDatetimeString } from "@/lib/utils/format-date";
 
 interface UpdateCompetitionDialogProps {
     competition: Competition;
@@ -43,12 +44,12 @@ export default function UpdateCompetitionDialog({
         descriptionEN: competition.descriptionEN || "",
         ruleContent: competition.ruleContent,
         maxParticipants: competition.maxParticipants,
-        visibleAt: competition.visibleAt ? new Date(competition.visibleAt).toISOString().slice(0, 16) : "",
-        registrationStartDate: competition.registrationStartDate ? new Date(competition.registrationStartDate).toISOString().slice(0, 16) : "",
-        registrationEndDate: competition.registrationEndDate ? new Date(competition.registrationEndDate).toISOString().slice(0, 16) : "",
-        startDate: competition.startDate ? new Date(competition.startDate).toISOString().slice(0, 16) : "",
-        endDate: competition.endDate ? new Date(competition.endDate).toISOString().slice(0, 16) : "",
-        resultPublishedAt: competition.resultPublishedAt ? new Date(competition.resultPublishedAt).toISOString().slice(0, 16) : "",
+        visibleAt: toLocalDatetimeString(competition.visibleAt),
+        registrationStartDate: toLocalDatetimeString(competition.registrationStartDate),
+        registrationEndDate: toLocalDatetimeString(competition.registrationEndDate),
+        startDate: toLocalDatetimeString(competition.startDate),
+        endDate: toLocalDatetimeString(competition.endDate),
+        resultPublishedAt: toLocalDatetimeString(competition.resultPublishedAt),
     });
 
     const updateCompetitionMutation = useUpdateCompetition();
@@ -63,12 +64,12 @@ export default function UpdateCompetitionDialog({
             descriptionEN: form.descriptionEN.trim(),
             ruleContent: form.ruleContent.trim(),
             maxParticipants: Number(form.maxParticipants),
-            visibleAt: form.visibleAt ? new Date(form.visibleAt).toISOString() : "",
-            registrationStartDate: form.registrationStartDate ? new Date(form.registrationStartDate).toISOString() : "",
-            registrationEndDate: form.registrationEndDate ? new Date(form.registrationEndDate).toISOString() : "",
-            startDate: form.startDate ? new Date(form.startDate).toISOString() : "",
-            endDate: form.endDate ? new Date(form.endDate).toISOString() : "",
-            resultPublishedAt: form.resultPublishedAt ? new Date(form.resultPublishedAt).toISOString() : undefined,
+            visibleAt: form.visibleAt ? `${form.visibleAt}:00` : "",
+            registrationStartDate: form.registrationStartDate ? `${form.registrationStartDate}:00` : "",
+            registrationEndDate: form.registrationEndDate ? `${form.registrationEndDate}:00` : "",
+            startDate: form.startDate ? `${form.startDate}:00` : "",
+            endDate: form.endDate ? `${form.endDate}:00` : "",
+            resultPublishedAt: form.resultPublishedAt ? `${form.resultPublishedAt}:00` : undefined,
         };
     }, [form]);
 

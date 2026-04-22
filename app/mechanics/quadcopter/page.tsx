@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import PartsExplorerTab from "@/components/mechanics/parts-explorer/PartsExplorerTab";
 import FlightMechanicsTab from "@/components/mechanics/flight-mechanics/FlightMechanicsTab";
 // import PhysicsLabTab from "@/components/mechanics/physics-lab/PhysicsLabTab";
 import PhysicsBasicsTab from "@/components/mechanics/physics-basics/PhysicsBasicsTab";
 import { cn } from "@/lib/utils";
-import { Rocket } from "lucide-react";
+import { Rocket, ArrowLeft } from "lucide-react";
 
 const TABS = [
   { id: "parts", label: "Khám phá linh kiện" },
@@ -18,6 +19,9 @@ const TABS = [
 
 export default function QuadcopterMechanicsLab() {
   const [activeTab, setActiveTab] = useState("parts");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const returnUrl = searchParams.get("returnUrl");
 
   return (
     <div
@@ -33,12 +37,17 @@ export default function QuadcopterMechanicsLab() {
       <header className="relative z-30 shrink-0 flex items-center justify-between px-8 py-9 bg-slate-900/20 backdrop-blur-md border-b border-white/5">
         {/* Title Group */}
         <div className="flex items-center gap-4">
-          {/* <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/10 ring-1 ring-white/10">
-            <Rocket className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-base font-black tracking-tight flex items-center gap-2">
-            Quadcopter <span className="text-white/20">/</span> <span className="text-white">Cơ Chế Máy Bay</span>
-          </h1> */}
+          {returnUrl && (
+            <button
+              onClick={() => router.push(returnUrl)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-xs font-medium text-cyan-400"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {returnUrl.includes("course-management") || returnUrl.includes("system")
+                ? "Quay lại quản trị"
+                : "Quay lại bài học"}
+            </button>
+          )}
         </div>
 
         {/* Tab Switcher */}

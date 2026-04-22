@@ -22,6 +22,7 @@ export const getLessonsResponseSchema = z.object({
 export const importLabLessonRequestSchema = z.object({
 	moduleID: z.string(),
 	orderIndex: z.number().int().positive(),
+	type: lessonTypeSchema,
 })
 
 export const importLabLessonResponseSchema = z.object({

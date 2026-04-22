@@ -22,19 +22,6 @@ type Props = {
 };
 
 export default function ObstacleField({ obstacles }: Props) {
-  // const customModel =
-  //   MARKER_MODEL_CONFIG.obstacle.useCustomModel &&
-  //   MARKER_MODEL_CONFIG.obstacle.modelPath
-  //     ? useGLTF(MARKER_MODEL_CONFIG.obstacle.modelPath)
-  //     : null;
-
-  const path = MARKER_MODEL_CONFIG.obstacle.modelPath ?? '/fallback.glb';
-  const gltf = useGLTF(path);
-
-  const customModel =
-    MARKER_MODEL_CONFIG.obstacle.useCustomModel ? gltf : null;
-
-
   return (
     <group>
       {obstacles.map((ob) => {

@@ -860,7 +860,10 @@
         "lessonTypes": {
           "theory": "Lý thuyết",
           "quiz": "Bài kiểm tra",
-          "lab": "Lab"
+          "lab": "Lab",
+          "physic": "Động cơ và vật lý",
+          "lab_physic": "Lab vật lý",
+          "vr": "VR"
         },
         "fields": {
           "titleVN": "Tiêu đề tiếng Việt",
@@ -874,6 +877,11 @@
           "labEmpty": "Không tìm thấy bài lab phù hợp.",
           "labSelectHint": "Vui lòng chọn một bài lab để tạo bài học.",
           "labSelected": "Đã chọn bài lab.",
+          "simulatorSearch": "Tìm kiếm bài mô phỏng",
+          "simulatorSearchPlaceholder": "Nhập tên hoặc mô tả bài mô phỏng",
+          "simulatorEmpty": "Không tìm thấy bài mô phỏng phù hợp.",
+          "simulatorSelectHint": "Vui lòng chọn một bài mô phỏng để tạo bài học.",
+          "simulatorSelected": "Đã chọn bài mô phỏng.",
           "theoryContentVN": "Nội dung tiếng Việt",
           "theoryContentEN": "Nội dung tiếng Anh",
           "theoryContentVNPlaceholder": "Nhập nội dung lý thuyết tiếng Việt",
@@ -944,7 +952,10 @@
         "subtitle": {
           "theory": "Chi tiết bài lý thuyết",
           "quiz": "Chi tiết bài kiểm tra",
-          "lab": "Chi tiết bài Lab"
+          "lab": "Chi tiết bài Lab",
+          "physic": "Chi tiết bài Động cơ & Vật lý",
+          "lab_physic": "Chi tiết bài Lab Vật lý",
+          "vr": "Chi tiết bài VR"
         },
         "fields": {
           "titleVN": "Tiêu đề (Tiếng Việt)",
@@ -1716,6 +1727,30 @@
         }
       },
       "backButton": "Quay lại"
+    }
+  },
+  "MemberLessonDetail": {
+    "labels": {
+      "THEORY": "Bài lý thuyết",
+      "QUIZ": "Bài kiểm tra",
+      "LAB": "Bài thực hành",
+      "PHYSIC": "Động cơ và vật lý",
+      "LAB_PHYSIC": "Lab vật lý",
+      "VR": "VR"
+    },
+    "descriptions": {
+      "THEORY": "Đọc nội dung bài học để nắm kiến thức nền tảng trước khi sang bài tiếp theo.",
+      "QUIZ": "Kiểm tra mức độ hiểu bài bằng các câu hỏi trắc nghiệm trong bài quiz.",
+      "LAB": "Thực hành các thao tác và tình huống mô phỏng để rèn kỹ năng thực tế.",
+      "PHYSIC": "Tìm hiểu kiến thức về động cơ và các định luật vật lý ứng dụng trong drone.",
+      "LAB_PHYSIC": "Thực hành các thí nghiệm vật lý để hiểu rõ cơ chế hoạt động của drone.",
+      "VR": "Trải nghiệm học tập trong môi trường thực tế ảo sống động."
+    },
+    "minutes": "{value} phút",
+    "unlock": "Mở khóa",
+    "errors": {
+      "unknownEnrollment": "Không xác định được enrollment hiện tại.",
+      "initFailed": "Không thể khởi tạo dữ liệu học bài."
     }
   }
 }
