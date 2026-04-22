@@ -51,17 +51,17 @@ export default function LearningPathSideBar({
 
     // Priority 1: Match from URL/selectedLessonId
     if (selectedLessonId) {
-      for (const module of data.modules) {
-        const lesson = module.lessons.find((l) => l.lessonID === selectedLessonId);
+      for (const moduleData of data.modules) {
+        const lesson = moduleData.lessons.find((l) => l.lessonID === selectedLessonId);
         if (lesson) {
           // Trigger selection if not already selected (this initializes parent state if from URL)
           onSelectLesson(lesson);
 
           // Ensure module is expanded
           setExpandedModules((prev) => {
-            if (prev.has(module.moduleID)) return prev;
+            if (prev.has(moduleData.moduleID)) return prev;
             const next = new Set(prev);
-            next.add(module.moduleID);
+            next.add(moduleData.moduleID);
             return next;
           });
           return;
@@ -71,8 +71,8 @@ export default function LearningPathSideBar({
 
     // Priority 2: Auto-select first unlocked lesson IF no selection is active
     if (!selectedLessonId) {
-      for (const module of data.modules) {
-        const firstUnlocked = module.lessons.find((lesson) => !lesson.isLocked);
+      for (const moduleData of data.modules) {
+        const firstUnlocked = moduleData.lessons.find((lesson) => !lesson.isLocked);
         if (firstUnlocked) {
           onSelectLesson(firstUnlocked);
           return;
@@ -86,8 +86,8 @@ export default function LearningPathSideBar({
 
     let completed = 0;
     let total = 0;
-    data.modules.forEach((module) => {
-      module.lessons.forEach((lesson) => {
+    data.modules.forEach((moduleData) => {
+      moduleData.lessons.forEach((lesson) => {
         total += 1;
         if (lesson.isCompleted) completed += 1;
       });
