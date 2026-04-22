@@ -21,10 +21,19 @@ export default function GoalMarker({ goal }: GoalProps) {
   const { position, shape, radius, size, coords, rotation } = goal;
   const baseY = Math.max(position.y, 0);
 
-  const customModel = MARKER_MODEL_CONFIG.goal.useCustomModel &&
-    MARKER_MODEL_CONFIG.goal.modelPath
-    ? useGLTF(MARKER_MODEL_CONFIG.goal.modelPath)
-    : null;
+  // const customModel = MARKER_MODEL_CONFIG.goal.useCustomModel &&
+  //   MARKER_MODEL_CONFIG.goal.modelPath
+  //   ? useGLTF(MARKER_MODEL_CONFIG.goal.modelPath)
+  //   : null;
+
+  const path = MARKER_MODEL_CONFIG.goal.modelPath || '/dummy.glb';
+  const gltf = useGLTF(path);
+
+  const customModel =
+    MARKER_MODEL_CONFIG.goal.useCustomModel &&
+      MARKER_MODEL_CONFIG.goal.modelPath
+      ? gltf
+      : null;
 
 
 
