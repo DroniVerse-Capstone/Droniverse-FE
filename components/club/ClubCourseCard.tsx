@@ -16,14 +16,13 @@ type ClubCourseCardProps = {
 
 const formatVnd = (value: number) => `${value.toLocaleString("vi-VN")} VND`;
 
-export default function ClubCourseCard({ course, onClick }: ClubCourseCardProps) {
+export default function ClubCourseCard({
+  course,
+  onClick,
+}: ClubCourseCardProps) {
   const t = useTranslations("ClubCourseCard");
-  const roleName = useAuthStore((state) => state.user?.roleName);
+  // const roleName = useAuthStore((state) => state.user?.roleName);
   const locale = useLocale();
-
-  const shouldShowSponsoredLabel =
-    roleName === "CLUB_MEMBER" &&
-    course.clubCourseOwned?.profitType === "NONPROFIT";
 
   return (
     <article
@@ -61,20 +60,8 @@ export default function ClubCourseCard({ course, onClick }: ClubCourseCardProps)
         </h3>
 
         <div className="flex items-end justify-between gap-3">
-          {shouldShowSponsoredLabel ? (
-            <p className="text-lg font-bold leading-none text-primary">
-              {t("sponsored")}
-            </p>
-          ) : (
-            <p className="text-lg font-bold leading-none text-primary">
-              {formatVnd(course.price)}
-            </p>
-          )}
-
-          <p className="text-base font-semibold text-greyscale-100 text-right">
-            {course.clubCourseOwned
-              ? `${course.clubCourseOwned.remainingCode} ${t("remaining")}`
-              : t("notOwned")}
+          <p className="text-lg font-bold leading-none text-primary">
+            {formatVnd(course.price)}
           </p>
         </div>
 
@@ -85,8 +72,10 @@ export default function ClubCourseCard({ course, onClick }: ClubCourseCardProps)
           </div>
 
           <div className="flex items-center gap-2">
-            <IoMdPeople size={20} className="text-primary"/>
-            <span className="font-medium">{course.numberOfParticipants} {t("learners")}</span>
+            <IoMdPeople size={20} className="text-primary" />
+            <span className="font-medium">
+              {course.numberOfParticipants} {t("learners")}
+            </span>
           </div>
         </div>
       </div>

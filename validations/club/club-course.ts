@@ -2,6 +2,19 @@ import { z } from "zod"
 
 export const clubCourseLevelSchema = z.enum(["EASY", "MEDIUM", "HARD"])
 
+export const clubCourseLevelObjectSchema = z.object({
+	levelID: z.string().uuid(),
+	levelNumber: z.number().int().nonnegative(),
+	name: z.string(),
+})
+
+export const clubCourseDroneSchema = z.object({
+	droneID: z.string().uuid(),
+	name: z.string(),
+	imgURL: z.string(),
+})
+
+
 export const participationSortSchema = z.enum([
 	"MostPopular",
 	"LeastPopular",
@@ -45,7 +58,8 @@ export const clubCourseOverviewSchema = z.object({
 	contextVN: z.string(),
 	contextEN: z.string(),
 	imageUrl: z.string().nullable(),
-	level: clubCourseLevelSchema,
+	level: clubCourseLevelObjectSchema,
+	drone: clubCourseDroneSchema.nullable(),
 	estimatedDuration: z.number().int().nonnegative(),
 	averageRating: z.number().nonnegative(),
 	totalFeedback: z.number().int().nonnegative(),
@@ -67,7 +81,8 @@ export const clubCourseSchema = z.object({
 	courseVersionId: z.string().uuid(),
 	titleVN: z.string(),
 	titleEN: z.string(),
-	level: clubCourseLevelSchema,
+	level: clubCourseLevelObjectSchema,
+	drone: clubCourseDroneSchema.nullable(),
 	numberOfParticipants: z.number().int().nonnegative(),
 	rating: z.number().nonnegative(),
 	imageUrl: z.string().nullable(),
