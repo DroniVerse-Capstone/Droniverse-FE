@@ -64,9 +64,9 @@ export default function ManagerCourse() {
   const [currentPage, setCurrentPage] = React.useState(1);
 
   const { data, isLoading, isError, error, isFetching } = useGetClubCourses(clubId, {
-    level: selectedLevel,
+    // level: selectedLevel,
     participationSort: selectedSort,
-    courseOwner: selectedOwner,
+    // courseOwner: selectedOwner,
     courseName: searchKeyword,
     currentPage,
     pageSize: 12,
@@ -149,14 +149,6 @@ export default function ManagerCourse() {
               allLabel={t("level.all")}
               onChange={updateSort}
             />
-
-            <InlineFilterRow
-              label={t("owner.label")}
-              selectedValue={selectedOwner}
-              options={ownerOptions}
-              allLabel={t("level.all")}
-              onChange={updateOwner}
-            />
           </div>
 
           <div className="flex w-full gap-2 xl:max-w-md">
@@ -217,10 +209,10 @@ export default function ManagerCourse() {
                 <ClubCourseCard
                   key={course.courseId}
                   course={course}
-                  onClick={() => {
-                    if (!clubSlug) return;
-                    router.push(`/manager/${clubSlug}/${course.courseId}`);
-                  }}
+                  // onClick={() => {
+                  //   if (!clubSlug) return;
+                  //   router.push(`/manager/${clubSlug}/${course.courseId}`);
+                  // }}
                 />
               ))}
             </div>

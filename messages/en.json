@@ -1409,7 +1409,8 @@
       "all": "All",
       "easy": "Beginner",
       "medium": "Intermediate",
-      "hard": "Advanced"
+      "hard": "Advanced",
+      "master": "Master"
     },
     "sort": {
       "label": "Number of learners:",

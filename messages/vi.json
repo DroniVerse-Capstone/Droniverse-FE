@@ -1405,7 +1405,8 @@
       "all": "Tất cả",
       "easy": "Cơ bản",
       "medium": "Trung bình",
-      "hard": "Nâng cao"
+      "hard": "Nâng cao",
+      "master": "Bậc thầy"
     },
     "sort": {
       "label": "Số người học:",

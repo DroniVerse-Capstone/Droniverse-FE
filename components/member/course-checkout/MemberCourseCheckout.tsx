@@ -12,7 +12,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useGetClubCourseOverview } from "@/hooks/club/useClubCourse";
 import {
   useCreatePaymentOrder,
-  useGetPaymentDetail,
 } from "@/hooks/payment/usePayment";
 import { useLocale } from "@/providers/i18n-provider";
 
@@ -53,37 +52,19 @@ export default function MemberCourseCheckout() {
     courseId,
   );
 
-  const [createdOrderId, setCreatedOrderId] = React.useState<string | undefined>(
-    undefined,
-  );
   const [paymentError, setPaymentError] = React.useState<string | null>(null);
 
   const redirectedRef = React.useRef(false);
 
   const createPaymentOrderMutation = useCreatePaymentOrder();
-  const {
-    data: paymentDetail,
-    isFetching: isFetchingPaymentDetail,
-    isError: isPaymentDetailError,
-    error: paymentDetailError,
-  } = useGetPaymentDetail(createdOrderId);
 
   const title = locale === "vi" ? data?.titleVN ?? "" : data?.titleEN ?? "";
   const hasProduct = !!data?.miniProduct;
   const unitPrice = data?.miniProduct?.price ?? 0;
   const currency = data?.miniProduct?.currency ?? "VND";
   const quantity = 1;
-  const clubMaintenanceFee = unitPrice * 0.1;
-  const total = unitPrice + clubMaintenanceFee;
-  const isProcessingPayment =
-    createPaymentOrderMutation.isPending || isFetchingPaymentDetail;
-
-  React.useEffect(() => {
-    if (!paymentDetail?.paymentUrl || redirectedRef.current) return;
-
-    redirectedRef.current = true;
-    window.location.href = paymentDetail.paymentUrl;
-  }, [paymentDetail?.paymentUrl]);
+  const total = unitPrice;
+  const isProcessingPayment = createPaymentOrderMutation.isPending;
 
   const handleCheckout = React.useCallback(async () => {
     if (!hasProduct || !data?.miniProduct || !clubId || isProcessingPayment) return;
@@ -105,7 +86,17 @@ export default function MemberCourseCheckout() {
         },
       });
 
-      setCreatedOrderId(createdOrder.data.orderID);
+      const paymentUrl = createdOrder.data.payment?.paymentUrl;
+
+      if (!paymentUrl) {
+        setPaymentError("Không lấy được đường dẫn thanh toán.");
+        return;
+      }
+
+      if (!redirectedRef.current) {
+        redirectedRef.current = true;
+        window.location.href = paymentUrl;
+      }
     } catch (checkoutError) {
       const message =
         (
@@ -241,12 +232,6 @@ export default function MemberCourseCheckout() {
                     <span>Số lượng</span>
                     <span className="font-semibold text-greyscale-0">1</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span>Phí duy trì CLB (10%)</span>
-                    <span className="font-semibold text-greyscale-0">
-                      {formatPrice(clubMaintenanceFee, currency)}
-                    </span>
-                  </div>
                   <div className="my-1 h-px bg-greyscale-700" />
                   <div className="flex items-center justify-between text-base">
                     <span className="font-semibold text-greyscale-0">
@@ -259,14 +244,6 @@ export default function MemberCourseCheckout() {
                 </div>
               </div>
             )}
-
-            {isPaymentDetailError ? (
-              <p className="mt-3 text-sm text-primary">
-                {paymentDetailError?.response?.data?.message ||
-                  paymentDetailError?.message ||
-                  "Không lấy được thông tin thanh toán."}
-              </p>
-            ) : null}
 
             {paymentError ? (
               <p className="mt-3 text-sm text-primary">{paymentError}</p>

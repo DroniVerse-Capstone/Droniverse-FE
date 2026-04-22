@@ -56,7 +56,7 @@ export const useGetClubCourses = (
 
 			const parsedOptions = getClubCoursesQuerySchema.parse(options ?? {})
 
-			const response = await apiClient.get(`/community/clubs/${clubId}/courses`, {
+			const response = await apiClient.get(`/academy/courses/club/${clubId}`, {
 				params: {
 					...(parsedOptions.level && { Level: parsedOptions.level }),
 					...(parsedOptions.participationSort && {
