@@ -45,10 +45,15 @@ export default function GroundPlane({
     [-halfW, BORDER_CONFIG.height, -halfH],
   ];
 
-  const customTerrain =
-    TERRAIN_MODEL_CONFIG.useCustomTerrain && TERRAIN_MODEL_CONFIG.terrainPath
-      ? useGLTF(TERRAIN_MODEL_CONFIG.terrainPath)
-      : null;
+  // const customTerrain =
+  //   TERRAIN_MODEL_CONFIG.useCustomTerrain && TERRAIN_MODEL_CONFIG.terrainPath
+  //     ? useGLTF(TERRAIN_MODEL_CONFIG.terrainPath)
+  //     : null;
+
+  const terrainPath = TERRAIN_MODEL_CONFIG.terrainPath ?? '/fallback.glb';
+  const gltf = useGLTF(terrainPath);
+
+  const customTerrain = TERRAIN_MODEL_CONFIG.useCustomTerrain ? gltf : null;
 
   return (
     <group>
