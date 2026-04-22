@@ -444,11 +444,21 @@ export default function PlayLabWorkspace({
     if (status === "finished" && missionEndState === null) {
       // --- CAPTURE METRICS FOR HUD ---
       const { Blockly, workspace } = blocklyContext || {};
-      const blockCount = workspace?.getAllBlocks(false).length || 0;
+
+      const getAccurateBlockCount = (w: any) => {
+        if (!w || !Blockly) return 0;
+        try {
+          const dom = Blockly.Xml.workspaceToDom(w);
+          return dom.getElementsByTagName('block').length;
+        } catch (e) {
+          return w.getAllBlocks(false).filter((b: any) => !b.isShadow()).length;
+        }
+      };
+
+      const blockCount = getAccurateBlockCount(workspace);
       const isBlockCountValid = !labData.rule.maxBlocks || blockCount <= labData.rule.maxBlocks;
 
       if (allCheckpointsCollected && hasEnoughScore && allPatternsCompleted && isBlockCountValid) {
-
         const program = (Blockly && workspace) ? generateProgram(Blockly, workspace) : [];
 
         setStudentFinalMetrics({
@@ -469,7 +479,17 @@ export default function PlayLabWorkspace({
         // Determine failure reason
         let reason = "Bạn đã hoàn thành đường bay ";
         const { workspace } = blocklyContext || {};
-        const blockCount = workspace?.getAllBlocks(false).length || 0;
+        const getAccurateBlockCount = (w: any) => {
+          if (!w || !Blockly) return 0;
+          try {
+            const dom = Blockly.Xml.workspaceToDom(w);
+            return dom.getElementsByTagName('block').length;
+          } catch (e) {
+            return w.getAllBlocks(false).filter((b: any) => !b.isShadow()).length;
+          }
+        };
+
+        const blockCount = getAccurateBlockCount(workspace);
         const isBlockCountValid = !labData.rule.maxBlocks || blockCount <= labData.rule.maxBlocks;
 
         if (!allCheckpointsCollected) reason += "nhưng KHÔNG vượt qua tất cả Checkpoint.";
@@ -978,25 +998,72 @@ export default function PlayLabWorkspace({
                 ) : null}
 
                 {/* Block Count Row (Conditional) */}
-                {labData.rule.maxBlocks && labData.rule.maxBlocks > 0 ? (
-                  <div className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
-                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
+                {labData.rule.maxBlocks && labData.rule.maxBlocks > 0 && (
+                  <div className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${(() => {
+                    const { Blockly, workspace } = blocklyContext || {};
+                    let bc = 0;
+                    if (Blockly && workspace) {
+                      const dom = Blockly.Xml.workspaceToDom(workspace);
+                      bc = dom.getElementsByTagName('block').length;
+                    }
+                    return bc <= labData.rule.maxBlocks;
+                  })() ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${(() => {
+                      const { Blockly, workspace } = blocklyContext || {};
+                      let bc = 0;
+                      if (Blockly && workspace) {
+                        const dom = Blockly.Xml.workspaceToDom(workspace);
+                        bc = dom.getElementsByTagName('block').length;
+                      }
+                      return bc <= labData.rule.maxBlocks;
+                    })() ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
 
                     <div className="w-[85px] shrink-0">
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t("missionEnd.blockCount")}</span>
                     </div>
 
                     <div className="flex-1 min-w-0 pr-3">
-                      <span className={`text-[11px] font-mono font-bold block truncate ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'text-white' : 'text-slate-400'}`}>
-                        {blocklyContext?.workspace?.getAllBlocks(false).length || 0} <span className="opacity-50 text-[10px] font-normal">/ {labData.rule.maxBlocks} {t("missionEnd.required")}</span>
+                      <span className={`text-[11px] font-mono font-bold block truncate ${(() => {
+                        const { Blockly, workspace } = blocklyContext || {};
+                        let bc = 0;
+                        if (Blockly && workspace) {
+                          const dom = Blockly.Xml.workspaceToDom(workspace);
+                          bc = dom.getElementsByTagName('block').length;
+                        }
+                        return bc <= labData.rule.maxBlocks;
+                      })() ? 'text-white' : 'text-slate-400'}`}>
+                        {(() => {
+                          const { Blockly, workspace } = blocklyContext || {};
+                          if (Blockly && workspace) {
+                            const dom = Blockly.Xml.workspaceToDom(workspace);
+                            return dom.getElementsByTagName('block').length;
+                          }
+                          return 0;
+                        })()} <span className="opacity-50 text-[10px] font-normal">/ {labData.rule.maxBlocks} {t("missionEnd.required")}</span>
                       </span>
                     </div>
 
-                    <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                      {((blocklyContext?.workspace?.getAllBlocks(false).length || 0) <= labData.rule.maxBlocks) ? t("missionEnd.pass") : t("missionEnd.fail")}
+                    <div className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-black tracking-widest border ${(() => {
+                      const { Blockly, workspace } = blocklyContext || {};
+                      let bc = 0;
+                      if (Blockly && workspace) {
+                        const dom = Blockly.Xml.workspaceToDom(workspace);
+                        bc = dom.getElementsByTagName('block').length;
+                      }
+                      return bc <= labData.rule.maxBlocks;
+                    })() ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                      {(() => {
+                        const { Blockly, workspace } = blocklyContext || {};
+                        let bc = 0;
+                        if (Blockly && workspace) {
+                          const dom = Blockly.Xml.workspaceToDom(workspace);
+                          bc = dom.getElementsByTagName('block').length;
+                        }
+                        return bc <= labData.rule.maxBlocks;
+                      })() ? t("missionEnd.pass") : t("missionEnd.fail")}
                     </div>
                   </div>
-                ) : null}
+                )}
                 {patternResults.map((pr, pIdx) => (
                   <div key={pr.id} className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${pr.report.success ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${pr.report.success ? 'bg-emerald-500' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
