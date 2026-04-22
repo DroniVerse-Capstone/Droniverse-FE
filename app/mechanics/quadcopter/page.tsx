@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PartsExplorerTab from "@/components/mechanics/parts-explorer/PartsExplorerTab";
 import FlightMechanicsTab from "@/components/mechanics/flight-mechanics/FlightMechanicsTab";
-import PhysicsLabTab from "@/components/mechanics/physics-lab/PhysicsLabTab";
+// import PhysicsLabTab from "@/components/mechanics/physics-lab/PhysicsLabTab";
 import PhysicsBasicsTab from "@/components/mechanics/physics-basics/PhysicsBasicsTab";
 import { cn } from "@/lib/utils";
 import { Rocket } from "lucide-react";
@@ -13,7 +13,7 @@ const TABS = [
   { id: "parts", label: "Khám phá linh kiện" },
   { id: "physics-basics", label: "Vật lý cơ bản" },
   { id: "mechanics", label: "Cơ chế điều khiển" },
-  { id: "physlab", label: "Physics Lab" },
+  // { id: "physlab", label: "Physics Lab" },
 ];
 
 export default function QuadcopterMechanicsLab() {
@@ -96,29 +96,31 @@ export default function QuadcopterMechanicsLab() {
             >
               <FlightMechanicsTab />
             </motion.div>
-          ) : activeTab === "physlab" ? (
-            <motion.div
-              key="physlab"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              <PhysicsLabTab />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="physics-basics"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              <PhysicsBasicsTab />
-            </motion.div>
-          )}
+          )
+            // : activeTab === "physlab" ? (
+            //   <motion.div
+            //     key="physlab"
+            //     initial={{ opacity: 0, y: 10 }}
+            //     animate={{ opacity: 1, y: 0 }}
+            //     exit={{ opacity: 0, y: -10 }}
+            //     transition={{ duration: 0.2 }}
+            //     className="h-full"
+            //   >
+            //     <PhysicsLabTab />
+            //   </motion.div>
+            // )
+            : (
+              <motion.div
+                key="physics-basics"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                <PhysicsBasicsTab />
+              </motion.div>
+            )}
         </AnimatePresence>
       </main>
     </div>
