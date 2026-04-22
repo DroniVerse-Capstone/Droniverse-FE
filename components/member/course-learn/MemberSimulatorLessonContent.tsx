@@ -50,7 +50,7 @@ export default function MemberSimulatorLessonContent({
   const handleOpenSimulator = () => {
     // Current URL including search params for the student to return to
     const currentUrl = `${pathname}${lessonId ? `?lessonId=${lessonId}` : ""}`;
-    const route = getSimulatorRoute(simulator.code, simulator.webSimulatorID, currentUrl);
+    const route = getSimulatorRoute(simulator.code, simulator.webSimulatorID, currentUrl, simulator.type);
     router.push(route);
   };
 

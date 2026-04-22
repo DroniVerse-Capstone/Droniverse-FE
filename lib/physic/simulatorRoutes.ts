@@ -12,10 +12,18 @@ export const SIMULATOR_ROUTE_MAP: Record<string, string> = {
  * Gets the localized or absolute route for a simulator based on its code.
  * Falls back to a default simulator lab view if no specific route is found.
  */
-export function getSimulatorRoute(code: string, id: string, returnUrl?: string): string {
+export function getSimulatorRoute(code: string, id: string, returnUrl?: string, type?: string): string {
   const specificRoute = SIMULATOR_ROUTE_MAP[code];
   
-  let targetRoute = specificRoute || `/simulator-lab?id=${id}`;
+  let targetRoute = specificRoute;
+
+  if (!targetRoute) {
+    if (type === "LAB_PHYSIC") {
+      targetRoute = `/challenges/${id}`;
+    } else {
+      targetRoute = `/simulator-lab?id=${id}`;
+    }
+  }
 
   // If a return URL is provided, append it as a query parameter
   if (returnUrl) {

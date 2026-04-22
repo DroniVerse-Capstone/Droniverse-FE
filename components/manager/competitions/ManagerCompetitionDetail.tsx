@@ -21,8 +21,8 @@ import CompetitonStatusBadge from "@/components/competition/CompetitonStatusBadg
 export default function ManagerCompetitionDetail() {
     const router = useRouter();
     const locale = useLocale();
-    const params = useParams<{ clubSlug: string; id: string }>();
-    const competitionId = params?.id;
+    const params = useParams<{ clubSlug: string; competitionId: string }>();
+    const competitionId = params?.competitionId;
     const clubSlug = params?.clubSlug;
 
     const t = useTranslations("ManagerCompetitions.detailPage");

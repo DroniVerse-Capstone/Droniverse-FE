@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetLab } from "@/hooks/lab/useLabs";
-import { useGetWebSimulator } from "@/hooks/simulator/useSimulator";
+import { useGetWebSimulator, useGetVRSimulator } from "@/hooks/simulator/useSimulator";
 import { useGetQuizDetail } from "@/hooks/quiz/useQuiz";
 import { useGetTheoryDetail } from "@/hooks/theory/useTheory";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
@@ -42,13 +42,15 @@ export default function LessonDetailDialog({
     open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId =
     open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
-  const labId = open && ["LAB", "LAB_PHYSIC", "VR"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
-  const simulatorId = open && lesson?.type === "PHYSIC" ? (lesson?.referenceID ?? null) : null;
+  const labId = open && ["LAB"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
+  const simulatorId = open && ["PHYSIC", "LAB_PHYSIC"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
+  const vrSimulatorId = open && lesson?.type === "VR" ? (lesson?.referenceID ?? null) : null;
 
   const theoryDetailQuery = useGetTheoryDetail(theoryId);
   const quizDetailQuery = useGetQuizDetail(quizId);
   const labDetailQuery = useGetLab(labId);
   const simulatorDetailQuery = useGetWebSimulator(simulatorId);
+  const vrSimulatorDetailQuery = useGetVRSimulator(vrSimulatorId);
 
   const levelLabelMap = {
     EASY: { vi: "Cơ bản", en: "Easy" },
@@ -72,9 +74,11 @@ export default function LessonDetailDialog({
               ? t("subtitle.theory")
               : lesson?.type === "QUIZ"
                 ? t("subtitle.quiz")
-                : lesson?.type === "PHYSIC"
-                  ? "Chi tiết bài mô phỏng vật lý"
-                  : t("subtitle.lab")}
+                : lesson?.type === "PHYSIC" || lesson?.type === "LAB_PHYSIC"
+                  ? "Chi tiết bài mô phỏng"
+                  : lesson?.type === "VR"
+                    ? "Chi tiết bài thực tế ảo (VR)"
+                    : t("subtitle.lab")}
           </DialogDescription>
         </DialogHeader>
 
@@ -231,7 +235,7 @@ export default function LessonDetailDialog({
             </div>
           ) : null}
 
-          {["LAB", "PHYSICS_LAB", "VR"].includes(lesson?.type || "") ? (
+          {["LAB"].includes(lesson?.type || "") ? (
             <div className="space-y-4">
               {labDetailQuery.isLoading ? (
                 <div className="flex items-center justify-center py-3">
@@ -319,7 +323,7 @@ export default function LessonDetailDialog({
             </div>
           ) : null}
 
-          {lesson?.type === "PHYSIC" ? (
+          {["PHYSIC", "LAB_PHYSIC"].includes(lesson?.type || "") ? (
             <div className="space-y-4">
               {simulatorDetailQuery.isLoading ? (
                 <div className="flex items-center justify-center py-3">
@@ -368,7 +372,8 @@ export default function LessonDetailDialog({
                           const route = getSimulatorRoute(
                             simulatorDetailQuery.data?.code || "",
                             simulatorDetailQuery.data?.webSimulatorID || "",
-                            pathname
+                            pathname,
+                            simulatorDetailQuery.data?.type
                           );
                           router.push(route);
                         }}
@@ -394,6 +399,52 @@ export default function LessonDetailDialog({
                     <p className="whitespace-pre-line text-base text-greyscale-25">
                       {simulatorDetailQuery.data.objectivesEN}
                     </p>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {lesson?.type === "VR" ? (
+            <div className="space-y-4">
+              {vrSimulatorDetailQuery.isLoading ? (
+                <div className="flex items-center justify-center py-3">
+                  <Spinner className="h-5 w-5" />
+                </div>
+              ) : null}
+
+              {vrSimulatorDetailQuery.isError ? (
+                <p className="text-sm text-warning">
+                  Không thể tải chi tiết bài mô phỏng VR.
+                </p>
+              ) : null}
+
+              {vrSimulatorDetailQuery.data ? (
+                <>
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="text-sm tracking-wide text-greyscale-200">
+                      {t("fields.titleVN")}
+                    </p>
+                    <p className="text-base font-medium text-greyscale-25">
+                      {vrSimulatorDetailQuery.data.titleVN}
+                    </p>
+
+                    <p className="mt-3 text-sm tracking-wide text-greyscale-200">
+                      {t("fields.titleEN")}
+                    </p>
+                    <p className="text-base font-medium text-greyscale-25">
+                      {vrSimulatorDetailQuery.data.titleEN || "-"}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded border border-secondary/40 bg-secondary/15 px-2 py-1 text-xs font-medium text-secondary">
+                        Loại: VR
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded border border-tertiary/40 bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
+                        <MdOutlineTimer size={14} />
+                        {vrSimulatorDetailQuery.data.estimatedTime || 0} {locale === "en" ? "minutes" : "phút"}
+                      </span>
+                    </div>
                   </div>
                 </>
               ) : null}

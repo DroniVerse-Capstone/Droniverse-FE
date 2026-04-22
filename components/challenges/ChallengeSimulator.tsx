@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -11,9 +11,10 @@ import {
 import { FlightState } from "@/components/challenges/physics";
 import { processKeyboardInput, runFlightController, updatePhysics, INITIAL_STATE } from "@/components/challenges/physics";
 import { FlightDroneViewer } from "@/components/challenges/FlightDroneViewer";
-import { LevelRegistry, mockLabs, LabData } from "@/components/challenges/levels/registry";
+import { LevelRegistry, mockLabs, LabData, LevelEnvironments } from "@/components/challenges/levels/registry";
 import { LevelFactory, LevelResult } from "@/components/challenges/levels/types";
 import { useDroneSound } from "@/components/mechanics/flight-mechanics/useDroneSound";
+import { useGetWebSimulator } from "@/hooks/simulator/useSimulator";
 
 type CameraMode = "FOLLOW" | "ORBIT" | "TOP" | "FPV";
 type GamePhase = "briefing" | "countdown" | "playing" | "complete";
@@ -399,10 +400,25 @@ function FlyingHUD({ altitude, stability, elapsedTime, isRunning, timeRemaining 
 
 interface ChallengeSimulatorProps {
   labId: string;
+  returnUrl?: string | null;
+  isAdmin?: boolean;
 }
 
-export default function ChallengeSimulator({ labId }: ChallengeSimulatorProps) {
-  const lab: LabData | undefined = mockLabs[labId];
+export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: ChallengeSimulatorProps) {
+  const { data: webSimulator, isLoading, isError } = useGetWebSimulator(labId);
+
+  const lab: LabData | undefined = useMemo(() => {
+    if (!webSimulator) return undefined;
+
+    return {
+      id: webSimulator.webSimulatorID,
+      title: webSimulator.titleVN,
+      levelCode: webSimulator.code,
+      droneType: "quadcopter_basic",
+      timeLimit: (webSimulator.estimatedTime || 2) * 60,
+      objective: webSimulator.objectivesVN || "",
+    };
+  }, [webSimulator]);
 
   const [flightState, setFlightState] = useState<FlightState>(INITIAL_STATE);
   const flightStateRef = useRef<FlightState>(INITIAL_STATE);
@@ -444,6 +460,7 @@ export default function ChallengeSimulator({ labId }: ChallengeSimulatorProps) {
       window.removeEventListener("keydown", initAudio);
     };
   }, []);
+
 
   const handleLevelUpdate = useCallback((result: LevelResult) => {
     if (result.status !== "PLAYING") {
@@ -613,13 +630,19 @@ export default function ChallengeSimulator({ labId }: ChallengeSimulatorProps) {
     setGamePhase("briefing");
   };
 
-  if (!lab) {
+  if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-slate-900">
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Không tìm thấy thử thách</h2>
-          <p className="text-slate-400">ID: {labId}</p>
-        </div>
+      <div className="flex items-center justify-center h-full bg-slate-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      </div>
+    );
+  }
+
+  if (isError || !lab) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center bg-slate-950 text-white">
+        <h2 className="text-xl font-bold text-red-400 mb-2">Không tìm thấy thử thách</h2>
+        <p className="text-slate-400">ID: {labId}</p>
       </div>
     );
   }
@@ -751,7 +774,7 @@ export default function ChallengeSimulator({ labId }: ChallengeSimulatorProps) {
             cameraMode={cameraMode}
             levelFactory={levelFactory}
             onLevelUpdate={handleLevelUpdate}
-            environmentType={lab.environmentType || "INDUSTRIAL"}
+            environmentType={lab ? (LevelEnvironments[lab.levelCode] || "DAY") : "DAY"}
             resetTrigger={resetTrigger}
           />
 
@@ -893,11 +916,11 @@ export default function ChallengeSimulator({ labId }: ChallengeSimulatorProps) {
 
                   {levelResult.status === "WIN" && (
                     <button
-                      onClick={() => window.location.href = "/mechanics/quadcopter"}
+                      onClick={() => window.location.href = returnUrl || "/"}
                       className="flex-1 px-4 py-3 font-bold text-sm text-white bg-cyan-500 hover:bg-cyan-400 transition-all rounded-lg"
                     >
                       <span className="flex items-center justify-center gap-2">
-                        Nộp bài
+                        {isAdmin ? "Quay về" : "Nộp bài"}
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>

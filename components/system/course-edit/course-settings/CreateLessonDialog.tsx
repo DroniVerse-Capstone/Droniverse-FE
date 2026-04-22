@@ -28,7 +28,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useImportLabLesson } from "@/hooks/lesson/useLesson";
 import { useGetLabs } from "@/hooks/lab/useLabs";
-import { useGetWebSimulators, useImportSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import { useGetWebSimulators, useImportSimulatorLesson, useGetVRSimulators, useImportVRSimulatorLesson } from "@/hooks/simulator/useSimulator";
 import SelectSimulatorCard from "@/components/system/course-edit/course-settings/SelectSimulatorCard";
 import { useCreateQuiz } from "@/hooks/quiz/useQuiz";
 import { useCreateTheory } from "@/hooks/theory/useTheory";
@@ -128,6 +128,22 @@ export default function CreateLessonDialog({
     },
   });
 
+  const importVRSimulatorLessonMutation = useImportVRSimulatorLesson({
+    onSuccess: (data) => {
+      toast.success(data.message || t("toast.importLabSuccess"));
+      setOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        t("error.importLabFailed"),
+      );
+    },
+  });
+
   const labPageSize = 6;
 
   const { data: activeLabsResponse, isLoading: isLabsLoading } = useGetLabs({
@@ -146,21 +162,26 @@ export default function CreateLessonDialog({
   const activeLabs = activeLabsData?.data || [];
   const labTotalPages = activeLabsData?.totalPages || 1;
 
-  const { data: webSimulators = [], isLoading: isSimulatorsLoading } = useGetWebSimulators({
-    type: ["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) ? lessonType : undefined,
+  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
+    type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
   });
+  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators();
+
+  const isSimulatorsLoading = lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;
 
   const filteredSimulators = React.useMemo(() => {
-    if (!labSearchTerm) return webSimulators;
+    const simsToFilter = lessonType === "VR" ? vrSimulators : webSimulators;
+    
+    if (!labSearchTerm) return simsToFilter;
     const term = labSearchTerm.toLowerCase();
-    return webSimulators.filter(
+    return simsToFilter.filter(
       (s) =>
-        s.titleVN.toLowerCase().includes(term) ||
-        s.titleEN.toLowerCase().includes(term) ||
-        s.objectivesVN.toLowerCase().includes(term) ||
-        s.objectivesEN.toLowerCase().includes(term),
+        s.titleVN?.toLowerCase().includes(term) ||
+        s.titleEN?.toLowerCase().includes(term) ||
+        s.objectivesVN?.toLowerCase().includes(term) ||
+        s.objectivesEN?.toLowerCase().includes(term),
     );
-  }, [webSimulators, labSearchTerm]);
+  }, [webSimulators, vrSimulators, lessonType, labSearchTerm]);
 
   const lessonTypeOptions: CommonDropdownOption[] = [
     { value: "THEORY", label: t("lessonTypes.theory") },
@@ -175,7 +196,8 @@ export default function CreateLessonDialog({
     createTheoryMutation.isPending ||
     createQuizMutation.isPending ||
     importLabLessonMutation.isPending ||
-    importSimulatorLessonMutation.isPending;
+    importSimulatorLessonMutation.isPending ||
+    importVRSimulatorLessonMutation.isPending;
 
   React.useEffect(() => {
     setLabPageIndex(1);
@@ -313,7 +335,18 @@ export default function CreateLessonDialog({
       return;
     }
 
-    if (["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType)) {
+    if (lessonType === "VR") {
+      await importVRSimulatorLessonMutation.mutateAsync({
+        simulatorId: selectedLabId,
+        payload: {
+          moduleID: moduleId,
+          orderIndex: nextOrderIndex,
+        },
+      });
+      return;
+    }
+
+    if (["PHYSIC", "LAB_PHYSIC"].includes(lessonType)) {
       await importSimulatorLessonMutation.mutateAsync({
         simulatorId: selectedLabId,
         payload: {
@@ -536,15 +569,18 @@ export default function CreateLessonDialog({
 
               {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isSimulatorsLoading && filteredSimulators.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
-                  {filteredSimulators.map((simulator) => (
-                    <SelectSimulatorCard
-                      key={simulator.webSimulatorID}
-                      simulator={simulator}
-                      isSelected={selectedLabId === simulator.webSimulatorID}
-                      onSelect={setSelectedLabId}
-                      disabled={isSubmitting}
-                    />
-                  ))}
+                  {filteredSimulators.map((simulator) => {
+                    const simId = simulator.webSimulatorID || simulator.vrSimulatorID;
+                    return (
+                      <SelectSimulatorCard
+                        key={simId}
+                        simulator={simulator}
+                        isSelected={selectedLabId === simId}
+                        onSelect={setSelectedLabId}
+                        disabled={isSubmitting}
+                      />
+                    );
+                  })}
                 </div>
               ) : null}
 
