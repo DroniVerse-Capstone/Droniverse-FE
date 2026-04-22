@@ -104,32 +104,29 @@ function Rotor({ position, isFlying, colorConfig }: RotorProps) {
   );
 }
 
+function CustomDroneModel({ url, state }: { url: string; state: Props["state"] }) {
+  const { scene } = useGLTF(url);
+  return (
+    <group
+      position={state.position}
+      rotation={[0, state.headingRad, 0]}
+      scale={DRONE_MODEL_CONFIG.scale}
+    >
+      <primitive
+        object={scene}
+        position={DRONE_MODEL_CONFIG.position}
+        rotation={DRONE_MODEL_CONFIG.rotation}
+      />
+    </group>
+  );
+}
+
 function DroneBody({ state, colorConfig }: Props) {
-  // const customModel =
-  //   DRONE_MODEL_CONFIG.useCustomModel && DRONE_MODEL_CONFIG.modelPath
-  //     ? useGLTF(DRONE_MODEL_CONFIG.modelPath)
-  //     : null;
+  const useCustomModel = DRONE_MODEL_CONFIG.useCustomModel && DRONE_MODEL_CONFIG.modelPath;
 
-
-  const modelPath = DRONE_MODEL_CONFIG.modelPath ?? '/fallback.glb';
-  const gltf = useGLTF(modelPath);
-
-  const customModel = DRONE_MODEL_CONFIG.useCustomModel ? gltf : null;
-
-  if (customModel) {
-    console.log("cc", customModel);
+  if (useCustomModel) {
     return (
-      <group
-        position={state.position}
-        rotation={[0, state.headingRad, 0]}
-        scale={DRONE_MODEL_CONFIG.scale}
-      >
-        <primitive
-          object={customModel.scene}
-          position={DRONE_MODEL_CONFIG.position}
-          rotation={DRONE_MODEL_CONFIG.rotation}
-        />
-      </group>
+      <CustomDroneModel url={DRONE_MODEL_CONFIG.modelPath} state={state} />
     );
   }
 

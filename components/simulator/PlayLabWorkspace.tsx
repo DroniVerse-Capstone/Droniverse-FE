@@ -998,7 +998,7 @@ export default function PlayLabWorkspace({
                 ) : null}
 
                 {/* Block Count Row (Conditional) */}
-                {labData.rule.maxBlocks && labData.rule.maxBlocks > 0 && (
+                {(labData.rule.maxBlocks ?? 0) > 0 && (
                   <div className={`relative overflow-hidden flex items-center p-2.5 pl-4 rounded border bg-[#0d0f14]/80 backdrop-blur-md transition-all ${(() => {
                     const { Blockly, workspace } = blocklyContext || {};
                     let bc = 0;
@@ -1006,7 +1006,7 @@ export default function PlayLabWorkspace({
                       const dom = Blockly.Xml.workspaceToDom(workspace);
                       bc = dom.getElementsByTagName('block').length;
                     }
-                    return bc <= labData.rule.maxBlocks;
+                    return bc <= (labData.rule.maxBlocks ?? Infinity);
                   })() ? 'border-emerald-500/20' : 'border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${(() => {
                       const { Blockly, workspace } = blocklyContext || {};
@@ -1015,7 +1015,7 @@ export default function PlayLabWorkspace({
                         const dom = Blockly.Xml.workspaceToDom(workspace);
                         bc = dom.getElementsByTagName('block').length;
                       }
-                      return bc <= labData.rule.maxBlocks;
+                      return bc <= (labData.rule.maxBlocks ?? Infinity);
                     })() ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`} />
 
                     <div className="w-[85px] shrink-0">
@@ -1030,7 +1030,7 @@ export default function PlayLabWorkspace({
                           const dom = Blockly.Xml.workspaceToDom(workspace);
                           bc = dom.getElementsByTagName('block').length;
                         }
-                        return bc <= labData.rule.maxBlocks;
+                        return bc <= (labData.rule.maxBlocks ?? Infinity);
                       })() ? 'text-white' : 'text-slate-400'}`}>
                         {(() => {
                           const { Blockly, workspace } = blocklyContext || {};
@@ -1039,7 +1039,7 @@ export default function PlayLabWorkspace({
                             return dom.getElementsByTagName('block').length;
                           }
                           return 0;
-                        })()} <span className="opacity-50 text-[10px] font-normal">/ {labData.rule.maxBlocks} {t("missionEnd.required")}</span>
+                        })()} <span className="opacity-50 text-[10px] font-normal">/ {labData.rule.maxBlocks ?? 0} {t("missionEnd.required")}</span>
                       </span>
                     </div>
 
@@ -1050,7 +1050,7 @@ export default function PlayLabWorkspace({
                         const dom = Blockly.Xml.workspaceToDom(workspace);
                         bc = dom.getElementsByTagName('block').length;
                       }
-                      return bc <= labData.rule.maxBlocks;
+                      return bc <= (labData.rule.maxBlocks ?? Infinity);
                     })() ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                       {(() => {
                         const { Blockly, workspace } = blocklyContext || {};
@@ -1059,7 +1059,7 @@ export default function PlayLabWorkspace({
                           const dom = Blockly.Xml.workspaceToDom(workspace);
                           bc = dom.getElementsByTagName('block').length;
                         }
-                        return bc <= labData.rule.maxBlocks;
+                        return bc <= (labData.rule.maxBlocks ?? Infinity);
                       })() ? t("missionEnd.pass") : t("missionEnd.fail")}
                     </div>
                   </div>

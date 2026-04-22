@@ -9,6 +9,12 @@ export const LevelRegistry: Record<string, LevelFactory> = {
   ring_run: LevelRingRun,
 };
 
+export const LevelEnvironments: Record<string, "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL"> = {
+  basic_flight: "DAY",
+  obstacle_run: "INDUSTRIAL",
+  ring_run: "SPACE",
+};
+
 export interface LabData {
   id: string;
   title: string;

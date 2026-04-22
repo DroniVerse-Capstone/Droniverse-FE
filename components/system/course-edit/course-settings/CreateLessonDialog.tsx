@@ -28,6 +28,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useImportLabLesson } from "@/hooks/lesson/useLesson";
 import { useGetLabs } from "@/hooks/lab/useLabs";
+import { useGetWebSimulators, useImportSimulatorLesson, useGetVRSimulators, useImportVRSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import SelectSimulatorCard from "@/components/system/course-edit/course-settings/SelectSimulatorCard";
 import { useCreateQuiz } from "@/hooks/quiz/useQuiz";
 import { useCreateTheory } from "@/hooks/theory/useTheory";
 import { ApiError } from "@/types/api/common";
@@ -72,8 +74,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-          axiosError.message ||
-          t("error.createTheoryFailed"),
+        axiosError.message ||
+        t("error.createTheoryFailed"),
       );
     },
   });
@@ -88,8 +90,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-          axiosError.message ||
-          t("error.createQuizFailed"),
+        axiosError.message ||
+        t("error.createQuizFailed"),
       );
     },
   });
@@ -104,8 +106,40 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-          axiosError.message ||
-          t("error.importLabFailed"),
+        axiosError.message ||
+        t("error.importLabFailed"),
+      );
+    },
+  });
+
+  const importSimulatorLessonMutation = useImportSimulatorLesson({
+    onSuccess: (data) => {
+      toast.success(data.message || t("toast.importLabSuccess"));
+      setOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        t("error.importLabFailed"),
+      );
+    },
+  });
+
+  const importVRSimulatorLessonMutation = useImportVRSimulatorLesson({
+    onSuccess: (data) => {
+      toast.success(data.message || t("toast.importLabSuccess"));
+      setOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        t("error.importLabFailed"),
       );
     },
   });
@@ -128,16 +162,42 @@ export default function CreateLessonDialog({
   const activeLabs = activeLabsData?.data || [];
   const labTotalPages = activeLabsData?.totalPages || 1;
 
+  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
+    type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
+  });
+  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators();
+
+  const isSimulatorsLoading = lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;
+
+  const filteredSimulators = React.useMemo(() => {
+    const simsToFilter = lessonType === "VR" ? vrSimulators : webSimulators;
+    
+    if (!labSearchTerm) return simsToFilter;
+    const term = labSearchTerm.toLowerCase();
+    return simsToFilter.filter(
+      (s) =>
+        s.titleVN?.toLowerCase().includes(term) ||
+        s.titleEN?.toLowerCase().includes(term) ||
+        s.objectivesVN?.toLowerCase().includes(term) ||
+        s.objectivesEN?.toLowerCase().includes(term),
+    );
+  }, [webSimulators, vrSimulators, lessonType, labSearchTerm]);
+
   const lessonTypeOptions: CommonDropdownOption[] = [
     { value: "THEORY", label: t("lessonTypes.theory") },
     { value: "QUIZ", label: t("lessonTypes.quiz") },
     { value: "LAB", label: t("lessonTypes.lab") },
+    { value: "PHYSIC", label: t("lessonTypes.physic") },
+    { value: "LAB_PHYSIC", label: t("lessonTypes.lab_physic") },
+    { value: "VR", label: t("lessonTypes.vr") },
   ];
 
   const isSubmitting =
     createTheoryMutation.isPending ||
     createQuizMutation.isPending ||
-    importLabLessonMutation.isPending;
+    importLabLessonMutation.isPending ||
+    importSimulatorLessonMutation.isPending ||
+    importVRSimulatorLessonMutation.isPending;
 
   React.useEffect(() => {
     setLabPageIndex(1);
@@ -202,6 +262,7 @@ export default function CreateLessonDialog({
     const normalizedTitleVN = titleVN.trim();
     const normalizedTitleEN = titleEN.trim();
     const isTheoryOrQuiz = lessonType === "THEORY" || lessonType === "QUIZ";
+    const isLabBased = ["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType);
 
     if (isTheoryOrQuiz && (!normalizedTitleVN || !normalizedTitleEN)) {
       toast.error(t("error.missingTitle"));
@@ -269,8 +330,30 @@ export default function CreateLessonDialog({
       return;
     }
 
-    if (!selectedLabId) {
+    if (isLabBased && !selectedLabId) {
       toast.error(t("error.missingLab"));
+      return;
+    }
+
+    if (lessonType === "VR") {
+      await importVRSimulatorLessonMutation.mutateAsync({
+        simulatorId: selectedLabId,
+        payload: {
+          moduleID: moduleId,
+          orderIndex: nextOrderIndex,
+        },
+      });
+      return;
+    }
+
+    if (["PHYSIC", "LAB_PHYSIC"].includes(lessonType)) {
+      await importSimulatorLessonMutation.mutateAsync({
+        simulatorId: selectedLabId,
+        payload: {
+          moduleID: moduleId,
+          orderIndex: nextOrderIndex,
+        },
+      });
       return;
     }
 
@@ -279,6 +362,7 @@ export default function CreateLessonDialog({
       payload: {
         moduleID: moduleId,
         orderIndex: nextOrderIndex,
+        type: lessonType,
       },
     });
   };
@@ -309,7 +393,7 @@ export default function CreateLessonDialog({
             disabled={isSubmitting}
           />
 
-          {lessonType !== "LAB" ? (
+          {lessonType === "THEORY" || lessonType === "QUIZ" ? (
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="create-lesson-title-vn">{t("fields.titleVN")}</Label>
@@ -439,37 +523,68 @@ export default function CreateLessonDialog({
             </div>
           ) : null}
 
-          {lessonType === "LAB" ? (
+          {["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) ? (
             <div className="space-y-4 rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
               <div className="space-y-2">
-                <Label htmlFor="lab-search">{t("fields.labSearch")}</Label>
+                <Label htmlFor="lab-search">
+                  {lessonType === "PHYSIC" ? t("fields.simulatorSearch") : t("fields.labSearch")}
+                </Label>
                 <Input
                   type="search"
                   id="lab-search"
                   value={labSearchTerm}
                   onChange={(event) => setLabSearchTerm(event.target.value)}
-                  placeholder={t("fields.labSearchPlaceholder")}
+                  placeholder={
+                    lessonType === "PHYSIC"
+                      ? t("fields.simulatorSearchPlaceholder")
+                      : t("fields.labSearchPlaceholder")
+                  }
                   disabled={isSubmitting}
                 />
               </div>
 
               <p className="text-xs text-greyscale-300">
                 {selectedLabId
-                  ? t("fields.labSelected")
-                  : t("fields.labSelectHint")}
+                  ? lessonType === "PHYSIC"
+                    ? t("fields.simulatorSelected")
+                    : t("fields.labSelected")
+                  : lessonType === "PHYSIC"
+                    ? t("fields.simulatorSelectHint")
+                    : t("fields.labSelectHint")}
               </p>
 
-              {isLabsLoading ? (
+              {isLabsLoading || isSimulatorsLoading ? (
                 <div className="flex min-h-24 items-center justify-center">
                   <Spinner className="h-5 w-5" />
                 </div>
               ) : null}
 
-              {!isLabsLoading && activeLabs.length === 0 ? (
+              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isSimulatorsLoading && filteredSimulators.length === 0 ? (
+                <EmptyState title={t("fields.simulatorEmpty")} />
+              ) : null}
+
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading && activeLabs.length === 0 ? (
                 <EmptyState title={t("fields.labEmpty")} />
               ) : null}
 
-              {!isLabsLoading && activeLabs.length > 0 ? (
+              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isSimulatorsLoading && filteredSimulators.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {filteredSimulators.map((simulator) => {
+                    const simId = simulator.webSimulatorID || simulator.vrSimulatorID;
+                    return (
+                      <SelectSimulatorCard
+                        key={simId}
+                        simulator={simulator}
+                        isSelected={selectedLabId === simId}
+                        onSelect={setSelectedLabId}
+                        disabled={isSubmitting}
+                      />
+                    );
+                  })}
+                </div>
+              ) : null}
+
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading && activeLabs.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   {activeLabs.map((lab) => {
                     return (
@@ -485,7 +600,7 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {!isLabsLoading ? (
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading ? (
                 <AppPagination
                   currentPage={labPageIndex}
                   totalPages={labTotalPages}
