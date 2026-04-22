@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FlightState,
+import { FlightState,
   ControlValues,
   runFlightController,
   updatePhysics,
   INITIAL_STATE,
 } from "./physics";
 import { FlightDroneViewer } from "./FlightDroneViewer";
+import { useDroneSound } from "./useDroneSound";
 import { cn } from "@/lib/utils";
 import { Rocket, Cpu, Activity, Info, Power } from "lucide-react";
 
@@ -25,20 +25,20 @@ const INITIAL_CONTROLS: ControlValues = {
 
 function ControlSlider({ label, keys, value, isCentered = true }: { label: string, keys: string, value: number, isCentered?: boolean }) {
   return (
-    <div className="mb-2 bg-slate-800/30 p-2.5 rounded-md border border-slate-700/50 backdrop-blur-sm">
+    <div className="mb-2 bg-slate-800/30 p-2.5 border border-slate-700">
       <div className="flex justify-between items-center mb-2">
          <div className="flex items-center gap-2">
            <span className="text-[11px] font-bold text-slate-200 tracking-wide">{label}</span>
-           <kbd className="text-[8px] bg-slate-900 border border-slate-700 px-1 py-0.5 rounded text-slate-400 font-mono tracking-wider">{keys}</kbd>
+           <kbd className="text-[8px] bg-slate-900 border border-slate-600 px-1 py-0.5 text-slate-400 font-mono tracking-wider">{keys}</kbd>
          </div>
          <span className="text-[11px] font-mono font-bold text-cyan-400">{value > 0 && isCentered ? "+" : ""}{value.toFixed(0)}%</span>
       </div>
-      <div className="h-2 bg-slate-950 rounded-full border border-slate-800/80 relative overflow-hidden shadow-inner">
+      <div className="h-2 bg-slate-950 border border-slate-800 relative overflow-hidden">
         {isCentered ? (
           <>
             <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-slate-500 z-10" />
             <div 
-              className="absolute h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-75"
+              className="absolute h-full bg-cyan-500 transition-all duration-75"
               style={{
                 width: `${Math.abs(value) / 2}%`,
                 left: value >= 0 ? "50%" : "auto",
@@ -48,7 +48,7 @@ function ControlSlider({ label, keys, value, isCentered = true }: { label: strin
           </>
         ) : (
           <div 
-            className="absolute h-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-75" 
+            className="absolute h-full bg-cyan-500 transition-all duration-75" 
             style={{ width: `${value}%`, left: 0 }} 
           />
         )}
@@ -59,10 +59,9 @@ function ControlSlider({ label, keys, value, isCentered = true }: { label: strin
 
 function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: boolean, label: string }) {
   const intensity = val / 100;
-  const color = isCW ? "rgb(6, 182, 212)" : "rgb(245, 158, 11)"; 
+  const color = isCW ? "rgb(0, 229, 255)" : "rgb(251, 191, 36)"; 
   
   const isHigh = val > 55;
-  const isLow = val < 45;
   
   const radius = 26;
   const circumference = 2 * Math.PI * radius;
@@ -70,15 +69,14 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
 
   return (
     <div className="flex flex-col items-center">
-      <div className={cn("text-[8px] text-center mb-0.5 font-bold tracking-wider transition-colors duration-150", isHigh ? "text-white" : "text-slate-500")}>{label}</div>
+      <div className={cn("text-[8px] text-center mb-0.5 font-bold tracking-wider transition-colors", isHigh ? "text-white" : "text-slate-500")}>{label}</div>
       <div 
-        className="relative w-14 h-14 rounded-full bg-slate-900/90 flex items-center justify-center backdrop-blur-md transition-all duration-150"
+        className="relative w-14 h-14 bg-slate-900 flex items-center justify-center transition-all duration-150"
         style={{
           transform: `scale(${isHigh ? 1.05 : 1})`,
-          boxShadow: isHigh ? `0 0 15px ${color.replace('rgb', 'rgba').replace(')', ', 0.3)')}` : '0 0 5px rgba(0,0,0,0.5)'
+          boxShadow: isHigh ? `0 0 12px ${color.replace('rgb', 'rgba').replace(')', ', 0.3)')}` : 'none'
         }}
       >
-        {/* Power Ring Progress */}
         <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 64 64" style={{ color }}>
           <circle cx="32" cy="32" r={radius} stroke="currentColor" strokeWidth="3" fill="none" className="opacity-10" />
           <circle 
@@ -88,32 +86,30 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
             fill="none"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            strokeLinecap="round"
+            strokeLinecap="butt"
             className="transition-all duration-75"
             style={{ filter: isHigh ? `drop-shadow(0 0 4px currentColor)` : 'none' }}
           />
         </svg>
 
-        {/* Spin Indicator Arrow */}
         <div className="absolute inset-0 flex items-center justify-center opacity-30" style={{ transform: isCW ? 'scaleX(1)' : 'scaleX(-1)' }}>
           <svg 
             className="w-10 h-10" 
-            viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="square" strokeLinejoin="round"
           >
             <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
             <path d="M21 3v5h-5" />
           </svg>
         </div>
 
-        {/* Value Display */}
         <div className="relative z-10 flex flex-col items-center">
-          <span className="text-[9px] font-black text-slate-300 drop-shadow-md">{id}</span>
-          <span className={cn("text-[14px] leading-tight font-mono font-bold drop-shadow-md", isHigh ? "text-white" : "text-white/80")}>
+          <span className="text-[9px] font-black text-slate-300">{id}</span>
+          <span className={cn("text-[14px] leading-tight font-mono font-bold", isHigh ? "text-white" : "text-white/80")}>
             {val.toFixed(0)}
           </span>
         </div>
       </div>
-      <div className="text-[8px] font-bold mt-1 tracking-widest bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700/50" style={{ color }}>
+      <div className="text-[8px] font-bold mt-1 tracking-widest bg-slate-900 px-2 py-0.5 border border-slate-700" style={{ color }}>
         {isCW ? "↻ CW" : "↺ CCW"}
       </div>
     </div>
@@ -122,9 +118,9 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
 
 function MathRow({ label, formula, result }: { label: string, formula: string, result: number }) {
   return (
-    <div className="flex items-center justify-between p-2 rounded-md bg-slate-800/40 border border-slate-700/50 mb-1.5">
+    <div className="flex items-center justify-between p-2 bg-slate-800/40 border border-slate-700 mb-1.5">
        <span className="text-[8px] font-bold text-slate-400 uppercase w-16 tracking-wider">{label}</span>
-       <span className="text-[9px] font-mono text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 shadow-inner">{formula}</span>
+       <span className="text-[9px] font-mono text-slate-300 bg-slate-900 px-2 py-0.5 border border-slate-800">{formula}</span>
        <span className="text-[11px] font-mono font-bold text-white w-8 text-right">{result > 0 ? "+" : ""}{result.toFixed(0)}</span>
     </div>
   );
@@ -138,6 +134,9 @@ export default function FlightMechanicsTab() {
   const physicsRef = useRef<FlightState>(INITIAL_STATE);
   const controlsRef = useRef<ControlValues>(INITIAL_CONTROLS);
   const keysRef = useRef<Set<string>>(new Set());
+
+  // ─── AUDIO ───
+  const droneSound = useDroneSound();
 
   // ─── ANALOG INPUT: Track how long each key has been held ───
   const holdTimeRef = useRef({
@@ -156,6 +155,7 @@ export default function FlightMechanicsTab() {
       // Start engine sequence
       setEngineState("STARTING");
       engineRef.current = "STARTING";
+      droneSound.init();
       // Startup takes ~1.5s
       setTimeout(() => {
         setEngineState("ON");
@@ -165,6 +165,7 @@ export default function FlightMechanicsTab() {
       // Shut down immediately
       setEngineState("OFF");
       engineRef.current = "OFF";
+      droneSound.stop();
       // Reset controls and physics when shutting down
       setControls(INITIAL_CONTROLS);
       setPhysics(INITIAL_STATE);
@@ -203,6 +204,7 @@ export default function FlightMechanicsTab() {
         const prev = physicsRef.current;
         const startupRamp = Math.min(12, (prev.motors.m1 || 0) + 8 * dt);
         const startupMotors = { m1: startupRamp, m2: startupRamp, m3: startupRamp, m4: startupRamp };
+        droneSound.updateThrottle(startupMotors);
         const state: FlightState = { ...INITIAL_STATE, motors: startupMotors };
         physicsRef.current = state;
         if (Date.now() % 48 < 16) {
@@ -267,6 +269,7 @@ export default function FlightMechanicsTab() {
       setControls(next);
       controlsRef.current = next;
       const motors = runFlightController(next, physicsRef.current, dt);
+      droneSound.updateThrottle(motors);
       const newState = updatePhysics(physicsRef.current, motors, dt);
       physicsRef.current = newState;
 
@@ -298,7 +301,7 @@ export default function FlightMechanicsTab() {
     <div className="grid grid-cols-[260px_1fr_280px] gap-4 h-full">
       
       {/* ─── LEFT: BẢNG ĐIỀU KHIỂN ─── */}
-      <div className="flex flex-col bg-slate-900/60 border border-slate-800 rounded-md p-4 shadow-2xl backdrop-blur-xl overflow-hidden">
+      <div className="flex flex-col bg-slate-900 border border-slate-800 p-4 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Rocket className="w-4 h-4 text-cyan-400" />
@@ -306,7 +309,7 @@ export default function FlightMechanicsTab() {
           </div>
           <button 
             onClick={handleReset}
-            className="text-[8px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 px-2 py-1 rounded border border-white/5 transition-colors"
+            className="text-[8px] font-black uppercase tracking-widest bg-white/5 hover:bg-white/10 px-2 py-1 border border-white/5 transition-colors"
           >
             Làm Lại
           </button>
@@ -317,10 +320,10 @@ export default function FlightMechanicsTab() {
             onClick={handleToggleEngine}
             disabled={engineState === "STARTING"}
             className={cn(
-              "w-full py-2 rounded-md border transition-all duration-500 mb-3 flex items-center justify-center gap-2 group",
+              "w-full py-2 border transition-all duration-500 mb-3 flex items-center justify-center gap-2 group",
               engineState === "OFF" 
-                ? "bg-slate-800/40 border-slate-700 hover:bg-slate-800 text-slate-300" 
-                : "bg-cyan-500/10 border-cyan-500/40 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.1)]"
+                ? "bg-slate-800 border-slate-700 hover:bg-slate-800/80 text-slate-300" 
+                : "bg-cyan-500/10 border-cyan-500/40 text-cyan-400"
             )}
           >
             <Power className={cn("w-3.5 h-3.5 transition-transform group-active:scale-90", engineState !== "OFF" && "animate-pulse")} />
@@ -335,34 +338,34 @@ export default function FlightMechanicsTab() {
           <ControlSlider label="Xoay Mũi (Yaw)" keys="← / →" value={controls.yaw} />
         </div>
 
-        <div className="mt-4 pt-4 border-t border-slate-800/80 shrink-0">
+        <div className="mt-4 pt-4 border-t border-slate-800 shrink-0">
           <div className="flex items-center gap-2 text-[9px] font-bold text-slate-500 uppercase mb-3 tracking-widest">
             <Info className="w-3 h-3" /> Hướng Dẫn
           </div>
           <div className="grid grid-cols-[1fr_auto] gap-y-1.5 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
             <span>Khởi động</span>
-            <kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700 text-emerald-400 text-[7px]">ENTER</kbd>
+            <kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700 text-emerald-400 text-[7px]">ENTER</kbd>
 
             <span>Cất / Hạ cánh</span>
-            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">↑</kbd><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">↓</kbd></div>
+            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">↑</kbd><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">↓</kbd></div>
             
             <span>Di chuyển</span>
-            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">W</kbd><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">S</kbd></div>
+            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">W</kbd><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">S</kbd></div>
             
             <span>Nghiêng</span>
-            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">A</kbd><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">D</kbd></div>
+            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">A</kbd><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">D</kbd></div>
             
             <span>Xoay Mũi</span>
-            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">←</kbd><kbd className="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">→</kbd></div>
+            <div className="flex gap-1"><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">←</kbd><kbd className="bg-slate-800 px-1 py-0.5 border border-slate-700">→</kbd></div>
           </div>
         </div>
       </div>
 
       {/* ─── CENTER: 3D VIEWER ─── */}
-      <div className="relative rounded-md border border-slate-800 overflow-hidden bg-black shadow-2xl ring-1 ring-white/5">
+      <div className="relative border border-slate-800 overflow-hidden bg-black">
         <FlightDroneViewer physicsRef={physicsRef} showForces={true} />
         
-        <div className="absolute bottom-4 right-4 flex gap-3 bg-slate-900/80 px-4 py-2 rounded-md border border-slate-700/50 backdrop-blur-md">
+        <div className="absolute bottom-4 right-4 flex gap-3 bg-slate-900/80 px-4 py-2 border border-slate-700">
           <div className="flex flex-col">
             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Độ Cao</span>
             <span className="text-xs font-mono font-bold text-cyan-400">{physics.altitude.toFixed(1)}m</span>
@@ -376,19 +379,19 @@ export default function FlightMechanicsTab() {
       </div>
 
       {/* ─── RIGHT: VẬT LÝ ─── */}
-      <div className="flex flex-col bg-slate-900/60 border border-slate-800 rounded-md p-4 shadow-2xl backdrop-blur-xl overflow-hidden">
+      <div className="flex flex-col bg-slate-900 border border-slate-800 p-4 overflow-hidden">
         
         <div className="flex items-center gap-2 mb-4">
           <Cpu className="w-4 h-4 text-indigo-400" />
           <h2 className="text-xs font-black uppercase tracking-[0.1em] text-white">Hệ Thống Vật Lý</h2>
         </div>
 
-        <div className="flex items-center justify-center gap-2 mb-4 bg-slate-800/40 py-2 rounded-md border border-slate-700/50 shrink-0">
+        <div className="flex items-center justify-center gap-2 mb-4 bg-slate-800/40 py-2 border border-slate-700 shrink-0">
           <div className={cn(
-            "w-1.5 h-1.5 rounded-full transition-all duration-300",
+            "w-1.5 h-1.5 transition-all duration-300",
             engineState === "OFF" ? "bg-slate-600" : 
-            engineState === "STARTING" ? "bg-amber-400 animate-pulse shadow-[0_0_8px_#f59e0b]" :
-            physics.altitude < 0.2 ? "bg-emerald-500 shadow-[0_0_6px_#10b981]" : "bg-cyan-400 animate-pulse shadow-[0_0_8px_#06b6d4]"
+            engineState === "STARTING" ? "bg-amber-400 animate-pulse" :
+            physics.altitude < 0.2 ? "bg-emerald-500" : "bg-cyan-400 animate-pulse"
           )} />
           <span className="text-[9px] text-white font-bold uppercase tracking-widest">
             {engineState === "OFF" ? "Máy tắt" :
@@ -401,10 +404,10 @@ export default function FlightMechanicsTab() {
           <div className="text-[9px] font-bold text-slate-500 uppercase mb-3 tracking-[0.2em] flex items-center gap-2">
             <Activity className="w-3 h-3" /> Lực đẩy (Thrust)
           </div>
-          <div className="relative w-full max-w-[190px] min-h-[230px] mx-auto mb-4 bg-slate-950/50 rounded-md border border-slate-800/80 p-4 flex items-center justify-center">
+          <div className="relative w-full max-w-[190px] min-h-[230px] mx-auto mb-4 bg-slate-950 border border-slate-800/80 p-4 flex items-center justify-center">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-              <div className="w-[80%] h-1 bg-slate-700 rotate-45 rounded-full" />
-              <div className="w-[80%] h-1 bg-slate-700 -rotate-45 absolute rounded-full" />
+              <div className="w-[80%] h-px bg-slate-700 rotate-45" />
+              <div className="w-[80%] h-px bg-slate-700 -rotate-45 absolute" />
             </div>
             <div className="grid grid-cols-2 grid-rows-2 w-full relative z-20 gap-x-2 gap-y-10 scale-[0.95] origin-center">
               <div className="flex items-start justify-start"><MotorNode id="M1" label="FL" isCW={true} val={physics.motors.m1} /></div>
@@ -412,8 +415,8 @@ export default function FlightMechanicsTab() {
               <div className="flex items-end justify-start"><MotorNode id="M3" label="RL" isCW={false} val={physics.motors.m3} /></div>
               <div className="flex items-end justify-end"><MotorNode id="M4" label="RR" isCW={true} val={physics.motors.m4} /></div>
             </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-slate-900 border border-slate-800 rounded flex items-center justify-center z-30 shadow-2xl">
-               <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-slate-900 border border-slate-800 flex items-center justify-center z-30">
+               <div className="w-1.5 h-1.5 bg-slate-700" />
             </div>
           </div>
 

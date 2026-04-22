@@ -52,18 +52,23 @@ export function runFlightController(
   
   const IDLE_THROTTLE = 12;
 
-  // 1. Calculate Base Throttle for Altitude Hold (Auto-Hover)
+  // 1. Throttle input smoothing — prevents PID shock when stick snaps back
+  const prevThrottle = currentState.thrust;
+  const inputLerpSpeed = 0.08;
+  const smoothThrottle = prevThrottle + (input.throttle - prevThrottle) * inputLerpSpeed;
+
+  // 2. Calculate Base Throttle for Altitude Hold (Auto-Hover)
   const pRad = (currentState.pitch * Math.PI) / 180;
   const rRad = (currentState.roll * Math.PI) / 180;
   const cosTilt = Math.cos(pRad) * Math.cos(rRad);
   const hoverThrust = HOVER_THRUST / Math.max(0.5, cosTilt);
   
   let targetVV = 0;
-  if (input.throttle > 55) {
-    targetVV = ((input.throttle - 55) / 45) * 20.0; // Max climb: 20 m/s
-  } else if (input.throttle < 45) {
+  if (smoothThrottle > 55) {
+    targetVV = ((smoothThrottle - 55) / 45) * 20.0; // Max climb: 20 m/s
+  } else if (smoothThrottle < 45) {
     // Tụt ga hết cỡ -> Rơi xuống cực nhanh để tiết kiệm thời gian chờ (Max -25 m/s)
-    targetVV = ((input.throttle - 45) / 45) * 25.0; 
+    targetVV = ((smoothThrottle - 45) / 45) * 25.0; 
     
     // Cảm biến tiệm cận (Proximity Sensor): 
     // Nếu drone đang ở rất gần mặt đất (dưới 10m), tự động hãm phanh mục tiêu lại để tiếp đất êm ái
@@ -75,13 +80,12 @@ export function runFlightController(
   }
 
   const velocityError = targetVV - currentState.verticalVelocity;
-  // Stronger P-gain (15.0) to aggressively brake and stop drifting when stick is released
-  const pGain = 15.0;
+  // Moderate P-gain — aggressive enough to stop drift, not so strong it spikes on sudden throttle changes
+  const pGain = 6.0;
   let baseThrottle = hoverThrust + (velocityError * pGain);
 
-  // Direct Manual Overrides for "Realism" feel at the top extreme
+  // Direct Manual Override for Full-Throttle (still allow PID correction for altitude)
   if (input.throttle > 95) {
-    // Bấm kịch ga -> Động cơ bung hết mức 100%
     baseThrottle = 100;
   }
 

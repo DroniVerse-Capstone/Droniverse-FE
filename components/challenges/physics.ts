@@ -56,7 +56,8 @@ export function processKeyboardInput(
   keysPressed: Set<string>,
   currentControls: ControlValues,
   precisionMode: boolean,
-  config: ControlConfig
+  config: ControlConfig,
+  dt: number = 1/60
 ): ControlValues {
   let throttle = currentControls.throttle;
   let pitch = currentControls.pitch;
@@ -67,22 +68,23 @@ export function processKeyboardInput(
   const multiplier = precisionMode ? config.precisionMultiplier : 1;
   const maxVal = precisionMode ? config.precisionMaxVal : 100;
 
-  // Throttle: Arrow Up/Down
+  // Throttle: Arrow Up/Down — giữ hover (50%) khi thả phím
   if (keysPressed.has("arrowup")) {
-    throttle = Math.min(maxVal, throttle + speed * 0.1);
+    throttle = Math.min(maxVal, throttle + config.throttleSpeed * dt);
   } else if (keysPressed.has("arrowdown")) {
-    throttle = Math.max(0, throttle - speed * 0.1);
+    throttle = Math.max(0, throttle - config.throttleSpeed * dt);
   } else {
-    // Decay throttle when no input
-    throttle *= config.throttleDecay;
-    if (throttle < 0.5) throttle = 0;
+    // Return to hover (50%) smoothly — không decay về 0
+    const diff = throttle - 50;
+    if (Math.abs(diff) < 0.5) throttle = 50;
+    else throttle = 50 + diff * config.throttleDecay;
   }
 
   // Pitch: W/S (forward/backward)
   if (keysPressed.has("w")) {
-    pitch = Math.min(maxVal, pitch + config.pitchSpeed * multiplier * 0.1);
+    pitch = Math.max(-maxVal, pitch - config.pitchSpeed * multiplier * dt);
   } else if (keysPressed.has("s")) {
-    pitch = Math.max(-maxVal, pitch - config.pitchSpeed * multiplier * 0.1);
+    pitch = Math.min(maxVal, pitch + config.pitchSpeed * multiplier * dt);
   } else {
     pitch *= config.pitchDecay;
     if (Math.abs(pitch) < config.pitchDeadZone) pitch = 0;
@@ -90,9 +92,9 @@ export function processKeyboardInput(
 
   // Roll: A/D (left/right)
   if (keysPressed.has("a")) {
-    roll = Math.max(-maxVal, roll - config.rollSpeed * multiplier * 0.1);
+    roll = Math.max(-maxVal, roll - config.rollSpeed * multiplier * dt);
   } else if (keysPressed.has("d")) {
-    roll = Math.min(maxVal, roll + config.rollSpeed * multiplier * 0.1);
+    roll = Math.min(maxVal, roll + config.rollSpeed * multiplier * dt);
   } else {
     roll *= config.rollDecay;
     if (Math.abs(roll) < config.rollDeadZone) roll = 0;
@@ -100,9 +102,9 @@ export function processKeyboardInput(
 
   // Yaw: Arrow Left/Right
   if (keysPressed.has("arrowleft")) {
-    yaw = Math.max(-maxVal, yaw - config.yawSpeed * multiplier * 0.1);
+    yaw = Math.max(-maxVal, yaw - config.yawSpeed * multiplier * dt);
   } else if (keysPressed.has("arrowright")) {
-    yaw = Math.min(maxVal, yaw + config.yawSpeed * multiplier * 0.1);
+    yaw = Math.min(maxVal, yaw + config.yawSpeed * multiplier * dt);
   } else {
     yaw *= config.yawDecay;
     if (Math.abs(yaw) < config.yawDeadZone) yaw = 0;
@@ -274,12 +276,12 @@ export function updatePhysics(
   const rRad = (prevState.roll * Math.PI) / 180;
   const pRad = (prevState.pitch * Math.PI) / 180;
 
-  // Real drones have immense thrust-to-weight ratios. We multiply the horizontal component 
+  // Real drones have immense thrust-to-weight ratios. We multiply the horizontal component
   // to simulate snappy, aggressive acceleration without needing extreme tilt angles.
-  // Balanced to 5.0 for a fast but controllable simulation speed.
-  const HORIZONTAL_THRUST_MULTIPLIER = 5.0;
+  // Balanced to 9.0 for a fast but controllable simulation speed.
+  const HORIZONTAL_THRUST_MULTIPLIER = 9.0;
   const accR = Math.sin(rRad) * liftForce * HORIZONTAL_THRUST_MULTIPLIER;  // D (+ roll) -> Positive Right
-  const accF = -Math.sin(pRad) * liftForce * HORIZONTAL_THRUST_MULTIPLIER; // W (- pitch) -> Positive Forward
+  const accF = -Math.sin(pRad) * liftForce * HORIZONTAL_THRUST_MULTIPLIER; // W (-pitch) -> Positive Forward
 
   // Yaw rotation (Positive yaw = CCW, standard math angle)
   const theta = (prevState.yaw * Math.PI) / 180;

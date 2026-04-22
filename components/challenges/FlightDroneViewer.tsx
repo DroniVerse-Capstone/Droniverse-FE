@@ -676,11 +676,13 @@ function SpaceEnvironment() {
 function LevelManager({
   levelFactory,
   onLevelUpdate,
-  drone
+  drone,
+  resetTrigger
 }: {
   levelFactory?: LevelFactory,
   onLevelUpdate?: (result: LevelResult) => void,
-  drone: THREE.Group | null
+  drone: THREE.Group | null,
+  resetTrigger?: number
 }) {
   const { scene } = useThree();
   const levelInstanceRef = useRef<LevelInstance | null>(null);
@@ -706,6 +708,18 @@ function LevelManager({
     }
   }, [levelFactory, scene, drone]);
 
+  // Reset level khi resetTrigger thay đổi
+  useEffect(() => {
+    if (resetTrigger !== undefined && levelInstanceRef.current) {
+      levelInstanceRef.current.cleanup();
+      if (levelFactory && drone) {
+        const instance = levelFactory(scene, drone);
+        instance.init();
+        levelInstanceRef.current = instance;
+      }
+    }
+  }, [resetTrigger, levelFactory, scene, drone]);
+
   // Cập nhật logic level mỗi khung hình
   useFrame((_, delta) => {
     if (levelInstanceRef.current && onLevelUpdate) {
@@ -723,7 +737,8 @@ export function FlightDroneViewer({
   cameraMode: externalCameraMode,
   levelFactory,
   onLevelUpdate,
-  environmentType = "SPACE"
+  environmentType = "SPACE",
+  resetTrigger
 }: {
   physicsRef: React.MutableRefObject<FlightState>,
   showForces?: boolean,
@@ -731,6 +746,7 @@ export function FlightDroneViewer({
   levelFactory?: LevelFactory,
   onLevelUpdate?: (result: LevelResult) => void,
   environmentType?: EnvironmentType,
+  resetTrigger?: number
 }) {
   // Use external camera mode if provided, otherwise default to FOLLOW
   const cameraMode = externalCameraMode || "FOLLOW";
@@ -765,9 +781,11 @@ export function FlightDroneViewer({
           )}
 
           <LevelManager
+            key={resetTrigger}
             levelFactory={levelFactory}
             onLevelUpdate={onLevelUpdate}
             drone={droneGroup}
+            resetTrigger={resetTrigger}
           />
 
           <FlightDrone

@@ -119,8 +119,8 @@ function MotorRing({ position, rotation, color, value }: { position: [number, nu
 
   return (
     <mesh ref={ringRef} position={position}>
-      <torusGeometry args={[0.1, 0.015, 8, 24]} />
-      <meshBasicMaterial color={color} transparent opacity={0.3} depthTest={false} />
+      <torusGeometry args={[0.07, 0.01, 8, 24]} />
+      <meshBasicMaterial color={color} transparent opacity={0.15 + intensity * 0.4} depthTest={false} />
     </mesh>
   );
 }
@@ -132,7 +132,7 @@ function ThrustArrow({ position, color, value }: { position: [number, number, nu
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      const targetScale = Math.max(0.1, value / 100 * 2.5);
+      const targetScale = Math.max(0.1, value / 100 * 1.0);
       currentScale.current += (targetScale - currentScale.current) * Math.min(1, delta * 8);
       groupRef.current.scale.y = currentScale.current;
     }
@@ -140,13 +140,13 @@ function ThrustArrow({ position, color, value }: { position: [number, number, nu
 
   return (
     <group ref={groupRef} position={position}>
-      <mesh position={[0, 0.4, 0]}>
-        <cylinderGeometry args={[0.012, 0.012, 0.8]} />
-        <meshBasicMaterial color={color} transparent opacity={0.5} depthTest={false} />
+      <mesh position={[0, 0.3, 0]}>
+        <cylinderGeometry args={[0.008, 0.008, 0.5]} />
+        <meshBasicMaterial color={color} transparent opacity={0.4} depthTest={false} />
       </mesh>
-      <mesh position={[0, 0.9, 0]}>
-        <coneGeometry args={[0.05, 0.15, 8]} />
-        <meshBasicMaterial color={color} transparent opacity={0.7} depthTest={false} />
+      <mesh position={[0, 0.6, 0]}>
+        <coneGeometry args={[0.03, 0.1, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.5} depthTest={false} />
       </mesh>
     </group>
   );
@@ -156,13 +156,13 @@ function ForceArrow({ innerRef, position, color }: { innerRef: any, position: [n
   return (
     <group position={position}>
       <group ref={innerRef}>
-        <mesh position={[0, 0.5, 0]}>
-          <cylinderGeometry args={[0.015, 0.015, 1]} />
-          <meshBasicMaterial color={color} transparent opacity={0.6} depthTest={false} />
+        <mesh position={[0, 0.35, 0]}>
+          <cylinderGeometry args={[0.008, 0.008, 0.7]} />
+          <meshBasicMaterial color={color} transparent opacity={0.5} depthTest={false} />
         </mesh>
-        <mesh position={[0, 1.1, 0]}>
-          <coneGeometry args={[0.08, 0.25]} />
-          <meshBasicMaterial color={color} transparent opacity={0.8} depthTest={false} />
+        <mesh position={[0, 0.75, 0]}>
+          <coneGeometry args={[0.04, 0.12]} />
+          <meshBasicMaterial color={color} transparent opacity={0.6} depthTest={false} />
         </mesh>
       </group>
     </group>
@@ -247,14 +247,16 @@ function FlightDrone({ physicsRef, showForces, cameraMode }: DroneProps) {
 
     // Rotation order for correct behavior
     groupRef.current.rotation.order = "YXZ";
+    // W = positive pitch → positive X rotation = tilt nose down = move forward
     groupRef.current.rotation.x = THREE.MathUtils.lerp(
       groupRef.current.rotation.x,
-      (s.pitch * Math.PI) / 180, // W (-pitch) -> Negative X rot -> Tilt Forward
+      (s.pitch * Math.PI) / 180,
       lf
     );
+    // D = positive roll → negative Z rotation = tilt right = strafe right
     groupRef.current.rotation.z = THREE.MathUtils.lerp(
       groupRef.current.rotation.z,
-      (-s.roll * Math.PI) / 180, // D (+roll) -> Negative Z rot -> Tilt Right
+      (-s.roll * Math.PI) / 180,
       lf
     );
     groupRef.current.rotation.y = THREE.MathUtils.lerp(

@@ -12,28 +12,17 @@ export default function DroneChallengeDetailPage() {
   const lab = mockLabs[id];
 
   return (
-    <div className="h-screen bg-[#020617] text-white font-sans flex flex-col overflow-hidden">
-      {/* Ambient backgrounds */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vh] bg-cyan-500/5 rounded-full blur-[160px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vh] bg-indigo-700/10 rounded-full blur-[140px]" />
-      </div>
-
-      {/* HEADER - Simple */}
-      <header className="relative z-30 shrink-0 flex items-center justify-between px-4 py-3 bg-slate-900/40 backdrop-blur-md border-b border-white/5">
+    <div className="h-screen bg-slate-950 text-white font-sans flex flex-col overflow-hidden">
+      {/* HEADER - Back button bar */}
+      <header className="relative z-30 shrink-0 flex items-center px-4 py-2 bg-slate-950 border-b border-slate-800">
         <Link
           href="/mechanics/quadcopter"
-          className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all"
+          className="group flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all"
         >
-          <ChevronLeft className="w-4 h-4 text-slate-300 group-hover:text-white transition-colors" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors">Quay lại</span>
+          <ChevronLeft className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+          <span className="text-[10px] font-bold text-slate-400 group-hover:text-white transition-colors">Quay lại</span>
         </Link>
-
-        <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold uppercase tracking-wide text-white">
-          {lab?.title || "Thử thách"}
-        </h1>
-
-        <div className="w-[80px]" />
+        <div className="flex-1" />
       </header>
 
       {/* CONTENT */}

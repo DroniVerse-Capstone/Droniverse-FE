@@ -14,24 +14,24 @@ export function ThrustVector({ position, value, color }: { position: [number, nu
   
   useFrame(() => {
     if (arrowRef.current) {
-      // Scale length based on motor power (0-100%)
-      const length = (value / 100) * 1.5;
+      // Compact thrust arrows — scale length 0-0.8 (was 0-1.5)
+      const length = (value / 100) * 0.8;
       arrowRef.current.scale.y = Math.max(0.001, length);
-      arrowRef.current.visible = value > 1;
+      arrowRef.current.visible = value > 2;
     }
   });
 
   return (
     <group position={position} ref={arrowRef}>
-      {/* Shaft */}
-      <mesh position={[0, 0.5, 0]}>
-        <cylinderGeometry args={[0.015, 0.015, 1, 8]} />
-        <meshBasicMaterial color={color} transparent opacity={0.8} depthTest={false} />
+      {/* Shaft — thinner and shorter */}
+      <mesh position={[0, 0.35, 0]}>
+        <cylinderGeometry args={[0.008, 0.008, 0.7, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.7} depthTest={false} />
       </mesh>
-      {/* Head */}
-      <mesh position={[0, 1.05, 0]}>
-        <coneGeometry args={[0.06, 0.15, 8]} />
-        <meshBasicMaterial color={color} transparent opacity={0.9} depthTest={false} />
+      {/* Head — smaller cone */}
+      <mesh position={[0, 0.75, 0]}>
+        <coneGeometry args={[0.03, 0.1, 8]} />
+        <meshBasicMaterial color={color} transparent opacity={0.8} depthTest={false} />
       </mesh>
     </group>
   );
@@ -40,18 +40,17 @@ export function ThrustVector({ position, value, color }: { position: [number, nu
 export function GravityVector() {
   return (
     <group position={[0, 0, 0]}>
-      {/* Gravity always points down from center */}
-      <mesh position={[0, -0.4, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.8, 8]} />
-        <meshBasicMaterial color="#ef4444" transparent opacity={0.6} depthTest={false} />
+      {/* Gravity — compact arrow pointing down */}
+      <mesh position={[0, -0.3, 0]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.5, 8]} />
+        <meshBasicMaterial color="#ef4444" transparent opacity={0.5} depthTest={false} />
       </mesh>
-      <mesh position={[0, -0.85, 0]} rotation={[Math.PI, 0, 0]}>
-        <coneGeometry args={[0.07, 0.2, 8]} />
-        <meshBasicMaterial color="#ef4444" transparent opacity={0.8} depthTest={false} />
+      <mesh position={[0, -0.6, 0]} rotation={[Math.PI, 0, 0]}>
+        <coneGeometry args={[0.04, 0.12, 8]} />
+        <meshBasicMaterial color="#ef4444" transparent opacity={0.7} depthTest={false} />
       </mesh>
-      {/* Label/Center point */}
       <mesh>
-        <sphereGeometry args={[0.04]} />
+        <sphereGeometry args={[0.03]} />
         <meshBasicMaterial color="#ef4444" />
       </mesh>
     </group>
