@@ -3,6 +3,7 @@ import { z } from "zod"
 // ---- Post my request ----
 export const clubAttemptRequestSchema = z.object({
   clubCode: z.string().min(1, "Club code is required"),
+  mediaId: z.string().uuid("Media ID must be a valid UUID"),
 })
 
 export const clubAttemptDataSchema = z.object({
@@ -10,7 +11,6 @@ export const clubAttemptDataSchema = z.object({
   nameVN: z.string(),
   nameEN: z.string(),
   clubAttemptRequestID: z.string().nullable(),
-  clubIsPublic: z.boolean(),
 })
 
 export const clubAttemptResponseSchema = z.object({
@@ -20,6 +20,15 @@ export const clubAttemptResponseSchema = z.object({
 })
 
 // ---- Get my requests ----
+export const clubAttemptMediaSchema = z.object({
+  mediaID: z.string(),
+  mediaTypeID: z.string(),
+  mediaTypeName: z.enum(["IMAGE", "VIDEO"]).nullable(),
+  mediaType: z.string().nullable(),
+  url: z.string(),
+  createdAt: z.string(),
+});
+
 export const clubAttemptRequestItemSchema = z.object({
   clubRequestID: z.string(),
   requesterID: z.string(),
@@ -35,6 +44,7 @@ export const clubAttemptRequestItemSchema = z.object({
   status: z.enum(["PENDING", "APPROVED", "REJECT"]),
   createAt: z.string(),
   processedAt: z.string().nullable(),
+  media: clubAttemptMediaSchema.nullable(),
 });
 
 export const getMyClubAttemptRequestsResponseSchema = z.object({

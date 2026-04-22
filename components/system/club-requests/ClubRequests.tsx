@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import { formatDateWithTime } from "@/lib/utils/format-date";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { FaRegEye } from "react-icons/fa";
-import { CiLock, CiUnlock } from "react-icons/ci";
 
 type RequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCEL" | null;
 
@@ -37,12 +36,7 @@ export default function ClubRequests() {
   const { data: detail, isLoading: isDetailLoading } =
     useGetClubCreationRequestDetail(viewId ?? undefined);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useGetAllClubCreationRequests({
+  const { data, isLoading, isError, error } = useGetAllClubCreationRequests({
     status: selectedStatus || undefined,
     currentPage,
     pageSize: PAGE_SIZE,
@@ -53,11 +47,10 @@ export default function ClubRequests() {
   const headers = [
     t("table.headers.name"),
     t("table.headers.requester"),
-    t("table.headers.mode"),
+    "Drone",
     t("table.headers.image"),
     t("table.headers.createdAt"),
     t("table.headers.approvedAt"),
-    t("table.headers.category"),
     t("table.headers.status"),
     t("table.headers.actions"),
   ];
@@ -137,23 +130,47 @@ export default function ClubRequests() {
 
               <TableCell>
                 <div className="text-sm text-greyscale-50">
-                  <div className="font-medium text-greyscale-25">{req.requesterName}</div>
-                  <div className="text-xs text-greyscale-100">{req.requesterEmail}</div>
+                  <div className="font-medium text-greyscale-25">
+                    {req.requesterName}
+                  </div>
+                  <div className="text-xs text-greyscale-100">
+                    {req.requesterEmail}
+                  </div>
                 </div>
               </TableCell>
 
               <TableCell>
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded border px-2 py-1 text-xs",
-                    req.isPublic
-                      ? "border-secondary/40 bg-secondary/15 text-secondary"
-                      : "border-primary/40 bg-primary/15 text-primary",
-                  )}
-                >
-                  {req.isPublic ? <CiUnlock size={13} /> : <CiLock size={13} />}
-                  {req.isPublic ? t("privacy.public") : t("privacy.private")}
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded border border-greyscale-700">
+                    <Image
+                      src={
+                        req?.drone?.imgURL || "/images/drone-placeholder.jpg"
+                      }
+                      alt={
+                        (locale === "vi"
+                          ? req?.drone?.droneNameVN
+                          : req?.drone?.droneNameEN) ?? "Drone"
+                      }
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-greyscale-0">
+                      {locale === "vi"
+                        ? req?.drone?.droneNameVN
+                        : req?.drone?.droneNameEN}
+                    </p>
+                    <p className="text-xs text-greyscale-100">
+                      {locale === "vi"
+                        ? req?.drone?.droneTypeNameVN
+                        : req?.drone?.droneTypeNameEN}
+                    </p>
+                    <p className="text-xs text-greyscale-100">
+                      {req?.drone?.manufacturer}
+                    </p>
+                  </div>
+                </div>
               </TableCell>
 
               <TableCell>
@@ -178,33 +195,11 @@ export default function ClubRequests() {
 
               <TableCell className="text-sm text-greyscale-50">
                 <div className="leading-tight">
-                  <div>{formatDateWithTime(req.approvedAt).day}</div>
+                  <div>{formatDateWithTime(req.approvedAt ?? null).day}</div>
                   <div className="text-xs text-gray-500">
-                    {formatDateWithTime(req.approvedAt).time}
+                    {formatDateWithTime(req.approvedAt ?? null).time}
                   </div>
                 </div>
-              </TableCell>
-
-              <TableCell>
-                {req.categories.length > 0 ? (
-                  <div className="flex flex-wrap gap-1">
-                    {req.categories.slice(0, 2).map((category) => (
-                      <span
-                        key={category.categoryId}
-                        className="rounded border border-greyscale-600 px-2 py-0.5 text-xs text-greyscale-100"
-                      >
-                        {locale === "vi" ? category.typeNameVN : category.typeNameEN}
-                      </span>
-                    ))}
-                    {req.categories.length > 2 && (
-                      <span className="text-xs text-greyscale-100">
-                        +{req.categories.length - 2}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-xs text-greyscale-100">-</span>
-                )}
               </TableCell>
 
               <TableCell>

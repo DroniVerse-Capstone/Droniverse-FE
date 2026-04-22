@@ -29,15 +29,25 @@ export const moduleSchema = z.object({
 	lessons: z.array(lessonSchema),
 })
 
+export const userCertificateSchema = z.object({
+	certificateID: z.string().uuid(),
+	userID: z.string().uuid(),
+	achievedDate: z.string(),
+	certificateUrl: z.string().url(),
+	status: z.enum(["ACHIEVED", "REVOKED"]),
+})
+
 export const userLearningPathSchema = z.object({
 	enrollmentID: z.string().uuid(),
 	courseID: z.string().uuid(),
 	courseVersionID: z.string().uuid(),
+	status: z.enum(["ACTIVE", "COMPLETED", "DROPPED", "LIMITED_ACCESS"]),
 	titleVN: z.string(),
 	titleEN: z.string(),
 	totalLessons: z.number().int().nonnegative(),
 	duration: z.number().int().nonnegative(),
 	progress: z.number().min(0).max(100),
+	userCertificate: userCertificateSchema.nullable(),
 	modules: z.array(moduleSchema),
 })
 

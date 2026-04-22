@@ -388,19 +388,19 @@
     "cta": "Quay lại"
   },
   "RegisterClubDialog": {
-    "title": "Đăng ký Club",
-    "subtitle": "Điền form sau để yêu cầu tạo Club cho riêng bạn",
-    "editTitle": "Sửa yêu cầu tạo Club",
-    "editSubtitle": "Cập nhật thông tin yêu cầu tạo Club của bạn",
+    "title": "Đăng ký Câu lạc bộ",
+    "subtitle": "Điền form sau để yêu cầu tạo Câu lạc bộ cho riêng bạn",
+    "editTitle": "Sửa yêu cầu tạo Câu lạc bộ",
+    "editSubtitle": "Cập nhật thông tin yêu cầu tạo Câu lạc bộ của bạn",
     "viewTitle": "Chi tiết yêu cầu",
     "fields": {
-      "nameVi": "Tên Club (Tiếng Việt)",
-      "nameEn": "Tên Club (Tiếng Anh)",
-      "description": "Lý do thành lập Club",
+      "nameVi": "Tên Câu lạc bộ (Tiếng Việt)",
+      "nameEn": "Tên Câu lạc bộ (Tiếng Anh)",
+      "description": "Lý do thành lập Câu lạc bộ",
       "category": "Danh mục",
       "categoryPlaceholder": "Chọn danh mục",
-      "coverImage": "Ảnh Club",
-      "isPublic": "Công khai Club",
+      "coverImage": "Ảnh Câu lạc bộ",
+      "isPublic": "Công khai Câu lạc bộ",
       "limitMembers": "Giới hạn thành viên",
       "limitManagers": "Giới hạn quản lý",
       "mode": "Chế độ",
@@ -433,18 +433,18 @@
     }
   },
   "JoinClubDialog": {
-    "title": "Tham gia Club",
-    "subtitle": "Hãy nhập mã Club bạn muốn tham gia để đăng ký tham gia",
+    "title": "Tham gia Câu lạc bộ",
+    "subtitle": "Hãy nhập mã Câu lạc bộ bạn muốn tham gia để đăng ký tham gia",
     "field": {
-      "code": "Mã Club",
-      "codePlaceholder": "Nhập mã Club..."
+      "code": "Mã Câu lạc bộ",
+      "codePlaceholder": "Nhập mã Câu lạc bộ..."
     },
     "buttons": {
       "cancel": "Hủy bỏ",
       "confirm": "Tham gia",
-      "find": "Tìm Club"
+      "find": "Tìm Câu lạc bộ"
     },
-    "error": "Không tìm thấy club"
+    "error": "Không tìm thấy câu lạc bộ"
   },
   "ClubImageUpload": {
     "toast": {
@@ -574,7 +574,8 @@
       "all": "Tất cả",
       "easy": "Cơ bản",
       "medium": "Trung bình",
-      "hard": "Nâng cao"
+      "hard": "Nâng cao",
+      "master": "Bậc thầy"
     },
     "management": {
       "total": "Tổng số khóa học",
@@ -586,7 +587,7 @@
       "subtitle": "Điền thông tin cơ bản để tạo khóa học mới",
       "titleEdit": "Cập nhật",
       "subtitleEdit": "Chỉnh sửa thông tin phiên bản hiện tại và thêm ghi chú thay đổi.",
-      "tileVersion": "Tạo phiên bản mới",
+      "titleVersion": "Tạo phiên bản mới",
       "subtitleVersion": "Nhập thông tin để tạo phiên bản khóa học mới.",
       "fields": {
         "title": {
@@ -630,7 +631,8 @@
       "level": {
         "easy": "Cơ bản",
         "medium": "Trung bình",
-        "hard": "Nâng cao"
+        "hard": "Nâng cao",
+        "master": "Bậc thầy"
       }
     },
     "AdminCourseCard": {
@@ -1304,10 +1306,49 @@
     "connectionTerminated": "Kết nối đã ngắt",
     "loadingSystems": "Đang tải hệ thống..."
   },
+  "ManagerSidebar": {
+    "subtitle": "Quản lý câu lạc bộ",
+    "switchClub": "Đổi câu lạc bộ",
+    "overview": "Tổng quan",
+    "members": {
+      "title": "Thành viên",
+      "subitems": {
+        "management": "Quản lý thành viên",
+        "requests": "Yêu cầu tham gia",
+        "transactions": "Quản lý giao dịch"
+      }
+    },
+    "courses": {
+      "title": "Khóa học",
+      "subitems": {
+        "available": "Khóa học hiện có",
+        "progress": "Theo dõi tiến trình học"
+      }
+    },
+    "competitions": "Cuộc thi",
+    "finance": {
+      "title": "Tài chính",
+      "subitems": {
+        "wallet": "Ví",
+        "withdrawHistory": "Lịch sử rút tiền"
+      }
+    },
+    "settings": {
+      "title": "Thiết lập",
+      "subitems": {
+        "clubInfo": "Thông tin câu lạc bộ",
+        "clubRules": "Nội quy câu lạc bộ"
+      }
+    },
+    "aria": {
+      "collapseSidebar": "Thu gọn thanh điều hướng quản lý",
+      "switchClub": "Chuyển câu lạc bộ"
+    }
+  },
   "ManagerMembers": {
     "errors": "Không xác định được câu lạc bộ hiện tại.",
-    "memberlist": "Danh sách thành viên",
-    "requests": "Yêu cầu tham gia",
+    "memberlist": "Danh sách các thành viên",
+    "requests": "Yêu cầu tham gia câu lạc bộ",
     "status": {
       "all": "Tất cả",
       "pending": "Chờ duyệt",

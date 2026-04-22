@@ -25,17 +25,8 @@ import {
   updateCourseVersionRequestSchema,
 } from "@/validations/course-version/course-version";
 import { BiEdit } from "react-icons/bi";
-import { COURSE_LEVELS } from "@/lib/constants/course";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "@/providers/i18n-provider";
-
-type CourseLevel = "EASY" | "MEDIUM" | "HARD";
-
-const COURSE_LEVEL_OPTIONS: Array<{ value: CourseLevel; label: string }> =
-  COURSE_LEVELS.filter((item) => item.value !== null).map((item) => ({
-    value: item.value as CourseLevel,
-    label: item.label,
-  }));
 
 type UpdateCourseVersionDialogProps = {
   courseId: string;
@@ -51,7 +42,6 @@ function toFormValue(version: CourseVersion) {
     contextVN: version.contextVN || "",
     contextEN: version.contextEN || "",
     imageUrl: version.imageUrl || "",
-    level: version.level,
     estimatedDuration: version.estimatedDuration,
     changeLog: "",
   };
@@ -93,7 +83,6 @@ export default function UpdateCourseVersionDialog({
       contextVN: form.contextVN.trim(),
       contextEN: form.contextEN.trim(),
       imageUrl: form.imageUrl.trim(),
-      level: form.level,
       estimatedDuration: Number(form.estimatedDuration),
       changeLog: form.changeLog.trim(),
     }),
@@ -245,29 +234,10 @@ export default function UpdateCourseVersionDialog({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>{t("fields.level")}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {COURSE_LEVEL_OPTIONS.map((item) => (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => setField("level", item.value)}
-                      className={
-                        form.level === item.value
-                          ? "rounded border border-primary bg-primary px-3 py-1.5 text-sm text-greyscale-0"
-                          : "rounded border border-greyscale-600 bg-greyscale-800 px-3 py-1.5 text-sm text-greyscale-100 hover:border-greyscale-400"
-                      }
-                    >
-                      {t(item.label)}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="mt-4 space-y-2">
-              <Label htmlFor="update-course-change-log">{t("fields.changeLog")} *</Label>
+              <Label htmlFor="update-course-change-log" className="text-primary-200">{t("fields.changeLog")} *</Label>
               <Textarea
                 id="update-course-change-log"
                 value={form.changeLog}

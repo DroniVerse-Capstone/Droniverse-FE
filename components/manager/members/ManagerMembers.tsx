@@ -4,9 +4,7 @@ import React from "react";
 import { useParams } from "next/navigation";
 
 import EmptyState from "@/components/common/EmptyState";
-import JoinRequestsTab from "@/components/manager/members/JoinRequestsTab";
 import MembersListTab from "@/components/manager/members/MembersListTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetMyClubs } from "@/hooks/club/useClub";
 import { useTranslations } from "@/providers/i18n-provider";
 
@@ -42,21 +40,9 @@ export default function ManagerMembers() {
   }
 
   return (
-    <div className="space-y-4 px-6 py-4">
-      <Tabs defaultValue="members" className="w-full">
-        <TabsList>
-          <TabsTrigger value="members">{t("memberlist")}</TabsTrigger>
-          <TabsTrigger value="join-requests">{t("requests")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="members" className="mt-4">
-          <MembersListTab clubId={clubId} />
-        </TabsContent>
-
-        <TabsContent value="join-requests" className="mt-4">
-          <JoinRequestsTab clubId={clubId} />
-        </TabsContent>
-      </Tabs>
+    <div className="space-y-4">
+      <h2 className="text-2xl font-semibold text-greyscale-0 ">{t("memberlist")}</h2>
+      <MembersListTab clubId={clubId} />
     </div>
   );
 }

@@ -4,11 +4,8 @@ import { AxiosError } from "axios";
 import React from "react";
 import toast from "react-hot-toast";
 import { GoZap } from "react-icons/go";
-import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import CourseVersionStatusBadge from "@/components/course/CourseVersionStatusBadge";
-import AssignCourseVersionCategoriesDialog from "@/components/system/course-edit/AssignCourseVersionCategoriesDialog";
-import AssignCourseVersionRequiredDronesDialog from "@/components/system/course-edit/AssignCourseVersionRequiredDronesDialog";
 import UpdateCourseVersionDialog from "@/components/system/course-edit/UpdateCourseVersionDialog";
 import { Empty } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
@@ -96,10 +93,6 @@ export default function CourseInfoTab({
   const isDeleting = deleteCourseVersionMutation.isPending;
 
   const handleActivateVersion = async () => {
-    if (version.categories.length === 0 || version.requiredDrones.length === 0) {
-      toast.error("Vui lòng gán danh mục và drone yêu cầu trước khi kích hoạt.");
-      return;
-    }
 
     if (version.certificate === null) {
       toast.error("Vui lòng tạo chứng nhận hoàn thành trước khi kích hoạt.");
@@ -171,7 +164,6 @@ export default function CourseInfoTab({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <CourseLevelBadge level={version.level || t("level.unknown")} />
               <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary/40">
                 {version.estimatedDuration ?? t("duration.unknown")} {t("duration.label")}
               </span>
@@ -248,100 +240,6 @@ export default function CourseInfoTab({
             <p className="text-sm text-greyscale-100">{version.changeLog}</p>
           </div>
         ) : null}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-greyscale-0">{t("category.label")}</h3>
-            {isDraftVersion ? (
-              <AssignCourseVersionCategoriesDialog
-                courseId={courseId}
-                versionId={version.courseVersionID}
-                defaultCategoryIDs={version.categories.map((category) => category.categoryID)}
-              />
-            ) : null}
-          </div>
-          {version.categories.length === 0 ? (
-            <p className="text-sm text-greyscale-300">{t("category.empty")}</p>
-          ) : (
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-              {version.categories.map((category) => {
-                const categoryName =
-                  locale === "en"
-                    ? category.typeNameEN || category.typeNameVN
-                    : category.typeNameVN || category.typeNameEN;
-                const categoryDescription =
-                  locale === "en"
-                    ? category.descriptionEN || category.descriptionVN
-                    : category.descriptionVN || category.descriptionEN;
-
-                return (
-                  <div
-                    key={category.categoryID}
-                    className="rounded border border-greyscale-700 bg-greyscale-800 p-3"
-                  >
-                    <p className="text-sm font-semibold text-greyscale-0">{categoryName}</p>
-                    <p className="mt-1 line-clamp-3 text-xs text-greyscale-200">
-                      {categoryDescription}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        <div className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-greyscale-0">
-              {t("drone.label")}
-            </h3>
-            {isDraftVersion ? (
-              <AssignCourseVersionRequiredDronesDialog
-                courseId={courseId}
-                versionId={version.courseVersionID}
-                defaultDroneIDs={version.requiredDrones.map((drone) => drone.droneID)}
-              />
-            ) : null}
-          </div>
-          {version.requiredDrones.length === 0 ? (
-            <p className="text-sm text-greyscale-300">{t("drone.empty")}</p>
-          ) : (
-            <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-              {version.requiredDrones.map((drone) => {
-                const droneName =
-                  locale === "en"
-                    ? drone.droneNameEN || drone.droneNameVN
-                    : drone.droneNameVN || drone.droneNameEN;
-                const droneTypeName =
-                  locale === "en"
-                    ? drone.droneTypeNameEN || drone.droneTypeNameVN
-                    : drone.droneTypeNameVN || drone.droneTypeNameEN;
-
-                const description =
-                  locale === "en"
-                    ? drone.descriptionEN || drone.descriptionVN
-                    : drone.descriptionVN || drone.descriptionEN;
-
-                return (
-                  <div
-                    key={drone.droneID}
-                    className="space-y-2 rounded border border-greyscale-700 bg-greyscale-800 p-3"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-greyscale-0">{droneName}</p>
-                        <p className="text-xs text-greyscale-25">{droneTypeName}</p>
-                      </div>
-                    </div>
-                    <p className="line-clamp-3 text-xs text-greyscale-200">{description}</p>
-                    
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

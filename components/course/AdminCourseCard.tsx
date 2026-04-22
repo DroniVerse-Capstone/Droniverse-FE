@@ -41,6 +41,8 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
   const titleEN = version?.titleEN || "";
   const courseSlug = `${slugify(title)}-${course.courseID}`;
   const imageUrl = version?.imageUrl || "/images/club-placeholder.jpg";
+  const droneName = course.drone?.name || "";
+  const droneImageUrl = course.drone?.imgURL || "/images/drone-placeholder.jpg";
   const description = locale === "en" ? version?.descriptionEN || version?.descriptionVN || t("description") : version?.descriptionVN || version?.descriptionEN || t("description");
   const creatorDisplay = course.creator?.fullName
     ? `${course.creator.fullName}${course.creator.email ? ` (${course.creator.email})` : ""}`
@@ -149,8 +151,8 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
 
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {version?.level ? (
-            <CourseLevelBadge level={version.level} />
+          {course?.level ? (
+            <CourseLevelBadge level={course.level} />
           ) : null}
           <div className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {version?.estimatedDuration ?? t("unknown")} {t("min")}
@@ -164,6 +166,25 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
       </h3>
 
       <p className="mb-4 line-clamp-3 text-sm text-greyscale-100">{description}</p>
+
+      {course.drone ? (
+        <div className="mb-4 rounded border border-greyscale-700 bg-greyscale-850/50 p-2.5">
+          <p className="mb-2 text-xs font-semibold text-greyscale-300">
+            {locale === "en" ? "Required Drone" : "Drone yêu cầu"}
+          </p>
+          <div className="flex items-center gap-2.5">
+            <div className="relative h-10 w-14 shrink-0 overflow-hidden rounded border border-greyscale-700">
+              <Image
+                src={droneImageUrl}
+                alt={droneName}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <p className="line-clamp-1 text-sm text-greyscale-100">{droneName}</p>
+          </div>
+        </div>
+      ) : null}
 
       <CourseProductPriceSection
         course={course}
