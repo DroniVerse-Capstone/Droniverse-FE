@@ -41,9 +41,9 @@ export const useGetClubCourses = (
 		queryKey: [
 			"club-courses",
 			clubId,
-			options?.level,
+			options?.levelId,
+			options?.droneId,
 			options?.participationSort,
-			options?.courseOwner,
 			options?.courseName,
 			options?.currentPage,
 			options?.pageSize,
@@ -58,12 +58,10 @@ export const useGetClubCourses = (
 
 			const response = await apiClient.get(`/academy/courses/club/${clubId}`, {
 				params: {
-					...(parsedOptions.level && { Level: parsedOptions.level }),
+					...(parsedOptions.levelId && { levelId: parsedOptions.levelId }),
+					...(parsedOptions.droneId && { droneId: parsedOptions.droneId }),
 					...(parsedOptions.participationSort && {
 						ParticipationSort: parsedOptions.participationSort,
-					}),
-					...(parsedOptions.courseOwner && {
-						CourseOwner: parsedOptions.courseOwner,
 					}),
 					...(parsedOptions.courseName && { CourseName: parsedOptions.courseName }),
 					CurrentPage: parsedOptions.currentPage,

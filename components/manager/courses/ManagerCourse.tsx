@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Search } from "lucide-react";
 
 import AppPagination from "@/components/common/AppPagination";
 import ClubCourseCard from "@/components/club/ClubCourseCard";
@@ -13,12 +12,13 @@ import EmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { useGetClubDetailById } from "@/hooks/club/useClub";
 import { useGetClubCourses } from "@/hooks/club/useClubCourse";
-import { COURSE_LEVELS } from "@/lib/constants/course";
+import { useGetLevelsByDrone } from "@/hooks/level/useLevel";
+import { getCourseLevel } from "@/lib/constants/course";
 import { useTranslations } from "@/providers/i18n-provider";
 import {
   ClubCourseLevel,
-  CourseOwner,
   ParticipationSort,
 } from "@/validations/club/club-course";
 import { IoFilterSharp } from "react-icons/io5";
@@ -44,29 +44,26 @@ export default function ManagerCourse() {
     { value: "LeastPopular", label: t("sort.leastPopular") },
   ];
 
-  const ownerOptions: InlineFilterOption<CourseOwner>[] = [
-    { value: "Owned", label: t("owner.owned") },
-    { value: "NotOwned", label: t("owner.notOwned") },
-  ];
-
   const [selectedLevel, setSelectedLevel] = React.useState<ClubCourseLevel | null>(
     null,
   );
   const [selectedSort, setSelectedSort] =
     React.useState<ParticipationSort | null>(null);
-  const [selectedOwner, setSelectedOwner] = React.useState<CourseOwner | null>(
-    null,
-  );
   const [searchInput, setSearchInput] = React.useState("");
   const [searchKeyword, setSearchKeyword] = React.useState<string | undefined>(
     undefined,
   );
   const [currentPage, setCurrentPage] = React.useState(1);
 
+  const { data: clubDetail } = useGetClubDetailById(clubId);
+  const droneId = clubDetail?.drone?.droneID;
+
+  const { data: levelsByDrone } = useGetLevelsByDrone(droneId);
+
   const { data, isLoading, isError, error, isFetching } = useGetClubCourses(clubId, {
-    // level: selectedLevel,
+    levelId: selectedLevel ?? undefined,
+    droneId,
     participationSort: selectedSort,
-    // courseOwner: selectedOwner,
     courseName: searchKeyword,
     currentPage,
     pageSize: 12,
@@ -78,11 +75,11 @@ export default function ManagerCourse() {
 
   const levelOptions = React.useMemo<InlineFilterOption<ClubCourseLevel>[]>(
     () =>
-      COURSE_LEVELS.filter((level) => level.value !== null).map((level) => ({
-        value: level.value as ClubCourseLevel,
-        label: t(`${level.label}`),
+      (levelsByDrone ?? []).map((level) => ({
+        value: level.levelID,
+        label: t(getCourseLevel(level.name)),
       })),
-    [t],
+    [levelsByDrone, t],
   );
 
   const handleSearch = React.useCallback(() => {
@@ -107,10 +104,6 @@ export default function ManagerCourse() {
     setCurrentPage(1);
   }, []);
 
-  const updateOwner = React.useCallback((value: CourseOwner | null) => {
-    setSelectedOwner(value);
-    setCurrentPage(1);
-  }, []);
 
   if (!clubId) {
     return (
@@ -209,10 +202,10 @@ export default function ManagerCourse() {
                 <ClubCourseCard
                   key={course.courseId}
                   course={course}
-                  // onClick={() => {
-                  //   if (!clubSlug) return;
-                  //   router.push(`/manager/${clubSlug}/${course.courseId}`);
-                  // }}
+                  onClick={() => {
+                    if (!clubSlug) return;
+                    router.push(`/manager/${clubSlug}/courses/${course.courseId}`);
+                  }}
                 />
               ))}
             </div>

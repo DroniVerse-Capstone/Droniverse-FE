@@ -12,8 +12,10 @@ import EmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { useGetClubDetailById } from "@/hooks/club/useClub";
 import { useGetClubCourses } from "@/hooks/club/useClubCourse";
-import { COURSE_LEVELS } from "@/lib/constants/course";
+import { useGetLevelsByDrone } from "@/hooks/level/useLevel";
+import { getCourseLevel } from "@/lib/constants/course";
 import { useTranslations } from "@/providers/i18n-provider";
 import {
   ClubCourseLevel,
@@ -52,10 +54,16 @@ export default function MemberCourse() {
   );
   const [currentPage, setCurrentPage] = React.useState(1);
 
+  const { data: clubDetail } = useGetClubDetailById(clubId);
+  const droneId = clubDetail?.drone?.droneID;
+
+  const { data: levelsByDrone } = useGetLevelsByDrone(droneId);
+
   const { data, isLoading, isError, error, isFetching } = useGetClubCourses(
     clubId,
     {
-      level: selectedLevel,
+      levelId: selectedLevel ?? undefined,
+      droneId,
       participationSort: selectedSort,
       courseName: searchKeyword,
       currentPage,
@@ -68,11 +76,11 @@ export default function MemberCourse() {
 
   const levelOptions = React.useMemo<InlineFilterOption<ClubCourseLevel>[]>(
     () =>
-      COURSE_LEVELS.filter((level) => level.value !== null).map((level) => ({
-        value: level.value as ClubCourseLevel,
-        label: t(level.label),
+      (levelsByDrone ?? []).map((level) => ({
+        value: level.levelID,
+        label: t(getCourseLevel(level.name)),
       })),
-    [t],
+    [levelsByDrone, t],
   );
 
   const handleSearch = React.useCallback(() => {

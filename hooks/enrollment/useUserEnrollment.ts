@@ -42,9 +42,9 @@ export const useGetUserEnrollments = (
 
 			const params = new URLSearchParams()
 
-			if (options?.level) {
-				params.append("level", options.level)
-			}
+			// if (options?.level) {
+			// 	params.append("level", options.level)
+			// }
 
 			if (options?.courseSearchName) {
 				params.append("courseSearchName", options.courseSearchName)

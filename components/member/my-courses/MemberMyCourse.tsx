@@ -14,7 +14,6 @@ import { CourseLevel, EnrollmentStatus } from "@/validations/enrollment/user-enr
 import InlineFilterRow, {
   InlineFilterOption,
 } from "@/components/common/InlineFilterRow";
-import { COURSE_LEVELS } from "@/lib/constants/course";
 import { IoFilterSharp } from "react-icons/io5";
 import UserEnrollmentCard from "@/components/member/UserEnrollmentCard";
 
@@ -62,15 +61,6 @@ export default function MemberMyCourse() {
   const courses = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
 
-  const levelOptions = React.useMemo<InlineFilterOption<CourseLevel>[]>(
-    () =>
-      COURSE_LEVELS.filter((level) => level.value !== null).map((level) => ({
-        value: level.value as CourseLevel,
-        label: t(level.label),
-      })),
-    [t],
-  );
-
   const handleSearch = React.useCallback(() => {
     const normalized = searchInput.trim();
     setCurrentPage(1);
@@ -110,15 +100,7 @@ export default function MemberMyCourse() {
               <IoFilterSharp />
               <p className="text-sm font-semibold">{t("filter")}</p>
             </div>
-
-            <InlineFilterRow
-              label={t("level.label")}
-              selectedValue={selectedLevel}
-              options={levelOptions}
-              onChange={updateLevel}
-              allLabel={t("level.all")}
-            />
-
+            
             <InlineFilterRow
               label="Trạng thái"
               selectedValue={selectedStatus}
