@@ -88,7 +88,7 @@ export const clubCourseSchema = z.object({
 	imageUrl: z.string().nullable(),
 	estimatedDuration: z.number().int().nonnegative(),
 	price: z.number().int().nonnegative(),
-	clubCourseOwned: clubCourseOwnedSchema.nullable(),
+	// clubCourseOwned: clubCourseOwnedSchema.nullable(),
 })
 
 export const getClubCoursesDataSchema = z.object({
@@ -147,7 +147,7 @@ export const getClubCourseOverviewQuerySchema = z.object({
 export type ClubCourseLevel = z.infer<typeof clubCourseLevelSchema>
 export type ParticipationSort = z.infer<typeof participationSortSchema>
 export type CourseOwner = z.infer<typeof courseOwnerSchema>
-export type ClubCourseOwned = z.infer<typeof clubCourseOwnedSchema>
+// export type ClubCourseOwned = z.infer<typeof clubCourseOwnedSchema>
 export type ClubCourseOverviewUser = z.infer<typeof clubCourseOverviewUserSchema>
 export type ClubCourseOverviewMiniProduct = z.infer<
 	typeof clubCourseOverviewMiniProductSchema
