@@ -1411,6 +1411,10 @@
   },
   "ManagerCourse": {
     "filter": "Bộ lọc",
+    "Beginner": "Cơ bản",
+    "Intermediate": "Trung bình",
+    "Advanced": "Nâng cao",
+    "Master": "Bậc thầy",
     "level": {
       "label": "Cấp độ:",
       "all": "Tất cả",

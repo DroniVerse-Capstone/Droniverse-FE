@@ -1,7 +1,5 @@
 import { z } from "zod"
 
-export const clubCourseLevelSchema = z.enum(["EASY", "MEDIUM", "HARD"])
-
 export const clubCourseLevelObjectSchema = z.object({
 	levelID: z.string().uuid(),
 	levelNumber: z.number().int().nonnegative(),
@@ -20,12 +18,6 @@ export const participationSortSchema = z.enum([
 	"LeastPopular",
 ])
 
-export const courseOwnerSchema = z.enum(["All", "Owned", "NotOwned"])
-
-export const clubCourseOwnedSchema = z.object({
-	remainingCode: z.number().int().nonnegative(),
-	profitType: z.enum(["PROFIT", "NONPROFIT"]),
-})
 
 export const clubCourseOverviewUserSchema = z.object({
 	userId: z.string().uuid(),
@@ -88,7 +80,6 @@ export const clubCourseSchema = z.object({
 	imageUrl: z.string().nullable(),
 	estimatedDuration: z.number().int().nonnegative(),
 	price: z.number().int().nonnegative(),
-	// clubCourseOwned: clubCourseOwnedSchema.nullable(),
 })
 
 export const getClubCoursesDataSchema = z.object({
@@ -126,9 +117,9 @@ export const getClubCourseOverviewResponseSchema = z.object({
 })
 
 export const getClubCoursesQuerySchema = z.object({
-	level: clubCourseLevelSchema.nullable().optional(),
+	levelId: z.string().uuid().nullable().optional(),
+	droneId: z.string().uuid().nullable().optional(),
 	participationSort: participationSortSchema.nullable().optional(),
-	courseOwner: courseOwnerSchema.nullable().optional(),
 	courseName: z.string().trim().min(1).optional(),
 	currentPage: z.number().int().positive().default(1),
 	pageSize: z.number().int().positive().default(5),
@@ -144,10 +135,7 @@ export const getClubCourseOverviewQuerySchema = z.object({
 	courseId: z.string().uuid(),
 })
 
-export type ClubCourseLevel = z.infer<typeof clubCourseLevelSchema>
 export type ParticipationSort = z.infer<typeof participationSortSchema>
-export type CourseOwner = z.infer<typeof courseOwnerSchema>
-// export type ClubCourseOwned = z.infer<typeof clubCourseOwnedSchema>
 export type ClubCourseOverviewUser = z.infer<typeof clubCourseOverviewUserSchema>
 export type ClubCourseOverviewMiniProduct = z.infer<
 	typeof clubCourseOverviewMiniProductSchema
@@ -169,3 +157,4 @@ export type GetClubCourseOverviewResponse = z.infer<
 export type GetClubCourseOverviewQuery = z.infer<
 	typeof getClubCourseOverviewQuerySchema
 >
+export type ClubCourseLevel = string
