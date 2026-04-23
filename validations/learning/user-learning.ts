@@ -7,9 +7,9 @@ export const lessonSchema = z.object({
 	orderIndex: z.number().int().positive(),
 	type: lessonTypeSchema,
 	referenceID: z.string().uuid(),
-	titleVN: z.string(),
-	titleEN: z.string(),
-	duration: z.number().int().nonnegative(),
+	titleVN: z.string().nullable(),
+	titleEN: z.string().nullable(),
+	duration: z.number().int().nonnegative().nullish(),
 	progress: z.number().min(0).max(100),
 	isCompleted: z.boolean(),
 	isLocked: z.boolean(),
@@ -18,8 +18,8 @@ export const lessonSchema = z.object({
 
 export const moduleSchema = z.object({
 	moduleID: z.string().uuid(),
-	titleVN: z.string(),
-	titleEN: z.string(),
+	titleVN: z.string().nullable(),
+	titleEN: z.string().nullable(),
 	moduleNumber: z.number().int().positive(),
 	totalLessons: z.number().int().nonnegative(),
 	duration: z.number().int().nonnegative(),

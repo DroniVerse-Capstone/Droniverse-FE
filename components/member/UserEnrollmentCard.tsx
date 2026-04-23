@@ -43,7 +43,7 @@ export default function UserEnrollmentCard({
 
       <div className="flex flex-1 flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <CourseLevelBadge level={enrollment.level} />
+          {/* <CourseLevelBadge level={enrollment.level} /> */}
           <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {enrollment.estimatedDuration} phút
           </span>
