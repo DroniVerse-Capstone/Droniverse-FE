@@ -10,7 +10,7 @@ export const userEnrollmentSchema = z.object({
 	courseNameVN: z.string(),
 	courseNameEN: z.string(),
 	imageUrl: z.string().nullable(),
-	level: levelSchema,
+	// level: levelSchema,
 	estimatedDuration: z.number().int().nonnegative(),
 	progress: z.number().min(0).max(100),
 	enrollStatus: enrollmentStatusSchema,
