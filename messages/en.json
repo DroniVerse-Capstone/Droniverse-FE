@@ -1415,6 +1415,10 @@
   },
   "ManagerCourse": {
     "filter": "Filter",
+    "Beginner": "Beginner",
+    "Intermediate": "Intermediate",
+    "Advanced": "Advanced",
+    "Master": "Master",
     "level": {
       "label": "Level:",
       "all": "All",

@@ -5,7 +5,6 @@ import { PiCertificateBold } from "react-icons/pi";
 import { Progress } from "@/components/ui/progress";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { UserEnrollment } from "@/validations/enrollment/user-enrollment";
-import { div } from "three/src/nodes/math/OperatorNode.js";
 
 type UserEnrollmentCardProps = {
   enrollment: UserEnrollment;
@@ -43,7 +42,7 @@ export default function UserEnrollmentCard({
 
       <div className="flex flex-1 flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          {/* <CourseLevelBadge level={enrollment.level} /> */}
+          <CourseLevelBadge level={enrollment.level} />
           <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
             {enrollment.estimatedDuration} phút
           </span>

@@ -32,9 +32,9 @@ const formatPrice = (value: number, currency: "USD" | "VND") => {
 export default function ManagerCourseOverview() {
   const router = useRouter();
   const locale = useLocale();
-  const params = useParams<{ clubSlug?: string; courseSlug?: string }>();
+  const params = useParams<{ clubSlug?: string; courseId?: string }>();
   const clubSlug = params?.clubSlug;
-  const courseSlug = params?.courseSlug;
+  const courseSlug = params?.courseId;
 
   const clubId = React.useMemo(() => {
     if (!clubSlug) return undefined;
@@ -96,7 +96,7 @@ export default function ManagerCourseOverview() {
   const authorName = data.author.fullName;
 
   return (
-    <div className="px-6 py-4">
+    <div>
       {/* Back lại trang courses */}
       <div className="mb-5 flex items-center gap-4">
         <Button
@@ -110,7 +110,7 @@ export default function ManagerCourseOverview() {
           Quay lại
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-5">
         <div className="space-y-5">
           <CourseOverviewHero
             title={courseTitle}
@@ -163,11 +163,6 @@ export default function ManagerCourseOverview() {
                 ? formatPrice(data.miniProduct.price, data.miniProduct.currency)
                 : "-"}
             </p>
-            <p className="mt-2 text-base font-semibold text-greyscale-0">
-              {data.clubCourseOwn
-                ? `${data.clubCourseOwn.remainingQuantity} mã còn lại`
-                : "Chưa sở hữu"}
-            </p>
 
             <div className="my-4 h-px bg-greyscale-600" />
 
@@ -193,21 +188,6 @@ export default function ManagerCourseOverview() {
                 {data.totalQuiz} bài kiểm tra
               </li>
             </ul>
-
-            <div className="my-4 h-px bg-greyscale-600" />
-
-            <div className="w-full">
-              <Button
-                variant="default"
-                className="w-full"
-                onClick={() => {
-                  if (!clubSlug || !courseSlug) return;
-                  router.push(`/manager/${clubSlug}/${courseSlug}/checkout`);
-                }}
-              >
-                Mua mã
-              </Button>
-            </div>
           </div>
         </aside>
       </div>
