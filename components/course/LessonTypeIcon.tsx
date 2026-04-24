@@ -4,6 +4,7 @@ import { GoBook } from "react-icons/go";
 
 import { LessonType } from "@/validations/lesson/lesson";
 import { TbAtom, TbDrone, TbEngine } from "react-icons/tb";
+import { cn } from "@/lib/utils";
 
 type LessonTypeIconProps = {
   type: LessonType;
@@ -19,10 +20,27 @@ const iconByType: Record<LessonType, React.ReactNode> = {
   VR: <BsHeadsetVr size={18} />,
 };
 
+const colorByType: Record<LessonType, { bg: string; text: string; border: string }> = {
+  THEORY: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  QUIZ: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  LAB: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  LAB_PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  VR: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+};
+
 export default function LessonTypeIcon({ type, className }: LessonTypeIconProps) {
+  const colors = colorByType[type] || { bg: "bg-greyscale-900", text: "text-primary", border: "border-greyscale-700" };
+
   return (
     <span
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-full bg-greyscale-900 border border-greyscale-700 text-primary ${className || ""}`}
+      className={cn(
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all",
+        colors.bg,
+        colors.text,
+        colors.border,
+        className
+      )}
       title={type}
       aria-label={`Lesson type: ${type}`}
     >

@@ -17,7 +17,7 @@ type LearningPathModuleItemProps = {
   isExpanded: boolean;
   selectedLessonId?: string | null;
   onToggle: (moduleId: string) => void;
-  onSelectLesson?: (lesson: Lesson) => void;
+  onSelectLesson?: (lesson: Lesson | null) => void;
 };
 
 export default function LearningPathModuleItem({

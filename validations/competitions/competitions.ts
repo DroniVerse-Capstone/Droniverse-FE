@@ -81,6 +81,10 @@ export const assignCompetitionCertificatesRequestSchema = z.object({
 	certificateIDs: z.array(z.string()).min(1),
 })
 
+export const assignCompetitionLevelsRequestSchema = z.object({
+	levelIds: z.array(z.string()).min(1),
+})
+
 const baseCompetitionRequestFields = {
 	nameVN: z.string(),
 	nameEN: z.string(),
@@ -162,6 +166,12 @@ export const roundLifeCycleStatusSchema = z.enum([
 	"Finished",
 ])
 
+export const roundStatusSchema = z.enum([
+	"Valid",
+	"ScheduleInvalid",
+	"Cancelled",
+])
+
 export const competitionRoundSchema = z.object({
 	roundID: z.string(),
 	competition: z.object({
@@ -169,16 +179,16 @@ export const competitionRoundSchema = z.object({
 		nameVN: z.string(),
 		nameEN: z.string(),
 	}),
-	lab: z.object({
-		labID: z.string(),
-		labNameVN: z.string(),
-		labNameEN: z.string(),
+	vrSimulator: z.object({
+		vrSimulatorId: z.string(),
+		titleVN: z.string(),
+		titleEN: z.string(),
 	}),
 	roundNumber: z.number().int().nonnegative(),
 	startTime: z.string(),
 	endTime: z.string(),
 	timeLimit: z.string(), // "HH:mm:ss"
-	roundStatus: z.string(),
+	roundStatus: roundStatusSchema,
 	roundPhase: roundLifeCycleStatusSchema,
 	totalParticipants: z.number().int().nonnegative(),
 })
@@ -191,10 +201,17 @@ export const getCompetitionRoundsResponseSchema = z.object({
 
 export const createRoundRequestSchema = z.object({
 	competitionID: z.string(),
-	labID: z.string(),
+	vrSimilatorID: z.string(),
 	startTime: z.string(), // ISO String
 	endTime: z.string(), // ISO String
 	limitTime: z.string(), // "HH:mm:ss"
+})
+
+export const updateRoundRequestSchema = z.object({
+	vrSimulatorID: z.string(),
+	startTime: z.string(), // ISO String
+	endTime: z.string(), // ISO String
+	timeLimit: z.string(), // "HH:mm:ss"
 })
 
 export type CompetitionStatus = z.infer<typeof competitionStatusSchema>
@@ -208,7 +225,8 @@ export type UpdateCompetitionRequest = z.infer<typeof updateCompetitionRequestSc
 export type CompetitionCertificate = z.infer<typeof competitionCertificateSchema>
 export type AssignCompetitionCertificatesRequest = z.infer<typeof assignCompetitionCertificatesRequestSchema>
 export type CompetitionPrize = z.infer<typeof competitionPrizeSchema>
-export type CreateCompetitionPrizeRequest = z.infer<typeof createCompetitionPrizeRequestSchema>
 export type CompetitionRound = z.infer<typeof competitionRoundSchema>
 export type CreateRoundRequest = z.infer<typeof createRoundRequestSchema>
+export type UpdateRoundRequest = z.infer<typeof updateRoundRequestSchema>
+export type CreateCompetitionPrizeRequest = z.infer<typeof createCompetitionPrizeRequestSchema>
 

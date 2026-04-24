@@ -11,7 +11,7 @@ import type { Lesson } from "@/validations/learning/user-learning";
 type LearningPathLessonItemProps = {
   lesson: Lesson;
   isActive: boolean;
-  onSelectLesson?: (lesson: Lesson) => void;
+  onSelectLesson?: (lesson: Lesson | null) => void;
 };
 
 export default function LearningPathLessonItem({

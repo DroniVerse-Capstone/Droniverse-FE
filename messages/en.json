@@ -1611,6 +1611,14 @@
     "fallback": {
       "noDescription": "No description available for this competition."
     },
+    "delete": {
+      "title": "Confirm delete competition?",
+      "description": "This action cannot be undone. Are you sure you want to delete this competition?",
+      "confirmText": "Delete",
+      "cancelText": "Cancel",
+      "toastSuccess": "Competition deleted successfully",
+      "toastError": "Failed to delete competition"
+    },
     "createDialog": {
       "title": "Create New Competition",
       "subtitle": "Fill in the basic info to initialize a competition (DRAFT status). You can edit it later.",
@@ -1672,8 +1680,8 @@
     "detailPage": {
       "tabs": {
         "overview": "Overview",
-        "rounds": "Rounds",
-        "certificates": "Required Certificates",
+        "rounds": "Competition Rounds",
+        "conditions": "Participation Conditions",
         "prizes": "Prizes"
       },
       "rounds": {
@@ -1704,6 +1712,11 @@
           "Upcoming": "Upcoming",
           "Ongoing": "Ongoing",
           "Finished": "Finished"
+        },
+        "statuses": {
+          "Valid": "Valid",
+          "ScheduleInvalid": "Schedule Invalid",
+          "Cancelled": "Cancelled"
         },
         "table": {
           "round": "Round",

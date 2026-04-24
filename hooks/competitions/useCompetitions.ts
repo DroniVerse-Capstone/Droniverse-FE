@@ -13,7 +13,9 @@ import {
 	CreateCompetitionRequest,
 	CompetitionCertificate,
 	getCompetitionCertificatesResponseSchema,
+	assignCompetitionLevelsRequestSchema,
 } from "@/validations/competitions/competitions"
+import { getLevelsByDroneResponseSchema, Level } from "@/validations/level/level"
 
 type UseGetCompetitionsByClubOptions = {
 	status?: CompetitionStatus | null
@@ -78,3 +80,52 @@ export const useGetCompetitionDetail = (id?: string) => {
 	});
 }
 
+export const useDeleteCompetition = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, string>({
+		mutationFn: async (id) => {
+			await apiClient.delete(`/community/competitions/${id}`);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["club-competitions"] });
+		}
+	});
+}
+
+export const useGetCompetitionLevels = (competitionId?: string) => {
+	return useQuery<Level[], AxiosError<ApiError>>({
+		queryKey: ["competition-levels", competitionId],
+		enabled: !!competitionId,
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/competitions/${competitionId}/levels`);
+			const parsed = getLevelsByDroneResponseSchema.parse(response.data);
+			return parsed.data;
+		},
+	});
+};
+
+export const useAssignCompetitionLevels = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, { competitionId: string; levelIds: string[] }>({
+		mutationFn: async ({ competitionId, levelIds }) => {
+			await apiClient.post(`/community/competitions/${competitionId}/levels`, { levelIds });
+		},
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: ["competition-levels", variables.competitionId] });
+		},
+	});
+};
+
+export const useDeleteCompetitionLevels = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, { competitionId: string; levelIds: string[] }>({
+		mutationFn: async ({ competitionId, levelIds }) => {
+			await apiClient.delete(`/community/competitions/${competitionId}/levels`, {
+				data: { levelIds },
+			});
+		},
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: ["competition-levels", variables.competitionId] });
+		},
+	});
+};

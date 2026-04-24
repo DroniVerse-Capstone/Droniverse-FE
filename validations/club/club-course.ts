@@ -1,12 +1,10 @@
 import { z } from "zod"
 
+import { levelSchema } from "../level/level"
+
 export const clubCourseLevelSchema = z.enum(["EASY", "MEDIUM", "HARD"])
 
-export const clubCourseLevelObjectSchema = z.object({
-	levelID: z.string().uuid(),
-	levelNumber: z.number().int().nonnegative(),
-	name: z.string(),
-})
+export const clubCourseLevelObjectSchema = levelSchema
 
 export const clubCourseDroneSchema = z.object({
 	droneID: z.string().uuid(),

@@ -10,6 +10,7 @@ import { WEIGHT_FORCE_N } from "./PhysicsBasicsEngine";
 interface ViewerProps {
   state: PhysicsState;
   lessonId: LessonId;
+  hideOverlays?: boolean;
 }
 
 // Scale factor for arrow visualization (arbitrary for display)
@@ -50,7 +51,8 @@ function VectorArrow({
   visible,
   label,
   labelValue,
-  position = [0, 0, 0]
+  position = [0, 0, 0],
+  hideOverlays
 }: {
   direction: [number, number, number],
   length: number,
@@ -58,7 +60,8 @@ function VectorArrow({
   visible: boolean,
   label?: string,
   labelValue?: string,
-  position?: [number, number, number]
+  position?: [number, number, number],
+  hideOverlays?: boolean
 }) {
   const meshRef = useRef<THREE.Group>(null);
   const targetScale = Math.max(0.01, length);
@@ -88,7 +91,7 @@ function VectorArrow({
             <meshBasicMaterial color={color} transparent opacity={0.95} />
           </mesh>
         </group>
-        {label && length > 0.05 && (
+        {label && length > 0.05 && !hideOverlays && (
           <Html position={[0.15, length * 0.5 + 0.2, 0]} center>
             <div className="px-2 py-1 rounded bg-black/90 border border-white/20 backdrop-blur-md shadow-xl">
               <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap block" style={{ color }}>{label}</span>
@@ -106,13 +109,15 @@ function TorqueIndicator({
   rpm,
   color,
   label,
-  isCW
+  isCW,
+  hideOverlays
 }: {
   position: number[],
   rpm: number,
   color: string,
   label: string,
-  isCW: boolean
+  isCW: boolean,
+  hideOverlays?: boolean
 }) {
   const meshRef = useRef<THREE.Group>(null);
 
@@ -151,14 +156,16 @@ function TorqueIndicator({
       </group>
 
       {/* Label */}
-      <Html position={[0, 0.15, 0]} center>
-        <div className="flex flex-col items-center gap-0.5 pointer-events-none">
-          <span className="text-[7px] font-black uppercase tracking-tighter opacity-40 text-white">{label}</span>
-          <div className="px-1.5 py-0.5 rounded-full bg-black/60 border border-white/10 backdrop-blur-sm shadow-xl">
-            <span className="text-[9px] font-bold" style={{ color }}>{Math.round(rpm)}</span>
+      {!hideOverlays && (
+        <Html position={[0, 0.15, 0]} center>
+          <div className="flex flex-col items-center gap-0.5 pointer-events-none">
+            <span className="text-[7px] font-black uppercase tracking-tighter opacity-40 text-white">{label}</span>
+            <div className="px-1.5 py-0.5 rounded-full bg-black/60 border border-white/10 backdrop-blur-sm shadow-xl">
+              <span className="text-[9px] font-bold" style={{ color }}>{Math.round(rpm)}</span>
+            </div>
           </div>
-        </div>
-      </Html>
+        </Html>
+      )}
     </group>
   );
 }
@@ -194,7 +201,7 @@ function WindParticles({ windForce, visible }: { windForce: number, visible: boo
   );
 }
 
-function DroneModel({ state, lessonId }: ViewerProps) {
+function DroneModel({ state, lessonId, hideOverlays }: ViewerProps) {
   const { scene } = useGLTF("/models/quadcopter.glb");
   const groupRef = useRef<THREE.Group>(null);
   const propsRef = useRef<THREE.Object3D[]>([]);
@@ -299,9 +306,11 @@ function DroneModel({ state, lessonId }: ViewerProps) {
         <mesh position={[state.weightOffset * 0.7, 0.1, 0]}>
           <sphereGeometry args={[0.08]} />
           <meshStandardMaterial color="#f43f5e" emissive="#f43f5e" emissiveIntensity={2} />
-          <Html center position={[0, 0.2, 0]}>
-            <span className="text-[8px] font-black text-red-400 uppercase tracking-widest whitespace-nowrap px-2 py-0.5 bg-black/60 rounded border border-red-500/20 backdrop-blur-sm">Trọng tâm</span>
-          </Html>
+          {!hideOverlays && (
+            <Html center position={[0, 0.2, 0]}>
+              <span className="text-[8px] font-black text-red-400 uppercase tracking-widest whitespace-nowrap px-2 py-0.5 bg-black/60 rounded border border-red-500/20 backdrop-blur-sm">Trọng tâm</span>
+            </Html>
+          )}
         </mesh>
       )}
 
@@ -314,6 +323,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
         labelValue={`${state.liftForce.toFixed(1)} N`}
         visible={lessonId === "lift" || lessonId === "equilibrium" || lessonId === "battery"}
         position={SIDE_OFFSETS.center as any}
+        hideOverlays={hideOverlays}
       />
       <VectorArrow
         direction={[0, -1, 0]}
@@ -323,6 +333,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
         labelValue={`${WEIGHT_FORCE_N.toFixed(1)} N`}
         visible={lessonId === "lift" || lessonId === "equilibrium" || lessonId === "battery"}
         position={SIDE_OFFSETS.center as any}
+        hideOverlays={hideOverlays}
       />
 
       {/* Wind */}
@@ -334,6 +345,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
           label="Lực Gió"
           visible={state.windForce > 0}
           position={SIDE_OFFSETS.center as any}
+          hideOverlays={hideOverlays}
         />
       )}
 
@@ -349,6 +361,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
             labelValue={`${state.leftRPM.toFixed(0)} RPM`}
             visible={true}
             position={SIDE_OFFSETS.left as any}
+            hideOverlays={hideOverlays}
           />
           {/* Right Side Lift Arrow */}
           <VectorArrow
@@ -359,6 +372,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
             labelValue={`${state.rightRPM.toFixed(0)} RPM`}
             visible={true}
             position={SIDE_OFFSETS.right as any}
+            hideOverlays={hideOverlays}
           />
           {/* Horizontal Movement Arrow - shows direction of sideways movement */}
           {Math.abs(state.velX) > 0.01 && (
@@ -370,6 +384,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
               labelValue={state.velX > 0 ? "→ Phải" : "← Trái"}
               visible={true}
               position={SIDE_OFFSETS.center as any}
+              hideOverlays={hideOverlays}
             />
           )}
         </>
@@ -386,6 +401,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
             labelValue={`${Math.round(state.frontRPM)} RPM`}
             visible={true}
             position={SIDE_OFFSETS.front as any}
+            hideOverlays={hideOverlays}
           />
           <VectorArrow
             direction={[0, 1, 0]}
@@ -395,6 +411,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
             labelValue={`${Math.round(state.rearRPM)} RPM`}
             visible={true}
             position={SIDE_OFFSETS.rear as any}
+            hideOverlays={hideOverlays}
           />
           {/* Forward movement arrow */}
           {state.velZ > 0.01 && (
@@ -406,6 +423,7 @@ function DroneModel({ state, lessonId }: ViewerProps) {
               labelValue="→ Tiến"
               visible={true}
               position={SIDE_OFFSETS.center as any}
+              hideOverlays={hideOverlays}
             />
           )}
         </>
@@ -414,17 +432,17 @@ function DroneModel({ state, lessonId }: ViewerProps) {
       {/* Yaw Torque - CCW=Blue, CW=Orange (RPM-based) */}
       {lessonId === "yaw" && (
         <>
-          <TorqueIndicator position={MOTOR_OFFSETS.FL} rpm={state.motorFL_RPM} color="#60a5fa" label="FL CCW" isCW={false} />
-          <TorqueIndicator position={MOTOR_OFFSETS.FR} rpm={state.motorFR_RPM} color="#fb923c" label="FR CW" isCW={true} />
-          <TorqueIndicator position={MOTOR_OFFSETS.RL} rpm={state.motorRL_RPM} color="#fb923c" label="RL CW" isCW={true} />
-          <TorqueIndicator position={MOTOR_OFFSETS.RR} rpm={state.motorRR_RPM} color="#60a5fa" label="RR CCW" isCW={false} />
+          <TorqueIndicator position={MOTOR_OFFSETS.FL} rpm={state.motorFL_RPM} color="#60a5fa" label="FL CCW" isCW={false} hideOverlays={hideOverlays} />
+          <TorqueIndicator position={MOTOR_OFFSETS.FR} rpm={state.motorFR_RPM} color="#fb923c" label="FR CW" isCW={true} hideOverlays={hideOverlays} />
+          <TorqueIndicator position={MOTOR_OFFSETS.RL} rpm={state.motorRL_RPM} color="#fb923c" label="RL CW" isCW={true} hideOverlays={hideOverlays} />
+          <TorqueIndicator position={MOTOR_OFFSETS.RR} rpm={state.motorRR_RPM} color="#60a5fa" label="RR CCW" isCW={false} hideOverlays={hideOverlays} />
         </>
       )}
     </group>
   );
 }
 
-export function PhysicsBasicsViewer({ state, lessonId }: ViewerProps) {
+export function PhysicsBasicsViewer({ state, lessonId, hideOverlays }: ViewerProps) {
   return (
     <div className="w-full h-full relative bg-[#020617] rounded-md overflow-hidden border border-white/5 shadow-2xl">
       <Canvas shadows dpr={[1, 2]}>
@@ -451,7 +469,7 @@ export function PhysicsBasicsViewer({ state, lessonId }: ViewerProps) {
 
         <Suspense fallback={null}>
           <WindParticles windForce={state.windForce} visible={lessonId === "wind"} />
-          <DroneModel state={state} lessonId={lessonId} />
+          <DroneModel state={state} lessonId={lessonId} hideOverlays={hideOverlays} />
         </Suspense>
 
         <ContactShadows position={[0, 0, 0]} opacity={0.6} scale={10} blur={2.5} far={4} color="#000000" />
