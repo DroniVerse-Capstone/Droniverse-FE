@@ -29,6 +29,7 @@ type UseGetClubHotCoursesOptions = Omit<
 	GetClubHotCoursesQuery,
 	"currentPage" | "pageSize"
 > & {
+	droneId?: string
 	currentPage?: number
 	pageSize?: number
 }
@@ -80,7 +81,13 @@ export const useGetClubHotCourses = (
 	options?: UseGetClubHotCoursesOptions
 ) => {
 	return useQuery<GetClubHotCoursesData, AxiosError<ApiError>>({
-		queryKey: ["club-hot-courses", clubId, options?.currentPage, options?.pageSize],
+		queryKey: [
+			"club-hot-courses",
+			clubId,
+			options?.droneId,
+			options?.currentPage,
+			options?.pageSize,
+		],
 		enabled: !!clubId,
 		queryFn: async () => {
 			if (!clubId) {
@@ -90,9 +97,10 @@ export const useGetClubHotCourses = (
 			const parsedOptions = getClubHotCoursesQuerySchema.parse(options ?? {})
 
 			const response = await apiClient.get(
-				`/community/clubs/${clubId}/courses/hot`,
+				`/academy/courses/club/${clubId}/hot`,
 				{
 					params: {
+						...(parsedOptions.droneId && { droneId: parsedOptions.droneId }),
 						CurrentPage: parsedOptions.currentPage,
 						PageSize: parsedOptions.pageSize,
 					},

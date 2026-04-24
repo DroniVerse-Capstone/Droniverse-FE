@@ -58,7 +58,7 @@ export default function MemberTheoryLessonContent({
 
   if (theoryDetailQuery.isLoading) {
     return (
-      <div className="mx-auto flex min-h-40 w-full max-w-4xl items-center justify-center rounded-lg border border-greyscale-700 bg-greyscale-900/60 p-6">
+      <div className="mx-auto flex min-h-[60vh] w-full max-w-4xl items-center justify-center rounded-lg border border-greyscale-700 bg-greyscale-900/40 p-8">
         <Spinner className="h-5 w-5" />
       </div>
     );
