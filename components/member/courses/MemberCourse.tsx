@@ -22,6 +22,8 @@ import {
   ParticipationSort,
 } from "@/validations/club/club-course";
 import { IoFilterSharp } from "react-icons/io5";
+import LevelPathDialog from "@/components/course/LevelPathDialog";
+import LearningPathDialog from "@/components/course/LearningPathDialog";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -140,34 +142,46 @@ export default function MemberCourse() {
             />
           </div>
 
-          <div className="flex w-full gap-2 xl:max-w-md">
-            <div className="relative flex-1">
-              <Input
-                type="search"
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    handleSearch();
-                  }
-                }}
-                placeholder={t("searchPlaceholder")}
-              />
-            </div>
-            {searchKeyword ? (
+          <div className="space-y-2 w-full xl:max-w-md">
+            {droneId && (
+              <div className="flex items-center gap-2 justify-end">
+                <LearningPathDialog droneId={droneId} />
+                <LevelPathDialog droneId={droneId} />
+              </div>
+            )}
+            <div className="flex w-full gap-2 xl:max-w-md">
+              <div className="relative flex-1">
+                <Input
+                  type="search"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleSearch();
+                    }
+                  }}
+                  placeholder={t("searchPlaceholder")}
+                />
+              </div>
+              {searchKeyword ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 border-greyscale-700 bg-greyscale-850 text-greyscale-100 hover:bg-greyscale-800"
+                  onClick={clearSearch}
+                >
+                  {t("clearSearch")}
+                </Button>
+              ) : null}
               <Button
                 type="button"
-                variant="outline"
-                className="h-10 border-greyscale-700 bg-greyscale-850 text-greyscale-100 hover:bg-greyscale-800"
-                onClick={clearSearch}
+                className="h-10 px-4"
+                onClick={handleSearch}
               >
-                {t("clearSearch")}
+                {t("search")}
               </Button>
-            ) : null}
-            <Button type="button" className="h-10 px-4" onClick={handleSearch}>
-              {t("search")}
-            </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -204,9 +218,7 @@ export default function MemberCourse() {
                   course={course}
                   onClick={() => {
                     if (!clubSlug) return;
-                    router.push(
-                      `/member/${clubSlug}/${course.courseId}`,
-                    );
+                    router.push(`/member/${clubSlug}/${course.courseId}`);
                   }}
                 />
               ))}

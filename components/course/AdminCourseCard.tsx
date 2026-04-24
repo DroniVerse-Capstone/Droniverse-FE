@@ -48,6 +48,7 @@ export default function AdminCourseCard({ course }: AdminCourseCardProps) {
     pageIndex: 1,
     pageSize: 100,
     droneId,
+    status: "PUBLISH",
     enabled: isPrerequisiteDialogOpen && Boolean(droneId),
   });
   const version = course.currentVersion;

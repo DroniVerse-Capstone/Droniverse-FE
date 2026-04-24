@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetClubHotCourses } from "@/hooks/club/useClubCourse";
 import { useTranslations } from "@/providers/i18n-provider";
+import { useGetClubDetailById } from "@/hooks/club/useClub";
 
 type ClubHotCourseProps = {
   clubId?: string;
@@ -22,7 +23,10 @@ export default function ClubHotCourse({
 }: ClubHotCourseProps) {
   const router = useRouter();
   const t = useTranslations("ClubDetail.ClubHotCourse");
+  const { data: clubDetail } = useGetClubDetailById(clubId);
+  const droneId = clubDetail?.drone?.droneID;
   const { data, isLoading, isError, error } = useGetClubHotCourses(clubId, {
+    droneId,
     currentPage: 1,
     pageSize: 4,
   });

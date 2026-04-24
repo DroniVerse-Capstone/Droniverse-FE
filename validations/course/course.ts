@@ -96,6 +96,8 @@ export const prerequisiteCoursesDataSchema = z.object({
 	courseID: z.string(),
 	titleVN: z.string(),
 	titleEN: z.string(),
+	imageUrl: z.string(),
+	level: courseLevelSchema.nullable(),
 })
 
 export const courseSchema = z.object({

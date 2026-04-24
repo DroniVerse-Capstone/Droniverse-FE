@@ -17,7 +17,10 @@ import {
   meResponseSchema,
   RegisterRequest,
   RegisterResponse,
-  registerResponseSchema
+  registerResponseSchema,
+  VerifyEmailRequest,
+  VerifyEmailResponse,
+  verifyEmailResponseSchema
 } from '@/validations/auth'
 import toast from 'react-hot-toast'
 
@@ -29,6 +32,12 @@ interface UseLoginOptions {
 
 interface UseRegisterOptions {
   onSuccess?: (data: RegisterResponse) => void
+  onError?: (error: AxiosError<ApiError>) => void
+  redirectTo?: string
+}
+
+interface UseVerifyEmailOptions {
+  onSuccess?: (data: VerifyEmailResponse) => void
   onError?: (error: AxiosError<ApiError>) => void
   redirectTo?: string
 }
@@ -149,6 +158,35 @@ export const useRegister = (options?: UseRegisterOptions) => {
     onError: (error) => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Register error:', error)
+      }
+
+      options?.onError?.(error)
+    }
+  })
+}
+
+export const useVerifyEmail = (options?: UseVerifyEmailOptions) => {
+  const router = useRouter()
+
+  return useMutation<VerifyEmailResponse, AxiosError<ApiError>, VerifyEmailRequest>({
+    mutationFn: async (payload: VerifyEmailRequest) => {
+      const response = await apiClient.post<VerifyEmailResponse>(
+        '/identity/auth/verify-email',
+        payload
+      )
+
+      return verifyEmailResponseSchema.parse(response.data)
+    },
+    onSuccess: (data) => {
+      options?.onSuccess?.(data)
+
+      if (options?.redirectTo) {
+        router.push(options.redirectTo)
+      }
+    },
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Verify email error:', error)
       }
 
       options?.onError?.(error)

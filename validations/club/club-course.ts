@@ -60,6 +60,7 @@ export const clubCourseOverviewSchema = z.object({
 	totalLab: z.number().int().nonnegative(),
 	certificateImageUrl: z.string().nullable(),
 	isUnlock: z.boolean(),
+	isEligibleByLevel: z.boolean(),
 	lastUpdatedBy: clubCourseOverviewUserSchema.nullable(),
 	lastUpdatedAt: z.string().nullable(),
 	miniProduct: clubCourseOverviewMiniProductSchema.nullable(),
@@ -124,6 +125,7 @@ export const getClubCoursesQuerySchema = z.object({
 })
 
 export const getClubHotCoursesQuerySchema = z.object({
+	droneId: z.string().uuid().nullable().optional(),
 	currentPage: z.number().int().positive().default(1),
 	pageSize: z.number().int().positive().default(5),
 })
