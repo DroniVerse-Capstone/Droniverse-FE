@@ -13,11 +13,11 @@ import { useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "@/validations/learning/user-learning";
 import { MdOutlinePlayLesson } from "react-icons/md";
-import { PiPathBold } from "react-icons/pi";
+import { PiCertificateBold, PiPathBold } from "react-icons/pi";
 
 type LearningPathSideBarProps = {
   selectedLessonId?: string | null;
-  onSelectLesson?: (lesson: Lesson) => void;
+  onSelectLesson?: (lesson: Lesson | null) => void;
 };
 
 export default function LearningPathSideBar({
@@ -69,8 +69,8 @@ export default function LearningPathSideBar({
       }
     }
 
-    // Priority 2: Auto-select first unlocked lesson IF no selection is active
-    if (!selectedLessonId) {
+    // Priority 2: Auto-select first unlocked lesson IF no selection is active AND course is not COMPLETED
+    if (!selectedLessonId && data.status !== "COMPLETED") {
       for (const moduleData of data.modules) {
         const firstUnlocked = moduleData.lessons.find((lesson) => !lesson.isLocked);
         if (firstUnlocked) {
@@ -191,6 +191,22 @@ export default function LearningPathSideBar({
               </div>
 
               <div className="max-h-[calc(100vh-200px)] space-y-2 overflow-y-auto pr-1">
+                {/* Overview Button - Only show when completed */}
+                {data.status === "COMPLETED" && (
+                  <button
+                    onClick={() => onSelectLesson?.(null)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded border p-3 transition-all relative overflow-hidden group",
+                      !selectedLessonId
+                        ? "border-secondary bg-secondary text-white shadow-lg shadow-secondary/30"
+                        : "border-secondary/60 bg-secondary/20 text-white hover:bg-secondary/30"
+                    )}
+                  >
+                    <PiCertificateBold className="h-5 w-5 relative z-10 text-white" />
+                    <span className="text-sm font-black tracking-tight relative z-10 uppercase">Xem chứng chỉ</span>
+                  </button>
+                )}
+
                 {data.modules.map((module) => (
                   <LearningPathModuleItem
                     key={module.moduleID}

@@ -4,16 +4,16 @@ import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { MdOutlineDashboard, MdStars, MdOutlineEmojiEvents } from "react-icons/md";
+import { LuClipboardList } from "react-icons/lu";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import EmptyState from "@/components/common/EmptyState";
 import { useGetCompetitionDetail } from "@/hooks/competitions/useCompetitions";
-import { useGetCompetitionCertificates } from "@/hooks/certificate/useCertificate";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import CompetitionOverviewTab from "./tabs/CompetitionOverviewTab";
-import CompetitionCertificatesTab from "./tabs/CompetitionCertificatesTab";
+import CompetitionConditionsTab from "./tabs/CompetitionConditionsTab";
 import CompetitionPrizesTab from "./tabs/CompetitionPrizesTab";
 import CompetitionRoundsTab from "./tabs/CompetitionRoundsTab";
 import CompetitonStatusBadge from "@/components/competition/CompetitonStatusBadge";
@@ -29,9 +29,8 @@ export default function ManagerCompetitionDetail() {
     const tc = useTranslations("ManagerCompetitions");
 
     const { data: competition, isLoading: isCompLoading, isError: isCompError, error: compError } = useGetCompetitionDetail(competitionId);
-    const { data: certificates, isLoading: isCertsLoading } = useGetCompetitionCertificates(competitionId);
 
-    const isLoading = isCompLoading || isCertsLoading;
+    const isLoading = isCompLoading;
     const isError = isCompError;
     const error = compError;
 
@@ -105,11 +104,11 @@ export default function ManagerCompetitionDetail() {
                                     {t("tabs.rounds")}
                                 </TabsTrigger>
                                 <TabsTrigger
-                                    value="certificates"
+                                    value="conditions"
                                     className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-transparent h-full px-1 text-base font-semibold text-greyscale-400 transition-all hover:text-greyscale-200"
                                 >
-                                    <MdOutlineEmojiEvents className="mr-2 h-5 w-5" />
-                                    {t("tabs.certificates")}
+                                    <LuClipboardList className="mr-2 h-5 w-5" />
+                                    {t("tabs.conditions")}
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="prizes"
@@ -129,11 +128,9 @@ export default function ManagerCompetitionDetail() {
                             <CompetitionRoundsTab competition={competition} />
                         </TabsContent>
 
-                        <TabsContent value="certificates" className="mt-0 outline-none">
-                            <CompetitionCertificatesTab
-                                competitionId={competition.competitionID}
-                                certificates={certificates}
-                                competitionStatus={competition.competitionStatus}
+                        <TabsContent value="conditions" className="mt-0 outline-none">
+                            <CompetitionConditionsTab
+                                competition={competition}
                             />
                         </TabsContent>
 

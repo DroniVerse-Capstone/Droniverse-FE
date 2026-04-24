@@ -111,4 +111,72 @@ export function useGetVRSimulator(simulatorId: string | null) {
   });
 }
 
-// 
+export function useGetUserSimulatorLesson(enrollmentId?: string, lessonId?: string) {
+  return useQuery({
+    queryKey: ["user-simulator-lesson", enrollmentId, lessonId],
+    queryFn: async () => {
+      if (!enrollmentId || !lessonId) return null;
+      const response = await apiClient.get<any>(
+        `/academy/user/enrollments/${enrollmentId}/lessons/${lessonId}/simulator`
+      );
+      return response.data.data;
+    },
+    enabled: !!enrollmentId && !!lessonId,
+  });
+}
+
+export const useSubmitUserSimulatorLesson = (options?: {
+  onSuccess?: (data: any) => void;
+  onError?: (error: AxiosError<ApiError>) => void;
+}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any, AxiosError<ApiError>, { enrollmentId: string; lessonId: string; payload: { flightTime: number; score?: number; isSuccess?: boolean } }>({
+    mutationFn: async ({ enrollmentId, lessonId, payload }) => {
+      const response = await apiClient.post(
+        `/academy/user/enrollments/${enrollmentId}/lessons/${lessonId}/simulator/submit`,
+        payload
+      );
+      return response.data;
+    },
+    onSuccess: async (data, variables) => {
+      // Đảm bảo cache được làm mới ở tất cả các trang (kể cả trang preview bài học)
+      await queryClient.invalidateQueries({
+        queryKey: ["user-simulator-lesson"],
+      });
+      // Invalidate cái cây thư mục bên trái (learning-path) để nó gọi API mở khóa bài tiếp theo
+      await queryClient.invalidateQueries({
+        queryKey: ["user-learning-path"]
+      });
+      options?.onSuccess?.(data);
+    },
+    onError: (error) => {
+      options?.onError?.(error);
+    },
+  });
+};
+
+export const useCompleteLesson = (options?: {
+  onSuccess?: (data: any) => void;
+  onError?: (error: AxiosError<ApiError>) => void;
+}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any, AxiosError<ApiError>, { enrollmentId: string; lessonId: string }>({
+    mutationFn: async ({ enrollmentId, lessonId }) => {
+      const response = await apiClient.post(
+        `/academy/user/enrollments/${enrollmentId}/lessons/${lessonId}/complete`
+      );
+      return response.data;
+    },
+    onSuccess: async (data, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["user-learning-path"]
+      });
+      options?.onSuccess?.(data);
+    },
+    onError: (error) => {
+      options?.onError?.(error);
+    },
+  });
+};

@@ -76,7 +76,7 @@ export default function MemberLabLessonContent({
       <div className="relative space-y-5">
         <div className="space-y-3">
           <span className="inline-flex items-center rounded-full border border-greyscale-600 bg-greyscale-900/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-greyscale-100">
-            Bài thực hành
+            Bài thực hành Blockly
           </span>
 
           <h2 className="text-2xl font-semibold leading-tight text-greyscale-0 md:text-3xl">

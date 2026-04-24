@@ -56,7 +56,7 @@ export function CreateRoundDialog({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.labID || !formData.startTime || !formData.endTime || !limitMinutes) {
+        if (!formData.vrSimilatorID || !formData.startTime || !formData.endTime || !limitMinutes) {
             toast.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
@@ -106,8 +106,8 @@ export function CreateRoundDialog({
                             Chọn Simulator
                         </Label>
                         <Select
-                            onValueChange={(value) => setFormData({ ...formData, labID: value })}
-                            value={formData.labID}
+                            onValueChange={(value) => setFormData({ ...formData, vrSimilatorID: value })}
+                            value={formData.vrSimilatorID}
                         >
                             <SelectTrigger className="bg-greyscale-900 border-greyscale-800 focus:ring-primary h-11">
                                 <SelectValue placeholder="Chọn VR cho vòng thi..." />

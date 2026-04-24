@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -14,7 +15,7 @@ import { FlightDroneViewer } from "@/components/challenges/FlightDroneViewer";
 import { LevelRegistry, mockLabs, LabData, LevelEnvironments } from "@/components/challenges/levels/registry";
 import { LevelFactory, LevelResult } from "@/components/challenges/levels/types";
 import { useDroneSound } from "@/components/mechanics/flight-mechanics/useDroneSound";
-import { useGetWebSimulator } from "@/hooks/simulator/useSimulator";
+import { useGetWebSimulator, useSubmitUserSimulatorLesson } from "@/hooks/simulator/useSimulator";
 
 type CameraMode = "FOLLOW" | "ORBIT" | "TOP" | "FPV";
 type GamePhase = "briefing" | "countdown" | "playing" | "complete";
@@ -138,7 +139,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 mt-0.5 rounded">
                     <svg className="w-2.5 h-2.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2L12 22M7 7L12 2L17 7M7 17L12 22L17 17"/>
+                      <path d="M12 2L12 22M7 7L12 2L17 7M7 17L12 22L17 17" />
                     </svg>
                   </div>
                   <span className="text-xs text-slate-300 leading-relaxed">Cất cánh và điều khiển drone bằng bàn phím</span>
@@ -146,7 +147,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 rounded">
                     <svg className="w-2.5 h-2.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                     </svg>
                   </div>
                   <span className="text-xs text-slate-300 leading-relaxed">Hoàn thành nhiệm vụ trong thời gian cho phép</span>
@@ -154,7 +155,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0 mt-0.5 rounded">
                     <svg className="w-2.5 h-2.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 6L6 18M6 6l12 12"/>
+                      <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </div>
                   <span className="text-xs text-slate-300 leading-relaxed">Chạm đất hoặc hết giờ = Thất bại</span>
@@ -191,7 +192,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-amber-500/10 border border-amber-500/30 flex items-center justify-center rounded">
                 <svg className="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
               </div>
               <div>
@@ -209,7 +210,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
               <span className="relative flex items-center gap-2">
                 Bắt đầu
                 <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </span>
             </button>
@@ -323,9 +324,9 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
 function MathRow({ label, formula, result }: { label: string, formula: string, result: number }) {
   return (
     <div className="flex items-center rounded-lg justify-between p-2 bg-slate-800/40 border border-slate-700 mb-1.5">
-       <span className="text-[8px] font-bold text-slate-400 uppercase w-16 tracking-wider">{label}</span>
-       <span className="text-[9px] font-mono text-slate-300 bg-slate-900 px-2 py-0.5 border rounded border-slate-800">{formula}</span>
-       <span className="text-[11px] font-mono font-bold text-white w-8 text-right">{result > 0 ? "+" : ""}{result.toFixed(0)}</span>
+      <span className="text-[8px] font-bold text-slate-400 uppercase w-16 tracking-wider">{label}</span>
+      <span className="text-[9px] font-mono text-slate-300 bg-slate-900 px-2 py-0.5 border rounded border-slate-800">{formula}</span>
+      <span className="text-[11px] font-mono font-bold text-white w-8 text-right">{result > 0 ? "+" : ""}{result.toFixed(0)}</span>
     </div>
   );
 }
@@ -376,7 +377,7 @@ function FlyingHUD({ altitude, stability, elapsedTime, isRunning, timeRemaining 
     <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1">
       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/60 rounded-lg border border-slate-700">
         <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L12 22M7 7L12 2L17 7M7 17L12 22L17 17"/>
+          <path d="M12 2L12 22M7 7L12 2L17 7M7 17L12 22L17 17" />
         </svg>
         <span className="text-[11px] font-mono font-bold text-white">{altitude.toFixed(1)}</span>
         <span className="text-[8px] text-white/50 font-bold">m</span>
@@ -386,7 +387,7 @@ function FlyingHUD({ altitude, stability, elapsedTime, isRunning, timeRemaining 
 
       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/60 rounded-lg border border-slate-700">
         <svg className={cn("w-3 h-3", isRunning ? (isLowTime ? "text-red-400" : "text-amber-400") : "text-white/40")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
         </svg>
         <span className={cn("text-[11px] font-mono font-bold", isRunning ? (isLowTime ? "text-red-400 animate-pulse" : "text-amber-400") : "text-white/40")}>
           {timeStr}
@@ -405,6 +406,25 @@ interface ChallengeSimulatorProps {
 }
 
 export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: ChallengeSimulatorProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const lessonId = searchParams.get("lessonId");
+  const enrollmentId = searchParams.get("enrollmentId");
+
+  const { mutate: submitSimulator, isPending: isSubmitting } = useSubmitUserSimulatorLesson({
+    onSuccess: () => {
+      if (returnUrl) {
+        // Cache đã được refetch và đợi hoàn tất ở trong useSimulator
+        // Nên ở đây dùng router.push() mượt mà như SPA bình thường.
+        router.push(returnUrl);
+      }
+    },
+    onError: (err) => {
+      console.error("Lỗi khi nộp bài:", err);
+      alert("Nộp bài thất bại, vui lòng thử lại!");
+    }
+  });
+
   const { data: webSimulator, isLoading, isError } = useGetWebSimulator(labId);
 
   const lab: LabData | undefined = useMemo(() => {
@@ -435,6 +455,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
   const [precisionMode, setPrecisionMode] = useState(false);
   const [levelResult, setLevelResult] = useState<LevelResult | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const elapsedTimeRef = useRef(0);
   const [objective, setObjective] = useState("");
   const [timeRemaining, setTimeRemaining] = useState(lab?.timeLimit ?? 60);
   const [resetTrigger, setResetTrigger] = useState(0);
@@ -468,6 +489,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
       setGamePhase("complete");
       setIsRunning(false);
       isRunningRef.current = false;
+      droneSound.stop();
     } else if (result.objective) {
       setObjective(result.objective);
     }
@@ -518,7 +540,8 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
       const dt = Math.min((ts - lastTs) / 1000, 0.05);
       lastTs = ts;
       if (isRunningRef.current) {
-        setElapsedTime((t) => t + dt);
+        elapsedTimeRef.current += dt;
+        setElapsedTime(elapsedTimeRef.current);
         setTimeRemaining((t) => Math.max(0, t - dt));
       }
       rafId = requestAnimationFrame(tick);
@@ -577,6 +600,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     setIsRunning(false);
     isRunningRef.current = false;
     setElapsedTime(0);
+    elapsedTimeRef.current = 0;
     setTimeRemaining(lab?.timeLimit ?? 60);
     setLevelResult(null);
     droneSound.stop();
@@ -586,6 +610,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     setIsRunning(false);
     isRunningRef.current = false;
     setElapsedTime(0);
+    elapsedTimeRef.current = 0;
     setTimeRemaining(lab?.timeLimit ?? 60);
     setLevelResult(null);
     setObjective("");
@@ -620,6 +645,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     setIsRunning(false);
     isRunningRef.current = false;
     setElapsedTime(0);
+    elapsedTimeRef.current = 0;
     setTimeRemaining(lab?.timeLimit ?? 60);
     setLevelResult(null);
     setObjective("");
@@ -660,6 +686,27 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
   const rollDiff = (flightState.motors.m1 + flightState.motors.m3) - (flightState.motors.m2 + flightState.motors.m4);
   const yawDiff = (flightState.motors.m2 + flightState.motors.m3) - (flightState.motors.m1 + flightState.motors.m4);
 
+  const handleSubmit = () => {
+    if (!lessonId || !enrollmentId) {
+      alert("Không tìm thấy thông tin bài học (lessonId hoặc enrollmentId) để nộp.");
+      return;
+    }
+
+    // Gửi thời gian bay, và gửi thêm score NẾU bài tập đó có trả về score
+    const payload: any = {
+      flightTime: Math.floor(elapsedTimeRef.current),
+      isSuccess: true,
+    };
+
+    console.log("Submitting simulator result:", { enrollmentId, lessonId, payload });
+
+    if (levelResult?.score !== undefined) {
+      payload.score = levelResult.score;
+    }
+
+    submitSimulator({ enrollmentId, lessonId, payload });
+  };
+
   return (
     <div className="h-full flex flex-col">
 
@@ -679,6 +726,26 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
                 <span className="text-[7px] font-black uppercase text-amber-400 tracking-widest">Precision</span>
               </div>
             )}
+
+            {/* NÚT NỘP BÀI KHI HOÀN THÀNH */}
+            {gamePhase === "complete" && levelResult?.status === "WIN" && !isAdmin && (
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white transition-all shadow-md",
+                  isSubmitting ? "bg-slate-600 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-400 hover:scale-105"
+                )}
+              >
+                {isSubmitting ? (
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Trophy className="w-3.5 h-3.5" />
+                )}
+                {isSubmitting ? "Đang nộp..." : "Nộp bài"}
+              </button>
+            )}
+
             {gamePhase === "playing" && (
               <div className="flex items-center gap-2">
                 <button
@@ -735,12 +802,12 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
               gamePhase === "playing" && isRunning && flightState.altitude > 0.2
                 ? "bg-emerald-400 animate-pulse"
                 : gamePhase === "playing"
-                ? "bg-cyan-400"
-                : "bg-slate-600"
+                  ? "bg-cyan-400"
+                  : "bg-slate-600"
             )} />
             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
               {gamePhase === "complete" ? "Xong" :
-               gamePhase === "playing" && flightState.altitude > 0.2 ? "Đang bay" : "Sẵn sàng"}
+                gamePhase === "playing" && flightState.altitude > 0.2 ? "Đang bay" : "Sẵn sàng"}
             </span>
           </div>
 
@@ -869,8 +936,8 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
               <div className="px-8 pt-8 pb-6 text-center ">
                 <div className={cn(
                   "w-20 h-20  mx-auto flex items-center justify-center rounded-lg",
-                  levelResult.status === "WIN" 
-                    ? "bg-amber-500" 
+                  levelResult.status === "WIN"
+                    ? "bg-amber-500"
                     : "bg-red-600"
                 )}>
                   <Trophy className="w-10 h-10 text-white" />
@@ -916,14 +983,29 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
 
                   {levelResult.status === "WIN" && (
                     <button
-                      onClick={() => window.location.href = returnUrl || "/"}
-                      className="flex-1 px-4 py-3 font-bold text-sm text-white bg-cyan-500 hover:bg-cyan-400 transition-all rounded-lg"
+                      onClick={() => {
+                        if (isAdmin) {
+                          if (returnUrl) router.push(returnUrl);
+                        } else {
+                          handleSubmit();
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      className={cn(
+                        "flex-1 px-4 py-3 font-bold text-sm text-white transition-all rounded-lg",
+                        isSubmitting ? "bg-slate-600 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-400"
+                      )}
                     >
                       <span className="flex items-center justify-center gap-2">
-                        {isAdmin ? "Quay về" : "Nộp bài"}
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
+                        {isSubmitting && (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        )}
+                        {isSubmitting ? "Đang nộp..." : (isAdmin ? "Quay về" : "Nộp bài")}
+                        {!isSubmitting && (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        )}
                       </span>
                     </button>
                   )}

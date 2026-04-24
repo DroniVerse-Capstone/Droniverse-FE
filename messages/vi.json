@@ -1611,6 +1611,14 @@
     "fallback": {
       "noDescription": "Không có mô tả cho cuộc thi này."
     },
+    "delete": {
+      "title": "Xác nhận xóa cuộc thi?",
+      "description": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa cuộc thi này?",
+      "confirmText": "Xóa",
+      "cancelText": "Hủy",
+      "toastSuccess": "Xóa cuộc thi thành công",
+      "toastError": "Xóa cuộc thi thất bại"
+    },
     "createDialog": {
       "title": "Tạo cuộc thi mới",
       "subtitle": "Điền thông tin cơ bản để khởi tạo một cuộc thi (trạng thái DRAFT). Bạn có thể chỉnh sửa thêm sau.",
@@ -1673,7 +1681,7 @@
       "tabs": {
         "overview": "Tổng quan",
         "rounds": "Vòng thi",
-        "certificates": "Chứng chỉ yêu cầu",
+        "conditions": "Điều kiện tham gia",
         "prizes": "Giải thưởng"
       },
       "rounds": {
@@ -1704,6 +1712,11 @@
           "Upcoming": "Chưa tới giờ",
           "Ongoing": "Đang diễn ra",
           "Finished": "Đã kết thúc"
+        },
+        "statuses": {
+          "Valid": "Hợp lệ",
+          "ScheduleInvalid": "Sai lịch",
+          "Cancelled": "Đã hủy"
         },
         "table": {
           "round": "Vòng",

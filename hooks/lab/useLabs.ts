@@ -404,8 +404,9 @@ export const useSubmitStudentLab = (enrollmentId: string, labId: string) => {
       return response.data;
     },
     onSuccess: () => {
-      // Invalidate lab detail so next visit reflects submitted state
       queryClient.invalidateQueries({ queryKey: ["student-lab-detail", enrollmentId, labId] });
+      queryClient.invalidateQueries({ queryKey: ["user-lab-mini", enrollmentId, labId] });
+      queryClient.invalidateQueries({ queryKey: ["user-learning-path"] });
     },
   });
 };
