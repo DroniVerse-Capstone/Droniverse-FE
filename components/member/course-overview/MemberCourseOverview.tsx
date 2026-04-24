@@ -27,6 +27,7 @@ import {
   IoTimeOutline,
 } from "react-icons/io5";
 import { TbDrone } from "react-icons/tb";
+import { div } from "three/src/nodes/math/OperatorNode.js";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -69,7 +70,6 @@ export default function MemberCourseOverview() {
     courseId,
   );
   const enterCourseCodeMutation = useEnterCourseCode();
-  const receiveCourseCodeMutation = useReceiveCourseCode();
   const createEnrollmentMutation = useCreateUserEnrollment();
   const [activateDialogOpen, setActivateDialogOpen] = React.useState(false);
   const [activateCode, setActivateCode] = React.useState("");
@@ -144,29 +144,6 @@ export default function MemberCourseOverview() {
       toast.error(message);
     }
   }, [activateCode, clubId, enterCourseCodeMutation]);
-
-  const handleReceiveCode = React.useCallback(async () => {
-    if (!clubId || !courseId) {
-      toast.error("Không xác định được khóa học hiện tại.");
-      return;
-    }
-
-    try {
-      await receiveCourseCodeMutation.mutateAsync({
-        clubId,
-        courseId,
-      });
-
-      toast.success("Đã nhận mã, hãy kiểm tra gmail");
-    } catch (receiveCodeError) {
-      const message =
-        (receiveCodeError as { response?: { data?: { message?: string } } })
-          ?.response?.data?.message ||
-        (receiveCodeError as { message?: string })?.message ||
-        "Không thể nhận mã. Vui lòng thử lại.";
-      toast.error(message);
-    }
-  }, [clubId, courseId, receiveCourseCodeMutation]);
 
   if (!clubId || !courseId) {
     return (
@@ -303,45 +280,55 @@ export default function MemberCourseOverview() {
 
             <div className="my-4 h-px bg-greyscale-600" />
 
-            <div className="w-full flex items-center gap-2">
-              {data.isUnlock ? (
-                <Button
-                  variant="tertiary"
-                  className="w-full"
-                  onClick={handleGoLearn}
-                  disabled={createEnrollmentMutation.isPending}
-                >
-                  {createEnrollmentMutation.isPending
-                    ? "Đang chuẩn bị vào học..."
-                    : "Vào học ngay"}
-                </Button>
-              ) : (
-                <>
+            {data.isEligibleByLevel ? (
+              <div className="w-full flex items-center gap-2">
+                {data.isUnlock ? (
                   <Button
-                    variant="default"
+                    variant="tertiary"
                     className="w-full"
-                    disabled={
-                      !data.miniProduct ||
-                      data.clubCourseOwn?.remainingQuantity === 0
-                    }
-                    onClick={() => {
-                      if (!clubSlug || !courseSlug) return;
-                      router.push(`/member/${clubSlug}/${courseSlug}/checkout`);
-                    }}
+                    onClick={handleGoLearn}
+                    disabled={createEnrollmentMutation.isPending}
                   >
-                    Mua ngay
+                    {createEnrollmentMutation.isPending
+                      ? "Đang chuẩn bị vào học..."
+                      : "Vào học ngay"}
                   </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      disabled={
+                        !data.miniProduct ||
+                        data.clubCourseOwn?.remainingQuantity === 0
+                      }
+                      onClick={() => {
+                        if (!clubSlug || !courseSlug) return;
+                        router.push(
+                          `/member/${clubSlug}/${courseSlug}/checkout`,
+                        );
+                      }}
+                    >
+                      Mua ngay
+                    </Button>
 
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => setActivateDialogOpen(true)}
-                  >
-                    Kích hoạt
-                  </Button>
-                </>
-              )}
-            </div>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => setActivateDialogOpen(true)}
+                    >
+                      Kích hoạt
+                    </Button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="w-full">
+                <Button className="w-full" disabled>
+                  Bạn chưa đủ điều kiện
+                </Button>
+              </div>
+            )}
           </div>
         </aside>
       </div>

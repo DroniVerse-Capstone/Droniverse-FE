@@ -1,17 +1,16 @@
 import React from "react";
 import { canAccessRoute } from "@/lib/auth/access";
 import {
+  ArrowUpFromLine,
+  Barcode,
   BookOpen,
   CircleHelp,
-  FileText,
   FolderKanban,
   Grid2x2,
   Home,
   Plane,
   Route,
   Settings,
-  ShieldCheck,
-  ShieldPlus,
   Trophy,
   UserCog,
   Users,
@@ -77,8 +76,9 @@ export const primaryItems: NavItem[] = [
     icon: BookOpen,
     subItems: [
       { title: "courses.subitems.course", href: "/course-management", icon: BookOpen },
-      { title: "courses.subitems.certificate", href: "/certificate-management", icon: FileText },
-      { title: "courses.subitems.code", href: "/course-codes-management", icon: Route },
+      { title: "courses.subitems.code", href: "/course-codes-management", icon: Barcode },
+      { title: "courses.subitems.curriculum", href: "/curriculum-management", icon: Route },
+      { title: "courses.subitems.level", href: "/level-path-management", icon: ArrowUpFromLine},
     ],
   },
   {
@@ -91,8 +91,6 @@ export const primaryItems: NavItem[] = [
     icon: UserCog,
     subItems: [
       { title: "users.subitems.user", href: "/user-management", icon: UserCog },
-      { title: "users.subitems.roles", href: "/role-management", icon: ShieldPlus },
-      { title: "users.subitems.permissions", href: "/permission-management", icon: ShieldCheck },
     ],
   },
   {
