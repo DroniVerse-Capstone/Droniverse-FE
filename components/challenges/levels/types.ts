@@ -6,6 +6,7 @@ export interface LevelResult {
   status: LevelStatus;
   message?: string;
   objective?: string;
+  score?: number;
 }
 
 export interface LevelInstance {

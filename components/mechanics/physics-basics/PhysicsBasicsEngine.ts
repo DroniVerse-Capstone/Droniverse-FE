@@ -444,16 +444,16 @@ export function updatePhysics(state: PhysicsState, lessonId: LessonId, delta: nu
         const motorRL_RPM = state.motorRL_RPM;
         const motorRR_RPM = state.motorRR_RPM;
 
-        // CW torque (FR, RR motors)
-        const cwTorque = calculateLiftForce(motorFR_RPM) + calculateLiftForce(motorRR_RPM);
-        // CCW torque (FL, RL motors)
-        const ccwTorque = calculateLiftForce(motorFL_RPM) + calculateLiftForce(motorRL_RPM);
+        // CW torque (FR, RL motors)
+        const cwTorque = calculateLiftForce(motorFR_RPM) + calculateLiftForce(motorRL_RPM);
+        // CCW torque (FL, RR motors)
+        const ccwTorque = calculateLiftForce(motorFL_RPM) + calculateLiftForce(motorRR_RPM);
 
-        // Net yaw torque: positive = CCW, negative = CW
+        // Net yaw torque: CCW motors stronger -> Rotate Left (+), CW motors stronger -> Rotate Right (-)
         const netYawTorque = (ccwTorque - cwTorque) * YAW_SENSITIVITY;
 
-        // Apply yaw rotation
-        newState.yaw += netYawTorque * delta * 0.01;
+        // Apply yaw rotation (multiplier increased from 0.01 to 5.0 for visibility)
+        newState.yaw += netYawTorque * delta * 5.0;
 
         // Store values for display
         newState.cwTorque = cwTorque;

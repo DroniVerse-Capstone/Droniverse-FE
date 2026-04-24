@@ -5,6 +5,8 @@ import { FaFlagCheckered, FaRegClock, FaUserTie } from "react-icons/fa"
 import { FiTarget } from "react-icons/fi"
 import { IoPeople } from "react-icons/io5"
 import { MdEmojiEvents, MdOutlineTimer } from "react-icons/md"
+import { Trash2 } from "lucide-react"
+import toast from "react-hot-toast"
 
 import CompetitonStatusBadge from "@/components/competition/CompetitonStatusBadge"
 import { formatDateTime } from "@/lib/utils/format-date"
@@ -13,6 +15,8 @@ import { Competition } from "@/validations/competitions/competitions"
 import { Button } from "@/components/ui/button"
 import UpdateCompetitionDialog from "@/components/manager/competitons/UpdateCompetitionDialog"
 import { useParams, useRouter } from "next/navigation"
+import { useDeleteCompetition } from "@/hooks/competitions/useCompetitions"
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover"
 
 type ManagerCompetitionCardProps = {
 	competition: Competition
@@ -32,6 +36,16 @@ export default function ManagerCompetitionCard({
 	const [isUpdateOpen, setIsUpdateOpen] = React.useState(false)
 	const router = useRouter()
 	const { clubSlug } = useParams()
+	const deleteMutation = useDeleteCompetition()
+
+	const handleDelete = async () => {
+		try {
+			await deleteMutation.mutateAsync(competition.competitionID)
+			toast.success(t("delete.toastSuccess"))
+		} catch (error) {
+			toast.error(t("delete.toastError"))
+		}
+	}
 
 	const description =
 		locale === "en"
@@ -159,6 +173,26 @@ export default function ManagerCompetitionCard({
 				>
 					{t("updateDialog.buttons.edit")}
 				</Button>
+				{competition.competitionStatus === "DRAFT" && (
+					<ConfirmActionPopover
+						title={t("delete.title")}
+						description={t("delete.description")}
+						confirmText={t("delete.confirmText")}
+						cancelText={t("delete.cancelText")}
+						isLoading={deleteMutation.isPending}
+						onConfirm={handleDelete}
+						trigger={
+							<Button
+								size="icon"
+								variant="ghost"
+								className="h-9 w-9 shrink-0 text-greyscale-400 hover:bg-error/10 hover:text-error"
+								title={t("delete.confirmText")}
+							>
+								<Trash2 size={18} />
+							</Button>
+						}
+					/>
+				)}
 			</div>
 
 			<UpdateCompetitionDialog

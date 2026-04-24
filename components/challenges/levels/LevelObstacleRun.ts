@@ -2,11 +2,11 @@ import * as THREE from "three";
 import { LevelInstance, LevelResult } from "./types";
 
 const GATE_ACTIVE_COLOR = "#22c55e";
-const GATE_DONE_COLOR   = "#94a3b8";
+const GATE_DONE_COLOR = "#94a3b8";
 const GATE_LOCKED_COLOR = "#7c3aed";
-const GOAL_OPEN_COLOR   = "#a855f7";
+const GOAL_OPEN_COLOR = "#a855f7";
 const GOAL_LOCKED_COLOR = "#1e293b";
-const DANGER_COLOR      = "#f97316";
+const DANGER_COLOR = "#f97316";
 
 interface GateData {
   position: THREE.Vector3;
@@ -154,8 +154,8 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
 
   function init() {
     const gatePositions = [
-      new THREE.Vector3(0,   45,  -50),
-      new THREE.Vector3(20,  62, -100),
+      new THREE.Vector3(0, 45, -50),
+      new THREE.Vector3(20, 62, -100),
       new THREE.Vector3(-10, 76, -145),
     ];
     gatePositions.forEach((pos, i) => {
@@ -176,11 +176,16 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
     const gate = gates[currentGateIndex];
     if (gate.passed) return;
 
-    const dx = Math.abs(drone.position.x - gate.position.x);
-    const dy = Math.abs(drone.position.y - gate.position.y);
+    const dx = drone.position.x - gate.position.x;
+    const dy = drone.position.y - gate.position.y;
     const dz = Math.abs(drone.position.z - gate.position.z);
 
-    if (dx < 14 && dy < 11 && dz < 4) {
+    // Khoảng cách từ tâm gate trong không gian 2D (mặt phẳng XY)
+    const distXY = Math.sqrt(dx * dx + dy * dy);
+
+    // Vòng sáng có bán kính là 8, cho phép sai số một chút (distXY < 9)
+    // Tăng dz < 12 để tránh lỗi lọt frame khi bay với tốc độ quá nhanh
+    if (distXY < 9 && dz < 12) {
       gate.passed = true;
       setGateColor(gate, GATE_DONE_COLOR);
       currentGateIndex++;

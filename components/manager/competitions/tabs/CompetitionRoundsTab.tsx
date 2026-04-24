@@ -6,20 +6,25 @@ import {
     MdDelete,
     MdSchedule,
     MdTimer,
+    MdEdit,
+    MdCancel,
 } from "react-icons/md";
 import { LuClipboardList } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "@/providers/i18n-provider";
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import {
     Competition,
+    CompetitionRound,
 } from "@/validations/competitions/competitions";
 import { formatDateTime } from "@/lib/utils/format-date";
 import {
     useGetCompetitionRounds,
-    useDeleteCompetitionRound
+    useCancelCompetitionRound
 } from "@/hooks/competitions/useCompetitionRounds";
 import { CreateRoundDialog } from "../dialogs/CreateRoundDialog";
 import toast from "react-hot-toast";
+import { UpdateRoundDialog } from "../dialogs/UpdateRoundDialog";
 
 interface CompetitionRoundsTabProps {
     competition: Competition;
@@ -29,24 +34,21 @@ export default function CompetitionRoundsTab({
     competition,
 }: CompetitionRoundsTabProps) {
     const t = useTranslations("ManagerCompetitions.detailPage.rounds");
+    const locale = useLocale();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [editingRound, setEditingRound] = useState<CompetitionRound | null>(null);
 
     const { data: rounds, isLoading } = useGetCompetitionRounds(competition.competitionID);
-    const deleteRoundMutation = useDeleteCompetitionRound();
+    const cancelRoundMutation = useCancelCompetitionRound();
 
     const isDraft = competition.competitionStatus === "DRAFT";
 
-    const handleDeleteRound = async (roundId: string) => {
-        if (!confirm("Bạn có chắc chắn muốn xóa vòng thi này?")) return;
-
+    const handleCancelRound = async (roundId: string) => {
         try {
-            await deleteRoundMutation.mutateAsync({
-                competitionId: competition.competitionID,
-                roundId
-            });
-            toast.success("Xóa vòng thi thành công");
+            await cancelRoundMutation.mutateAsync(roundId);
+            toast.success("Hủy vòng thi thành công");
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Xóa vòng thi thất bại");
+            toast.error(error.response?.data?.message || "Hủy vòng thi thất bại");
         }
     };
 
@@ -108,89 +110,121 @@ export default function CompetitionRoundsTab({
                     {rounds.sort((a, b) => a.roundNumber - b.roundNumber).map((round) => (
                         <div
                             key={round.roundID}
-                            className="group relative overflow-hidden rounded-2xl border-2 border-greyscale-700 bg-greyscale-900/90 backdrop-blur-xl p-6 shadow-2xl transition-all hover:border-primary/50 hover:shadow-primary/10"
+                            className="group relative overflow-hidden rounded-3xl border border-greyscale-700 bg-greyscale-800/40 p-1 shadow-xl transition-all duration-300 hover:border-primary/50 hover:bg-greyscale-800/60 hover:shadow-primary/5"
                         >
-                            {/* Decorative Background Accent */}
-                            <div className="absolute -left-20 -top-20 h-40 w-40 rounded-full bg-primary/20 blur-[80px] opacity-0 transition-opacity group-hover:opacity-100" />
+                            {/* Accent Glow */}
+                            <div className={`absolute -left-20 -top-20 h-40 w-40 rounded-full blur-[100px] opacity-0 transition-opacity duration-500 group-hover:opacity-20 ${round.roundPhase === "Ongoing" ? "bg-green-500" : "bg-primary"
+                                }`} />
 
-                            <div className="relative z-10 flex items-center justify-between">
-                                <div className="flex items-center gap-8">
-                                    {/* Round Number Badge */}
-                                    <div className="relative">
-                                        <div className="flex flex-col items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-greyscale-800 to-greyscale-900 border border-greyscale-600 shadow-2xl group-hover:border-primary/50 transition-colors">
-                                            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-greyscale-400 mb-0.5">Round</span>
-                                            <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-greyscale-50 to-greyscale-300 leading-none">
-                                                {round.roundNumber}
-                                            </span>
-                                        </div>
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6 p-6">
+                                {/* Left Side: Round Indicator */}
+                                <div className="flex flex-col items-center justify-center">
+                                    <div className="relative h-20 w-20 flex flex-col items-center justify-center rounded-2xl bg-greyscale-800 border border-greyscale-600 shadow-xl group-hover:border-primary/40 transition-colors">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-greyscale-400">Vòng</span>
+                                        <span className="text-4xl font-black text-greyscale-0 leading-none">
+                                            {round.roundNumber}
+                                        </span>
                                         {round.roundPhase === "Ongoing" && (
-                                            <div className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-green-500 border-4 border-greyscale-950 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
+                                            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-greyscale-900"></span>
+                                            </span>
                                         )}
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="space-y-1.5">
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="text-xl font-black text-white tracking-tight drop-shadow-sm">
-                                                    {round.lab?.labNameVN || "Bài Lab chưa xác định"}
-                                                </h3>
-                                                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border-2 shadow-sm ${round.roundPhase === "Upcoming" ? "bg-blue-500/20 text-blue-300 border-blue-500/30" :
-                                                        round.roundPhase === "Ongoing" ? "bg-green-500/20 text-green-300 border-green-500/30 font-bold" :
-                                                            "bg-greyscale-800 text-greyscale-400 border-greyscale-700"
-                                                    }`}>
-                                                    {t(`phases.${round.roundPhase}`)}
-                                                </div>
-                                            </div>
-                                            <p className="text-xs font-mono text-greyscale-400 flex items-center gap-2 uppercase tracking-widest bg-greyscale-800/50 w-fit px-2 py-0.5 rounded border border-greyscale-700/50">
-                                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                                ID: {round.lab.labID}
-                                            </p>
-                                        </div>
-
-                                        <div className="flex items-center gap-10">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] text-primary/80 font-black uppercase tracking-[0.15em] flex items-center gap-1.5">
-                                                    <MdSchedule size={14} /> Thời gian
-                                                </span>
-                                                <span className="text-sm font-bold text-greyscale-100 flex items-center gap-2">
-                                                    <span className="px-2 py-0.5 rounded bg-greyscale-800 text-greyscale-300 border border-greyscale-700 text-xs">
-                                                        {formatDateTime(round.startTime)}
-                                                    </span>
-                                                    <span className="text-greyscale-500">—</span>
-                                                    <span className="px-2 py-0.5 rounded bg-greyscale-800 text-greyscale-300 border border-greyscale-700 text-xs">
-                                                        {formatDateTime(round.endTime)}
-                                                    </span>
-                                                </span>
-                                            </div>
-
-                                            <div className="w-px h-10 bg-greyscale-800" />
-
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] text-primary/80 font-black uppercase tracking-[0.15em] flex items-center gap-1.5">
-                                                    <MdTimer size={14} /> {t("table.limit")}
-                                                </span>
-                                                <span className="text-base font-black text-primary flex items-center gap-2">
-                                                    <span className="text-2xl">{round.timeLimit.split(':')[1]}</span>
-                                                    <span className="text-xs text-greyscale-500 uppercase tracking-tighter">Phút</span>
-                                                </span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
-                                {isDraft && (
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDeleteRound(round.roundID)}
-                                            className="h-14 w-14 rounded-2xl text-greyscale-500 hover:text-error hover:bg-error/10 border-2 border-transparent hover:border-error/30 transition-all active:scale-95 shadow-lg shadow-black/20"
-                                            title="Xóa vòng thi"
-                                        >
-                                            <MdDelete size={28} />
-                                        </Button>
+                                {/* Middle: Round Details */}
+                                <div className="flex-1 space-y-4">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <h3 className="text-2xl font-bold text-greyscale-0 tracking-tight">
+                                            {locale === "en" ? round.vrSimulator?.titleEN : round.vrSimulator?.titleVN || "Bài Lab chưa xác định"}
+                                        </h3>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${round.roundPhase === "Upcoming" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                                round.roundPhase === "Ongoing" ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                                    "bg-greyscale-800 text-greyscale-400 border-greyscale-700"
+                                                }`}>
+                                                {t(`phases.${round.roundPhase}`)}
+                                            </span>
+                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${round.roundStatus === "Valid" ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                                round.roundStatus === "ScheduleInvalid" ? "bg-error/10 text-error border-error/20" :
+                                                    "bg-greyscale-800 text-greyscale-400 border-greyscale-700"
+                                                }`}>
+                                                {t(`statuses.${round.roundStatus}`)}
+                                            </span>
+                                        </div>
                                     </div>
-                                )}
+
+                                    <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
+                                        <div className="flex items-center gap-3 bg-greyscale-800/80 px-4 py-2.5 rounded-2xl border border-greyscale-700/50 shadow-sm">
+                                            <div className="p-2 rounded-xl bg-primary/20 text-primary shadow-inner">
+                                                <MdSchedule size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-greyscale-400 uppercase tracking-wider mb-0.5">Thời gian thi đấu</p>
+                                                <div className="flex items-center gap-2 text-sm font-bold text-greyscale-50">
+                                                    <span>{formatDateTime(round.startTime)}</span>
+                                                    <span className="text-greyscale-600">—</span>
+                                                    <span>{formatDateTime(round.endTime)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 bg-greyscale-800/80 px-4 py-2.5 rounded-2xl border border-greyscale-700/50 shadow-sm">
+                                            <div className="p-2 rounded-xl bg-secondary/20 text-secondary shadow-inner">
+                                                <MdTimer size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-greyscale-400 uppercase tracking-wider mb-0.5">{t("table.limit")}</p>
+                                                <p className="text-sm font-black text-greyscale-0">
+                                                    <span className="text-xl text-secondary">{round.timeLimit.split(':')[1]}</span>
+                                                    <span className="ml-1.5 text-greyscale-400 font-bold tracking-tight">phút</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-[10px] font-mono text-greyscale-500 bg-black/20 w-fit px-2 py-0.5 rounded border border-greyscale-800/50">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                                        ID: {round.vrSimulator.vrSimulatorId}
+                                    </div>
+                                </div>
+
+                                {/* Right Side: Actions */}
+                                <div className="flex items-center gap-2">
+                                    {isDraft && (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setEditingRound(round)}
+                                                className="h-12 w-12 rounded-2xl text-greyscale-500 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
+                                                title="Chỉnh sửa vòng thi"
+                                            >
+                                                <MdEdit size={24} />
+                                            </Button>
+
+                                            <ConfirmActionPopover
+                                                title="Hủy vòng thi"
+                                                description="Bạn có chắc chắn muốn hủy vòng thi này không? Hành động này không thể hoàn tác."
+                                                onConfirm={() => handleCancelRound(round.roundID)}
+                                                confirmText="Xác nhận hủy"
+                                                cancelText="Đóng"
+                                                isLoading={cancelRoundMutation.isPending}
+                                                trigger={
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-12 w-12 rounded-2xl text-greyscale-500 hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20"
+                                                        title="Hủy vòng thi"
+                                                    >
+                                                        <MdDelete size={24} />
+                                                    </Button>
+                                                }
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -201,6 +235,12 @@ export default function CompetitionRoundsTab({
                 open={isCreateOpen}
                 onOpenChange={setIsCreateOpen}
                 competition={competition}
+            />
+
+            <UpdateRoundDialog
+                open={!!editingRound}
+                onOpenChange={(open) => !open && setEditingRound(null)}
+                round={editingRound!}
             />
         </div>
     );
