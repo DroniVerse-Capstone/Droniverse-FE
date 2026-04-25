@@ -2,6 +2,7 @@
 
 import React from "react";
 
+import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import EmptyState from "@/components/common/EmptyState";
 import GenderBadge from "@/components/common/GenderBadge";
 import { TableCustom } from "@/components/common/TableCustom";
@@ -9,9 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { TableCell } from "@/components/ui/table";
-import { useGetClubParticipations } from "@/hooks/club/useClub";
+import { useGetClubParticipations, useGetClubDetailById } from "@/hooks/club/useClub";
 import { formatDate, formatDateTime } from "@/lib/utils/format-date";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type MembersListTabProps = {
   clubId: string;
@@ -34,6 +35,7 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
   const [debouncedSearchText, setDebouncedSearchText] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const t = useTranslations("ManagerMembers");
+  const locale = useLocale();
 
   React.useEffect(() => {
     const timeout = setTimeout(() => {
@@ -50,18 +52,22 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
     pageSize: PAGE_SIZE,
   });
 
+  const { data: clubDetail } = useGetClubDetailById(clubId);
+  const clubDroneId = clubDetail?.drone?.droneID ?? null;
+
   const members = data?.data ?? [];
 
   const headers = [
     t("headers.stt"),
     t("headers.avatar"),
     t("headers.name"),
-    t("headers.email"),
     t("headers.lastName"),
     t("headers.firstName"),
+    t("headers.level"),
     t("headers.gender"),
     t("headers.dateOfBirth"),
     t("headers.joinDate"),
+    
   ];
 
   return (
@@ -120,20 +126,31 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
                 </Avatar>
               </TableCell>
               <TableCell>
-                <div className="space-y-1">
-                  <p className="font-medium text-greyscale-0">
-                    {member.username}
-                  </p>
+                <div className="space-y-0.5">
+                  <p className="font-medium text-greyscale-0">{member.username}</p>
+                  <p className="text-xs text-greyscale-400">{member.email}</p>
                 </div>
-              </TableCell>
-              <TableCell className="text-greyscale-50">
-                {member.email}
               </TableCell>
               <TableCell className="text-greyscale-50">
                 {member.lastName}
               </TableCell>
               <TableCell className="text-greyscale-50">
                 {member.firstName}
+              </TableCell>
+              <TableCell>
+                {(() => {
+                  const levelEntry = clubDroneId
+                    ? member.userLevelMax?.find(
+                        (l) => l.drone.droneID === clubDroneId
+                      )
+                    : null;
+
+                  return levelEntry ? (
+                    <CourseLevelBadge level={levelEntry.level} />
+                  ) : (
+                    <span className="text-sm text-greyscale-100">{locale === "vi" ? "Chưa có cấp độ" : "No level"}</span>
+                  );
+                })()}
               </TableCell>
               <TableCell>
                 <GenderBadge gender={member.gender} />
@@ -151,3 +168,4 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
     </div>
   );
 }
+

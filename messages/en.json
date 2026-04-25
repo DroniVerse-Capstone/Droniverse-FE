@@ -1380,6 +1380,7 @@
       "firstName": "First Name",
       "lastName": "Last Name",
       "gender": "Gender",
+      "level": "Level",
       "dateOfBirth": "Date of Birth",
       "joinDate": "Join Date",
       "status": "Status",

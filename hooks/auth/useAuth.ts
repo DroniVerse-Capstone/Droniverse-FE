@@ -18,6 +18,13 @@ import {
   RegisterRequest,
   RegisterResponse,
   registerResponseSchema,
+  uploadAvatarRequestSchema,
+  uploadAvatarResponseSchema,
+  UploadAvatarRequest,
+  UploadAvatarResponse,
+  UpdateMeRequest,
+  UpdateMeResponse,
+  updateMeResponseSchema,
   VerifyEmailRequest,
   VerifyEmailResponse,
   verifyEmailResponseSchema
@@ -40,6 +47,16 @@ interface UseVerifyEmailOptions {
   onSuccess?: (data: VerifyEmailResponse) => void
   onError?: (error: AxiosError<ApiError>) => void
   redirectTo?: string
+}
+
+interface UseUpdateMeOptions {
+  onSuccess?: (data: UpdateMeResponse) => void
+  onError?: (error: AxiosError<ApiError>) => void
+}
+
+interface UseUploadAvatarOptions {
+  onSuccess?: (data: UploadAvatarResponse) => void
+  onError?: (error: AxiosError<ApiError>) => void
 }
 
 interface UseMeOptions {
@@ -187,6 +204,98 @@ export const useVerifyEmail = (options?: UseVerifyEmailOptions) => {
     onError: (error) => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Verify email error:', error)
+      }
+
+      options?.onError?.(error)
+    }
+  })
+}
+
+export const useUpdateMe = (options?: UseUpdateMeOptions) => {
+  const queryClient = useQueryClient()
+
+  return useMutation<UpdateMeResponse, AxiosError<ApiError>, UpdateMeRequest>({
+    mutationFn: async (payload: UpdateMeRequest) => {
+      const response = await apiClient.put<UpdateMeResponse>(
+        '/identity/auth/me',
+        payload
+      )
+
+      return updateMeResponseSchema.parse(response.data)
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      options?.onSuccess?.(data)
+    },
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Update me error:', error)
+      }
+
+      options?.onError?.(error)
+    }
+  })
+}
+
+export const useUploadAvatar = (options?: UseUploadAvatarOptions) => {
+  const queryClient = useQueryClient()
+
+  return useMutation<UploadAvatarResponse, AxiosError<ApiError>, UploadAvatarRequest>({
+    mutationFn: async (payload: UploadAvatarRequest) => {
+      const parsedPayload = uploadAvatarRequestSchema.parse(payload)
+      const formData = new FormData()
+      formData.append('file', parsedPayload.file)
+
+      const requestConfig = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+
+      try {
+        const response = await apiClient.post<UploadAvatarResponse>(
+          `/identity/users/${parsedPayload.userId}/upload-avatar`,
+          formData,
+          requestConfig
+        )
+
+        return uploadAvatarResponseSchema.parse(response.data)
+      } catch (error) {
+        const axiosError = error as AxiosError<ApiError>
+        const isNotFound = axiosError.response?.status === 404
+
+        if (!isNotFound) {
+          throw error
+        }
+
+        const fallbackResponse = await apiClient.post<UploadAvatarResponse>(
+          `/api/identity/users/${parsedPayload.userId}/upload-avatar`,
+          formData,
+          requestConfig
+        )
+
+        return uploadAvatarResponseSchema.parse(fallbackResponse.data)
+      }
+    },
+    onSuccess: (data) => {
+      if (typeof window !== 'undefined') {
+        useAuthStore.getState().setUser(data)
+      }
+
+      queryClient.setQueryData<MeResponse>(['auth', 'me'], (previousData) => {
+        if (!previousData) return previousData
+
+        return {
+          ...previousData,
+          data
+        }
+      })
+
+      options?.onSuccess?.(data)
+    },
+    onError: (error) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Upload avatar error:', error)
       }
 
       options?.onError?.(error)

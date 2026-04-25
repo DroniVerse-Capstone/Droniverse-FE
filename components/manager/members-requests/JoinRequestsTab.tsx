@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Check, Eye, X } from "lucide-react";
 
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
+import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
 import ClubRequestStatusBadge from "@/components/club/ClubRequestStatusBadge";
@@ -21,6 +22,7 @@ import {
   useGetClubAttemptRequestsByClub,
   useUpdateClubAttemptRequestStatus,
 } from "@/hooks/club-attempt/useClubAttempt";
+import { useGetClubDetailById } from "@/hooks/club/useClub";
 import { formatDateTime } from "@/lib/utils/format-date";
 import { cn } from "@/lib/utils";
 import { CLUB_ATTEMPT_REQUEST_STATUS } from "@/lib/constants/club";
@@ -42,6 +44,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedEvidence, setSelectedEvidence] = React.useState<{
     requesterName: string | null;
+    clubRequirement: string | null;
     clubNameVN: string;
     clubNameEN: string;
     mediaTypeName: "IMAGE" | "VIDEO";
@@ -58,6 +61,9 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
       pageSize: PAGE_SIZE,
     },
   );
+
+  const { data: clubDetail } = useGetClubDetailById(clubId);
+  const clubDroneId = clubDetail?.drone?.droneID ?? null;
 
   const requests = data?.data ?? [];
 
@@ -88,7 +94,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
   const headers = [
     t("headers.stt"),
     t("headers.requester"),
-    t("headers.email"),
+    t("headers.level"),
     t("headers.status"),
     t("headers.requestedAt"),
     t("headers.approvedAt"),
@@ -152,11 +158,26 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                   index +
                   1}
               </TableCell>
-              <TableCell className="text-greyscale-0">
-                {request.requesterName || "—"}
+              <TableCell>
+                <div className="space-y-0.5">
+                  <p className="font-medium text-greyscale-0">{request.requesterName || "—"}</p>
+                  <p className="text-xs text-greyscale-400">{request.requesterEmail || "—"}</p>
+                </div>
               </TableCell>
-              <TableCell className="text-greyscale-50">
-                {request.requesterEmail || "—"}
+              <TableCell>
+                {(() => {
+                  const levelEntry = clubDroneId
+                    ? request.userLevelMax?.find(
+                        (l) => l.drone.droneID === clubDroneId
+                      )
+                    : null;
+
+                  return levelEntry ? (
+                    <CourseLevelBadge level={levelEntry.level} />
+                  ) : (
+                    <span className="text-sm text-greyscale-100">{locale === "vi" ? "Chưa có cấp độ" : "No level"}</span>
+                  );
+                })()}
               </TableCell>
               <TableCell>
                 <ClubRequestStatusBadge
@@ -188,6 +209,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
 
                       setSelectedEvidence({
                         requesterName: request.requesterName,
+                        clubRequirement: request.clubRequirement,
                         clubNameVN: request.clubNameVN,
                         clubNameEN: request.clubNameEN,
                         mediaTypeName,
@@ -254,20 +276,24 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
           <DialogHeader>
             <DialogTitle>
               {locale === "vi"
-                ? "Bằng chứng sở hữu Drone"
-                : "Drone ownership evidence"}
+                ? "Chi tiết yêu cầu tham gia câu lạc bộ"
+                : "Join club request details"}
             </DialogTitle>
           </DialogHeader>
 
           {selectedEvidence && (
             <div className="space-y-3">
-              <div className="rounded border border-greyscale-700 bg-greyscale-900/40 p-3 text-sm">
+              <div className="rounded border border-greyscale-700 bg-greyscale-900/40 p-3 text-sm space-y-1">
                 <p className="text-greyscale-0">
-                  {locale === "vi" ? "Người gửi" : "Requester"}:{" "}
+                  <span className="font-medium text-greyscale-200">{locale === "vi" ? "Người gửi" : "Requester"}:</span>{" "}
                   {selectedEvidence.requesterName || "-"}
                 </p>
-                <p className="text-greyscale-25">
-                  {locale === "vi" ? "Định dạng" : "Media Type"}:{" "}
+                <p className="text-greyscale-0">
+                  <span className="font-medium text-greyscale-200">{locale === "vi" ? "Thông tin cung cấp" : "Provided Info"}:</span>{" "}
+                  {selectedEvidence.clubRequirement || "-"}
+                </p>
+                <p className="text-greyscale-0">
+                  <span className="font-medium text-greyscale-200">{locale === "vi" ? "Định dạng" : "Media Type"}:</span>{" "}
                   {selectedEvidence.mediaTypeName === "IMAGE"
                     ? locale === "vi"
                       ? "Hình ảnh"

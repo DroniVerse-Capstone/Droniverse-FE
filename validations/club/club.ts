@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { categorySchema } from "@/validations/category/category"
+import { userLevelSchema } from "@/validations/auth"
 
 export const clubStatusSchema = z.enum([
   "ACTIVE",
@@ -47,6 +48,8 @@ export const clubParticipationSchema = z.object({
   imageUrl: z.string().nullable().optional(),
   gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).nullable().optional(),
   joinDate: z.string().nullable().optional(),
+  userLevelMax: z.array(userLevelSchema).nullable(),
+  userLevel: z.array(userLevelSchema).nullable()
 })
 
 export const clubSchema = z.object({
