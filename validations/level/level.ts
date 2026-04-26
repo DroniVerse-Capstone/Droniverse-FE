@@ -5,6 +5,11 @@ export const levelSchema = z.object({
 	levelID: z.string().optional(),
 	levelNumber: z.number().int().nonnegative(),
 	name: z.string(),
+	droneInfo: z.object({
+		droneId: z.string(),
+		droneNameVN: z.string(),
+		droneNameEN: z.string()
+	}).optional(),
 }).transform((data) => ({
 	...data,
 	levelId: data.levelId || data.levelID || "",

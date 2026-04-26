@@ -528,7 +528,8 @@
       "members": "Members",
       "courses": "Courses",
       "myCourses": "My Courses",
-      "competitions": "Competitions"
+      "competitions": "Competitions",
+      "prizes": "Achievements"
     },
     "ClubSwitcher": {
       "title": "Switch Club",
@@ -867,7 +868,9 @@
           "lab": "Lab",
           "physic": "Engine & Physics",
           "lab_physic": "Physics Lab",
-          "vr": "VR"
+          "vr": "VR",
+          "learning": "Learning",
+          "competition": "Competition"
         },
         "fields": {
           "titleVN": "Vietnamese Title",
@@ -1574,7 +1577,7 @@
       "label": "Status:",
       "all": "All",
       "DRAFT": "Draft",
-      "PUBLISHED": "Published",
+      "PUBLISHED": "Announced",
       "REGISTRATION_OPEN": "Registration Open",
       "REGISTRATION_CLOSED": "Registration Closed",
       "ONGOING": "Ongoing",

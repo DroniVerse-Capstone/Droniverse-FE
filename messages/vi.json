@@ -524,7 +524,8 @@
       "members": "Thành viên",
       "courses": "Khóa học",
       "myCourses": "Khóa học của tôi",
-      "competitions": "Cuộc thi"
+      "competitions": "Cuộc thi",
+      "prizes": "Giải thưởng"
     },
     "ClubSwitcher": {
       "title": "Đổi Club",
@@ -863,7 +864,9 @@
           "lab": "Lab",
           "physic": "Động cơ và vật lý",
           "lab_physic": "Lab vật lý",
-          "vr": "VR"
+          "vr": "VR",
+          "learning": "Học tập",
+          "competition": "Thi đấu"
         },
         "fields": {
           "titleVN": "Tiêu đề tiếng Việt",
@@ -1570,7 +1573,7 @@
       "label": "Trạng thái:",
       "all": "Tất cả",
       "DRAFT": "Bản nháp",
-      "PUBLISHED": "Đã xuất bản",
+      "PUBLISHED": "Đã công bố",
       "REGISTRATION_OPEN": "Đang mở đăng ký",
       "REGISTRATION_CLOSED": "Đã đóng đăng ký",
       "ONGOING": "Đang diễn ra",
@@ -1667,7 +1670,7 @@
       "title": "Chi tiết cuộc thi",
       "subtitle": "Xem đầy đủ thông tin về cuộc thi.",
       "sections": {
-        "info": "Thông tin chung",
+        "info": "Mô tả",
         "timeline": "Lộ trình",
         "rules": "Quy định"
       },

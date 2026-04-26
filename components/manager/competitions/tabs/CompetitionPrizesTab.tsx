@@ -145,21 +145,20 @@ export default function CompetitionPrizesTab({
                     {prizes.map((prize) => (
                         <div
                             key={prize.competitionPrizeID}
-                            className="group relative overflow-hidden rounded-2xl border border-greyscale-800 bg-greyscale-900/40 backdrop-blur-sm p-5 transition-all hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10"
+                            className="group relative overflow-hidden rounded-md border border-greyscale-700 bg-greyscale-900/60 flex flex-col transition-all hover:border-greyscale-500 hover:shadow-lg"
                         >
-                            {/* Decorative Background Gradient */}
-                            <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-10 transition-opacity group-hover:opacity-20 ${prize.rewardType === "MONEY" ? "bg-green-500" : "bg-primary"}`} />
+                            <div className="p-5 flex-1 flex flex-col">
 
                             <div className="flex justify-between items-start relative z-10 mb-4">
-                                <div className="space-y-1.5 whitespace-nowrap overflow-hidden">
+                                <div className="space-y-2 flex-1 pr-4">
                                     <div className="flex items-center gap-2">
-                                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${prize.rewardType === "MONEY"
-                                            ? "bg-green-500/20 text-green-400 border-green-500/30"
-                                            : "bg-primary/20 text-primary border-primary/30"}`}>
+                                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase border shadow-sm tracking-widest ${prize.rewardType === "MONEY"
+                                            ? "bg-green-500/15 text-green-300 border-green-500/30"
+                                            : "bg-primary/15 text-primary border-primary/30"}`}>
                                             Hạng {prize.rankFrom === prize.rankTo ? prize.rankFrom : `${prize.rankFrom} - ${prize.rankTo}`}
-                                        </div>
+                                        </span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-greyscale-0 truncate max-w-[180px]" title={prize.titleVN}>
+                                    <h3 className="text-xl font-bold text-greyscale-50 line-clamp-2" title={prize.titleVN}>
                                         {prize.titleVN}
                                     </h3>
                                 </div>
@@ -191,11 +190,11 @@ export default function CompetitionPrizesTab({
                                 )}
                             </div>
 
-                            <p className="text-sm text-greyscale-400 mb-6 line-clamp-2 min-h-[40px] leading-relaxed relative z-10 italic opacity-80">
+                            <p className="text-sm text-greyscale-400 mt-2 mb-6 line-clamp-2 min-h-[40px] leading-relaxed italic opacity-80 flex-1">
                                 {prize.descriptionVN || "Thí sinh sẽ nhận được giải thưởng này dựa trên thành tích thi đấu."}
                             </p>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-greyscale-800/50 relative z-10">
+                            <div className="flex items-center justify-between pt-4 border-t border-greyscale-700 bg-greyscale-950/30 px-5 pb-5">
                                 <div className="flex items-center gap-3">
                                     {prize.rewardType === "MONEY" ? (
                                         <>
@@ -224,10 +223,11 @@ export default function CompetitionPrizesTab({
                                     )}
                                 </div>
 
-                                <div className="h-8 w-8 rounded-full border border-greyscale-800 flex items-center justify-center text-greyscale-600 transition-colors group-hover:border-primary/20 group-hover:text-primary/40">
+                                <div className="h-8 w-8 rounded-full border border-greyscale-700 bg-greyscale-900 flex items-center justify-center text-greyscale-500">
                                     <MdOutlineEmojiEvents size={18} />
                                 </div>
                             </div>
+                        </div>
                         </div>
                     ))}
                 </div>

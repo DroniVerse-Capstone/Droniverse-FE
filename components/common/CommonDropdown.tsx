@@ -162,7 +162,7 @@ export default function CommonDropdown(props: CommonDropdownProps) {
 
         <DropdownMenuContent
           className={cn(
-            "w-(--radix-dropdown-menu-trigger-width) bg-greyscale-800 border-greyscale-700",
+            "w-(--radix-dropdown-menu-trigger-width) bg-greyscale-850 border-greyscale-700 shadow-2xl shadow-black/50 overflow-hidden z-[100]",
             contentClassName
           )}
         >
@@ -196,8 +196,8 @@ export default function CommonDropdown(props: CommonDropdownProps) {
                     }
                     onSelect={(event) => event.preventDefault()}
                     className={cn(
-                      "cursor-pointer items-start rounded-md text-base text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700",
-                      isChecked && "bg-primary-200/20 text-primary-200",
+                      "cursor-pointer items-start rounded-md text-base text-greyscale-0 hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary transition-colors py-2",
+                      isChecked && "bg-primary/20 text-primary font-bold",
                       itemClassName
                     )}
                   >
@@ -228,8 +228,8 @@ export default function CommonDropdown(props: CommonDropdownProps) {
                   disabled={option.disabled}
                   onClick={() => props.onChange(option.value)}
                   className={cn(
-                    "cursor-pointer text-base hover:bg-greyscale-700 focus:bg-greyscale-700",
-                    isSelected ? "bg-primary-200/20 text-primary-200" : "text-greyscale-0",
+                    "cursor-pointer text-base hover:bg-primary/20 hover:text-primary focus:bg-primary/20 focus:text-primary transition-colors py-2 px-3",
+                    isSelected ? "bg-primary/20 text-primary font-bold" : "text-greyscale-0",
                     itemClassName
                   )}
                 >
