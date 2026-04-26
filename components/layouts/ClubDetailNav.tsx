@@ -9,7 +9,7 @@ import { useTranslations } from "@/providers/i18n-provider";
 
 type ClubRole = "CLUB_MEMBER" | "CLUB_MANAGER";
 
-type NavKey = "overview" | "courses" | "myCourses" | "competitions" | "members";
+type NavKey = "overview" | "courses" | "myCourses" | "competitions" | "prizes" | "members";
 
 type ClubDetailNavLinks = Record<NavKey, string>;
 
@@ -25,6 +25,7 @@ const navLabels: Record<NavKey, string> = {
   courses: "courses",
   myCourses: "myCourses",
   competitions: "competitions",
+  prizes: "prizes",
   members: "members",
 };
 
@@ -64,6 +65,7 @@ export default function ClubDetailNav({
     courses: `${detailBase}/courses`,
     myCourses: `${detailBase}/my-courses`,
     competitions: `${detailBase}/competitions`,
+    prizes: `${detailBase}/prizes`,
   };
 
   const finalLinks: ClubDetailNavLinks = {

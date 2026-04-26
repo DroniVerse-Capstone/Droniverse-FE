@@ -165,7 +165,7 @@ export default function CreateLessonDialog({
   const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
     type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
   });
-  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators();
+  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators({ type: "LEARNING" });
 
   const isSimulatorsLoading = lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;
 
