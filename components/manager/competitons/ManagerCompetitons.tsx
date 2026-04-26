@@ -3,7 +3,8 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { IoFilterSharp } from "react-icons/io5";
+import { IoFilterSharp, IoSearchOutline } from "react-icons/io5";
+import { MdOutlineClose } from "react-icons/md";
 
 import ManagerCompetitionCard from "@/components/competition/ManagerCompetitionCard";
 import CreateCompetitionDialog from "@/components/manager/competitons/CreateCompetitionDialog";
@@ -58,8 +59,8 @@ export default function ManagerCompetitons() {
   const filteredCompetitions = React.useMemo(() => {
     let result = [...competitions];
 
-    if (searchKeyword.trim()) {
-      const keyword = searchKeyword.toLowerCase().trim();
+    if (searchInput.trim()) {
+      const keyword = searchInput.toLowerCase().trim();
       result = result.filter((c) => {
         const nameVN = c.nameVN?.toLowerCase() || "";
         const nameEN = c.nameEN?.toLowerCase() || "";
@@ -70,15 +71,10 @@ export default function ManagerCompetitons() {
     return result.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [competitions, searchKeyword]);
-
-  const handleSearch = React.useCallback(() => {
-    setSearchKeyword(searchInput);
-  }, [searchInput]);
+  }, [competitions, searchInput]);
 
   const clearSearch = React.useCallback(() => {
     setSearchInput("");
-    setSearchKeyword("");
   }, []);
 
   if (!clubId) {
@@ -92,54 +88,47 @@ export default function ManagerCompetitons() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-greyscale-0 ">Cuộc thi của Câu lạc bộ</h2>
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-greyscale-0">
-            <IoFilterSharp />
-            <p className="text-sm font-semibold">{t("filter")}</p>
-          </div>
+      <div className="flex flex-col gap-6 rounded-md border border-greyscale-700 bg-greyscale-900/40 p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-greyscale-400">
+              <IoFilterSharp size={18} />
+              <p className="text-xs font-bold uppercase tracking-widest">{t("filter")}</p>
+            </div>
 
-          <InlineFilterRow
-            label={t("status.label")}
-            selectedValue={selectedStatus}
-            options={statusOptions}
-            onChange={setSelectedStatus}
-            allLabel={t("status.all")}
-          />
-        </div>
-
-        <div className="flex w-full flex-wrap gap-2 xl:max-w-xl">
-          <div className="relative flex-1 min-w-[240px]">
-            <Input
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSearch();
-                }
-              }}
-              placeholder={t("searchPlaceholder")}
-              className="pr-10"
+            <InlineFilterRow
+              label={t("status.label")}
+              selectedValue={selectedStatus}
+              options={statusOptions}
+              onChange={setSelectedStatus}
+              allLabel={t("status.all")}
             />
           </div>
-          <div className="flex gap-2">
-            {searchKeyword && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={clearSearch}
-                className="h-10 border-greyscale-700 bg-greyscale-850 text-greyscale-100 hover:bg-greyscale-800"
-              >
-                {t("clearSearch")}
-              </Button>
-            )}
-            <Button type="button" onClick={handleSearch} className="h-10 px-4">
-              {t("search")}
-            </Button>
+
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center xl:max-w-xl">
+            <div className="relative flex-1">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-greyscale-500 pointer-events-none">
+                <IoSearchOutline size={18} />
+              </div>
+              <Input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="bg-greyscale-950 border-greyscale-700 pl-10 pr-10 focus-visible:ring-0 focus-visible:border-indigo-500/50 h-11 text-sm rounded-md transition-all placeholder:text-greyscale-600"
+              />
+              {searchInput && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-greyscale-500 hover:text-greyscale-200 transition-colors p-1"
+                >
+                  <MdOutlineClose size={16} />
+                </button>
+              )}
+            </div>
+
             <Button
-              className="h-10 gap-2 bg-primary px-4 text-primary-foreground hover:bg-primary/90"
+              className="h-11 gap-2 bg-primary px-6 text-white hover:bg-primary/90 font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95"
               onClick={() => setIsCreateDialogOpen(true)}
             >
               <Plus className="h-4 w-4" />

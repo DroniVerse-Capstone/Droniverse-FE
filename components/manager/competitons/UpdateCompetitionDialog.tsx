@@ -49,7 +49,6 @@ export default function UpdateCompetitionDialog({
         registrationEndDate: toLocalDatetimeString(competition.registrationEndDate),
         startDate: toLocalDatetimeString(competition.startDate),
         endDate: toLocalDatetimeString(competition.endDate),
-        resultPublishedAt: toLocalDatetimeString(competition.resultPublishedAt),
     });
 
     const updateCompetitionMutation = useUpdateCompetition();
@@ -69,7 +68,6 @@ export default function UpdateCompetitionDialog({
             registrationEndDate: form.registrationEndDate ? `${form.registrationEndDate}:00` : "",
             startDate: form.startDate ? `${form.startDate}:00` : "",
             endDate: form.endDate ? `${form.endDate}:00` : "",
-            resultPublishedAt: form.resultPublishedAt ? `${form.resultPublishedAt}:00` : undefined,
         };
     }, [form]);
 
@@ -240,16 +238,6 @@ export default function UpdateCompetitionDialog({
                                         type="datetime-local"
                                         value={form.endDate}
                                         onChange={(e) => setField("endDate", e.target.value)}
-                                        className="bg-greyscale-850 border-greyscale-700 focus-visible:ring-primary [color-scheme:dark]"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="comp-result">{tf("resultPublishedAt")}</Label>
-                                    <Input
-                                        id="comp-result"
-                                        type="datetime-local"
-                                        value={form.resultPublishedAt}
-                                        onChange={(e) => setField("resultPublishedAt", e.target.value)}
                                         className="bg-greyscale-850 border-greyscale-700 focus-visible:ring-primary [color-scheme:dark]"
                                     />
                                 </div>

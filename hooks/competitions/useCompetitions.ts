@@ -14,6 +14,12 @@ import {
 	CompetitionCertificate,
 	getCompetitionCertificatesResponseSchema,
 	assignCompetitionLevelsRequestSchema,
+	ParticipantStatus,
+	GetCompetitionParticipantsResponse,
+	getCompetitionParticipantsResponseSchema,
+	GetCompetitionLeaderboardResponse,
+	getCompetitionLeaderboardResponseSchema,
+	CompetitionParticipation,
 } from "@/validations/competitions/competitions"
 import { getLevelsByDroneResponseSchema, Level } from "@/validations/level/level"
 
@@ -126,6 +132,142 @@ export const useDeleteCompetitionLevels = () => {
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({ queryKey: ["competition-levels", variables.competitionId] });
+		},
+	});
+};
+
+export const useGetCompetitionParticipants = (
+	competitionId: string,
+	options?: {
+		status?: ParticipantStatus | null;
+		currentPage?: number;
+		pageSize?: number;
+	}
+) => {
+	return useQuery<GetCompetitionParticipantsResponse["data"], AxiosError<ApiError>>({
+		queryKey: ["competition-participants", competitionId, options?.status, options?.currentPage, options?.pageSize],
+		enabled: !!competitionId,
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/competitions/${competitionId}/participants`, {
+				params: {
+					Status: options?.status || undefined,
+					CurrentPage: options?.currentPage || 1,
+					PageSize: options?.pageSize || 10,
+				},
+			});
+			const parsed = getCompetitionParticipantsResponseSchema.parse(response.data);
+			return parsed.data;
+		},
+	});
+};
+
+export const useGetCompetitionLeaderboard = (
+	competitionId: string,
+	options?: {
+		currentPage?: number;
+		pageSize?: number;
+	}
+) => {
+	return useQuery<GetCompetitionLeaderboardResponse["data"], AxiosError<ApiError>>({
+		queryKey: ["competition-leaderboard", competitionId, options?.currentPage, options?.pageSize],
+		enabled: !!competitionId,
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/competitions/${competitionId}/leaderboard`, {
+				params: {
+					CurrentPage: options?.currentPage || 1,
+					PageSize: options?.pageSize || 10,
+				},
+			});
+			const parsed = getCompetitionLeaderboardResponseSchema.parse(response.data);
+			return parsed.data;
+		},
+	});
+};
+
+export const useRegisterCompetition = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, string>({
+		mutationFn: async (id) => {
+			await apiClient.post(`/community/competitions/${id}/register`);
+		},
+		onSuccess: (_, id) => {
+			queryClient.invalidateQueries({ queryKey: ["competition", id] });
+			queryClient.invalidateQueries({ queryKey: ["club-competitions"] });
+		}
+	});
+}
+
+export const useWithdrawCompetition = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, string>({
+		mutationFn: async (id) => {
+			await apiClient.post(`/community/competitions/${id}/withdraw`);
+		},
+		onSuccess: (_, id) => {
+			queryClient.invalidateQueries({ queryKey: ["competition", id] });
+			queryClient.invalidateQueries({ queryKey: ["club-competitions"] });
+		}
+	});
+}
+
+export const useGetMyCompetitionParticipation = (id: string) => {
+	return useQuery<CompetitionParticipation | null, AxiosError<ApiError>>({
+		queryKey: ["my-competition-participation", id],
+		enabled: !!id,
+		queryFn: async () => {
+			try {
+				const response = await apiClient.get(`/community/competitions/${id}/my-participation`);
+				return response.data?.data || response.data;
+			} catch (error: any) {
+				if (error.response?.status === 404) return null;
+				throw error;
+			}
+		},
+	});
+}
+
+export const useUpdateCompetitionStatus = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, { id: string; status: CompetitionStatus; invalidReason?: string | null }>({
+		mutationFn: async ({ id, status, invalidReason }) => {
+			await apiClient.patch(`/community/competitions/${id}/status`, {
+				status,
+				invalidReason: invalidReason || null,
+			});
+		},
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: ["club-competitions"] });
+			queryClient.invalidateQueries({ queryKey: ["competition", variables.id] });
+		}
+	});
+}
+
+export const useDisqualifyParticipant = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, { competitionId: string; userId: string }>({
+		mutationFn: async ({ competitionId, userId }) => {
+			await apiClient.post(`/community/competitions/${competitionId}/participants/${userId}/disqualified`);
+		},
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: ["competition-participants", variables.competitionId] });
+		},
+	});
+};
+
+// POST /community/competitions/{competitionId}/aggregate
+// Tính điểm xếp hạng và trao giải thưởng cho người chơi
+export const useAggregateCompetition = () => {
+	const queryClient = useQueryClient();
+	return useMutation<void, AxiosError<ApiError>, string>({
+		mutationFn: async (competitionId: string) => {
+			await apiClient.post(`/community/competitions/${competitionId}/aggregate`);
+		},
+		onSuccess: (_, competitionId) => {
+			queryClient.invalidateQueries({ queryKey: ["competition", competitionId] });
+			queryClient.invalidateQueries({ queryKey: ["club-competitions"] });
+			queryClient.invalidateQueries({ queryKey: ["competition-prizes", competitionId] });
+			queryClient.invalidateQueries({ queryKey: ["competition-leaderboard", competitionId] });
+			queryClient.invalidateQueries({ queryKey: ["competition-participants", competitionId] });
 		},
 	});
 };

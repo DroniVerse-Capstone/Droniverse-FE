@@ -99,20 +99,20 @@ export default function AssignCompetitionLevelsDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-greyscale-950 border-greyscale-800 text-greyscale-50 p-0 overflow-hidden flex flex-col max-h-[85vh]">
-                <DialogHeader className="p-6 border-b border-greyscale-800">
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <DialogContent className="max-w-2xl bg-greyscale-900 border-greyscale-800 text-greyscale-50 p-0 overflow-hidden flex flex-col max-h-[85vh] shadow-2xl">
+                <DialogHeader className="p-6 border-b border-greyscale-800 bg-greyscale-950/50">
+                    <DialogTitle className="text-xl font-bold flex items-center gap-2 uppercase tracking-tight">
                         <LuClipboardList className="text-primary" />
                         {locale === "en" ? "Configure Participation Levels" : "Thiết lập điều kiện Cấp độ"}
                     </DialogTitle>
-                    <DialogDescription className="text-greyscale-400">
+                    <DialogDescription className="text-greyscale-400 text-sm">
                         {locale === "en" 
                             ? "Select the mandatory levels that candidates must achieve to participate in the competition." 
                             : "Chọn các cấp độ mà thí sinh bắt buộc phải đạt được để tham gia cuộc thi."}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {isFetching ? (
                         <div className="flex h-40 items-center justify-center">
                             <Spinner className="h-8 w-8 text-primary" />
@@ -132,12 +132,12 @@ export default function AssignCompetitionLevelsDialog({
                                     <div
                                         key={level.levelId}
                                     onClick={() => toggleLevel(level.levelId)}
-                                    className={`relative flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${selectedIds.includes(level.levelId)
-                                        ? "bg-primary/10 border-primary shadow-[0_0_15px_rgba(255,102,0,0.1)]"
-                                        : "bg-greyscale-900/50 border-greyscale-800 hover:border-greyscale-600"
+                                    className={`relative flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedIds.includes(level.levelId)
+                                        ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
+                                        : "bg-greyscale-950 border-greyscale-800 hover:border-greyscale-600"
                                         }`}
                                 >
-                                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center font-black text-xl shadow-inner border transition-colors ${selectedIds.includes(level.levelId)
+                                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center font-black text-xl shadow-inner border transition-colors ${selectedIds.includes(level.levelId)
                                         ? "bg-primary/20 border-primary/30 text-primary"
                                         : "bg-greyscale-800/50 border-greyscale-700/50 text-greyscale-400"
                                         }`}>
@@ -147,7 +147,7 @@ export default function AssignCompetitionLevelsDialog({
                                         <p className="text-sm font-black text-greyscale-50 truncate">
                                             {getLocalizedLevelName(level.name)}
                                         </p>
-                                        <p className="text-[10px] font-bold text-greyscale-500 uppercase tracking-widest">
+                                        <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedIds.includes(level.levelId) ? 'text-primary/70' : 'text-greyscale-500'}`}>
                                             {locale === "en" ? "Required Level" : "Yêu cầu Cấp độ"}
                                         </p>
                                     </div>
@@ -163,7 +163,7 @@ export default function AssignCompetitionLevelsDialog({
                     )}
                 </div>
 
-                <DialogFooter className="p-6 border-t border-greyscale-800 bg-greyscale-900/30">
+                <DialogFooter className="p-6 border-t border-greyscale-800 bg-greyscale-950/50">
                     <Button
                         variant="ghost"
                         onClick={() => onOpenChange(false)}
@@ -174,9 +174,9 @@ export default function AssignCompetitionLevelsDialog({
                     <Button
                         onClick={handleSave}
                         disabled={isProcessing}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 min-w-40 font-bold shadow-lg shadow-primary/20"
+                        className="bg-primary text-white hover:bg-primary/90 min-w-40 font-bold shadow-lg shadow-primary/20 h-11 transition-all active:scale-95"
                     >
-                        {isProcessing ? <Spinner className="h-4 w-4 mr-2" /> : <MdAdd className="mr-2 h-5 w-5" />}
+                        {isProcessing ? <Spinner className="h-4 w-4 mr-2" /> : <MdCheck className="mr-2 h-5 w-5" />}
                         {locale === "en" ? "Save Configuration" : "Lưu thiết lập"}
                     </Button>
                 </DialogFooter>

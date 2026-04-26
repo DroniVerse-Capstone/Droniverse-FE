@@ -90,3 +90,57 @@ export const useDeleteCompetitionPrize = () => {
         },
     });
 };
+// GET my prizes across all competitions
+const myPrizeItemSchema = z.object({
+    competition: z.object({
+        competitionID: z.string(),
+        nameVN: z.string(),
+        nameEN: z.string(),
+    }),
+    prize: z.object({
+        prizeId: z.string(),
+        titleVN: z.string(),
+        titleEN: z.string(),
+        rank: z.number(),
+        rewardType: z.enum(["MONEY", "GIFT"]),
+        rewardValueMoney: z.number().nullable().optional(),
+        rewardValueGiftVN: z.string().nullable().optional(),
+        rewardValueGiftEN: z.string().nullable().optional(),
+        awardedAt: z.string(),
+    })
+});
+
+const myPrizesResponseSchema = z.object({
+    isSuccess: z.boolean(),
+    message: z.string(),
+    data: z.object({
+        data: z.array(myPrizeItemSchema),
+        totalRecords: z.number(),
+        pageIndex: z.number(),
+        pageSize: z.number(),
+        totalPages: z.number(),
+    })
+});
+
+export type MyPrizeItem = z.infer<typeof myPrizeItemSchema>;
+
+export const useGetMyPrizes = (options?: {
+    currentPage?: number;
+    pageSize?: number;
+    competitionName?: string;
+}) => {
+    return useQuery({
+        queryKey: ["my-prizes", options],
+        queryFn: async () => {
+            const response = await apiClient.get(`/community/competitions/my-prizes`, {
+                params: {
+                    CurrentPage: options?.currentPage || 1,
+                    PageSize: options?.pageSize || 10,
+                    CompetitionName: options?.competitionName || undefined,
+                }
+            });
+            const parsed = myPrizesResponseSchema.parse(response.data);
+            return parsed.data;
+        }
+    });
+};
