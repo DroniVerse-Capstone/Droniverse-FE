@@ -89,11 +89,15 @@ export function useGetWebSimulator(simulatorId: string | null) {
   });
 }
 
-export function useGetVRSimulators() {
+export function useGetVRSimulators(options?: { type?: string }) {
   return useQuery<any[]>({
-    queryKey: ["vr-simulators"],
+    queryKey: ["vr-simulators", options?.type],
     queryFn: async () => {
-      const response = await apiClient.get<any>("/academy/vr-simulators");
+      const response = await apiClient.get<any>("/academy/vr-simulators", {
+        params: {
+          ...(options?.type && { type: options.type }),
+        },
+      });
       return response.data?.data?.data || response.data?.data || [];
     },
   });

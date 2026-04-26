@@ -40,7 +40,6 @@ const DEFAULT_FORM = {
   registrationEndDate: "",
   startDate: "",
   endDate: "",
-  resultPublishedAt: "",
 };
 
 export default function CreateCompetitionDialog({
@@ -70,7 +69,7 @@ export default function CreateCompetitionDialog({
       registrationEndDate: form.registrationEndDate ? `${form.registrationEndDate}:00` : "",
       startDate: form.startDate ? `${form.startDate}:00` : "",
       endDate: form.endDate ? `${form.endDate}:00` : "",
-      resultPublishedAt: form.resultPublishedAt ? `${form.resultPublishedAt}:00` : undefined,
+      resultPublishedAt: null,
     };
   }, [form, clubId]);
 
@@ -246,16 +245,6 @@ export default function CreateCompetitionDialog({
                     type="datetime-local"
                     value={form.endDate}
                     onChange={(e) => setField("endDate", e.target.value)}
-                    className="bg-greyscale-850 border-greyscale-700 focus-visible:ring-primary [color-scheme:dark]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="comp-result">{t("fields.resultPublishedAt")}</Label>
-                  <Input
-                    id="comp-result"
-                    type="datetime-local"
-                    value={form.resultPublishedAt}
-                    onChange={(e) => setField("resultPublishedAt", e.target.value)}
                     className="bg-greyscale-850 border-greyscale-700 focus-visible:ring-primary [color-scheme:dark]"
                   />
                 </div>

@@ -2,8 +2,8 @@
 
 import React from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { FiUser, FiLogOut, FiSettings } from "react-icons/fi";
+import { useParams, useRouter } from "next/navigation";
+import { FiUser, FiLogOut, FiSettings, FiAward } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +23,8 @@ interface UserDropdownProps {
 
 export default function UserDropdown({ user }: UserDropdownProps) {
   const router = useRouter();
+  const params = useParams<{ clubSlug: string }>();
+  const clubSlug = params?.clubSlug;
   const logout = useLogout();
 
   const handleLogout = () => {
@@ -93,6 +95,16 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           <FiUser className="mr-2" />
           Hồ sơ
         </DropdownMenuItem>
+
+        {user?.roleName === "CLUB_MEMBER" && clubSlug && (
+          <DropdownMenuItem
+            onClick={() => router.push(`/member/${clubSlug}/prizes`)}
+            className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
+          >
+            <FiAward className="mr-2" />
+            Giải thưởng
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem
           onClick={() => router.push("/settings")}
