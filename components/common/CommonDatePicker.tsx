@@ -13,10 +13,13 @@ import {
   isSameMonth,
   isSameDay,
   isToday,
+  isValid,
+  parse,
 } from "date-fns"
 import { vi } from "date-fns/locale"
 import { ChevronDown, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
@@ -33,6 +36,42 @@ type CommonDatePickerProps = {
 
 const WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
 
+const formatDisplayDate = (date: Date) => {
+  return format(date, "dd/MM/yyyy", { locale: vi })
+}
+
+const formatManualDateInput = (input: string) => {
+  const digits = input.replace(/\D/g, "").slice(0, 8)
+
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+const parseManualDateInput = (input: string) => {
+  const digits = input.replace(/\D/g, "")
+
+  if (digits.length !== 8) return null
+
+  const day = Number(digits.slice(0, 2))
+  const month = Number(digits.slice(2, 4))
+  const year = Number(digits.slice(4, 8))
+  const parsedDate = new Date(year, month - 1, day)
+
+  if (!isValid(parsedDate)) return null
+
+  if (
+    parsedDate.getDate() !== day ||
+    parsedDate.getMonth() !== month - 1 ||
+    parsedDate.getFullYear() !== year
+  ) {
+    return null
+  }
+
+  return parsedDate
+}
+
 export default function CommonDatePicker({
   value,
   onChange,
@@ -43,8 +82,9 @@ export default function CommonDatePicker({
   label,
 }: CommonDatePickerProps) {
   const [open, setOpen] = React.useState(false)
+  const [manualInput, setManualInput] = React.useState("")
 
-  const selectedDate = value ? new Date(value) : null
+  const selectedDate = value ? parse(value, "yyyy-MM-dd", new Date()) : null
 
   const [viewMonth, setViewMonth] = React.useState<Date>(
     selectedDate ?? new Date()
@@ -53,8 +93,29 @@ export default function CommonDatePicker({
   /* sync view month when value changes externally */
   React.useEffect(() => {
     if (selectedDate) setViewMonth(selectedDate)
+    setManualInput(selectedDate ? formatDisplayDate(selectedDate) : "")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
+
+  const commitManualInput = () => {
+    if (!manualInput) {
+      onChange("")
+      setOpen(false)
+      return
+    }
+
+    const parsedDate = parseManualDateInput(manualInput)
+
+    if (!parsedDate) {
+      setManualInput(selectedDate ? formatDisplayDate(selectedDate) : "")
+      return
+    }
+
+    onChange(format(parsedDate, "yyyy-MM-dd"))
+    setManualInput(formatDisplayDate(parsedDate))
+    setViewMonth(parsedDate)
+    setOpen(false)
+  }
 
   const days = React.useMemo(() => {
     return eachDayOfInterval({
@@ -65,11 +126,13 @@ export default function CommonDatePicker({
 
   const handleSelect = (day: Date) => {
     onChange(format(day, "yyyy-MM-dd"))
+    setManualInput(formatDisplayDate(day))
+    setViewMonth(day)
     setOpen(false)
   }
 
   const triggerLabel = selectedDate
-    ? format(selectedDate, "dd/MM/yyyy", { locale: vi })
+    ? formatDisplayDate(selectedDate)
     : placeholder
 
   return (
@@ -78,7 +141,15 @@ export default function CommonDatePicker({
         <label className="text-sm font-medium text-greyscale-0">{label}</label>
       ) : null}
 
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen)
+          if (nextOpen) {
+            setManualInput(selectedDate ? formatDisplayDate(selectedDate) : "")
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             type="button"
@@ -99,9 +170,32 @@ export default function CommonDatePicker({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-[--radix-popover-trigger-width] min-w-[280px] border-greyscale-700 bg-greyscale-800 p-3"
+          className="w-[--radix-popover-trigger-width] min-w-70 border-greyscale-700 bg-greyscale-800 p-3"
           align="start"
         >
+          <div className="mb-3">
+            <Input
+              value={manualInput}
+              onChange={(event) =>
+                setManualInput(formatManualDateInput(event.target.value))
+              }
+              onBlur={commitManualInput}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault()
+                  commitManualInput()
+                }
+              }}
+              inputMode="numeric"
+              placeholder="dd/mm/yyyy"
+              disabled={disabled}
+              className="border-greyscale-600 bg-greyscale-900/60 text-greyscale-0 placeholder:text-greyscale-500 focus:border-primary-500 focus:ring-primary-500/20"
+            />
+            <p className="mt-1 text-xs text-greyscale-400">
+              Nhập số theo định dạng dd/mm/yyyy hoặc chọn ngày từ lịch
+            </p>
+          </div>
+
           {/* Month navigation */}
           <div className="mb-3 flex items-center justify-between">
             <button

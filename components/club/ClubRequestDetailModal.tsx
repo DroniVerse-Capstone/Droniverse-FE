@@ -241,6 +241,14 @@ export function ClubRequestDetailModal({
                   </FieldBlock>
                 )}
 
+                {detail.clubRequirement && (
+                  <FieldBlock label={"Yêu cầu để được tham gia câu lạc bộ"}>
+                    <p className="text-sm text-greyscale-50 leading-relaxed">
+                      {detail.clubRequirement}
+                    </p>
+                  </FieldBlock>
+                )}
+
                 {/* Ảnh */}
                 {detail.imageUrl && (
                   <FieldBlock label={t("fields.coverImage")}>
