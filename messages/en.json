@@ -352,7 +352,9 @@
       "subitems": {
         "course": "Course Management",
         "certificate": "Certificate Management",
-        "code": "Code Management"
+        "code": "Code Management",
+        "curriculum": "Curriculum Management",
+        "level": "Level Management"
       }
     },
     "labs": {

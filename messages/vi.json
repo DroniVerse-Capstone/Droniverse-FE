@@ -348,7 +348,9 @@
       "subitems": {
         "course": "Quản lý khóa học",
         "certificate": "Quản lý chứng chỉ",
-        "code": "Quản lý mã code"
+        "code": "Quản lý mã code",
+        "curriculum": "Quản lý chương trình học",
+        "level": "Quản lý cấp độ"
       }
     },
     "labs": {

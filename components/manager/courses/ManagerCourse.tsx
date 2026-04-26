@@ -22,6 +22,8 @@ import {
   ParticipationSort,
 } from "@/validations/club/club-course";
 import { IoFilterSharp } from "react-icons/io5";
+import LevelPathDialog from "@/components/course/LevelPathDialog";
+import LearningPathDialog from "@/components/course/LearningPathDialog";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -44,9 +46,8 @@ export default function ManagerCourse() {
     { value: "LeastPopular", label: t("sort.leastPopular") },
   ];
 
-  const [selectedLevel, setSelectedLevel] = React.useState<ClubCourseLevel | null>(
-    null,
-  );
+  const [selectedLevel, setSelectedLevel] =
+    React.useState<ClubCourseLevel | null>(null);
   const [selectedSort, setSelectedSort] =
     React.useState<ParticipationSort | null>(null);
   const [searchInput, setSearchInput] = React.useState("");
@@ -60,14 +61,17 @@ export default function ManagerCourse() {
 
   const { data: levelsByDrone } = useGetLevelsByDrone(droneId);
 
-  const { data, isLoading, isError, error, isFetching } = useGetClubCourses(clubId, {
-    levelId: selectedLevel ?? undefined,
-    droneId,
-    participationSort: selectedSort,
-    courseName: searchKeyword,
-    currentPage,
-    pageSize: 12,
-  });
+  const { data, isLoading, isError, error, isFetching } = useGetClubCourses(
+    clubId,
+    {
+      levelId: selectedLevel ?? undefined,
+      droneId,
+      participationSort: selectedSort,
+      courseName: searchKeyword,
+      currentPage,
+      pageSize: 12,
+    },
+  );
 
   const courses = data?.data ?? [];
 
@@ -104,7 +108,6 @@ export default function ManagerCourse() {
     setCurrentPage(1);
   }, []);
 
-
   if (!clubId) {
     return (
       <div className="px-6 py-4">
@@ -115,9 +118,19 @@ export default function ManagerCourse() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-greyscale-0 ">
-        Khóa học hiện có
-      </h2>
+      <div className="flex justify-between gap-2">
+        <h2 className="text-2xl font-semibold text-greyscale-0 ">
+          Khóa học hiện có
+        </h2>
+
+        {droneId && (
+          <div className="flex items-center gap-2">
+            <LearningPathDialog droneId={droneId} />
+            <LevelPathDialog droneId={droneId} />
+          </div>
+        )}
+      </div>
+
       <div>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="space-y-3">
@@ -125,7 +138,6 @@ export default function ManagerCourse() {
               <IoFilterSharp />
               <p className="text-sm font-semibold">{t("filter")}</p>
             </div>
-
 
             <InlineFilterRow
               label={t("level.label")}
@@ -185,7 +197,11 @@ export default function ManagerCourse() {
       {!isLoading && isError ? (
         <div className="rounded-xl border border-greyscale-800 bg-greyscale-900/60 p-8">
           <EmptyState
-            title={error.response?.data?.message || error.message || t("errors.loadCourses")}
+            title={
+              error.response?.data?.message ||
+              error.message ||
+              t("errors.loadCourses")
+            }
           />
         </div>
       ) : null}
@@ -204,7 +220,9 @@ export default function ManagerCourse() {
                   course={course}
                   onClick={() => {
                     if (!clubSlug) return;
-                    router.push(`/manager/${clubSlug}/courses/${course.courseId}`);
+                    router.push(
+                      `/manager/${clubSlug}/courses/${course.courseId}`,
+                    );
                   }}
                 />
               ))}

@@ -38,9 +38,9 @@ export default function CourseManagement() {
   const levelOptions = levels.map((level) => {
     const levelNameMapVi: Record<number, string> = {
       1: "Cơ bản",
-      2: "Trung cấp",
+      2: "Trung bình",
       3: "Nâng cao",
-      4: "Master",
+      4: "Bậc thầy",
     };
 
     const levelNameMapEn: Record<number, string> = {
