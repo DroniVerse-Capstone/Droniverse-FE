@@ -10,7 +10,6 @@ import {
   BarChart,
   ChevronLeft,
   ChevronRight,
-  History,
   House,
   Info,
   Library,
@@ -22,8 +21,6 @@ import {
   Trophy,
   UserCheck,
   Users,
-  Wallet,
-  WalletCards,
 } from "lucide-react";
 import { AiOutlineSwap } from "react-icons/ai";
 import { IoPeople } from "react-icons/io5";
@@ -91,12 +88,6 @@ function buildManagerNavItems(
           icon: UserCheck,
           isActive: (pathname) => pathname === `${base}/members-requests`,
         },
-        {
-          title: t("members.subitems.transactions"),
-          href: `${base}/members-transactions`,
-          icon: Receipt,
-          isActive: (pathname) => pathname === `${base}/members-transactions`,
-        },
       ],
     },
     {
@@ -127,25 +118,6 @@ function buildManagerNavItems(
       isActive: (pathname) =>
         pathname === `${base}/competitions` ||
         pathname.startsWith(`${base}/competitions/`),
-    },
-    {
-      id: "finance",
-      title: t("finance.title"),
-      icon: Wallet,
-      subItems: [
-        {
-          title: t("finance.subitems.wallet"),
-          href: `${base}/my-wallet`,
-          icon: WalletCards,
-          isActive: (pathname) => pathname === `${base}/my-wallet`,
-        },
-        {
-          title: t("finance.subitems.withdrawHistory"),
-          href: `${base}/withdraw-history`,
-          icon: History,
-          isActive: (pathname) => pathname === `${base}/withdraw-history`,
-        },
-      ],
     },
     {
       id: "settings",

@@ -9,6 +9,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import ClubCard from "@/components/club/ClubCard";
 import { useGetClubDetailByCode } from "@/hooks/club/useClub";
@@ -29,6 +30,7 @@ export default function JoinClubDialog() {
   const [open, setOpen] = useState(false);
   const [evidenceDialogOpen, setEvidenceDialogOpen] = useState(false);
   const [ownershipMediaId, setOwnershipMediaId] = useState("");
+  const [clubRequirement, setClubRequirement] = useState("");
 
   const {
     data: club,
@@ -43,6 +45,7 @@ export default function JoinClubDialog() {
     setClubCode("");
     setSearchCode(null);
     setOwnershipMediaId("");
+    setClubRequirement("");
     setEvidenceDialogOpen(false);
   };
 
@@ -51,9 +54,21 @@ export default function JoinClubDialog() {
   };
 
   const handleJoin = () => {
+    if (!clubRequirement || clubRequirement.trim().length === 0) {
+      toast.error(
+        locale === "vi"
+          ? "Vui lòng nhập lý do (bắt buộc)"
+          : "Please enter a reason (required)",
+      );
+      return;
+    }
     if (club) {
       attemptJoinClub(
-        { clubCode: club.clubCode, mediaId: ownershipMediaId },
+        {
+          clubCode: club.clubCode,
+          mediaId: ownershipMediaId || null,
+          clubRequirement: clubRequirement.trim(),
+        },
         {
           onSuccess: (data) => {
             setEvidenceDialogOpen(false);
@@ -130,7 +145,7 @@ export default function JoinClubDialog() {
           </DialogClose>
           <Button
             onClick={handleOpenEvidenceDialog}
-            disabled={!club || isJoining}
+            disabled={!club || isJoining || !clubRequirement.trim()}
           >
             {t("buttons.confirm")}
           </Button>
@@ -142,15 +157,48 @@ export default function JoinClubDialog() {
           <DialogHeader>
             <DialogTitle>
               {locale === "vi"
-                ? "Bằng chứng sở hữu Drone"
-                : "Drone ownership evidence"}
+                ? "Đơn xin gia nhập câu lạc bộ"
+                : "Join Club Request"}
             </DialogTitle>
             <p className="text-sm text-muted-foreground">
               {locale === "vi"
-                ? "Vui lòng tải lên hình ảnh hoặc video chứng minh bạn sở hữu drone phù hợp với câu lạc bộ trước khi gửi yêu cầu tham gia."
-                : "Please upload an image or video proving you own a drone that matches this club before sending your join request."}
+                ? "Vui lòng điền các thông tin để gửi yêu cầu gia nhập câu lạc bộ. Quản lý sẽ xem xét và phản hồi trong thời gian sớm nhất."
+                : "Please fill in the information below to submit your club join request. The manager will review and respond as soon as possible."}
             </p>
           </DialogHeader>
+
+          {club?.clubRequirement ? (
+            <div className="mt-3 rounded border border-greyscale-700 bg-greyscale-900/40 p-3">
+              <p className="mb-1 text-sm font-medium text-greyscale-0">
+                {locale === "vi"
+                  ? "Yêu cầu của câu lạc bộ"
+                  : "Club requirement"}
+              </p>
+              <p className="text-sm text-greyscale-25 whitespace-pre-wrap">
+                {club.clubRequirement}
+              </p>
+            </div>
+          ) : null}
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                {locale === "vi" ? "Lý do muốn tham gia" : "Reason for wanting to join"}
+                <span className="ml-1 text-rose-500">*</span>
+              </Label>
+              <p className="text-xs text-muted-foreground">{locale === "vi" ? "Bắt buộc" : "Required"}</p>
+            </div>
+            <Textarea
+              className="min-w-0 w-full mt-1"
+              value={clubRequirement}
+              onChange={(e) => setClubRequirement(e.target.value)}
+              placeholder={locale === "vi" ? "Nhập lý do" : "Enter a reason"}
+              aria-required
+            />
+            {!clubRequirement.trim() ? (
+              <p className="text-xs text-rose-500 mt-1">{locale === "vi" ? "Vui lòng nhập lý do" : "Please enter a reason"}</p>
+            ) : null}
+          </div>
 
           {club?.drone && (
             <div className="rounded border border-greyscale-700 bg-greyscale-900/40 p-3">
@@ -172,20 +220,19 @@ export default function JoinClubDialog() {
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-sm font-medium text-greyscale-0">
-                  {locale === "vi"
-                    ? club.drone.droneNameVN
-                    : club.drone.droneNameEN}
-                </p>
-                <p className="text-xs text-greyscale-100">
-                  {locale === "vi"
-                    ? club.drone.droneTypeNameVN
-                    : club.drone.droneTypeNameEN}
-                  {club.drone.manufacturer
-                    ? ` • ${club.drone.manufacturer}`
-                    : ""}
-                </p>
+                    {locale === "vi"
+                      ? club.drone.droneNameVN
+                      : club.drone.droneNameEN}
+                  </p>
+                  <p className="text-xs text-greyscale-100">
+                    {locale === "vi"
+                      ? club.drone.droneTypeNameVN
+                      : club.drone.droneTypeNameEN}
+                    {club.drone.manufacturer
+                      ? ` • ${club.drone.manufacturer}`
+                      : ""}
+                  </p>
                 </div>
-                
               </div>
             </div>
           )}
@@ -213,7 +260,7 @@ export default function JoinClubDialog() {
             <Button
               type="button"
               onClick={handleJoin}
-              disabled={!club || !ownershipMediaId || isJoining}
+              disabled={!club || isJoining}
             >
               {isJoining ? (
                 <Spinner />

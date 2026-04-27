@@ -1,16 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { IoHelpCircleOutline, IoPeople, IoStar } from "react-icons/io5";
+import { AxiosError } from "axios";
+import { useParams, useRouter } from "next/navigation";
+import { IoPeople, IoWalletSharp } from "react-icons/io5";
+import { FiArrowRight } from "react-icons/fi";
 
 import EmptyState from "@/components/common/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetClubDetailById } from "@/hooks/club/useClub";
+import { useGetMyWallet } from "@/hooks/wallet/useWallet";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import StatCard from "@/components/common/StatCard";
 import { BiSolidBookAlt } from "react-icons/bi";
-import { FaEdit } from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
 
 type ManagerClubInfoProps = {
@@ -18,13 +21,27 @@ type ManagerClubInfoProps = {
 };
 export default function ManagerClubInfo({ clubId }: ManagerClubInfoProps) {
   const t = useTranslations("ClubDetail.ClubInfo");
-   const locale = useLocale();
-   const {
-     data: club,
-     isLoading,
-     isError,
-     error,
-   } = useGetClubDetailById(clubId);
+  const locale = useLocale();
+  const router = useRouter();
+  const params = useParams<{ clubSlug?: string }>();
+  const clubSlug = params?.clubSlug;
+  const {
+    data: club,
+    isLoading,
+    isError,
+    error,
+  } = useGetClubDetailById(clubId);
+  const {
+    data: wallet,
+    isLoading: isWalletLoading,
+    error: walletError,
+  } = useGetMyWallet();
+  const isWalletNotFound =
+    walletError instanceof AxiosError && walletError.response?.status === 404;
+
+  const goToWallet = () => {
+    router.push("/my-wallet");
+  };
  
    if (isLoading) {
      return (
@@ -53,18 +70,10 @@ export default function ManagerClubInfo({ clubId }: ManagerClubInfoProps) {
    }
  
    const clubName = locale === "en" ? club.nameEN || club.nameVN : club.nameVN;
- 
-   let managerName = "Chưa cập nhật";
-   if (club.creator && typeof club.creator === "object") {
-     const creator = club.creator as Record<string, unknown>;
-     const candidate = creator.fullName || creator.name || creator.username;
-     if (typeof candidate === "string" && candidate.trim()) {
-       managerName = candidate;
-     }
-   }
+
  
    return (
-     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+     <div className="flex gap-4 items-center justify-between">
        <div className="flex min-w-0 flex-1 items-start gap-4">
          <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded">
            <Image
@@ -91,29 +100,49 @@ export default function ManagerClubInfo({ clubId }: ManagerClubInfoProps) {
          </div>
        </div>
  
-       <div className="grid w-full gap-3 md:grid-cols-3 xl:w-auto xl:min-w-190">
-         <StatCard
-           icon={<IoStar size={24} />}
-           title={t("manager")}
-           value={managerName}
-           variant="primary"
-           extra={<IoHelpCircleOutline size={18} className="text-primary" />}
-         />
- 
+      <div className="flex gap-3 items-center">
          <StatCard
            icon={<IoPeople size={24} />}
            title={t("members")}
            value={club.totalMembers}
            variant="secondary"
          />
- 
-         <StatCard
-           icon={<BiSolidBookAlt size={24} />}
-           title={t("courses")}
-           value={club.totalCourses}
-           variant="tertiary"
-         />
-       </div>
+
+        <StatCard
+          icon={<IoWalletSharp size={24} />}
+          title={locale === "en" ? "Balance" : "Số dư"}
+          value={
+            isWalletLoading
+              ? locale === "en"
+                ? "Loading..."
+                : "Đang tải..."
+              : wallet
+                ? `${wallet.balance.toLocaleString("vi-VN")} đ`
+                : isWalletNotFound
+                  ? locale === "en"
+                    ? "No wallet"
+                    : "Chưa có ví"
+                  : locale === "en"
+                    ? "Unavailable"
+                    : "Không khả dụng"
+          }
+          variant={isWalletLoading || isWalletNotFound ? "primary" : "tertiary"}
+        />
+      </div>
+
+      {!isWalletLoading && !wallet && isWalletNotFound ? (
+        <div className="flex justify-end xl:col-span-2">
+          <Button
+            type="button"
+            variant="default"
+            onClick={goToWallet}
+            icon={<FiArrowRight size={18} />}
+          >
+            {locale === "en" ? "Set up wallet" : "Thiết lập ví ngay"}
+          </Button>
+        </div>
+      ) : null}
+
      </div>
    );
  }

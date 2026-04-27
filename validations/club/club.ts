@@ -68,6 +68,7 @@ export const clubSchema = z.object({
   suspendedReason: z.string().nullable().optional(),
   clubPolicyVN: z.string(),
   clubPolicyEN: z.string(),
+  clubRequirement: z.string().nullable(),
   drone: clubDroneSchema.optional().nullable(),
   creator: creatorSchema.nullable(),
 })

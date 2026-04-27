@@ -4,7 +4,8 @@ import { z } from "zod"
 // ---- Post my request ----
 export const clubAttemptRequestSchema = z.object({
   clubCode: z.string().min(1, "Club code is required"),
-  mediaId: z.string().uuid("Media ID must be a valid UUID"),
+  mediaId: z.string().uuid("Media ID must be a valid UUID").nullable(),
+  clubRequirement: z.string(),
 })
 
 export const clubAttemptDataSchema = z.object({

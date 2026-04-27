@@ -47,8 +47,8 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
     clubRequirement: string | null;
     clubNameVN: string;
     clubNameEN: string;
-    mediaTypeName: "IMAGE" | "VIDEO";
-    url: string;
+    mediaTypeName: "IMAGE" | "VIDEO" | null;
+    url: string | null;
   } | null>(null);
 
   const updateStatusMutation = useUpdateClubAttemptRequestStatus();
@@ -198,14 +198,12 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                     type="button"
                     variant="viewIcon"
                     size="icon"
-                    disabled={!request.media?.url}
                     onClick={() => {
-                      if (!request.media?.url) return;
-
-                      const mediaTypeName =
-                        request.media.mediaTypeName === "VIDEO"
+                      const mediaTypeName = request.media
+                        ? request.media.mediaTypeName === "VIDEO"
                           ? "VIDEO"
-                          : "IMAGE";
+                          : "IMAGE"
+                        : null;
 
                       setSelectedEvidence({
                         requesterName: request.requesterName,
@@ -213,7 +211,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                         clubNameVN: request.clubNameVN,
                         clubNameEN: request.clubNameEN,
                         mediaTypeName,
-                        url: request.media.url,
+                        url: request.media?.url ?? null,
                       });
                     }}
                   >
@@ -289,7 +287,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                   {selectedEvidence.requesterName || "-"}
                 </p>
                 <p className="text-greyscale-0">
-                  <span className="font-medium text-greyscale-200">{locale === "vi" ? "Thông tin cung cấp" : "Provided Info"}:</span>{" "}
+                  <span className="font-medium text-greyscale-200">{locale === "vi" ? "Lý do muốn tham gia câu lạc bộ" : "Reason to join the club"}:</span>{" "}
                   {selectedEvidence.clubRequirement || "-"}
                 </p>
                 <p className="text-greyscale-0">
@@ -307,7 +305,7 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
               </div>
 
               <div className="overflow-hidden rounded border border-greyscale-700 bg-black/40">
-                {selectedEvidence.mediaTypeName === "VIDEO" ? (
+                {selectedEvidence.url ? selectedEvidence.mediaTypeName === "VIDEO" ? (
                   <video
                     src={selectedEvidence.url}
                     controls
@@ -319,6 +317,12 @@ export default function JoinRequestsTab({ clubId }: JoinRequestsTabProps) {
                     alt="Drone ownership evidence"
                     className="max-h-[70vh] w-full object-contain"
                   />
+                ) : (
+                  <div className="flex min-h-48 items-center justify-center p-6 text-center text-sm text-greyscale-100">
+                    {locale === "vi"
+                      ? "Yêu cầu này không có hình ảnh hay video đính kèm."
+                      : "This request does not have any attached media."}
+                  </div>
                 )}
               </div>
             </div>

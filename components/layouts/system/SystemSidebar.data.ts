@@ -11,7 +11,6 @@ import {
   Plane,
   Route,
   Settings,
-  Trophy,
   UserCog,
   Users,
 } from "lucide-react";
@@ -104,11 +103,6 @@ export const primaryItems: NavItem[] = [
     subItems: [
       { title: "category.subitems.drone", href: "/drone-category", icon: Settings },
     ],
-  },
-  {
-    title: "event.title",
-    icon: Trophy,
-    href: "/event-management",
   },
 ];
 
