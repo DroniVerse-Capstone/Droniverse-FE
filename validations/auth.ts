@@ -77,11 +77,36 @@ export const verifyEmailRequestSchema = z.object({
   token: z.string()
 })
 
+export const updateMeRequestSchema = z.object({
+  username: z.string().min(1),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  dateOfBirth: z.string().min(1),
+  gender: z.enum(['MALE', 'FEMALE', 'UNKNOWN']),
+  phone: z.string().min(1)
+})
+
+export const uploadAvatarRequestSchema = z.object({
+  userId: z.string().uuid(),
+  file: z.custom<File>(
+    (value) => typeof File !== 'undefined' && value instanceof File,
+    'Avatar file is required'
+  )
+})
+
 export const verifyEmailResponseSchema = z.object({
   data: userSchema,
   isSuccess: z.boolean(),
   message: z.string()
 })
+
+export const updateMeResponseSchema = z.object({
+  data: z.boolean(),
+  isSuccess: z.boolean(),
+  message: z.string()
+})
+
+export const uploadAvatarResponseSchema = userSchema
 
 // Types
 export type LoginRequest = z.infer<typeof loginRequestSchema>
@@ -93,3 +118,7 @@ export type RegisterResponse = z.infer<typeof registerResponseSchema>
 export type MeResponse = z.infer<typeof meResponseSchema>
 export type VerifyEmailRequest = z.infer<typeof verifyEmailRequestSchema>
 export type VerifyEmailResponse = z.infer<typeof verifyEmailResponseSchema>
+export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>
+export type UpdateMeResponse = z.infer<typeof updateMeResponseSchema>
+export type UploadAvatarRequest = z.infer<typeof uploadAvatarRequestSchema>
+export type UploadAvatarResponse = z.infer<typeof uploadAvatarResponseSchema>
