@@ -26,6 +26,8 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
   let time = 0;
   let currentGateIndex = 0;
   let allGatesPassed = false;
+  // Plane-crossing collision: track previous drone position each frame
+  let prevDronePos = new THREE.Vector3();
 
   let portalOuterMat: THREE.MeshStandardMaterial | null = null;
   let portalInnerMat: THREE.MeshStandardMaterial | null = null;
@@ -169,23 +171,56 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
     const portal = createPortal(goalPos);
     scene.add(portal);
     objects.push(portal);
+
+    // DEBUG: Add Hitbox UI for Gates
+    gates.forEach(gate => {
+      const helper = new THREE.Mesh(
+        new THREE.RingGeometry(GATE_RING_RADIUS - 0.1, GATE_RING_RADIUS, 32),
+        new THREE.MeshBasicMaterial({ color: "#00ffff", transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+      );
+      gate.group.add(helper);
+    });
+
+    // DEBUG: Add Hitbox UI for Portal
+    const portalHelper = new THREE.Mesh(
+      new THREE.RingGeometry(12.9, 13, 32),
+      new THREE.MeshBasicMaterial({ color: "#ff00ff", transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+    );
+    portal.add(portalHelper);
   }
+
+  /**
+   * Plane-crossing collision — giống Unity Trigger Collider.
+   * Chỉ trigger khi drone thực sự CẮT QUA mặt phẳng của gate (prevZ ↔ curZ)
+   * VÀ điểm cắt nằm trong lỗ vòng (radius < RING_RADIUS).
+   */
+  const GATE_RING_RADIUS = 8; // bán kính lỗ vòng
 
   function checkGatePass() {
     if (currentGateIndex >= gates.length) return;
     const gate = gates[currentGateIndex];
     if (gate.passed) return;
 
-    const dx = drone.position.x - gate.position.x;
-    const dy = drone.position.y - gate.position.y;
-    const dz = Math.abs(drone.position.z - gate.position.z);
+    const gateZ = gate.position.z;
+    const curZ  = drone.position.z;
+    const preZ  = prevDronePos.z;
 
-    // Khoảng cách từ tâm gate trong không gian 2D (mặt phẳng XY)
-    const distXY = Math.sqrt(dx * dx + dy * dy);
+    // Bước 1: Drone có cắt qua mặt phẳng Z của gate trong frame này không?
+    // (prevZ và curZ nằm khác phía so với gateZ)
+    const crossed = (preZ >= gateZ && curZ < gateZ) || (preZ <= gateZ && curZ > gateZ);
+    if (!crossed) return;
 
-    // Vòng sáng có bán kính là 8, cho phép sai số một chút (distXY < 9)
-    // Tăng dz < 12 để tránh lỗi lọt frame khi bay với tốc độ quá nhanh
-    if (distXY < 9 && dz < 12) {
+    // Bước 2: Nội suy vị trí chính xác tại giao điểm với mặt phẳng
+    const t = Math.abs(gateZ - preZ) / (Math.abs(curZ - preZ) + 1e-9);
+    const crossX = prevDronePos.x + t * (drone.position.x - prevDronePos.x);
+    const crossY = prevDronePos.y + t * (drone.position.y - prevDronePos.y);
+
+    // Bước 3: Kiểm tra giao điểm có nằm trong lỗ vòng không
+    const dx = crossX - gate.position.x;
+    const dy = crossY - gate.position.y;
+    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+    if (distFromCenter < GATE_RING_RADIUS) {
       gate.passed = true;
       setGateColor(gate, GATE_DONE_COLOR);
       currentGateIndex++;
@@ -213,9 +248,31 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
 
     checkGatePass();
 
-    if (allGatesPassed && drone.position.distanceTo(goalPos) < 20) {
-      return { status: "WIN", message: "XUẤT SẮC! NHIỆM VỤ HOÀN TẤT!", objective: "Nhiệm vụ hoàn tất" };
+    // --- PORTAL CROSSING CHECK ---
+    if (allGatesPassed) {
+      const portalZ = goalPos.z;
+      const curZ = drone.position.z;
+      const preZ = prevDronePos.z;
+
+      // Check if crossed portal plane
+      const crossedPortal = (preZ >= portalZ && curZ < portalZ) || (preZ <= portalZ && curZ > portalZ);
+      if (crossedPortal) {
+        const t = Math.abs(portalZ - preZ) / (Math.abs(curZ - preZ) + 1e-9);
+        const crossX = prevDronePos.x + t * (drone.position.x - prevDronePos.x);
+        const crossY = prevDronePos.y + t * (drone.position.y - prevDronePos.y);
+
+        const dx = crossX - goalPos.x;
+        const dy = crossY - goalPos.y;
+        const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+
+        if (distFromCenter < 13) { // Portal radius is ~13
+          return { status: "WIN", message: "XUẤT SẮC! NHIỆM VỤ HOÀN TẤT!", objective: "Nhiệm vụ hoàn tất" };
+        }
+      }
     }
+
+    // Cập nhật vị trí prev SAU khi check để frame tiếp theo dùng
+    prevDronePos.copy(drone.position);
 
     if (drone.position.y < 0.1 && drone.position.z < -5) {
       return { status: "FAIL", message: "DRONE ĐÃ RƠI!", objective: "Giữ ga để không rơi" };
@@ -257,6 +314,7 @@ export function LevelObstacleRun(scene: THREE.Scene, drone: THREE.Group): LevelI
     portalOuterMat = null;
     portalInnerMat = null;
     portalLight = null;
+    prevDronePos.set(0, 0, 0);
   }
 
   return { init, update, cleanup };
