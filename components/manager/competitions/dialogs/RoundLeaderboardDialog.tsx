@@ -77,7 +77,7 @@ export default function RoundLeaderboardDialog({
                                     placeholder="Tìm kiếm thí sinh..."
                                     value={searchName}
                                     onChange={(e) => setSearchName(e.target.value)}
-                                    className="pl-10 bg-greyscale-900 border-greyscale-800 text-greyscale-100 placeholder:text-greyscale-600 focus-visible:ring-primary"
+                                    className="pl-10 bg-black/20 border-greyscale-700 text-greyscale-100 placeholder:text-greyscale-600 focus-visible:ring-indigo-500/30 focus-visible:border-indigo-500/50 hover:border-greyscale-600 transition-all shadow-inner"
                                 />
                             </div>
                         </div>

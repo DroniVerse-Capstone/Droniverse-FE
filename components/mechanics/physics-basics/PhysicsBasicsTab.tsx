@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  ArrowUp, 
-  MoveHorizontal, 
-  RotateCw, 
-  Wind, 
-  Play, 
-  RotateCcw, 
+import {
+  ArrowUp,
+  MoveHorizontal,
+  RotateCw,
+  Wind,
+  Play,
+  RotateCcw,
   Gauge,
   Zap,
   Weight,
@@ -27,10 +27,10 @@ import { PhysicsBasicsViewer } from "./PhysicsBasicsViewer";
 import { KnowledgeRecapModal } from "./KnowledgeRecapModal";
 import { useSubmitUserSimulatorLesson, useCompleteLesson, useGetUserSimulatorLesson } from "@/hooks/simulator/useSimulator";
 import { useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
-import { 
-  PhysicsState, 
-  LessonId, 
-  INITIAL_STATE, 
+import {
+  PhysicsState,
+  LessonId,
+  INITIAL_STATE,
   updatePhysics,
   DRONE_MASS_KG,
   GRAVITY_MS2,
@@ -136,7 +136,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
         <div className={cn(
           "p-3 rounded-lg border transition-all",
           state.netForce > 0 ? "bg-emerald-500/10 border-emerald-500/30" :
-          state.netForce < 0 ? "bg-red-500/10 border-red-500/30" : "bg-white/5 border-white/10"
+            state.netForce < 0 ? "bg-red-500/10 border-red-500/30" : "bg-white/5 border-white/10"
         )}>
           <div className="flex items-center gap-1.5 mb-1">
             <Scale className="w-3 h-3 text-white/60" />
@@ -145,7 +145,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
           <span className={cn(
             "text-lg font-black font-mono",
             state.netForce > 0 ? "text-emerald-400" :
-            state.netForce < 0 ? "text-red-400" : "text-white"
+              state.netForce < 0 ? "text-red-400" : "text-white"
           )}>
             {formatSign(state.netForce)}
           </span>
@@ -156,7 +156,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
         <div className={cn(
           "p-3 rounded-lg border transition-all",
           state.verticalAccel > 0 ? "bg-cyan-500/10 border-cyan-500/30" :
-          state.verticalAccel < 0 ? "bg-red-500/10 border-red-500/30" : "bg-white/5 border-white/10"
+            state.verticalAccel < 0 ? "bg-red-500/10 border-red-500/30" : "bg-white/5 border-white/10"
         )}>
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="w-3 h-3 text-cyan-400" />
@@ -165,7 +165,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
           <span className={cn(
             "text-lg font-black font-mono",
             state.verticalAccel > 0 ? "text-cyan-400" :
-            state.verticalAccel < 0 ? "text-red-400" : "text-white"
+              state.verticalAccel < 0 ? "text-red-400" : "text-white"
           )}>
             {formatSign(state.verticalAccel)}
           </span>
@@ -191,7 +191,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
           <Target className="w-3 h-3 text-cyan-400" />
           <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Công thức Newton</span>
         </div>
-        
+
         <div className="font-mono text-[11px] text-white/80 space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-emerald-400">F<sub>lift</sub></span>
@@ -200,9 +200,9 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             <span className="text-white/30">×</span>
             <span className="text-cyan-400">RPM²</span>
           </div>
-          
+
           <div className="h-px bg-white/10 my-2" />
-          
+
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-cyan-300">F<sub>net</sub></span>
             <span className="text-white/30">=</span>
@@ -210,7 +210,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             <span className="text-white/30">−</span>
             <span className="text-red-400">F<sub>weight</sub></span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-[10px] text-white/50">
             <span className="text-emerald-400/70">{state.liftForce.toFixed(1)}</span>
             <span className="text-white/30">−</span>
@@ -218,14 +218,14 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             <span className="text-white/30">=</span>
             <span className={cn(
               state.netForce > 0 ? "text-emerald-400" :
-              state.netForce < 0 ? "text-red-400" : "text-white/70"
+                state.netForce < 0 ? "text-red-400" : "text-white/70"
             )}>
               {formatSign(state.netForce)} N
             </span>
           </div>
-          
+
           <div className="h-px bg-white/10 my-2" />
-          
+
           <div className="flex items-center gap-2">
             <span className="text-cyan-300">a</span>
             <span className="text-white/30">=</span>
@@ -233,7 +233,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             <span className="text-white/30">/</span>
             <span className="text-purple-400">m</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-[10px] text-white/50">
             <span className="text-cyan-400/70">{formatSign(state.verticalAccel)}</span>
             <span className="text-white/30">=</span>
@@ -243,7 +243,7 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             <span className="text-white/30">=</span>
             <span className={cn(
               state.verticalAccel > 0 ? "text-cyan-400" :
-              state.verticalAccel < 0 ? "text-red-400" : "text-white/70"
+                state.verticalAccel < 0 ? "text-red-400" : "text-white/70"
             )}>
               {formatSign(state.verticalAccel)} m/s²
             </span>
@@ -266,9 +266,9 @@ function RealDataPanel({ state }: { state: PhysicsState }) {
             style={{ left: `${(state.rpm / 9000) * 100}%`, transform: 'translateX(-50%)' }}
           /> */}
           {/* Hover zone */}
-          <div 
+          <div
             className="absolute top-0 h-full bg-emerald-500/40 border-l border-r border-emerald-400/50"
-            style={{ 
+            style={{
               left: `${(3000 / 9000) * 100}%`,
               width: `${((6600 - 4200) / 9000) * 100}%`
             }}
@@ -375,16 +375,16 @@ export default function PhysicsBasicsTab() {
 
   const { data: simulatorData } = useGetUserSimulatorLesson(enrollmentId || undefined, lessonId || undefined);
   const { data: learningPath } = useGetUserLearningPath(enrollmentId || undefined);
-  
+
   // Find current lesson in learning path to check completion status
   const currentLesson = learningPath?.modules
     ?.flatMap(m => m.lessons || [])
     ?.find(l => l.lessonID === lessonId);
-    
+
   // If the specific experiment or the whole module is completed, no wait time
   const isExperimentCompleted = completedLessons.includes(activeId) || !!currentLesson?.isCompleted || !!simulatorData?.userSimulator;
   const isModuleComplete = !!currentLesson?.isCompleted || !!simulatorData?.userSimulator;
-  const REQUIRED_TIME = isExperimentCompleted ? 0 : 15; 
+  const REQUIRED_TIME = isExperimentCompleted ? 0 : 15;
 
   const { mutate: completeLesson } = useCompleteLesson({
     onSuccess: () => {
@@ -436,16 +436,16 @@ export default function PhysicsBasicsTab() {
     setActiveId(newLessonId);
     setIsSimulating(false);
     setExplorationTime(0); // Reset timer for new lesson
-    
+
     // Create appropriate initial state based on lesson
     let newState: PhysicsState;
-    
+
     if (newLessonId === "roll" || newLessonId === "pitch" || newLessonId === "yaw") {
       // Roll/Pitch/Yaw experiment: drone starts hovering at good height with balanced RPM
       // Use HOVER_RPM (6200) to ensure drone can maintain height
       const hoverRPM = 6200;
-      newState = { 
-        ...INITIAL_STATE, 
+      newState = {
+        ...INITIAL_STATE,
         isRunning: false,
         posY: ROLL_BASE_HEIGHT,  // Start at good height for these experiments
         velX: 0,
@@ -468,8 +468,8 @@ export default function PhysicsBasicsTab() {
       };
     } else {
       // Other experiments: use default initial state
-      newState = { 
-        ...INITIAL_STATE, 
+      newState = {
+        ...INITIAL_STATE,
         isRunning: false,
         // Roll experiment defaults (in case they were modified before)
         leftRPM: ROLL_RPM_DEFAULT,
@@ -479,18 +479,18 @@ export default function PhysicsBasicsTab() {
         rpmDifference: 0,
       };
     }
-    
+
     setState(newState);
   };
 
   const handleReset = () => {
     let newState: PhysicsState;
     const hoverRPM = 6200;
-    
+
     if (activeId === "roll" || activeId === "pitch" || activeId === "yaw") {
       // Roll/Pitch/Yaw experiment: reset to hovering at good height with enough lift
-      newState = { 
-        ...INITIAL_STATE, 
+      newState = {
+        ...INITIAL_STATE,
         isRunning: false,
         posY: ROLL_BASE_HEIGHT,
         velX: 0,
@@ -509,8 +509,8 @@ export default function PhysicsBasicsTab() {
         rpmDifference: 0,
       };
     } else {
-      newState = { 
-        ...INITIAL_STATE, 
+      newState = {
+        ...INITIAL_STATE,
         isRunning: false,
         leftRPM: ROLL_RPM_DEFAULT,
         rightRPM: ROLL_RPM_DEFAULT,
@@ -519,7 +519,7 @@ export default function PhysicsBasicsTab() {
         rpmDifference: 0,
       };
     }
-    
+
     setState(newState);
     setIsSimulating(false);
   };
@@ -562,7 +562,7 @@ export default function PhysicsBasicsTab() {
 
   return (
     <div className="grid gap-4 h-full" style={{ gridTemplateColumns: "320px 1fr 380px", overflow: "hidden" }}>
-      
+
       {/* ─── LEFT: LIST ─── */}
       <aside className="flex flex-col rounded-md border border-white/5 bg-slate-900/60 backdrop-blur-xl overflow-hidden shadow-2xl">
         <div className="shrink-0 px-6 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
@@ -575,8 +575,8 @@ export default function PhysicsBasicsTab() {
               {isModuleComplete ? EXPERIMENTS.length : completedLessons.length}/{EXPERIMENTS.length}
             </span>
             <div className="w-16 h-1 bg-white/10 rounded-full mt-1 overflow-hidden">
-              <div 
-                className="h-full bg-emerald-500 transition-all duration-500" 
+              <div
+                className="h-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${(isModuleComplete ? 100 : (completedLessons.length / EXPERIMENTS.length) * 100)}%` }}
               />
             </div>
@@ -606,19 +606,19 @@ export default function PhysicsBasicsTab() {
                         disabled={!isUnlocked}
                         className={cn(
                           "w-full flex items-center gap-4 px-4 py-3 rounded-md text-left transition-all duration-300 border relative overflow-hidden",
-                          isCurrent 
-                            ? "bg-cyan-500/10 border-cyan-500/30 text-white shadow-lg" 
-                            : isUnlocked 
+                          isCurrent
+                            ? "bg-cyan-500/10 border-cyan-500/30 text-white shadow-lg"
+                            : isUnlocked
                               ? "border-transparent text-white/40 hover:bg-white/5 hover:text-white/80"
                               : "border-white/5 bg-white/[0.02] text-white/30 cursor-not-allowed"
                         )}
                       >
                         <div className={cn(
                           "w-8 h-8 rounded flex items-center justify-center transition-colors shrink-0",
-                          isCurrent 
-                            ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
-                            : isUnlocked 
-                              ? "bg-white/5 text-white/40" 
+                          isCurrent
+                            ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                            : isUnlocked
+                              ? "bg-white/5 text-white/40"
                               : "bg-white/5 text-white/20"
                         )}>
                           {!isUnlocked ? <Lock className="w-3.5 h-3.5" /> : <exp.icon className="w-4 h-4" />}
@@ -651,7 +651,7 @@ export default function PhysicsBasicsTab() {
       {/* ─── CENTER: SIMULATION AREA ─── */}
       <main className="flex flex-col rounded-md border border-white/5 bg-black relative overflow-hidden shadow-2xl">
         <PhysicsBasicsViewer state={state} lessonId={activeId} hideOverlays={showRecap} />
-        
+
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-20">
           <button
             onClick={runExperiment}
@@ -659,7 +659,7 @@ export default function PhysicsBasicsTab() {
             className={cn(
               "px-10 py-4 rounded-md flex items-center gap-4 font-black text-[12px] uppercase tracking-[0.2em] transition-all",
               isSimulating ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 cursor-not-allowed" :
-              "bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.2)] active:scale-95"
+                "bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.2)] active:scale-95"
             )}
           >
             <Play className="w-4 h-4 fill-current" />
@@ -671,8 +671,8 @@ export default function PhysicsBasicsTab() {
             disabled={explorationTime < REQUIRED_TIME}
             className={cn(
               "px-8 py-4 rounded-md flex items-center gap-3 font-black text-[12px] uppercase tracking-widest transition-all active:scale-95",
-              explorationTime >= REQUIRED_TIME 
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]" 
+              explorationTime >= REQUIRED_TIME
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                 : "bg-slate-900/50 text-white/30 border border-white/5 cursor-not-allowed"
             )}
           >
@@ -690,7 +690,7 @@ export default function PhysicsBasicsTab() {
               </>
             )}
           </button>
-          
+
           <button
             onClick={handleReset}
             className="w-14 h-14 rounded-md bg-slate-900 border border-white/10 flex items-center justify-center hover:bg-white/5 transition-all active:scale-90"
@@ -714,7 +714,7 @@ export default function PhysicsBasicsTab() {
               <div className="w-6 h-6 rounded bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-[10px] font-black text-emerald-400">01</div>
               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Thiết lập thông số</p>
             </div>
-            
+
             <div className="space-y-6 pl-9">
 
               {/* ─── EXPERIMENT 01: LIFT (RPM) ─── */}
@@ -736,19 +736,19 @@ export default function PhysicsBasicsTab() {
                     </div>
                     <div className="relative">
                       {/* Hover zone background */}
-                      <div 
+                      <div
                         className="absolute top-1/2 -translate-y-1/2 h-3 bg-emerald-500/30 rounded-full pointer-events-none"
-                        style={{ 
-                          left: `${(5800 / 9000) * 100}%`, 
-                          width: `${((6600 - 5800) / 9000) * 100}%` 
+                        style={{
+                          left: `${(5800 / 9000) * 100}%`,
+                          width: `${((6600 - 5800) / 9000) * 100}%`
                         }}
                       />
                       {/* Hover zone border */}
-                      <div 
+                      <div
                         className="absolute top-1/2 -translate-y-1/2 h-3 border-l-2 border-r-2 border-emerald-400/50 rounded-full pointer-events-none"
-                        style={{ 
-                          left: `${(5800 / 9000) * 100}%`, 
-                          width: `${((6600 - 5800) / 9000) * 100}%` 
+                        style={{
+                          left: `${(5800 / 9000) * 100}%`,
+                          width: `${((6600 - 5800) / 9000) * 100}%`
                         }}
                       />
                       {/* Slider track */}
@@ -761,7 +761,7 @@ export default function PhysicsBasicsTab() {
                         onChange={(e) => {
                           const rpm = +e.target.value;
                           const thrust = (rpm / 6200) * 50;
-                          setState(p => ({...p, thrust: Math.max(0, Math.min(100, thrust))}));
+                          setState(p => ({ ...p, thrust: Math.max(0, Math.min(100, thrust)) }));
                         }}
                         className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-30"
                         style={{
@@ -795,14 +795,14 @@ export default function PhysicsBasicsTab() {
                       <span className="text-white/60">Lực đẩy Motor (Thrust)</span>
                       <span className="text-cyan-400 font-mono">{state.thrust}%</span>
                     </div>
-                    <input type="range" min="0" max="100" value={state.thrust} onChange={(e) => setState(p => ({...p, thrust: +e.target.value}))} disabled={isSimulating} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-cyan-500" />
+                    <input type="range" min="0" max="100" value={state.thrust} onChange={(e) => setState(p => ({ ...p, thrust: +e.target.value }))} disabled={isSimulating} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-cyan-500" />
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between text-[11px] font-bold">
                       <span className="text-white/60">Mức Pin (Battery)</span>
                       <span className={cn("font-mono", state.batteryLevel < 30 ? "text-red-400" : "text-emerald-400")}>{state.batteryLevel}%</span>
                     </div>
-                    <input type="range" min="5" max="100" value={state.batteryLevel} onChange={(e) => setState(p => ({...p, batteryLevel: +e.target.value}))} disabled={isSimulating} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-cyan-500" />
+                    <input type="range" min="5" max="100" value={state.batteryLevel} onChange={(e) => setState(p => ({ ...p, batteryLevel: +e.target.value }))} disabled={isSimulating} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-cyan-500" />
                   </div>
 
                   {/* ─── BATTERY PHYSICS FORMULA PANEL ─── */}
@@ -911,18 +911,18 @@ export default function PhysicsBasicsTab() {
                         <span className="text-cyan-400 font-mono font-black">{Math.round(state.leftRPM)}</span>
                       </div>
                       <div className="relative">
-                        <div 
+                        <div
                           className="absolute top-1/2 -translate-y-1/2 h-3 bg-emerald-500/20 rounded-full pointer-events-none"
                           style={{ left: `${((5800 - 3000) / 6000) * 100}%`, width: `${((6600 - 5800) / 6000) * 100}%` }}
                         />
                         <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
-                        <input 
-                          type="range" 
-                          min="3000" 
-                          max="9000" 
-                          value={state.leftRPM} 
-                          onChange={(e) => setState(p => ({...p, leftRPM: +e.target.value}))} 
-                          disabled={isSimulating} 
+                        <input
+                          type="range"
+                          min="3000"
+                          max="9000"
+                          value={state.leftRPM}
+                          onChange={(e) => setState(p => ({ ...p, leftRPM: +e.target.value }))}
+                          disabled={isSimulating}
                           className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10"
                           style={{ WebkitAppearance: 'none', background: 'transparent' }}
                         />
@@ -943,18 +943,18 @@ export default function PhysicsBasicsTab() {
                         <span className="text-cyan-400 font-mono font-black">{Math.round(state.rightRPM)}</span>
                       </div>
                       <div className="relative">
-                        <div 
+                        <div
                           className="absolute top-1/2 -translate-y-1/2 h-3 bg-emerald-500/20 rounded-full pointer-events-none"
                           style={{ left: `${((5800 - 3000) / 6000) * 100}%`, width: `${((6600 - 5800) / 6000) * 100}%` }}
                         />
                         <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
-                        <input 
-                          type="range" 
-                          min="3000" 
-                          max="9000" 
-                          value={state.rightRPM} 
-                          onChange={(e) => setState(p => ({...p, rightRPM: +e.target.value}))} 
-                          disabled={isSimulating} 
+                        <input
+                          type="range"
+                          min="3000"
+                          max="9000"
+                          value={state.rightRPM}
+                          onChange={(e) => setState(p => ({ ...p, rightRPM: +e.target.value }))}
+                          disabled={isSimulating}
                           className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10"
                           style={{ WebkitAppearance: 'none', background: 'transparent' }}
                         />
@@ -1018,7 +1018,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         state.rpmDifference > 100 ? "bg-blue-500/10 border-blue-500/30" :
-                        state.rpmDifference < -100 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
+                          state.rpmDifference < -100 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <Target className="w-3 h-3 text-white/60" />
@@ -1026,11 +1026,11 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black",
-                          state.rpmDifference > 100 ? "text-blue-400" : 
-                          state.rpmDifference < -100 ? "text-orange-400" : "text-white/60"
+                          state.rpmDifference > 100 ? "text-blue-400" :
+                            state.rpmDifference < -100 ? "text-orange-400" : "text-white/60"
                         )}>
-                          {state.rpmDifference > 100 ? "→ Phải" : 
-                           state.rpmDifference < -100 ? "← Trái" : "⊕ Ổn định"}
+                          {state.rpmDifference > 100 ? "→ Phải" :
+                            state.rpmDifference < -100 ? "← Trái" : "⊕ Ổn định"}
                         </span>
                       </div>
                     </div>
@@ -1038,8 +1038,8 @@ export default function PhysicsBasicsTab() {
                     {/* Educational Text */}
                     <div className="p-3 rounded-md bg-cyan-500/5 border border-cyan-500/10 mt-3">
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        Khi một bên quay nhanh hơn, bên đó đẩy mạnh hơn, 
-                        drone nghiêng, và lực nâng có thành phần ngang, 
+                        Khi một bên quay nhanh hơn, bên đó đẩy mạnh hơn,
+                        drone nghiêng, và lực nâng có thành phần ngang,
                         gây ra di chuyển sang hai bên.
                       </p>
                     </div>
@@ -1091,7 +1091,7 @@ export default function PhysicsBasicsTab() {
                     {/* Force Components */}
                     <div className="p-3 rounded-md bg-black/40 border border-white/5 space-y-2">
                       <div className="text-[9px] text-white/40 font-black uppercase mb-2">Bước 3: Phân tích Lực</div>
-                      
+
                       {/* Total Lift */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1102,7 +1102,7 @@ export default function PhysicsBasicsTab() {
                           {state.liftForce.toFixed(2)} N
                         </span>
                       </div>
-                      
+
                       {/* Vertical Component */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1118,7 +1118,7 @@ export default function PhysicsBasicsTab() {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Horizontal Component */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1189,18 +1189,18 @@ export default function PhysicsBasicsTab() {
                         <span className="text-cyan-400 font-mono font-black">{Math.round(state.frontRPM)}</span>
                       </div>
                       <div className="relative">
-                        <div 
+                        <div
                           className="absolute top-1/2 -translate-y-1/2 h-3 bg-emerald-500/20 rounded-full pointer-events-none"
                           style={{ left: `${((5800 - 3000) / 6000) * 100}%`, width: `${((6600 - 5800) / 6000) * 100}%` }}
                         />
                         <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
-                        <input 
-                          type="range" 
-                          min="3000" 
-                          max="9000" 
-                          value={state.frontRPM} 
-                          onChange={(e) => setState(p => ({...p, frontRPM: +e.target.value}))} 
-                          disabled={isSimulating} 
+                        <input
+                          type="range"
+                          min="3000"
+                          max="9000"
+                          value={state.frontRPM}
+                          onChange={(e) => setState(p => ({ ...p, frontRPM: +e.target.value }))}
+                          disabled={isSimulating}
                           className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10"
                           style={{ WebkitAppearance: 'none', background: 'transparent' }}
                         />
@@ -1222,18 +1222,18 @@ export default function PhysicsBasicsTab() {
                         <span className="text-cyan-400 font-mono font-black">{Math.round(state.rearRPM)}</span>
                       </div>
                       <div className="relative">
-                        <div 
+                        <div
                           className="absolute top-1/2 -translate-y-1/2 h-3 bg-emerald-500/20 rounded-full pointer-events-none"
                           style={{ left: `${((5800 - 3000) / 6000) * 100}%`, width: `${((6600 - 5800) / 6000) * 100}%` }}
                         />
                         <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
-                        <input 
-                          type="range" 
-                          min="3000" 
-                          max="9000" 
-                          value={state.rearRPM} 
-                          onChange={(e) => setState(p => ({...p, rearRPM: +e.target.value}))} 
-                          disabled={isSimulating} 
+                        <input
+                          type="range"
+                          min="3000"
+                          max="9000"
+                          value={state.rearRPM}
+                          onChange={(e) => setState(p => ({ ...p, rearRPM: +e.target.value }))}
+                          disabled={isSimulating}
                           className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10"
                           style={{ WebkitAppearance: 'none', background: 'transparent' }}
                         />
@@ -1297,7 +1297,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         state.frontRPM - state.rearRPM > 100 ? "bg-blue-500/10 border-blue-500/30" :
-                        state.frontRPM - state.rearRPM < -100 ? "bg-purple-500/10 border-purple-500/30" : "bg-white/5 border-white/10"
+                          state.frontRPM - state.rearRPM < -100 ? "bg-purple-500/10 border-purple-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <Target className="w-3 h-3 text-white/60" />
@@ -1305,11 +1305,11 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black",
-                          state.frontRPM - state.rearRPM > 100 ? "text-blue-400" : 
-                          state.frontRPM - state.rearRPM < -100 ? "text-purple-400" : "text-white/60"
+                          state.frontRPM - state.rearRPM > 100 ? "text-blue-400" :
+                            state.frontRPM - state.rearRPM < -100 ? "text-purple-400" : "text-white/60"
                         )}>
-                          {state.frontRPM - state.rearRPM > 100 ? "↓ Lên" : 
-                           state.frontRPM - state.rearRPM < -100 ? "↑ Xuống" : "⊕ Ổn định"}
+                          {state.frontRPM - state.rearRPM > 100 ? "↓ Lên" :
+                            state.frontRPM - state.rearRPM < -100 ? "↑ Xuống" : "⊕ Ổn định"}
                         </span>
                       </div>
                     </div>
@@ -1317,7 +1317,7 @@ export default function PhysicsBasicsTab() {
                     {/* Educational Text */}
                     <div className="p-3 rounded-md bg-cyan-500/5 border border-cyan-500/10 mt-3">
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        Khi phía trước quay nhanh hơn, mũi drone chúc xuống, 
+                        Khi phía trước quay nhanh hơn, mũi drone chúc xuống,
                         tạo lực đẩy về phía trước. Ngược lại khi phía sau quay nhanh hơn.
                       </p>
                     </div>
@@ -1369,7 +1369,7 @@ export default function PhysicsBasicsTab() {
                     {/* Force Components */}
                     <div className="p-3 rounded-md bg-black/40 border border-white/5 space-y-2">
                       <div className="text-[9px] text-white/40 font-black uppercase mb-2">Bước 3: Phân tích Lực</div>
-                      
+
                       {/* Total Lift */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1380,7 +1380,7 @@ export default function PhysicsBasicsTab() {
                           {state.liftForce.toFixed(2)} N
                         </span>
                       </div>
-                      
+
                       {/* Vertical Component */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1396,7 +1396,7 @@ export default function PhysicsBasicsTab() {
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Forward Component */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1458,7 +1458,7 @@ export default function PhysicsBasicsTab() {
                   <div className="p-5 rounded-xl bg-slate-950/80 border border-white/10 relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-orange-500/5 opacity-50" />
                     <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6 text-center relative z-10">Cấu hình Động cơ</div>
-                    
+
                     <div className="relative w-48 h-48 mx-auto mb-4 flex items-center justify-center">
                       <div className="absolute w-full h-0.5 bg-white/5 rotate-45" />
                       <div className="absolute w-full h-0.5 bg-white/5 -rotate-45" />
@@ -1503,45 +1503,45 @@ export default function PhysicsBasicsTab() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 gap-4">
                     <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 space-y-3">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                           <div className="w-2 h-2 rounded-full bg-orange-500" />
-                           <span className="text-[10px] font-black text-orange-400 uppercase">Nhóm CW (FR + RL)</span>
+                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                          <span className="text-[10px] font-black text-orange-400 uppercase">Nhóm CW (FR + RL)</span>
                         </div>
                         <span className="text-[12px] font-mono font-black text-orange-400">{Math.round(state.motorFR_RPM)} RPM</span>
                       </div>
-                      <input 
-                        type="range" min="3000" max="9000" 
-                        value={state.motorFR_RPM} 
+                      <input
+                        type="range" min="3000" max="9000"
+                        value={state.motorFR_RPM}
                         onChange={(e) => {
                           const val = +e.target.value;
-                          setState(p => ({...p, motorFR_RPM: val, motorRL_RPM: val}));
-                        }} 
-                        disabled={isSimulating} 
-                        className="w-full h-1.5 bg-orange-500/10 rounded-full appearance-none accent-orange-500 cursor-pointer" 
+                          setState(p => ({ ...p, motorFR_RPM: val, motorRL_RPM: val }));
+                        }}
+                        disabled={isSimulating}
+                        className="w-full h-1.5 bg-orange-500/10 rounded-full appearance-none accent-orange-500 cursor-pointer"
                       />
                     </div>
 
                     <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 space-y-3">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                           <div className="w-2 h-2 rounded-full bg-blue-500" />
-                           <span className="text-[10px] font-black text-blue-400 uppercase">Nhóm CCW (FL + RR)</span>
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span className="text-[10px] font-black text-blue-400 uppercase">Nhóm CCW (FL + RR)</span>
                         </div>
                         <span className="text-[12px] font-mono font-black text-blue-400">{Math.round(state.motorFL_RPM)} RPM</span>
                       </div>
-                      <input 
-                        type="range" min="3000" max="9000" 
-                        value={state.motorFL_RPM} 
+                      <input
+                        type="range" min="3000" max="9000"
+                        value={state.motorFL_RPM}
                         onChange={(e) => {
                           const val = +e.target.value;
-                          setState(p => ({...p, motorFL_RPM: val, motorRR_RPM: val}));
-                        }} 
-                        disabled={isSimulating} 
-                        className="w-full h-1.5 bg-blue-500/10 rounded-full appearance-none accent-blue-500 cursor-pointer" 
+                          setState(p => ({ ...p, motorFL_RPM: val, motorRR_RPM: val }));
+                        }}
+                        disabled={isSimulating}
+                        className="w-full h-1.5 bg-blue-500/10 rounded-full appearance-none accent-blue-500 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -1580,7 +1580,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         state.yawTorque > 0.1 ? "bg-blue-500/10 border-blue-500/30" :
-                        state.yawTorque < -0.1 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
+                          state.yawTorque < -0.1 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <TrendingUp className="w-3 h-3 text-white/60" />
@@ -1588,8 +1588,8 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black font-mono",
-                          state.yawTorque > 0.1 ? "text-blue-400" : 
-                          state.yawTorque < -0.1 ? "text-orange-400" : "text-white"
+                          state.yawTorque > 0.1 ? "text-blue-400" :
+                            state.yawTorque < -0.1 ? "text-orange-400" : "text-white"
                         )}>
                           {state.yawTorque > 0 ? "+" : ""}{state.yawTorque.toFixed(2)} N
                         </span>
@@ -1599,7 +1599,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         state.yawTorque > 0.1 ? "bg-blue-500/10 border-blue-500/30" :
-                        state.yawTorque < -0.1 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
+                          state.yawTorque < -0.1 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <Target className="w-3 h-3 text-white/60" />
@@ -1607,11 +1607,11 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black",
-                          state.yawTorque > 0.1 ? "text-blue-400" : 
-                          state.yawTorque < -0.1 ? "text-orange-400" : "text-white/60"
+                          state.yawTorque > 0.1 ? "text-blue-400" :
+                            state.yawTorque < -0.1 ? "text-orange-400" : "text-white/60"
                         )}>
-                          {state.yawTorque > 0.1 ? "↺ Ngược" : 
-                           state.yawTorque < -0.1 ? "↻ Thuận" : "⊕ Cân bằng"}
+                          {state.yawTorque > 0.1 ? "↺ Ngược" :
+                            state.yawTorque < -0.1 ? "↻ Thuận" : "⊕ Cân bằng"}
                         </span>
                       </div>
                     </div>
@@ -1619,14 +1619,14 @@ export default function PhysicsBasicsTab() {
                     {/* Educational Text */}
                     <div className="p-3 rounded-md bg-orange-500/5 border border-orange-500/10 mt-3">
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        Khi hai nhóm motor quay với tốc độ khác nhau, chênh lệch mô-men xoắn 
+                        Khi hai nhóm motor quay với tốc độ khác nhau, chênh lệch mô-men xoắn
                         tạo ra lực làm drone xoay quanh trục đứng (yaw).
                       </p>
                     </div>
                   </div>
 
-                    {/* ─── YAW PHYSICS FORMULA PANEL ─── */}
-                    <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-orange-500/20 space-y-3">
+                  {/* ─── YAW PHYSICS FORMULA PANEL ─── */}
+                  <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-orange-500/20 space-y-3">
                     <div className="flex items-center gap-2 mb-3">
                       <Target className="w-4 h-4 text-orange-400" />
                       <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Công thức Vật lý</span>
@@ -1656,7 +1656,7 @@ export default function PhysicsBasicsTab() {
                       <div className="text-[11px] font-mono text-orange-400 font-black pt-1 border-t border-white/5">
                         = {state.cwTorque.toFixed(2)} N
                       </div>
-                      
+
                       <div className="text-[11px] text-white/80 font-mono mt-2">
                         <span className="text-blue-400">τ<sub>CCW</sub></span>
                         <span className="text-white/40"> = F<sub>FL</sub> + F<sub>RR</sub></span>
@@ -1706,7 +1706,7 @@ export default function PhysicsBasicsTab() {
                     </div>
                     <div className="relative">
                       <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
-                      <input type="range" min="0" max="100" value={state.windForce} onChange={(e) => setState(p => ({...p, windForce: +e.target.value}))} disabled={isSimulating} className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10" style={{ WebkitAppearance: 'none', background: 'transparent' }} />
+                      <input type="range" min="0" max="100" value={state.windForce} onChange={(e) => setState(p => ({ ...p, windForce: +e.target.value }))} disabled={isSimulating} className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10" style={{ WebkitAppearance: 'none', background: 'transparent' }} />
                     </div>
                     <div className="flex justify-between text-[8px] text-white/30">
                       <span>0 m/s</span>
@@ -1771,7 +1771,7 @@ export default function PhysicsBasicsTab() {
                     {/* Educational Text */}
                     <div className="p-3 rounded-md bg-sky-500/5 border border-sky-500/10 mt-3">
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        Gió thổi ngang tạo lực đẩy lên drone. Lực cản không khí 
+                        Gió thổi ngang tạo lực đẩy lên drone. Lực cản không khí
                         chống lại chuyển động của drone trong không khí.
                       </p>
                     </div>
@@ -1870,7 +1870,7 @@ export default function PhysicsBasicsTab() {
                       <div className="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-white/10 rounded-full" />
                       {/* Center marker */}
                       <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-4 bg-white/30 -translate-x-1/2 left-1/2" />
-                      <input type="range" min="-1" max="1" step="0.2" value={state.weightOffset} onChange={(e) => setState(p => ({...p, weightOffset: +e.target.value}))} disabled={isSimulating} className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10" style={{ WebkitAppearance: 'none', background: 'transparent' }} />
+                      <input type="range" min="-1" max="1" step="0.2" value={state.weightOffset} onChange={(e) => setState(p => ({ ...p, weightOffset: +e.target.value }))} disabled={isSimulating} className="w-full h-3 bg-transparent rounded-full appearance-none cursor-pointer relative z-10" style={{ WebkitAppearance: 'none', background: 'transparent' }} />
                     </div>
                     <div className="flex justify-between text-[8px] text-white/30">
                       <span>← Lệch Trái</span>
@@ -1927,7 +1927,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         state.roll > 1 ? "bg-orange-500/10 border-orange-500/30" :
-                        state.roll < -1 ? "bg-blue-500/10 border-blue-500/30" : "bg-white/5 border-white/10"
+                          state.roll < -1 ? "bg-blue-500/10 border-blue-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <TrendingUp className="w-3 h-3 text-white/60" />
@@ -1935,8 +1935,8 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black font-mono",
-                          state.roll > 1 ? "text-orange-400" : 
-                          state.roll < -1 ? "text-blue-400" : "text-white"
+                          state.roll > 1 ? "text-orange-400" :
+                            state.roll < -1 ? "text-blue-400" : "text-white"
                         )}>
                           {state.roll > 0 ? "+" : ""}{state.roll.toFixed(1)}°
                         </span>
@@ -1946,7 +1946,7 @@ export default function PhysicsBasicsTab() {
                     {/* Educational Text */}
                     <div className="p-3 rounded-md bg-red-500/5 border border-red-500/10 mt-3">
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        Khi đặt thiết bị lệch khỏi trọng tâm, trọng lượng tạo ra 
+                        Khi đặt thiết bị lệch khỏi trọng tâm, trọng lượng tạo ra
                         mô-men làm drone nghiêng sang một bên.
                       </p>
                     </div>
@@ -2052,13 +2052,13 @@ export default function PhysicsBasicsTab() {
                       <Gauge className="w-5 h-5 text-emerald-400" />
                       <span className="text-[11px] font-bold text-white/60">Chế độ Auto-Level</span>
                     </div>
-                    <button 
-                      onClick={() => setState(p => ({...p, isStabilized: !p.isStabilized}))} 
-                      disabled={isSimulating} 
+                    <button
+                      onClick={() => setState(p => ({ ...p, isStabilized: !p.isStabilized }))}
+                      disabled={isSimulating}
                       className={cn(
                         "px-6 py-2 rounded-md text-[11px] font-black uppercase transition-all",
-                        state.isStabilized 
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
+                        state.isStabilized
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
                           : "bg-white/5 text-white/30 border border-white/10"
                       )}
                     >
@@ -2078,7 +2078,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         Math.abs(state.roll) > 5 ? "bg-red-500/10 border-red-500/30" :
-                        Math.abs(state.roll) > 2 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-emerald-500/10 border-emerald-500/30"
+                          Math.abs(state.roll) > 2 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-emerald-500/10 border-emerald-500/30"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <RotateCw className="w-3 h-3 text-cyan-400" />
@@ -2087,7 +2087,7 @@ export default function PhysicsBasicsTab() {
                         <span className={cn(
                           "text-lg font-black font-mono",
                           Math.abs(state.roll) > 5 ? "text-red-400" :
-                          Math.abs(state.roll) > 2 ? "text-yellow-400" : "text-emerald-400"
+                            Math.abs(state.roll) > 2 ? "text-yellow-400" : "text-emerald-400"
                         )}>
                           {state.roll > 0 ? "+" : ""}{state.roll.toFixed(1)}°
                         </span>
@@ -2097,7 +2097,7 @@ export default function PhysicsBasicsTab() {
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
                         Math.abs(state.pitch) > 5 ? "bg-red-500/10 border-red-500/30" :
-                        Math.abs(state.pitch) > 2 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-emerald-500/10 border-emerald-500/30"
+                          Math.abs(state.pitch) > 2 ? "bg-yellow-500/10 border-yellow-500/30" : "bg-emerald-500/10 border-emerald-500/30"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <Wind className="w-3 h-3 text-purple-400" />
@@ -2106,7 +2106,7 @@ export default function PhysicsBasicsTab() {
                         <span className={cn(
                           "text-lg font-black font-mono",
                           Math.abs(state.pitch) > 5 ? "text-red-400" :
-                          Math.abs(state.pitch) > 2 ? "text-yellow-400" : "text-emerald-400"
+                            Math.abs(state.pitch) > 2 ? "text-yellow-400" : "text-emerald-400"
                         )}>
                           {state.pitch > 0 ? "+" : ""}{state.pitch.toFixed(1)}°
                         </span>
@@ -2136,7 +2136,7 @@ export default function PhysicsBasicsTab() {
                       state.isStabilized ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10"
                     )}>
                       <p className="text-[9px] text-white/50 leading-relaxed">
-                        {state.isStabilized 
+                        {state.isStabilized
                           ? "Auto-Level đang bật: Drone tự động về vị trí cân bằng nhờ bộ điều khiển PID."
                           : "Auto-Level đang tắt: Drone sẽ bị nghiêng và trôi dần do nhiễu ngẫu nhiên."}
                       </p>
@@ -2211,7 +2211,7 @@ export default function PhysicsBasicsTab() {
           </section>
 
         </div>
-        
+
         {/* Footer info */}
         <div className="p-4 bg-white/5 flex items-center gap-3">
           <Info className="w-3.5 h-3.5 text-white/20" />
@@ -2219,7 +2219,7 @@ export default function PhysicsBasicsTab() {
         </div>
       </aside>
 
-      <KnowledgeRecapModal 
+      <KnowledgeRecapModal
         isOpen={showRecap}
         onClose={() => setShowRecap(false)}
         onNext={handleNextLesson}
