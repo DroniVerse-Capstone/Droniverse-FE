@@ -246,9 +246,22 @@ export default function MemberCompetitionRoundsTab({
                                                 )}
 
                                                 {isJoined && !isLockedByOrder && (
-                                                    <div className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border flex items-center gap-1 bg-white/5 text-greyscale-400 border-white/10">
-                                                        <MdCheckCircle size={11} />
-                                                        {isInProgress ? "Đang thi" : "Đã nộp bài"}
+                                                    <div className={cn(
+                                                        "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border flex items-center gap-1",
+                                                        isInProgress 
+                                                            ? "bg-white/5 text-greyscale-400 border-white/10" 
+                                                            : (myResult?.userRoundResult?.isPassed === false || myResult?.isPassed === false)
+                                                                ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                                                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                    )}>
+                                                        {isInProgress ? (
+                                                            <MdSportsEsports size={11} />
+                                                        ) : (myResult?.userRoundResult?.isPassed === false || myResult?.isPassed === false) ? (
+                                                            <MdLock size={11} className="text-rose-400" />
+                                                        ) : (
+                                                            <MdCheckCircle size={11} className="text-emerald-400" />
+                                                        )}
+                                                        {isInProgress ? "Đang thi" : (myResult?.userRoundResult?.isPassed === false || myResult?.isPassed === false) ? "Thất bại" : "Hoàn thành"}
                                                     </div>
                                                 )}
 
@@ -434,29 +447,51 @@ function RoundResultDisplay({ roundId }: { roundId: string }) {
         return detailRaw.data || detailRaw;
     }, [detailRaw]);
 
+    const isPassed = detail?.isPassed !== false; // Mặc định là true trừ khi explicitly là false
+
     return (
-        <div className="flex items-center gap-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 px-5 transition-all min-w-[180px] h-[52px]">
+        <div className={cn(
+            "flex items-center gap-4 border rounded-xl p-3 px-5 transition-all min-w-[180px] h-[52px]",
+            isPassed 
+                ? "bg-emerald-500/5 border-emerald-500/20" 
+                : "bg-rose-500/5 border-rose-500/20"
+        )}>
             {isLoading ? (
                 <div className="flex items-center justify-center w-full gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-emerald-500/50" />
-                    <span className="text-[10px] font-bold text-emerald-500/50 uppercase tracking-widest">Đang tải...</span>
+                    <Loader2 className="h-4 w-4 animate-spin text-indigo-500/50" />
+                    <span className="text-[10px] font-bold text-greyscale-500 uppercase tracking-widest">Đang tải...</span>
                 </div>
             ) : (
                 <div className="flex items-center gap-4 w-full animate-in fade-in duration-500">
-                    <div className="flex flex-col items-center border-r border-emerald-500/10 pr-4 flex-1">
-                        <span className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Điểm số</span>
-                        <span className="text-xl font-black text-emerald-400 leading-none">
+                    <div className={cn(
+                        "flex flex-col items-center border-r pr-4 flex-1",
+                        isPassed ? "border-emerald-500/10" : "border-rose-500/10"
+                    )}>
+                        <span className={cn(
+                            "text-[8px] font-black uppercase tracking-widest mb-1",
+                            isPassed ? "text-emerald-500/60" : "text-rose-500/60"
+                        )}>Điểm số</span>
+                        <span className={cn(
+                            "text-xl font-black leading-none",
+                            isPassed ? "text-emerald-400" : "text-rose-400"
+                        )}>
                             {detail?.point ?? 0}
                         </span>
                     </div>
                     <div className="flex flex-col items-end flex-1">
-                        <span className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">Thời gian</span>
+                        <span className={cn(
+                            "text-[8px] font-black uppercase tracking-widest mb-1",
+                            isPassed ? "text-emerald-500/60" : "text-rose-500/60"
+                        )}>Thời gian</span>
                         <span className="text-sm font-bold text-white leading-none">
                             {detail?.executionTime?.split('.')[0] || "00:00"}
                         </span>
                     </div>
-                    <div className="ml-1 h-7 w-7 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                        <MdCheckCircle size={16} />
+                    <div className={cn(
+                        "ml-1 h-7 w-7 rounded-full flex items-center justify-center",
+                        isPassed ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"
+                    )}>
+                        {isPassed ? <MdCheckCircle size={16} /> : <MdLock size={16} />}
                     </div>
                 </div>
             )}
