@@ -19,28 +19,28 @@ const ARROW_SCALE = 0.08; // 1 Newton = 0.08 units in length
 // Camera Tracker - follows drone vertically for lift, roll, and pitch experiments
 function CameraTracker({ state, lessonId }: ViewerProps) {
   const controlsRef = useRef<any>(null);
-  
+
   useFrame(() => {
     if (!controlsRef.current) return;
-    
+
     // Follow drone for vertical experiments AND roll/pitch experiments
     const isLiftExperiment = lessonId === "lift" || lessonId === "equilibrium" || lessonId === "battery";
     const isRollExperiment = lessonId === "roll";
     const isPitchExperiment = lessonId === "pitch";
-    
+
     if (isLiftExperiment || isRollExperiment || isPitchExperiment) {
       // Target drone position + offset
       const targetY = state.posY + 0.5;
       // Smoothly move camera target up/down
       controlsRef.current.target.y = THREE.MathUtils.lerp(
-        controlsRef.current.target.y, 
-        targetY, 
+        controlsRef.current.target.y,
+        targetY,
         0.05
       );
       controlsRef.current.update();
     }
   });
-  
+
   return <OrbitControls ref={controlsRef} enablePan={true} minDistance={5} maxDistance={40} target={[0, 1.5, 0]} maxPolarAngle={Math.PI / 2.1} />;
 }
 
@@ -280,7 +280,7 @@ function DroneModel({ state, lessonId, hideOverlays }: ViewerProps) {
 
     propsRef.current.forEach((prop, i) => {
       if (!prop) return;
-      
+
       let speed: number;
       if (lessonId === "roll") {
         // For roll, scale RPM to spin speed (RPM / 60 gives approximate spin multiplier)
@@ -447,7 +447,7 @@ export function PhysicsBasicsViewer({ state, lessonId, hideOverlays }: ViewerPro
     <div className="w-full h-full relative bg-[#020617] rounded-md overflow-hidden border border-white/5 shadow-2xl">
       <Canvas shadows dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 2.5, 12]} fov={50} />
-        
+
         {/* Camera follows drone vertically when in lift experiment */}
         <CameraTracker state={state} lessonId={lessonId} />
 

@@ -139,23 +139,21 @@ export function runFlightController(
 
   let targetVV = 0;
   if (input.throttle > 55) {
-    targetVV = ((input.throttle - 55) / 45) * 20.0; // Max climb: 20 m/s
+    targetVV = ((input.throttle - 55) / 45) * 15.0; // Max climb: 15 m/s
   } else if (input.throttle < 45) {
-    // Tụt ga hết cỡ -> Rơi xuống cực nhanh để tiết kiệm thời gian chờ (Max -25 m/s)
-    targetVV = ((input.throttle - 45) / 45) * 25.0;
+    // Phản hồi nhanh khi bấm xuống (max -18 m/s) — vẫn có phanh gần đất
+    targetVV = ((input.throttle - 45) / 45) * 18.0;
 
-    // Cảm biến tiệm cận (Proximity Sensor): 
-    // Nếu drone đang ở rất gần mặt đất (dưới 10m), tự động hãm phanh mục tiêu lại để tiếp đất êm ái
-    if (currentState.altitude < 10.0) {
-      const safeLandingSpeed = -3.0; // Tốc độ chạm đất an toàn
-      // Càng gần đất, targetVV càng bị ép về mức an toàn
-      targetVV = Math.max(targetVV, safeLandingSpeed + (targetVV - safeLandingSpeed) * (currentState.altitude / 10.0));
+    // Cảm biến tiệm cận: tự hãm phanh khi gần đất
+    if (currentState.altitude < 8.0) {
+      const safeLandingSpeed = -2.5;
+      targetVV = Math.max(targetVV, safeLandingSpeed + (targetVV - safeLandingSpeed) * (currentState.altitude / 8.0));
     }
   }
 
   const velocityError = targetVV - currentState.verticalVelocity;
-  // Stronger P-gain (15.0) to aggressively brake and stop drifting when stick is released
-  const pGain = 15.0;
+  // P-gain cao hơn = phản hồi tức thì hơn, ít lag hơn khi đổi hướng lên/xuống
+  const pGain = 22.0;
   let baseThrottle = hoverThrust + (velocityError * pGain);
 
   // Direct Manual Overrides for "Realism" feel at the top extreme
@@ -211,10 +209,26 @@ export function runFlightController(
   };
 }
 
+// Helper: expose the same targetVV logic so the main loop can feed it back as a game assist
+export function computeTargetVV(throttle: number, altitude: number): number {
+  if (throttle > 55) {
+    return ((throttle - 55) / 45) * 15.0;
+  } else if (throttle < 45) {
+    let vv = ((throttle - 45) / 45) * 18.0;
+    if (altitude < 8.0) {
+      const safeLandingSpeed = -2.5;
+      vv = Math.max(vv, safeLandingSpeed + (vv - safeLandingSpeed) * (altitude / 8.0));
+    }
+    return vv;
+  }
+  return 0;
+}
+
 export function updatePhysics(
   prevState: FlightState,
   motors: MotorValues,
-  dt: number
+  dt: number,
+  gameAssistTargetVV?: number   // optional game-assist: lực hãm ảo để giảm lag
 ): FlightState {
   const thrust = (motors.m1 + motors.m2 + motors.m3 + motors.m4) / 4;
   const liftForce = (thrust / HOVER_THRUST) * GRAVITY;
@@ -227,6 +241,19 @@ export function updatePhysics(
 
   const vAcc = verticalLift - GRAVITY - prevState.verticalVelocity * AIR_DRAG_VERTICAL;
   let nVV = prevState.verticalVelocity + vAcc * dt;
+
+  // ─── GAME ASSIST: hãm tốc theo hướng mục tiêu (vd: đang +27 m/s muốn xuống -18 m/s ngay)
+  if (gameAssistTargetVV !== undefined) {
+    const error = gameAssistTargetVV - nVV;
+    // Chỉ apply khi cùng hướng với lệnh (tránh giảm tốc quá nữ khi vận tốc đã đúng mục tiêu)
+    if (Math.abs(error) > 1.0) {
+      // Tốc độ hãm game-assist: 35 m/s² (khoảng 3.5G) — từ +27 → -18 trong ~1.3 giây
+      const assistAcc = Math.sign(error) * Math.min(Math.abs(error), 35 * dt);
+      nVV += assistAcc;
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
   nVV = Math.max(-MAX_VERTICAL_SPEED, Math.min(MAX_VERTICAL_SPEED, nVV));
 
   let nAlt = prevState.altitude + nVV * dt;

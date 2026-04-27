@@ -50,17 +50,27 @@ export default function RoundMonitoringDialog({
     const [page, setPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [selectedUserResult, setSelectedUserResult] = useState<{
         userInfo: any;
         participantResult: any;
     } | null>(null);
     const pageSize = 10;
 
+    // Debounce search query
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const { data, isLoading, refetch } = useGetRoundUserResults(roundId, {
         currentPage: page,
         pageSize,
         status: statusFilter === "all" ? undefined : statusFilter,
-        search: searchQuery,
+        search: debouncedSearch,
         sortBy: "StartedAt",
         sortDirection: "Desc",
         refetchInterval: (currentData) => {
@@ -89,12 +99,17 @@ export default function RoundMonitoringDialog({
     const totalPages = data?.userResults?.totalPages || 1;
     const totalRecords = data?.userResults?.totalRecords || 0;
 
-    const getStatusStyle = (status: string) => {
+    const getStatusStyle = (participant: any) => {
+        const status = participant.status;
+        const isPassed = participant.isPassed !== false;
+
         switch (status) {
             case "InProgress":
                 return "text-sky-400 bg-sky-500/10 border-sky-500/20";
             case "Completed":
-                return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+                return isPassed 
+                    ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    : "text-rose-400 bg-rose-500/10 border-rose-500/20";
             case "Disqualified":
                 return "text-rose-400 bg-rose-500/10 border-rose-500/20";
             default:
@@ -102,12 +117,15 @@ export default function RoundMonitoringDialog({
         }
     };
 
-    const getStatusIcon = (status: string) => {
+    const getStatusIcon = (participant: any) => {
+        const status = participant.status;
+        const isPassed = participant.isPassed !== false;
+
         switch (status) {
             case "InProgress":
                 return <MdHistory className="animate-spin-slow" size={14} />;
             case "Completed":
-                return <MdCheckCircle size={14} />;
+                return isPassed ? <MdCheckCircle size={14} /> : <MdError size={14} />;
             case "Disqualified":
                 return <MdError size={14} />;
             default:
@@ -115,10 +133,13 @@ export default function RoundMonitoringDialog({
         }
     };
 
-    const getStatusText = (status: string) => {
+    const getStatusText = (participant: any) => {
+        const status = participant.status;
+        const isPassed = participant.isPassed !== false;
+
         switch (status) {
             case "InProgress": return "Đang thi";
-            case "Completed": return "Hoàn thành";
+            case "Completed": return isPassed ? "Hoàn thành" : "Thất bại";
             case "Disqualified": return "Bị loại";
             default: return status;
         }
@@ -170,7 +191,7 @@ export default function RoundMonitoringDialog({
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     placeholder="Tìm tên thí sinh..."
-                                    className="pl-10 bg-greyscale-900 border-greyscale-800 text-greyscale-100 h-11 focus-visible:ring-primary/30"
+                                    className="pl-10 bg-black/40 border-greyscale-700 text-greyscale-100 h-11 focus-visible:ring-indigo-500/30 focus-visible:border-indigo-500/50 hover:border-greyscale-600 transition-all shadow-inner"
                                 />
                             </div>
                         </div>
@@ -230,10 +251,10 @@ export default function RoundMonitoringDialog({
                                                     <TableCell className="text-center">
                                                         <span className={cn(
                                                             "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border",
-                                                            getStatusStyle(item.participantResult.status)
+                                                            getStatusStyle(item.participantResult)
                                                         )}>
-                                                            {getStatusIcon(item.participantResult.status)}
-                                                            {getStatusText(item.participantResult.status)}
+                                                            {getStatusIcon(item.participantResult)}
+                                                            {getStatusText(item.participantResult)}
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="text-center">
@@ -251,12 +272,18 @@ export default function RoundMonitoringDialog({
                                                             {item.participantResult.status === "Completed" ? (
                                                                 <>
                                                                     <div className="flex items-center gap-1.5">
-                                                                        <span className="text-lg font-black text-emerald-400">
+                                                                        <span className={cn(
+                                                                            "text-lg font-black",
+                                                                            item.participantResult.isPassed !== false ? "text-emerald-400" : "text-rose-400"
+                                                                        )}>
                                                                             {item.participantResult.point ?? 0}
                                                                         </span>
                                                                         <span className="text-[10px] font-bold text-greyscale-500 uppercase">đ</span>
                                                                     </div>
-                                                                    <span className="text-[11px] font-mono text-greyscale-400">
+                                                                    <span className={cn(
+                                                                        "text-[11px] font-mono",
+                                                                        item.participantResult.isPassed !== false ? "text-greyscale-400" : "text-rose-400/60"
+                                                                    )}>
                                                                         {item.participantResult.executionTime ? item.participantResult.executionTime.split('.')[0] : "--:--"}
                                                                     </span>
                                                                 </>

@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   Trophy, RotateCcw, Eye, Video,
-  Map, Crosshair
+  Map, Crosshair, ChevronLeft
 } from "lucide-react";
 
 import { FlightState } from "@/components/challenges/physics";
-import { processKeyboardInput, runFlightController, updatePhysics, INITIAL_STATE } from "@/components/challenges/physics";
+import { processKeyboardInput, runFlightController, updatePhysics, computeTargetVV, INITIAL_STATE } from "@/components/challenges/physics";
 import { FlightDroneViewer } from "@/components/challenges/FlightDroneViewer";
 import { LevelRegistry, mockLabs, LabData, LevelEnvironments } from "@/components/challenges/levels/registry";
 import { LevelFactory, LevelResult } from "@/components/challenges/levels/types";
@@ -34,17 +34,17 @@ const INITIAL_CONTROLS = {
 } as const;
 
 const CONTROL_CONFIG = {
-  throttleSpeed: 80,
-  throttlePrecisionSpeed: 40,
-  throttleDecay: 0.88,
-  pitchSpeed: 160,
-  pitchDecay: 0.88,
+  throttleSpeed: 60,           // Tốc độ tăng/giảm ga (chậm hơn -> dễ hover)
+  throttlePrecisionSpeed: 30,
+  throttleDecay: 0.96,         // Tốc độ tự về hover khi thả phím (cao = chậm hơn)
+  pitchSpeed: 90,              // Tiến/Lùi - giảm để không overshooting
+  pitchDecay: 0.80,            // Tự về 0 nhanh hơn khi thả W/S
   pitchDeadZone: 0.5,
-  rollSpeed: 300,
-  rollDecay: 0.88,
+  rollSpeed: 90,               // Trái/Phải - giảm để dễ điều chỉnh
+  rollDecay: 0.80,             // Tự về 0 nhanh hơn khi thả A/D  
   rollDeadZone: 0.5,
-  yawSpeed: 150,
-  yawDecay: 0.88,
+  yawSpeed: 120,               // Xoay - giữ nguyên
+  yawDecay: 0.84,
   yawDeadZone: 0.5,
   precisionMultiplier: 0.4,
   precisionMaxVal: 40,
@@ -92,7 +92,13 @@ function CountdownOverlay({ onComplete }: { onComplete: () => void }) {
 
 // ─── BRIEFING SCREEN ───────────────────────────────────────────────────────────
 
-function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart: () => void; timeRemaining?: number }) {
+function BriefingScreen({ lab, onStart, onResume, timeRemaining, isPaused }: {
+  lab: LabData;
+  onStart: () => void;
+  onResume?: () => void;
+  timeRemaining?: number;
+  isPaused?: boolean;
+}) {
   const displaySeconds = timeRemaining ?? lab.timeLimit;
   const minutes = Math.floor(displaySeconds / 60);
   const seconds = Math.floor(displaySeconds % 60);
@@ -125,7 +131,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-4 bg-cyan-400 rounded-full" />
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Nhiệm vụ</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Nhiệm vụ (Objective)</h3>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed pl-3">{lab.objective}</p>
             </div>
@@ -133,7 +139,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-4 bg-amber-400 rounded-full" />
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Luật chơi</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Luật chơi (Rules)</h3>
               </div>
               <div className="space-y-2 pl-3">
                 <div className="flex items-start gap-3">
@@ -166,7 +172,7 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
             <div className="bg-slate-950 p-4 border border-slate-700 rounded">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-1 h-4 bg-purple-400 rounded-full" />
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Điều khiển</h3>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Điều khiển (Controls)</h3>
               </div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-2">
                 {[
@@ -197,23 +203,40 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
               </div>
               <div>
                 <span className="text-sm font-mono font-bold text-amber-400">{timeStr}</span>
-                <span className="text-[9px] text-slate-500 ml-1.5">giới hạn</span>
+                <span className="text-[9px] text-slate-500 ml-1.5">{isPaused ? "còn lại" : "giới hạn"}</span>
               </div>
             </div>
 
-            <button
-              onClick={onStart}
-              className="group relative px-6 py-2.5 font-bold text-sm uppercase tracking-wider text-white overflow-hidden transition-all hover:scale-105 rounded"
-            >
-              <div className="absolute inset-0 bg-cyan-500 rounded" />
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity rounded" />
-              <span className="relative flex items-center gap-2">
-                Bắt đầu
-                <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </span>
-            </button>
+            <div className="flex items-center gap-2">
+              {isPaused && onResume && (
+                <button
+                  onClick={onResume}
+                  className="group relative px-5 py-2.5 font-bold text-sm uppercase tracking-wider text-slate-300 bg-slate-800 border border-slate-700 hover:bg-slate-700 hover:text-white transition-all rounded"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Tiếp tục bay
+                  </span>
+                </button>
+              )}
+              {!isPaused && (
+                <button
+                  onClick={onStart}
+                  className="group relative px-6 py-2.5 font-bold text-sm uppercase tracking-wider text-white overflow-hidden transition-all hover:scale-105 rounded"
+                >
+                  <div className="absolute inset-0 bg-cyan-500 rounded" />
+                  <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity rounded" />
+                  <span className="relative flex items-center gap-2">
+                    Bắt đầu
+                    <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -223,27 +246,58 @@ function BriefingScreen({ lab, onStart, timeRemaining }: { lab: LabData; onStart
 
 // ─── SHARED COMPONENTS (same as FlightMechanicsTab) ───────────────────────────
 
+const powerToRPM = (p: number) => Math.sqrt(Math.max(0, p) / 50) * 6200;
+const powerToNewtons = (p: number) => (Math.max(0, p) / 50) * (1.38 * 9.81);
+
 function ControlSlider({ label, keys, value, isCentered = true }: {
   label: string;
   keys: string;
   value: number;
   isCentered?: boolean
 }) {
+  const isThrottle = label.toLowerCase().includes("ga");
+  const isPitch = label.toLowerCase().includes("chúc");
+  const isRoll = label.toLowerCase().includes("nghiêng");
+  const isYaw = label.toLowerCase().includes("xoay");
+
+  // Vietnamese labels with English technical terms
+  let displayLabel = label;
+  if (isThrottle) displayLabel = "Ga (Throttle)";
+  if (isPitch) displayLabel = "Chúc/Ngóc (Pitch)";
+  if (isRoll) displayLabel = "Nghiêng (Roll)";
+  if (isYaw) displayLabel = "Xoay (Yaw)";
+
   return (
     <div className="mb-2 bg-slate-800/30 p-2.5 rounded-lg border border-slate-700">
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-200 tracking-wide">{label}</span>
+          <span className="text-[9px] font-black text-slate-200 tracking-tight uppercase leading-none">{displayLabel}</span>
           <kbd className="text-[8px] bg-slate-900 border border-slate-600 px-1 py-0.5 rounded text-slate-400 font-mono tracking-wider">{keys}</kbd>
         </div>
-        <span className="text-[11px] font-mono font-bold text-cyan-400">{value > 0 && isCentered ? "+" : ""}{value.toFixed(0)}%</span>
+        <div className="flex flex-col items-end">
+          {isThrottle ? (
+            <span className="text-[11px] font-mono font-black text-cyan-400 leading-none">{powerToNewtons(value).toFixed(2)} N</span>
+          ) : isPitch || isRoll ? (
+            <div className="flex flex-col items-end">
+              <span className="text-[11px] font-mono font-black text-cyan-400 leading-none">{value > 0 ? "+" : ""}{(value * 0.45).toFixed(0)}°</span>
+              <span className="text-[7px] font-mono text-white/20">{value.toFixed(0)}%</span>
+            </div>
+          ) : isYaw ? (
+            <div className="flex flex-col items-end">
+              <span className="text-[11px] font-mono font-black text-cyan-400 leading-none">{value > 0 ? "+" : ""}{(value * 0.75).toFixed(0)}°</span>
+              <span className="text-[7px] font-mono text-white/20">{value.toFixed(0)}%</span>
+            </div>
+          ) : (
+            <span className="text-[11px] font-mono font-black text-cyan-400 leading-none">{value > 0 && isCentered ? "+" : ""}{value.toFixed(0)}%</span>
+          )}
+        </div>
       </div>
-      <div className="h-2 bg-slate-950 rounded-full border border-slate-800 relative overflow-hidden">
+      <div className="h-1 bg-slate-950 rounded-full border border-slate-800 relative overflow-hidden">
         {isCentered ? (
           <>
             <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-slate-500 z-10" />
             <div
-              className="absolute h-full bg-cyan-500 transition-all duration-75"
+              className="absolute h-full bg-cyan-500 transition-all duration-75 shadow-[0_0_8px_rgba(6,182,212,0.5)]"
               style={{
                 width: `${Math.abs(value) / 2}%`,
                 left: value >= 0 ? "50%" : "auto",
@@ -253,7 +307,7 @@ function ControlSlider({ label, keys, value, isCentered = true }: {
           </>
         ) : (
           <div
-            className="absolute h-full bg-cyan-500 transition-all duration-75"
+            className="absolute h-full bg-cyan-500 transition-all duration-75 shadow-[0_0_8px_rgba(6,182,212,0.5)]"
             style={{ width: `${value}%`, left: 0 }}
           />
         )}
@@ -264,6 +318,8 @@ function ControlSlider({ label, keys, value, isCentered = true }: {
 
 function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: boolean, label: string }) {
   const intensity = val / 100;
+  const rpm = powerToRPM(val);
+  const newtons = powerToNewtons(val);
   const color = isCW ? "rgb(0, 229, 255)" : "rgb(251, 191, 36)";
 
   const isHigh = val > 55;
@@ -308,25 +364,38 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
         </div>
 
         <div className="relative z-10 flex flex-col items-center">
-          <span className="text-[9px] font-black text-slate-300">{id}</span>
-          <span className={cn("text-[14px] leading-tight font-mono font-bold", isHigh ? "text-white" : "text-white/80")}>
-            {val.toFixed(0)}
+          <span className="text-[7px] font-black text-slate-500 leading-none mb-0.5">{id}</span>
+          <span className={cn("text-[11px] leading-tight font-mono font-bold", isHigh ? "text-white" : "text-white/80")}>
+            {Math.round(rpm)}
           </span>
+          <span className="text-[7px] font-bold text-white/30 uppercase tracking-tighter">RPM</span>
         </div>
       </div>
-      <div className="text-[8px] font-bold mt-1 tracking-widest bg-slate-900 px-2 py-0.5 rounded border border-slate-700" style={{ color }}>
-        {isCW ? "↻ CW" : "↺ CCW"}
+      <div className="flex flex-col items-center mt-1">
+        <div className="text-[8px] font-bold tracking-widest bg-slate-900 px-2 py-0.5 rounded border border-slate-700" style={{ color }}>
+          {isCW ? "↻ CW" : "↺ CCW"}
+        </div>
+        <div className="text-[7px] font-mono text-white/40 mt-0.5">{newtons.toFixed(2)} N</div>
       </div>
     </div>
   );
 }
 
 function MathRow({ label, formula, result }: { label: string, formula: string, result: number }) {
+  const resultInN = (result / 100) * (1.38 * 9.81);
+  let vLabel = label;
+  if (label.includes("PITCH")) vLabel = "Chúc mũi (Pitch)";
+  if (label.includes("ROLL")) vLabel = "Nghiêng (Roll)";
+  if (label.includes("YAW")) vLabel = "Xoay (Yaw)";
+
   return (
     <div className="flex items-center rounded-lg justify-between p-2 bg-slate-800/40 border border-slate-700 mb-1.5">
-      <span className="text-[8px] font-bold text-slate-400 uppercase w-16 tracking-wider">{label}</span>
-      <span className="text-[9px] font-mono text-slate-300 bg-slate-900 px-2 py-0.5 border rounded border-slate-800">{formula}</span>
-      <span className="text-[11px] font-mono font-bold text-white w-8 text-right">{result > 0 ? "+" : ""}{result.toFixed(0)}</span>
+      <span className="text-[8px] font-black text-slate-400 uppercase w-20 tracking-tighter leading-tight">{vLabel}</span>
+      <span className="text-[9px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 border rounded border-slate-800">{formula}</span>
+      <div className="flex flex-col items-end w-14">
+        <span className="text-[11px] font-mono font-black text-white leading-none">{resultInN > 0 ? "+" : ""}{resultInN.toFixed(2)} N</span>
+        <span className="text-[7px] font-mono text-white/10">{result > 0 ? "+" : ""}{result.toFixed(0)}%</span>
+      </div>
     </div>
   );
 }
@@ -364,34 +433,60 @@ function CameraModeSelector({ mode, onChange }: { mode: CameraMode; onChange: (m
 
 // ─── FLYING HUD (compact hub-style — centered top) ───────────────────────────
 
-function FlyingHUD({ altitude, stability, elapsedTime, isRunning, timeRemaining }: {
-  altitude: number; stability: number; elapsedTime: number; isRunning: boolean; timeRemaining: number;
+function FlyingHUD({ altitude, stability, vVelocity, hVelocity, roll, pitch, timeRemaining }: {
+  altitude: number; stability: number; vVelocity: number; hVelocity: number; roll: number; pitch: number; timeRemaining: number;
 }) {
-  const minutes = Math.floor(timeRemaining / 60);
-  const seconds = Math.floor(timeRemaining % 60);
-  const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
   const isLowTime = timeRemaining <= 30;
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/60 rounded-lg border border-slate-700">
-        <svg className="w-3 h-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L12 22M7 7L12 2L17 7M7 17L12 22L17 17" />
-        </svg>
-        <span className="text-[11px] font-mono font-bold text-white">{altitude.toFixed(1)}</span>
-        <span className="text-[8px] text-white/50 font-bold">m</span>
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-0 bg-slate-950/40 px-1 py-0.5 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_15px_rgba(0,229,255,0.1)] backdrop-blur-xl transition-all hover:bg-slate-950/60 group">
+      {/* Time - Sleek indicator */}
+      <div className="flex flex-col items-center px-4 py-1 border-r border-white/5">
+        <span className="text-[6px] font-bold text-white/30 uppercase tracking-[0.2em] mb-0.5">Thời gian</span>
+        <span className={cn("text-base font-mono font-black leading-none tracking-tighter", isLowTime ? "text-red-500 animate-pulse" : "text-amber-400")}>
+          {formatTime(timeRemaining)}
+        </span>
       </div>
 
-      <div className="w-px h-5 bg-slate-600" />
+      <div className="flex items-center gap-5 px-5 py-1">
+        <div className="flex flex-col items-center">
+          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Độ cao (Alt)</span>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-sm font-mono font-black text-white leading-none">{altitude.toFixed(1)}</span>
+            <span className="text-[8px] text-white/40 font-bold">m</span>
+          </div>
+        </div>
 
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-black/60 rounded-lg border border-slate-700">
-        <svg className={cn("w-3 h-3", isRunning ? (isLowTime ? "text-red-400" : "text-amber-400") : "text-white/40")} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-        </svg>
-        <span className={cn("text-[11px] font-mono font-bold", isRunning ? (isLowTime ? "text-red-400 animate-pulse" : "text-amber-400") : "text-white/40")}>
-          {timeStr}
-        </span>
+        <div className="w-px h-4 bg-white/5" />
+
+        <div className="flex flex-col items-center">
+          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">V.Spd (Dọc)</span>
+          <div className="flex items-baseline gap-0.5">
+            <span className={cn("text-sm font-mono font-black leading-none", vVelocity > 0.1 ? "text-emerald-400" : vVelocity < -0.1 ? "text-red-400" : "text-white")}>
+              {vVelocity.toFixed(1)}
+            </span>
+            <span className="text-[8px] text-white/40 font-bold">m/s</span>
+          </div>
+        </div>
+
+        <div className="w-px h-4 bg-white/5" />
+
+        <div className="flex flex-col items-center">
+          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">H.Spd (Ngang)</span>
+          <div className="flex items-baseline gap-0.5">
+            <span className={cn("text-sm font-mono font-black leading-none text-white")}>
+              {hVelocity.toFixed(1)}
+            </span>
+            <span className="text-[8px] text-white/40 font-bold">m/s</span>
+          </div>
+        </div>
+
+        {/* <div className="w-px h-4 bg-white/5" /> */}
+
+        {/* <div className="flex flex-col items-center">
+          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Nghiêng (Tilt)</span>
+          <span className="text-sm font-mono font-black text-amber-500/90 leading-none">{Math.abs(roll).toFixed(0)}° / {Math.abs(pitch).toFixed(0)}°</span>
+        </div> */}
       </div>
     </div>
   );
@@ -449,6 +544,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
   const [gamePhase, setGamePhase] = useState<GamePhase>("briefing");
   const [isRunning, setIsRunning] = useState(false);
   const isRunningRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [cameraMode, setCameraMode] = useState<CameraMode>("FOLLOW");
   const cameraModeRef = useRef<CameraMode>("FOLLOW");
   const precisionModeRef = useRef(false);
@@ -580,7 +676,12 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
 
         droneSound.updateThrottle(motorValues);
 
-        const newState = updatePhysics(physicsRef.current, motorValues, deltaTime);
+        const newState = updatePhysics(
+          physicsRef.current,
+          motorValues,
+          deltaTime,
+          computeTargetVV(newControls.throttle, physicsRef.current.altitude) // game-assist
+        );
         physicsRef.current = newState;
         flightStateRef.current = newState;
 
@@ -596,6 +697,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
   }, []);
 
   const handleStartGame = () => {
+    setIsPaused(false);
     setGamePhase("countdown");
     setIsRunning(false);
     isRunningRef.current = false;
@@ -604,6 +706,33 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     setTimeRemaining(lab?.timeLimit ?? 60);
     setLevelResult(null);
     droneSound.stop();
+
+    // Also reset physics when starting fresh
+    physicsRef.current = INITIAL_STATE;
+    flightStateRef.current = INITIAL_STATE;
+    setFlightState(INITIAL_STATE);
+    setControls(INITIAL_CONTROLS);
+    controlsRef.current = INITIAL_CONTROLS;
+    keysPressed.current.clear();
+    setResetTrigger(prev => prev + 1);
+  };
+
+  const handlePauseForBriefing = () => {
+    setIsPaused(true);
+    setIsRunning(false);
+    isRunningRef.current = false;
+    droneSound.stop();
+    setGamePhase("briefing");
+  };
+
+  const handleResume = () => {
+    setIsPaused(false);
+    setGamePhase("playing");
+    // Small countdown-less resume — just set running after a brief moment
+    setTimeout(() => {
+      setIsRunning(true);
+      isRunningRef.current = true;
+    }, 300);
   };
 
   const handleReplayGame = () => {
@@ -712,11 +841,26 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
 
       {/* ─── HEADER BAR ─── */}
       <div className="shrink-0 bg-slate-950 border-b border-slate-700">
-        <div className="flex items-center justify-between px-5 py-2.5">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-4">
+            {/* Nút Quay lại - Giờ đã được gộp vào đây */}
+            {returnUrl && (
+              <button
+                onClick={() => router.push(returnUrl)}
+                className="group flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-all"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 text-slate-400 group-hover:text-white transition-colors" />
+                <span className="text-[10px] font-bold text-slate-400 group-hover:text-white transition-colors">
+                  {isAdmin ? "Quay lại quản trị" : "Quay lại bài học"}
+                </span>
+              </button>
+            )}
+
+            <div className="h-4 w-px bg-slate-800" />
+
+            <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-800">
               <div className="w-2 h-2 bg-cyan-400 rounded-full" />
-              <span className="text-xs font-black text-white tracking-wide">{lab.title}</span>
+              <span className="text-xs font-black text-white tracking-wide uppercase">{lab.title}</span>
             </div>
           </div>
 
@@ -749,7 +893,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
             {gamePhase === "playing" && (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setGamePhase("briefing")}
+                  onClick={handlePauseForBriefing}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider text-cyan-400 bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-all"
                 >
                   <Eye className="w-3 h-3" />
@@ -785,7 +929,9 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
           <BriefingScreen
             lab={lab}
             onStart={handleStartGame}
+            onResume={isPaused ? handleResume : undefined}
             timeRemaining={timeRemaining}
+            isPaused={isPaused}
           />
         )}
       </AnimatePresence>
@@ -812,7 +958,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
           </div>
 
           <div className="flex-1 space-y-0.5 pt-1">
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 px-0.5">Điều khiển</div>
+            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 px-0.5">Điều khiển (Control Panel)</div>
             <ControlSlider label="Ga" keys="↑↓" value={controls.throttle} isCentered={false} />
             <ControlSlider label="Tiến/Lùi" keys="W/S" value={controls.pitch} />
             <ControlSlider label="Trái/Phải" keys="A/D" value={controls.roll} />
@@ -821,7 +967,7 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
 
           <div className="pt-2 border-t border-slate-800">
             <div className="grid grid-cols-[1fr_auto] gap-y-0.5 text-[8px] text-slate-500 font-bold uppercase">
-              <span>Di chuyển</span>
+              <span>Di chuyển (Move)</span>
               <div className="flex gap-0.5">
                 <kbd className="bg-slate-900 px-0.5 rounded border border-slate-700 text-[6px]">W</kbd>
                 <kbd className="bg-slate-900 px-0.5 rounded border border-slate-700 text-[6px]">S</kbd>
@@ -861,13 +1007,18 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
           <FlyingHUD
             altitude={flightState.altitude}
             stability={flightState.stability}
-            elapsedTime={elapsedTime}
-            isRunning={isRunning}
+            vVelocity={flightState.verticalVelocity}
+            hVelocity={Math.sqrt(flightState.velocityX ** 2 + flightState.velocityZ ** 2)}
+            roll={flightState.roll}
+            pitch={flightState.pitch}
             timeRemaining={timeRemaining}
           />
 
-          <div className="absolute bottom-3 right-3">
-            <CameraModeSelector mode={cameraMode} onChange={setCameraMode} />
+          <div className="absolute top-4 right-4">
+            <CameraModeSelector mode={cameraMode} onChange={(m) => {
+              setCameraMode(m);
+              cameraModeRef.current = m;
+            }} />
           </div>
         </div>
 
@@ -875,17 +1026,17 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
         <div className="w-[200px] shrink-0 flex flex-col bg-slate-950 border-l border-slate-800 p-3 gap-2">
 
           <div>
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Động cơ</div>
+            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Động cơ (Motors)</div>
             <div className="relative w-full max-w-[160px] mx-auto bg-slate-900/80 rounded-lg border border-slate-700 p-2">
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
                 <div className="w-[80%] h-px bg-slate-400 rotate-45" />
                 <div className="w-[80%] h-px bg-slate-400 -rotate-45 absolute" />
               </div>
               <div className="grid grid-cols-2 w-full relative z-10 gap-x-1 gap-y-6 scale-[0.88] origin-center">
-                <div className="flex items-start justify-start"><MotorNode id="M1" label="FL" isCW={true} val={flightState.motors.m1} /></div>
-                <div className="flex items-start justify-end"><MotorNode id="M2" label="FR" isCW={false} val={flightState.motors.m2} /></div>
-                <div className="flex items-end justify-start"><MotorNode id="M3" label="RL" isCW={false} val={flightState.motors.m3} /></div>
-                <div className="flex items-end justify-end"><MotorNode id="M4" label="RR" isCW={true} val={flightState.motors.m4} /></div>
+                <div className="flex items-start justify-start"><MotorNode id="M1" label="FL" isCW={false} val={flightState.motors.m1} /></div>
+                <div className="flex items-start justify-end"><MotorNode id="M2" label="FR" isCW={true} val={flightState.motors.m2} /></div>
+                <div className="flex items-end justify-start"><MotorNode id="M3" label="RL" isCW={true} val={flightState.motors.m3} /></div>
+                <div className="flex items-end justify-end"><MotorNode id="M4" label="RR" isCW={false} val={flightState.motors.m4} /></div>
               </div>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-slate-900 rounded-full border border-slate-700 flex items-center justify-center z-20">
                 <div className="w-1 h-1 bg-slate-700 rounded-full" />
@@ -893,20 +1044,18 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
             </div>
           </div>
 
-          <div className="pt-1.5 border-t border-slate-800">
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Lực</div>
-            <div className="space-y-0.5">
-              <MathRow label="Pitch" formula="(M3+M4)-(M1+M2)" result={pitchDiff} />
-              <MathRow label="Roll" formula="(M1+M3)-(M2+M4)" result={rollDiff} />
-              <MathRow label="Yaw" formula="(M2+M3)-(M1+M4)" result={yawDiff} />
-            </div>
+          <div className="mt-4">
+            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Trình trộn lực (Mixer)</div>
+            <MathRow label="PITCH" formula="(M3+M4)-(M1+M2)" result={pitchDiff} />
+            <MathRow label="ROLL" formula="(M1+M3)-(M2+M4)" result={rollDiff} />
+            <MathRow label="YAW" formula="(M2+M3)-(M1+M4)" result={yawDiff} />
           </div>
 
           <div className="pt-1.5 border-t border-slate-800">
-            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Lực đẩy</div>
+            <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 mt-2">Tổng lực đẩy (Total Thrust)</div>
             <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-cyan-500/5 border border-cyan-500/20">
-              <span className="text-[7px] font-bold text-slate-500 uppercase">Avg</span>
-              <span className="text-[10px] font-mono font-bold text-cyan-400">{flightState.thrust.toFixed(0)}%</span>
+              <span className="text-[7px] font-bold text-slate-500 uppercase">Trung bình (Avg)</span>
+              <span className="text-[11px] font-mono font-black text-cyan-400">{powerToNewtons(flightState.thrust).toFixed(2)} N</span>
             </div>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function DroneChallengeDetailPage() {
   return (
     <div className="h-screen bg-slate-950 text-white font-sans flex flex-col overflow-hidden">
       {/* HEADER - Back button bar */}
-      <header className="relative z-30 shrink-0 flex items-center px-4 py-2 bg-slate-950 border-b border-slate-800">
+      {/* <header className="relative z-30 shrink-0 flex items-center px-4 py-2 bg-slate-950 border-b border-slate-800">
         {returnUrl && (
           <button
             onClick={() => router.push(returnUrl)}
@@ -31,7 +31,7 @@ export default function DroneChallengeDetailPage() {
           </button>
         )}
         <div className="flex-1" />
-      </header>
+      </header> */}
 
       {/* CONTENT */}
       <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
