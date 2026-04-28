@@ -21,15 +21,19 @@ import { toast } from "react-hot-toast";
 import { MdEmojiEvents, MdCheckCircle, MdLock, MdOutlineTimer, MdLogout, MdPeopleAlt } from "react-icons/md";
 import { Badge } from "@/components/ui/badge";
 import MemberCompetitionLeaderboardTab from "./tabs/MemberCompetitionLeaderboardTab";
+import { useGetClubDetailByCode } from "@/hooks/club/useClub";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MemberCompetitionDetail() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ id: string; clubSlug: string }>();
   const id = params?.id;
+  const clubSlug = params?.clubSlug;
   const router = useRouter();
   const locale = useLocale();
   const [activeTab, setActiveTab] = React.useState("overview");
 
-  const { data: competition, isLoading } = useGetCompetitionDetail(id);
+  const { data: competition, isLoading: isCompLoading } = useGetCompetitionDetail(id);
+  const { data: club, isLoading: isClubLoading } = useGetClubDetailByCode(clubSlug);
   const registerMutation = useRegisterCompetition();
   const withdrawMutation = useWithdrawCompetition();
 
@@ -111,15 +115,36 @@ export default function MemberCompetitionDetail() {
     }
   };
 
+  const isLoading = isCompLoading || isClubLoading;
+
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex h-screen items-center justify-center bg-greyscale-950">
+        <Spinner className="h-10 w-10 text-primary" />
       </div>
     );
   }
 
-  if (!competition) return <div>Không tìm thấy cuộc thi</div>;
+  // CHẶN TRUY CẬP TRÁI PHÉP GIỮA CÁC CLB
+  // Nếu ID CLB của cuộc thi không khớp với ID CLB trên URL thì chặn
+  const isUnauthorized = competition && club && competition.clubID !== club.clubID;
+
+  if (!competition || isUnauthorized) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-greyscale-950 p-6 text-center">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 mb-6">
+          <MdLock size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">Truy cập bị từ chối</h2>
+        <p className="text-greyscale-400 max-w-md mx-auto mb-8">
+          Cuộc thi này không thuộc về Câu lạc bộ hiện tại hoặc bạn không có quyền truy cập.
+        </p>
+        <Button onClick={() => router.push(`/member/${clubSlug}/competitions`)}>
+          Quay lại danh sách
+        </Button>
+      </div>
+    );
+  }
 
   const displayPhase = currentPhase || competition.competitionPhase;
   const isRegistrationOpen = displayPhase === "REGISTRATION_OPEN";

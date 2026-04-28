@@ -45,11 +45,13 @@ import { useCreateAssignment } from "@/hooks/assignment/useAssignment";
 
 type CreateLessonDialogProps = {
   moduleId: string;
+  droneId?: string;
   lessons: Lesson[];
 };
 
 export default function CreateLessonDialog({
   moduleId,
+  droneId,
   lessons,
 }: CreateLessonDialogProps) {
   const t = useTranslations(
@@ -187,14 +189,13 @@ export default function CreateLessonDialog({
   const activeLabs = activeLabsData?.data || [];
   const labTotalPages = activeLabsData?.totalPages || 1;
 
-  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } =
-    useGetWebSimulators({
-      type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType)
-        ? lessonType
-        : undefined,
-    });
-  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } =
-    useGetVRSimulators({ type: "LEARNING" });
+  console.log("CreateLessonDialog - droneId:", droneId, "lessonType:", lessonType);
+
+  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
+    type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
+    droneId: lessonType === "PHYSIC" ? droneId : undefined,
+  });
+  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators({ type: "LEARNING" });
 
   const isSimulatorsLoading =
     lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;

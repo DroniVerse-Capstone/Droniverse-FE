@@ -15,12 +15,14 @@ import { useTranslations } from "@/providers/i18n-provider";
 
 type CourseSettingsTabProps = {
   courseId?: string;
+  droneId?: string;
   versionId?: string;
   versionStatus?: string;
 };
 
 export default function CourseSettingsTab({
   courseId,
+  droneId,
   versionId,
   versionStatus,
 }: CourseSettingsTabProps) {
@@ -113,6 +115,7 @@ export default function CourseSettingsTab({
             <ModuleItem
               key={module.moduleID}
               courseId={courseId}
+              droneId={droneId}
               versionId={versionId}
               module={module}
               isDeletingModule={isDeletingModule}
