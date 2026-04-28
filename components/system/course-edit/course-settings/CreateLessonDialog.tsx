@@ -28,7 +28,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useImportLabLesson } from "@/hooks/lesson/useLesson";
 import { useGetLabs } from "@/hooks/lab/useLabs";
-import { useGetWebSimulators, useImportSimulatorLesson, useGetVRSimulators, useImportVRSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import {
+  useGetWebSimulators,
+  useImportSimulatorLesson,
+  useGetVRSimulators,
+  useImportVRSimulatorLesson,
+} from "@/hooks/simulator/useSimulator";
 import SelectSimulatorCard from "@/components/system/course-edit/course-settings/SelectSimulatorCard";
 import { useCreateQuiz } from "@/hooks/quiz/useQuiz";
 import { useCreateTheory } from "@/hooks/theory/useTheory";
@@ -36,6 +41,7 @@ import { ApiError } from "@/types/api/common";
 import { Lesson, LessonType } from "@/validations/lesson/lesson";
 import { useTranslations } from "@/providers/i18n-provider";
 import EmptyState from "@/components/common/EmptyState";
+import { useCreateAssignment } from "@/hooks/assignment/useAssignment";
 
 type CreateLessonDialogProps = {
   moduleId: string;
@@ -46,7 +52,9 @@ export default function CreateLessonDialog({
   moduleId,
   lessons,
 }: CreateLessonDialogProps) {
-  const t = useTranslations("CourseManagement.CourseSettings.CreateLessonDialog");
+  const t = useTranslations(
+    "CourseManagement.CourseSettings.CreateLessonDialog",
+  );
   const [open, setOpen] = React.useState(false);
   const [lessonType, setLessonType] = React.useState<LessonType>("THEORY");
   const [selectedLabId, setSelectedLabId] = React.useState("");
@@ -60,6 +68,7 @@ export default function CreateLessonDialog({
   const [contentEN, setContentEN] = React.useState("");
   const [descriptionVN, setDescriptionVN] = React.useState("");
   const [descriptionEN, setDescriptionEN] = React.useState("");
+  const [requirement, setRequirement] = React.useState("");
   const [timeLimit, setTimeLimit] = React.useState("");
   const [totalScore, setTotalScore] = React.useState("");
   const [passScore, setPassScore] = React.useState("");
@@ -74,8 +83,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-        axiosError.message ||
-        t("error.createTheoryFailed"),
+          axiosError.message ||
+          t("error.createTheoryFailed"),
       );
     },
   });
@@ -90,8 +99,24 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-        axiosError.message ||
-        t("error.createQuizFailed"),
+          axiosError.message ||
+          t("error.createQuizFailed"),
+      );
+    },
+  });
+
+  const createAssignmentMutation = useCreateAssignment({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      setOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("error.createAssignmentFailed"),
       );
     },
   });
@@ -106,8 +131,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-        axiosError.message ||
-        t("error.importLabFailed"),
+          axiosError.message ||
+          t("error.importLabFailed"),
       );
     },
   });
@@ -122,8 +147,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-        axiosError.message ||
-        t("error.importLabFailed"),
+          axiosError.message ||
+          t("error.importLabFailed"),
       );
     },
   });
@@ -138,8 +163,8 @@ export default function CreateLessonDialog({
       const axiosError = error as AxiosError<ApiError>;
       toast.error(
         axiosError.response?.data?.message ||
-        axiosError.message ||
-        t("error.importLabFailed"),
+          axiosError.message ||
+          t("error.importLabFailed"),
       );
     },
   });
@@ -162,16 +187,21 @@ export default function CreateLessonDialog({
   const activeLabs = activeLabsData?.data || [];
   const labTotalPages = activeLabsData?.totalPages || 1;
 
-  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
-    type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
-  });
-  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators({ type: "LEARNING" });
+  const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } =
+    useGetWebSimulators({
+      type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType)
+        ? lessonType
+        : undefined,
+    });
+  const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } =
+    useGetVRSimulators({ type: "LEARNING" });
 
-  const isSimulatorsLoading = lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;
+  const isSimulatorsLoading =
+    lessonType === "VR" ? isVRSimulatorsLoading : isWebSimulatorsLoading;
 
   const filteredSimulators = React.useMemo(() => {
     const simsToFilter = lessonType === "VR" ? vrSimulators : webSimulators;
-    
+
     if (!labSearchTerm) return simsToFilter;
     const term = labSearchTerm.toLowerCase();
     return simsToFilter.filter(
@@ -190,11 +220,13 @@ export default function CreateLessonDialog({
     { value: "PHYSIC", label: t("lessonTypes.physic") },
     { value: "LAB_PHYSIC", label: t("lessonTypes.lab_physic") },
     { value: "VR", label: t("lessonTypes.vr") },
+    { value: "ASSIGNMENT", label: t("lessonTypes.assignment") },
   ];
 
   const isSubmitting =
     createTheoryMutation.isPending ||
     createQuizMutation.isPending ||
+    createAssignmentMutation.isPending ||
     importLabLessonMutation.isPending ||
     importSimulatorLessonMutation.isPending ||
     importVRSimulatorLessonMutation.isPending;
@@ -223,6 +255,7 @@ export default function CreateLessonDialog({
     setContentEN("");
     setDescriptionVN("");
     setDescriptionEN("");
+    setRequirement("");
     setTimeLimit("");
     setTotalScore("");
     setPassScore("");
@@ -262,9 +295,15 @@ export default function CreateLessonDialog({
     const normalizedTitleVN = titleVN.trim();
     const normalizedTitleEN = titleEN.trim();
     const isTheoryOrQuiz = lessonType === "THEORY" || lessonType === "QUIZ";
-    const isLabBased = ["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType);
+    const isAssignment = lessonType === "ASSIGNMENT";
+    const isLabBased = ["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(
+      lessonType,
+    );
 
-    if (isTheoryOrQuiz && (!normalizedTitleVN || !normalizedTitleEN)) {
+    if (
+      (isTheoryOrQuiz || isAssignment) &&
+      (!normalizedTitleVN || !normalizedTitleEN)
+    ) {
       toast.error(t("error.missingTitle"));
       return;
     }
@@ -274,7 +313,11 @@ export default function CreateLessonDialog({
       const normalizedContentEN = contentEN.trim();
       const parsedEstimatedTime = parsePositiveInt(estimatedTime);
 
-      if (!normalizedContentVN || !normalizedContentEN || !parsedEstimatedTime) {
+      if (
+        !normalizedContentVN ||
+        !normalizedContentEN ||
+        !parsedEstimatedTime
+      ) {
         toast.error(t("error.missingTheory"));
         return;
       }
@@ -286,6 +329,36 @@ export default function CreateLessonDialog({
         titleEN: normalizedTitleEN,
         contentVN: normalizedContentVN,
         contentEN: normalizedContentEN,
+        estimatedTime: parsedEstimatedTime,
+      });
+
+      return;
+    }
+
+    if (lessonType === "ASSIGNMENT") {
+      const normalizedDescriptionVN = descriptionVN.trim();
+      const normalizedDescriptionEN = descriptionEN.trim();
+      const normalizedRequirement = requirement.trim();
+      const parsedEstimatedTime = parsePositiveInt(estimatedTime);
+
+      if (
+        !normalizedDescriptionVN ||
+        !normalizedDescriptionEN ||
+        !normalizedRequirement ||
+        !parsedEstimatedTime
+      ) {
+        toast.error(t("error.missingAssignment"));
+        return;
+      }
+
+      await createAssignmentMutation.mutateAsync({
+        moduleID: moduleId,
+        orderIndex: nextOrderIndex,
+        titleVN: normalizedTitleVN,
+        titleEN: normalizedTitleEN,
+        descriptionVN: normalizedDescriptionVN,
+        descriptionEN: normalizedDescriptionEN,
+        requirement: normalizedRequirement,
         estimatedTime: parsedEstimatedTime,
       });
 
@@ -370,7 +443,10 @@ export default function CreateLessonDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button icon={<MdOutlineAddCircleOutline size={18} />} variant="secondary">
+        <Button
+          icon={<MdOutlineAddCircleOutline size={18} />}
+          variant="secondary"
+        >
           {t("buttons.createLesson")}
         </Button>
       </DialogTrigger>
@@ -393,10 +469,14 @@ export default function CreateLessonDialog({
             disabled={isSubmitting}
           />
 
-          {lessonType === "THEORY" || lessonType === "QUIZ" ? (
+          {lessonType === "THEORY" ||
+          lessonType === "QUIZ" ||
+          lessonType === "ASSIGNMENT" ? (
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="create-lesson-title-vn">{t("fields.titleVN")}</Label>
+                <Label htmlFor="create-lesson-title-vn">
+                  {t("fields.titleVN")}
+                </Label>
                 <Input
                   id="create-lesson-title-vn"
                   value={titleVN}
@@ -407,12 +487,74 @@ export default function CreateLessonDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="create-lesson-title-en">{t("fields.titleEN")}</Label>
+                <Label htmlFor="create-lesson-title-en">
+                  {t("fields.titleEN")}
+                </Label>
                 <Input
                   id="create-lesson-title-en"
                   value={titleEN}
                   onChange={(event) => setTitleEN(event.target.value)}
                   placeholder={t("fields.titleENPlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {lessonType === "ASSIGNMENT" ? (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="create-assignment-description-vn">
+                    {t("fields.assignmentDescriptionVN")}
+                  </Label>
+                  <Textarea
+                    id="create-assignment-description-vn"
+                    value={descriptionVN}
+                    onChange={(event) => setDescriptionVN(event.target.value)}
+                    placeholder={t("fields.assignmentDescriptionVNPlaceholder")}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="create-assignment-description-en">
+                    {t("fields.assignmentDescriptionEN")}
+                  </Label>
+                  <Textarea
+                    id="create-assignment-description-en"
+                    value={descriptionEN}
+                    onChange={(event) => setDescriptionEN(event.target.value)}
+                    placeholder={t("fields.assignmentDescriptionENPlaceholder")}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-assignment-requirement">
+                  {t("fields.assignmentRequirement")}
+                </Label>
+                <Textarea
+                  id="create-assignment-requirement"
+                  value={requirement}
+                  onChange={(event) => setRequirement(event.target.value)}
+                  placeholder={t("fields.assignmentRequirementPlaceholder")}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-assignment-estimated-time">
+                  {t("fields.estimatedTime")}
+                </Label>
+                <Input
+                  id="create-assignment-estimated-time"
+                  type="number"
+                  min={1}
+                  value={estimatedTime}
+                  onChange={(event) => setEstimatedTime(event.target.value)}
+                  placeholder={t("fields.estimatedTimePlaceholder")}
                   disabled={isSubmitting}
                 />
               </div>
@@ -442,7 +584,9 @@ export default function CreateLessonDialog({
               />
 
               <div className="space-y-2">
-                <Label htmlFor="create-theory-estimated-time">{t("fields.estimatedTime")}</Label>
+                <Label htmlFor="create-theory-estimated-time">
+                  {t("fields.estimatedTime")}
+                </Label>
                 <Input
                   id="create-theory-estimated-time"
                   type="number"
@@ -459,7 +603,9 @@ export default function CreateLessonDialog({
           {lessonType === "QUIZ" ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="create-quiz-description-vn">{t("fields.quizDescriptionVN")}</Label>
+                <Label htmlFor="create-quiz-description-vn">
+                  {t("fields.quizDescriptionVN")}
+                </Label>
                 <Textarea
                   id="create-quiz-description-vn"
                   value={descriptionVN}
@@ -470,7 +616,9 @@ export default function CreateLessonDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="create-quiz-description-en">{t("fields.quizDescriptionEN")}</Label>
+                <Label htmlFor="create-quiz-description-en">
+                  {t("fields.quizDescriptionEN")}
+                </Label>
                 <Textarea
                   id="create-quiz-description-en"
                   value={descriptionEN}
@@ -482,7 +630,9 @@ export default function CreateLessonDialog({
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-time-limit">{t("fields.quizTimeLimit")}</Label>
+                  <Label htmlFor="create-quiz-time-limit">
+                    {t("fields.quizTimeLimit")}
+                  </Label>
                   <Input
                     id="create-quiz-time-limit"
                     type="number"
@@ -495,7 +645,9 @@ export default function CreateLessonDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-total-score">{t("fields.quizTotalScore")}</Label>
+                  <Label htmlFor="create-quiz-total-score">
+                    {t("fields.quizTotalScore")}
+                  </Label>
                   <Input
                     id="create-quiz-total-score"
                     type="number"
@@ -508,7 +660,9 @@ export default function CreateLessonDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="create-quiz-pass-score">{t("fields.quizPassScore")}</Label>
+                  <Label htmlFor="create-quiz-pass-score">
+                    {t("fields.quizPassScore")}
+                  </Label>
                   <Input
                     id="create-quiz-pass-score"
                     type="number"
@@ -527,7 +681,9 @@ export default function CreateLessonDialog({
             <div className="space-y-4 rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
               <div className="space-y-2">
                 <Label htmlFor="lab-search">
-                  {lessonType === "PHYSIC" ? t("fields.simulatorSearch") : t("fields.labSearch")}
+                  {lessonType === "PHYSIC"
+                    ? t("fields.simulatorSearch")
+                    : t("fields.labSearch")}
                 </Label>
                 <Input
                   type="search"
@@ -559,18 +715,25 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isSimulatorsLoading && filteredSimulators.length === 0 ? (
+              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              !isSimulatorsLoading &&
+              filteredSimulators.length === 0 ? (
                 <EmptyState title={t("fields.simulatorEmpty")} />
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading && activeLabs.length === 0 ? (
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              !isLabsLoading &&
+              activeLabs.length === 0 ? (
                 <EmptyState title={t("fields.labEmpty")} />
               ) : null}
 
-              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isSimulatorsLoading && filteredSimulators.length > 0 ? (
+              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              !isSimulatorsLoading &&
+              filteredSimulators.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   {filteredSimulators.map((simulator) => {
-                    const simId = simulator.webSimulatorID || simulator.vrSimulatorID;
+                    const simId =
+                      simulator.webSimulatorID || simulator.vrSimulatorID;
                     return (
                       <SelectSimulatorCard
                         key={simId}
@@ -584,7 +747,9 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading && activeLabs.length > 0 ? (
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              !isLabsLoading &&
+              activeLabs.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   {activeLabs.map((lab) => {
                     return (
@@ -600,7 +765,8 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) && !isLabsLoading ? (
+              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              !isLabsLoading ? (
                 <AppPagination
                   currentPage={labPageIndex}
                   totalPages={labTotalPages}

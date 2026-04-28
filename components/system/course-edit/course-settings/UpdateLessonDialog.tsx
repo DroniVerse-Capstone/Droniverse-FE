@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetAssignmentDetail, useUpdateAssignment } from "@/hooks/assignment/useAssignment";
 import { useGetQuizDetail, useUpdateQuiz } from "@/hooks/quiz/useQuiz";
 import { useGetTheoryDetail, useUpdateTheory } from "@/hooks/theory/useTheory";
 import { useTranslations } from "@/providers/i18n-provider";
@@ -50,11 +51,20 @@ export default function UpdateLessonDialog({
   const [quizTotalScore, setQuizTotalScore] = useState("");
   const [quizPassScore, setQuizPassScore] = useState("");
 
+  const [assignmentTitleVN, setAssignmentTitleVN] = useState("");
+  const [assignmentTitleEN, setAssignmentTitleEN] = useState("");
+  const [assignmentDescriptionVN, setAssignmentDescriptionVN] = useState("");
+  const [assignmentDescriptionEN, setAssignmentDescriptionEN] = useState("");
+  const [assignmentRequirement, setAssignmentRequirement] = useState("");
+  const [assignmentEstimatedTime, setAssignmentEstimatedTime] = useState("");
+
   const theoryId = open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId = open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
+  const assignmentId = open && lesson?.type === "ASSIGNMENT" ? lesson.referenceID : undefined;
 
   const theoryDetailQuery = useGetTheoryDetail(theoryId);
   const quizDetailQuery = useGetQuizDetail(quizId);
+  const assignmentDetailQuery = useGetAssignmentDetail(assignmentId);
 
   const updateTheoryMutation = useUpdateTheory({
     onSuccess: (data) => {
@@ -86,6 +96,21 @@ export default function UpdateLessonDialog({
     },
   });
 
+  const updateAssignmentMutation = useUpdateAssignment({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      onOpenChange(false);
+    },
+    onError: (updateError) => {
+      const axiosError = updateError as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          t("error.updateAssignmentFailed"),
+      );
+    },
+  });
+
   useEffect(() => {
     if (theoryDetailQuery.data && lesson?.type === "THEORY") {
       const detail = theoryDetailQuery.data;
@@ -109,6 +134,18 @@ export default function UpdateLessonDialog({
       setQuizPassScore(String(detail.passScore));
     }
   }, [lesson?.type, quizDetailQuery.data]);
+
+  useEffect(() => {
+    if (assignmentDetailQuery.data && lesson?.type === "ASSIGNMENT") {
+      const detail = assignmentDetailQuery.data;
+      setAssignmentTitleVN(detail.titleVN);
+      setAssignmentTitleEN(detail.titleEN);
+      setAssignmentDescriptionVN(detail.descriptionVN);
+      setAssignmentDescriptionEN(detail.descriptionEN);
+      setAssignmentRequirement(detail.requirement);
+      setAssignmentEstimatedTime(String(detail.estimatedTime));
+    }
+  }, [lesson?.type, assignmentDetailQuery.data]);
 
   const parsePositiveInt = (value: string) => {
     const numberValue = Number(value);
@@ -209,7 +246,45 @@ export default function UpdateLessonDialog({
     });
   };
 
-  const isSaving = updateTheoryMutation.isPending || updateQuizMutation.isPending;
+  const handleUpdateAssignment = async () => {
+    if (!lesson || lesson.type !== "ASSIGNMENT") {
+      return;
+    }
+
+    const normalizedTitleVN = assignmentTitleVN.trim();
+    const normalizedTitleEN = assignmentTitleEN.trim();
+    const normalizedDescriptionVN = assignmentDescriptionVN.trim();
+    const normalizedDescriptionEN = assignmentDescriptionEN.trim();
+    const normalizedRequirement = assignmentRequirement.trim();
+    const parsedEstimatedTime = parsePositiveInt(assignmentEstimatedTime);
+
+    if (
+      !normalizedTitleVN ||
+      !normalizedTitleEN ||
+      !normalizedDescriptionVN ||
+      !normalizedDescriptionEN ||
+      !normalizedRequirement ||
+      !parsedEstimatedTime
+    ) {
+      toast.error(t("error.missingAssignment"));
+      return;
+    }
+
+    await updateAssignmentMutation.mutateAsync({
+      assignmentId: lesson.referenceID,
+      moduleID: lesson.moduleID,
+      payload: {
+        titleVN: normalizedTitleVN,
+        titleEN: normalizedTitleEN,
+        descriptionVN: normalizedDescriptionVN,
+        descriptionEN: normalizedDescriptionEN,
+        requirement: normalizedRequirement,
+        estimatedTime: parsedEstimatedTime,
+      },
+    });
+  };
+
+  const isSaving = updateTheoryMutation.isPending || updateQuizMutation.isPending || updateAssignmentMutation.isPending;
 
   return (
     <Dialog
@@ -226,7 +301,11 @@ export default function UpdateLessonDialog({
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>
-            {lesson?.type === "THEORY" ? t("subtitle.theory") : t("subtitle.quiz")}
+            {lesson?.type === "THEORY"
+              ? t("subtitle.theory")
+              : lesson?.type === "QUIZ"
+                ? t("subtitle.quiz")
+                : t("subtitle.assignment")}
           </DialogDescription>
         </DialogHeader>
 
@@ -388,6 +467,86 @@ export default function UpdateLessonDialog({
           </div>
         ) : null}
 
+        {lesson?.type === "ASSIGNMENT" ? (
+          <div className="space-y-4">
+            {assignmentDetailQuery.isLoading ? (
+              <div className="flex items-center justify-center py-3">
+                <Spinner className="h-5 w-5" />
+              </div>
+            ) : null}
+
+            {assignmentDetailQuery.data ? (
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-assignment-title-vn">{t("fields.titleVN")}</Label>
+                    <Input
+                      id="edit-assignment-title-vn"
+                      value={assignmentTitleVN}
+                      onChange={(event) => setAssignmentTitleVN(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-assignment-title-en">{t("fields.titleEN")}</Label>
+                    <Input
+                      id="edit-assignment-title-en"
+                      value={assignmentTitleEN}
+                      onChange={(event) => setAssignmentTitleEN(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignment-description-vn">{t("fields.assignmentDescriptionVN")}</Label>
+                  <Textarea
+                    id="edit-assignment-description-vn"
+                    value={assignmentDescriptionVN}
+                    onChange={(event) => setAssignmentDescriptionVN(event.target.value)}
+                    disabled={isSaving}
+                    className="border-greyscale-700 bg-greyscale-800 text-greyscale-0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignment-description-en">{t("fields.assignmentDescriptionEN")}</Label>
+                  <Textarea
+                    id="edit-assignment-description-en"
+                    value={assignmentDescriptionEN}
+                    onChange={(event) => setAssignmentDescriptionEN(event.target.value)}
+                    disabled={isSaving}
+                    className="border-greyscale-700 bg-greyscale-800 text-greyscale-0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignment-requirement">{t("fields.assignmentRequirement")}</Label>
+                  <Textarea
+                    id="edit-assignment-requirement"
+                    value={assignmentRequirement}
+                    onChange={(event) => setAssignmentRequirement(event.target.value)}
+                    disabled={isSaving}
+                    className="border-greyscale-700 bg-greyscale-800 text-greyscale-0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignment-estimated-time">{t("fields.estimatedTime")}</Label>
+                  <Input
+                    id="edit-assignment-estimated-time"
+                    type="number"
+                    min={1}
+                    value={assignmentEstimatedTime}
+                    onChange={(event) => setAssignmentEstimatedTime(event.target.value)}
+                    disabled={isSaving}
+                  />
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             {t("buttons.cancel")}
@@ -402,6 +561,11 @@ export default function UpdateLessonDialog({
 
               if (lesson?.type === "QUIZ") {
                 void handleUpdateQuiz();
+                return;
+              }
+
+              if (lesson?.type === "ASSIGNMENT") {
+                void handleUpdateAssignment();
               }
             }}
             disabled={isSaving}
