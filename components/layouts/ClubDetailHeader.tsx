@@ -35,6 +35,14 @@ export default function ClubDetailHeader() {
   const currentClub = clubs.find((club) =>
     currentClubSlug.endsWith(`-${club.clubID}`),
   );
+
+  // BẢO MẬT: Chặn nếu vào CLB không có trong danh sách
+  React.useEffect(() => {
+    if (clubs.length > 0 && currentClubSlug && !currentClub && !isManager) {
+      router.replace("/member/my-courses");
+    }
+  }, [clubs, currentClub, currentClubSlug, isManager, router]);
+
   const currentClubName = currentClub
     ? locale === "en"
       ? currentClub.nameEN || currentClub.nameVN

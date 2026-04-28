@@ -7,6 +7,7 @@ export interface LevelResult {
   message?: string;
   objective?: string;
   score?: number;
+  customState?: any;
 }
 
 export interface LevelInstance {
