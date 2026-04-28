@@ -1,40 +1,35 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
-import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
-import { useGetMyOrders } from "@/hooks/order/useOrder";
+import { useGetMyCommissionTransactions } from "@/hooks/transaction/useTransaction";
 import { formatDateTime } from "@/lib/utils/format-date";
 import { useLocale } from "@/providers/i18n-provider";
-import OrderStatusBadge from "@/components/common/OrderStatusBadge";
-import { IoMdArrowBack } from "react-icons/io";
 
 const PAGE_SIZE = 10;
 
-export default function OrderHistory() {
-  const router = useRouter();
+export default function CommissionHistory() {
   const locale = useLocale();
   const [currentPage, setCurrentPage] = React.useState(1);
 
-  const { data, isLoading, isError, error } = useGetMyOrders({
+  const { data, isLoading, isError, error } = useGetMyCommissionTransactions({
     currentPage,
     pageSize: PAGE_SIZE,
+    type: "COMMISSION",
   });
 
-  const orders = data?.data ?? [];
+  const transactions = data?.data ?? [];
 
   const headers = [
     "STT",
     "Tên khóa học",
-    "Số tiền",
-    "Trạng thái",
-    "Ngày tạo",
-    "Ngày xử lý",
+    "Người mua",
+    "Tiền hoa hồng",
+    "Ngày nhận",
   ];
 
   const formatCurrency = (value: number) =>
@@ -45,27 +40,32 @@ export default function OrderHistory() {
     }).format(value);
 
   return (
-    <div className="space-y-4 px-6 py-4">
-      <div className="flex flex- items-center gap-3">
-        <Button variant="outline" icon={<IoMdArrowBack />} onClick={() => router.back()}>
-          Quay lại
-        </Button>
-        <h1 className="text-3xl font-bold text-greyscale-0">Lịch sử thanh toán</h1>
-      </div>
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-greyscale-0">
+        {locale === "vi" ? "Lịch sử hoa hồng" : "Commission History"}
+      </h3>
+
       {isLoading ? (
-        <div className="flex min-h-40 items-center justify-center">
+        <div className="flex min-h-40 items-center justify-center rounded border border-greyscale-700 bg-greyscale-900/40">
           <Spinner className="h-5 w-5" />
         </div>
       ) : isError ? (
-        <p className="text-sm text-error">
-          {error.response?.data?.message || error.message || "Không tải được lịch sử thanh toán."}
-        </p>
-      ) : orders.length === 0 ? (
-        <EmptyState title="Chưa có lịch sử thanh toán" description="Các đơn hàng thanh toán sẽ xuất hiện tại đây." />
+        <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-4 text-sm text-error">
+          {error.response?.data?.message || error.message || 
+            (locale === "vi" ? "Không tải được lịch sử hoa hồng." : "Could not load commission history.")}
+        </div>
+      ) : transactions.length === 0 ? (
+        <EmptyState 
+          title={locale === "vi" ? "Chưa có hoa hồng" : "No Commission Yet"}
+          description={locale === "vi" 
+            ? "Các giao dịch hoa hồng sẽ xuất hiện tại đây." 
+            : "Commission transactions will appear here."
+          } 
+        />
       ) : (
         <TableCustom
           headers={headers}
-          data={orders}
+          data={transactions}
           pagination={
             data
               ? {
@@ -76,11 +76,13 @@ export default function OrderHistory() {
                 }
               : undefined
           }
-          renderRow={(order, index) => {
+          renderRow={(transaction, index) => {
             const productName =
               locale === "vi"
-                ? order.item?.productNameVN || order.item?.productNameEN || "—"
-                : order.item?.productNameEN || order.item?.productNameVN || "—";
+                ? transaction.order?.item?.productNameVN || transaction.order?.item?.productNameEN || "—"
+                : transaction.order?.item?.productNameEN || transaction.order?.item?.productNameVN || "—";
+
+            const username = transaction.order?.user?.username || "—";
 
             return (
               <>
@@ -91,18 +93,13 @@ export default function OrderHistory() {
                   {productName}
                 </TableCell>
                 <TableCell className="text-greyscale-0">
-                  {formatCurrency(order.totalAmount)}
+                  {username}
                 </TableCell>
-                <TableCell>
-                  <OrderStatusBadge status={order.status} />
+                <TableCell className="text-greyscale-0">
+                  {formatCurrency(transaction.amount)}
                 </TableCell>
                 <TableCell className="text-greyscale-50">
-                  {formatDateTime(order.createAt)}
-                </TableCell>
-                <TableCell className="text-greyscale-100">
-                  {order.payment?.transactionDate
-                    ? formatDateTime(order.payment.transactionDate)
-                    : "—"}
+                  {formatDateTime(transaction.createdAt)}
                 </TableCell>
               </>
             );
