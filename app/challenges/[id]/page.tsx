@@ -10,6 +10,8 @@ export default function DroneChallengeDetailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const returnUrl = searchParams.get("returnUrl");
+  const enrollmentId = searchParams.get("enrollmentId");
+  const lessonId = searchParams.get("lessonId");
 
   const isAdmin = returnUrl ? (returnUrl.includes("course-management") || returnUrl.includes("system")) : false;
 
@@ -35,7 +37,13 @@ export default function DroneChallengeDetailPage() {
 
       {/* CONTENT */}
       <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
-        <ChallengeSimulator labId={id} returnUrl={returnUrl} isAdmin={isAdmin} />
+        <ChallengeSimulator
+          labId={id}
+          returnUrl={returnUrl}
+          isAdmin={isAdmin}
+          enrollmentId={enrollmentId}
+          lessonId={lessonId}
+        />
       </main>
     </div>
   );
