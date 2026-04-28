@@ -39,11 +39,13 @@ import EmptyState from "@/components/common/EmptyState";
 
 type CreateLessonDialogProps = {
   moduleId: string;
+  droneId?: string;
   lessons: Lesson[];
 };
 
 export default function CreateLessonDialog({
   moduleId,
+  droneId,
   lessons,
 }: CreateLessonDialogProps) {
   const t = useTranslations("CourseManagement.CourseSettings.CreateLessonDialog");
@@ -162,8 +164,11 @@ export default function CreateLessonDialog({
   const activeLabs = activeLabsData?.data || [];
   const labTotalPages = activeLabsData?.totalPages || 1;
 
+  console.log("CreateLessonDialog - droneId:", droneId, "lessonType:", lessonType);
+
   const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
     type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
+    droneId: lessonType === "PHYSIC" ? droneId : undefined,
   });
   const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators({ type: "LEARNING" });
 
@@ -171,7 +176,7 @@ export default function CreateLessonDialog({
 
   const filteredSimulators = React.useMemo(() => {
     const simsToFilter = lessonType === "VR" ? vrSimulators : webSimulators;
-    
+
     if (!labSearchTerm) return simsToFilter;
     const term = labSearchTerm.toLowerCase();
     return simsToFilter.filter(

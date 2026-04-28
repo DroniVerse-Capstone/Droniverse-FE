@@ -15,6 +15,7 @@ import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 type ModuleItemProps = {
   courseId?: string;
+  droneId?: string;
   versionId?: string;
   module: Module;
   isDeletingModule: boolean;
@@ -24,6 +25,7 @@ type ModuleItemProps = {
 
 export default function ModuleItem({
   courseId,
+  droneId,
   versionId,
   module,
   isDeletingModule,
@@ -113,6 +115,7 @@ export default function ModuleItem({
             {canManageModules ? (
                 <CreateLessonDialog
                   moduleId={module.moduleID}
+                  droneId={droneId}
                   lessons={lessons}
                 />
             ) : null}

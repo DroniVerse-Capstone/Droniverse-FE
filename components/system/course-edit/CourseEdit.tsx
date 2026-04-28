@@ -181,6 +181,7 @@ export default function CourseEdit() {
         <TabsContent value="course-settings" className="mt-0">
           <CourseSettingsTab
             courseId={course.courseID}
+            droneId={course.drone?.droneID}
             versionId={selectedVersionId}
             versionStatus={selectedVersion?.status}
           />

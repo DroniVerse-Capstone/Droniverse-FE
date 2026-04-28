@@ -8,7 +8,10 @@ import FlightMechanicsTab from "@/components/mechanics/flight-mechanics/FlightMe
 // import PhysicsLabTab from "@/components/mechanics/physics-lab/PhysicsLabTab";
 import PhysicsBasicsTab from "@/components/mechanics/physics-basics/PhysicsBasicsTab";
 import { cn } from "@/lib/utils";
-import { Rocket, ArrowLeft } from "lucide-react";
+import { Rocket, ArrowLeft, Map } from "lucide-react";
+import { useGetUserSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
 
 const TABS = [
   { id: "parts", label: "Khám phá linh kiện" },
@@ -22,6 +25,56 @@ export default function QuadcopterMechanicsLab() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const returnUrl = searchParams.get("returnUrl");
+  const enrollmentId = searchParams.get("enrollmentId");
+  const lessonId = searchParams.get("lessonId");
+
+  const isAdmin = returnUrl ? (returnUrl.includes("course-management") || returnUrl.includes("system")) : false;
+
+  // XÁC THỰC QUYỀN TRUY CẬP TỪ BACKEND
+  const { data: userLessonData, isLoading: isVerifying, isError: isVerifyError } = useGetUserSimulatorLesson(
+    enrollmentId || undefined,
+    lessonId || undefined
+  );
+
+  // KIỂM TRA QUYỀN TRUY CẬP THỰC TẾ
+  const isAuthorized = isAdmin || (!!userLessonData && !isVerifyError);
+
+  if (isVerifying) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#020617]">
+        <Spinner className="h-8 w-8 text-cyan-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-[#020617] p-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md space-y-6"
+        >
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <Map className="h-10 w-10" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight uppercase">Truy cập bị chặn</h1>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Bạn không thể truy cập trực tiếp phòng thí nghiệm này. Vui lòng vào từ danh sách bài học trong khóa học của bạn để bắt đầu.
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => router.push("/")}
+          >
+            Quay về Trang chủ
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div

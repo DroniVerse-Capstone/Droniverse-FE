@@ -18,7 +18,7 @@ import { LevelFactory, LevelInstance, LevelResult } from "./levels/types";
 import { ForceVectors } from "./ForceVectors";
 
 type CameraMode = "FOLLOW" | "ORBIT" | "TOP" | "FPV";
-type EnvironmentType = "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL";
+type EnvironmentType = "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL" | "CITY_FIRE";
 
 interface DroneProps {
   physicsRef: React.MutableRefObject<FlightState>;
@@ -28,9 +28,19 @@ interface DroneProps {
 
 // ── Camera Controller Component ──────────────────────────────────────────────
 function CameraController({ mode, droneRef, altitude }: { mode: CameraMode, droneRef: React.RefObject<THREE.Group>, altitude: number }) {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const targetPos = useMemo(() => new THREE.Vector3(), []);
   const lookAtPos = useMemo(() => new THREE.Vector3(), []);
+  const [zoomOffset, setZoomOffset] = useState(0);
+
+  // Thêm tính năng cuộn chuột để Zoom
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      setZoomOffset(prev => Math.max(-5, Math.min(20, prev + e.deltaY * 0.01)));
+    };
+    gl.domElement.addEventListener("wheel", handleWheel);
+    return () => gl.domElement.removeEventListener("wheel", handleWheel);
+  }, [gl]);
 
   useFrame(() => {
     if (!droneRef.current) return;
@@ -41,11 +51,11 @@ function CameraController({ mode, droneRef, altitude }: { mode: CameraMode, dron
 
     switch (mode) {
       case "FOLLOW": {
-        const baseDistance = 6;
-        const zoomFactor = Math.min(1.0, altitude / 100); // Zoom dãn ra dựa trên 100m thay vì 25m
+        const baseDistance = 6 + zoomOffset;
+        const zoomFactor = Math.min(1.0, altitude / 100); 
         const distance = baseDistance + (zoomFactor * 12);
-        const height = 2.8 + (zoomFactor * 6);
-        // Drone faces -Z, so camera should be placed at +Z to look at its back
+        const height = (2.8 + zoomOffset * 0.4) + (zoomFactor * 6);
+        
         const angle = droneRot.y;
 
         targetPos.set(
@@ -58,21 +68,18 @@ function CameraController({ mode, droneRef, altitude }: { mode: CameraMode, dron
         break;
       }
       case "TOP": {
-        targetPos.set(dronePos.x, dronePos.y + 25, dronePos.z);
+        targetPos.set(dronePos.x, dronePos.y + 25 + zoomOffset, dronePos.z);
         camera.position.lerp(targetPos, 0.05);
         camera.lookAt(lookAtPos);
         break;
       }
       case "FPV": {
-        // Gắn camera cố định vào mũi drone (Dùng Quaternion để bám theo cả Pitch, Roll, Yaw)
         const localOffset = new THREE.Vector3(0, 0.15, -0.35);
         const worldPos = localOffset.applyQuaternion(droneRef.current.quaternion);
         targetPos.copy(dronePos).add(worldPos);
 
         camera.position.lerp(targetPos, 0.8);
 
-        // FPV Camera Uptilt (Góc ngẩng camera): Khoảng 25 độ
-        // Drone FPV thật luôn gắn camera ngẩng lên, để khi chúi mũi bay nhanh về trước, bạn vẫn nhìn thấy đường ngang
         const cameraTilt = 25 * (Math.PI / 180);
         const localLook = new THREE.Vector3(0, Math.sin(cameraTilt) * 10, -Math.cos(cameraTilt) * 10);
         const worldLook = localLook.applyQuaternion(droneRef.current.quaternion);
@@ -487,6 +494,145 @@ function WarehouseWall({ x, z, w, h, rotY = 0 }: { x: number; z: number; w: numb
   );
 }
 
+function CityFireEnvironment() {
+  // Cố định dữ liệu map để không bị nhảy khi render
+  const buildings = useMemo(() => {
+    const b = [];
+    
+    // 1. ĐẢM BẢO CÓ TÒA NHÀ TẠI CÁC ĐIỂM CHÁY (Hạ thấp độ cao)
+    const missionPoints = [
+      { x: -40, z: -120, h: 60, color: "#111827" },
+      { x: 55, z: -300, h: 80, color: "#0f172a" },
+      { x: -65, z: -500, h: 70, color: "#1e293b" }
+    ];
+    
+    missionPoints.forEach((p, i) => {
+      b.push({
+        id: `mission-${i}`,
+        x: p.x,
+        z: p.z,
+        w: 25,
+        d: 25,
+        h: p.h,
+        color: p.color,
+        windows: Array.from({ length: 15 }).map(() => ({
+          y: (Math.random() - 0.5),
+          opacity: 0.2 + Math.random() * 0.6
+        }))
+      });
+    });
+
+    // 2. Tạo thêm các tòa nhà ngẫu nhiên khác xung quanh
+    for (let i = 0; i < 50; i++) {
+      const side = Math.random() > 0.5 ? 1 : -1;
+      const x = side * (35 + Math.random() * 100);
+      const z = (Math.random() - 0.5) * 1200;
+
+      // Tránh đè lên các tòa nhà mission
+      const isNearMission = missionPoints.some(p => Math.abs(p.x - x) < 50 && Math.abs(p.z - z) < 50);
+      if (isNearMission) continue;
+
+      b.push({
+        id: i,
+        x,
+        z,
+        w: 15 + Math.random() * 30,
+        h: 40 + Math.random() * 200,
+        d: 15 + Math.random() * 30,
+        color: ["#0f172a", "#1e293b", "#020617"][Math.floor(Math.random() * 3)],
+        windows: Array.from({ length: 10 }).map(() => ({
+          y: (Math.random() - 0.5),
+          opacity: 0.1 + Math.random() * 0.4
+        }))
+      });
+    }
+    return b;
+  }, []);
+
+  const streetLights = useMemo(() => {
+    return Array.from({ length: 25 }).map((_, i) => ({
+      id: i,
+      z: (i - 12) * 45
+    }));
+  }, []);
+
+  return (
+    <group>
+      <color attach="background" args={["#010413"]} />
+      <fog attach="fog" args={["#010413", 60, 450]} />
+
+      <ambientLight intensity={0.15} />
+      <Environment preset="city" />
+
+      {/* ── MẶT ĐẤT & VỈA HÈ ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
+        <planeGeometry args={[2000, 2000]} />
+        <meshStandardMaterial color="#020617" roughness={0.9} />
+      </mesh>
+
+      {/* Đường nhựa chính */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+        <planeGeometry args={[22, 2000]} />
+        <meshStandardMaterial color="#111827" roughness={0.4} metalness={0.2} />
+      </mesh>
+
+      {/* Vỉa hè (Sidewalks) */}
+      {[-13.5, 13.5].map(x => (
+        <mesh key={x} rotation={[-Math.PI / 2, 0, 0]} position={[x, -0.04, 0]}>
+          <planeGeometry args={[5, 2000]} />
+          <meshStandardMaterial color="#334155" roughness={0.8} />
+        </mesh>
+      ))}
+
+      {/* Vạch kẻ đường */}
+      {Array.from({ length: 60 }).map((_, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.03, (i - 30) * 40]}>
+          <planeGeometry args={[0.8, 12]} />
+          <meshBasicMaterial color="#fbbf24" transparent opacity={0.5} />
+        </mesh>
+      ))}
+
+      {/* ── ĐÈN ĐƯỜNG ── */}
+      {streetLights.map((light) => (
+        <group key={light.id} position={[11.5, 0, light.z]}>
+          <mesh position={[0, 8, 0]}>
+            <cylinderGeometry args={[0.15, 0.25, 16]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[1, 16, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.08, 0.08, 2]} />
+            <meshStandardMaterial color="#1e293b" />
+          </mesh>
+          <mesh position={[2, 16, 0]}>
+            <sphereGeometry args={[0.6, 16, 16]} />
+            <meshBasicMaterial color="#fef08a" />
+          </mesh>
+          <pointLight position={[2, 15, 0]} color="#fef08a" intensity={25} distance={60} />
+        </group>
+      ))}
+
+      {/* ── TÒA NHÀ CAO TẦNG ── */}
+      {buildings.map((b) => (
+        <group key={b.id} position={[b.x, b.h / 2, b.z]}>
+          <mesh>
+            <boxGeometry args={[b.w, b.h, b.d]} />
+            <meshStandardMaterial color={b.color} metalness={0.8} roughness={0.2} />
+          </mesh>
+          {/* Windows */}
+          {b.windows.map((win, j) => (
+            <mesh key={j} position={[0, win.y * b.h, b.d / 2 + 0.1]}>
+              <planeGeometry args={[b.w * 0.85, 1.2]} />
+              <meshBasicMaterial color="#60a5fa" transparent opacity={win.opacity * 0.4} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+
+      <Stars radius={300} depth={60} count={3000} factor={4} saturation={0} fade speed={1} />
+    </group>
+  );
+}
+
 function IndustrialEnvironment() {
   return (
     <group>
@@ -776,6 +922,8 @@ export function FlightDroneViewer({
             <NightCityEnvironment />
           ) : environmentType === "INDUSTRIAL" ? (
             <IndustrialEnvironment />
+          ) : environmentType === "CITY_FIRE" ? (
+            <CityFireEnvironment />
           ) : (
             <SpaceEnvironment />
           )}
