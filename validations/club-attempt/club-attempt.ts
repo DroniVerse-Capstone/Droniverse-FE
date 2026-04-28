@@ -1,9 +1,11 @@
+import { userLevelSchema } from "@/validations/auth";
 import { z } from "zod"
 
 // ---- Post my request ----
 export const clubAttemptRequestSchema = z.object({
   clubCode: z.string().min(1, "Club code is required"),
-  mediaId: z.string().uuid("Media ID must be a valid UUID"),
+  mediaId: z.string().uuid("Media ID must be a valid UUID").nullable(),
+  clubRequirement: z.string(),
 })
 
 export const clubAttemptDataSchema = z.object({
@@ -33,6 +35,7 @@ export const clubAttemptRequestItemSchema = z.object({
   clubRequestID: z.string(),
   requesterID: z.string(),
   approverID: z.string().nullable(),
+  clubRequirement: z.string().nullable(),
   clubID: z.string(),
   clubNameVN: z.string(),
   clubNameEN: z.string(),
@@ -45,6 +48,8 @@ export const clubAttemptRequestItemSchema = z.object({
   createAt: z.string(),
   processedAt: z.string().nullable(),
   media: clubAttemptMediaSchema.nullable(),
+  userLevelMax: z.array(userLevelSchema).nullable(),
+  userLevel: z.array(userLevelSchema).nullable()
 });
 
 export const getMyClubAttemptRequestsResponseSchema = z.object({

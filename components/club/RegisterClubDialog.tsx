@@ -60,6 +60,7 @@ export default function RegisterClubDialog({
   const [droneId, setDroneId] = React.useState("");
   const [clubPolicyVN, setClubPolicyVN] = React.useState("");
   const [clubPolicyEN, setClubPolicyEN] = React.useState("");
+  const [clubRequirement, setClubRequirement] = React.useState("");
   const [mediaId, setMediaId] = React.useState("");
   const [memberLimit, setMemberLimit] = React.useState(10);
   const [clubImageUrl, setClubImageUrl] = React.useState("");
@@ -103,6 +104,7 @@ export default function RegisterClubDialog({
     setMemberLimit(10);
     setClubImageUrl("");
     setClubMediaUrl("");
+    setClubRequirement("");
   };
 
   useEffect(() => {
@@ -119,6 +121,7 @@ export default function RegisterClubDialog({
     setMemberLimit(detail.limitParticipant);
     setClubImageUrl(detail.imageUrl ?? "");
     setClubMediaUrl(detail.media?.url ?? "");
+    setClubRequirement(detail.clubRequirement ?? "");
   }, [open, mode, detail]);
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -134,6 +137,7 @@ export default function RegisterClubDialog({
       description: clubDescription.trim(),
       limitParticipant: memberLimit,
       image: clubImageUrl.trim(),
+      clubRequirement: clubRequirement.trim(),
     };
 
     const result = clubCreationRequestSchema.safeParse(payload);
@@ -279,6 +283,18 @@ export default function RegisterClubDialog({
                     placeholder={t("fields.description")}
                     value={clubDescription}
                     onChange={(e) => setClubDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="club-requirement">
+                    Yêu cầu để được tham gia câu lạc bộ
+                  </Label>
+                  <Textarea
+                    id="club-requirement"
+                    placeholder="Nhập yêu cầu để được tham gia câu lạc bộ"
+                    value={clubRequirement}
+                    onChange={(e) => setClubRequirement(e.target.value)}
                   />
                 </div>
 

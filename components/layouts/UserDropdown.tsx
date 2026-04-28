@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { FiUser, FiLogOut, FiSettings, FiAward } from "react-icons/fi";
+import { FiUser, FiLogOut, FiSettings, FiAward, FiCreditCard } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { useLogout } from "@/hooks/auth/useAuth";
 import { Spinner } from "@/components/ui/spinner";
 import { User } from "@/validations/auth";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
+import { GoHistory } from "react-icons/go";
 
 interface UserDropdownProps {
   user: User | null;
@@ -95,6 +96,26 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           <FiUser className="mr-2" />
           Hồ sơ
         </DropdownMenuItem>
+
+        {user?.roleName === "CLUB_MEMBER" && (
+          <DropdownMenuItem
+            onClick={() => router.push(`/member/order-history`)}
+            className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
+          >
+            <GoHistory className="mr-2" />
+            Lịch sử thanh toán
+          </DropdownMenuItem>
+        )}
+
+        {user?.roleName === "CLUB_MANAGER" && (
+          <DropdownMenuItem
+            onClick={() => router.push(`/my-wallet`)}
+            className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
+          >
+            <FiCreditCard className="mr-2" />
+            Ví
+          </DropdownMenuItem>
+        )}
 
         {user?.roleName === "CLUB_MEMBER" && clubSlug && (
           <DropdownMenuItem
