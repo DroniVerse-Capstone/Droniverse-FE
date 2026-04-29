@@ -5,6 +5,7 @@ import { GoBook } from "react-icons/go";
 import { LessonType } from "@/validations/lesson/lesson";
 import { TbAtom, TbDrone, TbEngine } from "react-icons/tb";
 import { cn } from "@/lib/utils";
+import { MdAssignment } from "react-icons/md";
 
 type LessonTypeIconProps = {
   type: LessonType;
@@ -18,6 +19,7 @@ const iconByType: Record<LessonType, React.ReactNode> = {
   PHYSIC: <TbEngine size={18} />,
   LAB_PHYSIC: <TbAtom size={18} />,
   VR: <BsHeadsetVr size={18} />,
+  ASSIGNMENT: <MdAssignment size={18} />
 };
 
 const colorByType: Record<LessonType, { bg: string; text: string; border: string }> = {
@@ -27,6 +29,7 @@ const colorByType: Record<LessonType, { bg: string; text: string; border: string
   PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   LAB_PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   VR: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  ASSIGNMENT: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };
 
 export default function LessonTypeIcon({ type, className }: LessonTypeIconProps) {

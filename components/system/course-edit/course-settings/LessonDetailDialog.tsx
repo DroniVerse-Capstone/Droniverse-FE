@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useGetAssignmentDetail } from "@/hooks/assignment/useAssignment";
 import { useGetLab } from "@/hooks/lab/useLabs";
 import { useGetWebSimulator, useGetVRSimulator } from "@/hooks/simulator/useSimulator";
 import { useGetQuizDetail } from "@/hooks/quiz/useQuiz";
@@ -42,12 +43,15 @@ export default function LessonDetailDialog({
     open && lesson?.type === "THEORY" ? lesson.referenceID : undefined;
   const quizId =
     open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
+  const assignmentId =
+    open && lesson?.type === "ASSIGNMENT" ? lesson.referenceID : undefined;
   const labId = open && ["LAB"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
   const simulatorId = open && ["PHYSIC", "LAB_PHYSIC"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
   const vrSimulatorId = open && lesson?.type === "VR" ? (lesson?.referenceID ?? null) : null;
 
   const theoryDetailQuery = useGetTheoryDetail(theoryId);
   const quizDetailQuery = useGetQuizDetail(quizId);
+  const assignmentDetailQuery = useGetAssignmentDetail(assignmentId);
   const labDetailQuery = useGetLab(labId);
   const simulatorDetailQuery = useGetWebSimulator(simulatorId);
   const vrSimulatorDetailQuery = useGetVRSimulator(vrSimulatorId);
@@ -74,6 +78,8 @@ export default function LessonDetailDialog({
               ? t("subtitle.theory")
               : lesson?.type === "QUIZ"
                 ? t("subtitle.quiz")
+                : lesson?.type === "ASSIGNMENT"
+                  ? t("subtitle.assignment")
                 : lesson?.type === "PHYSIC" || lesson?.type === "LAB_PHYSIC"
                   ? "Chi tiết bài mô phỏng"
                   : lesson?.type === "VR"
@@ -229,6 +235,61 @@ export default function LessonDetailDialog({
                     <p className="text-base text-greyscale-25">
                       {quizDetailQuery.data.descriptionEN}
                     </p>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
+          {lesson?.type === "ASSIGNMENT" ? (
+            <div className="space-y-4">
+              {assignmentDetailQuery.isLoading ? (
+                <div className="flex items-center justify-center py-3">
+                  <Spinner className="h-5 w-5" />
+                </div>
+              ) : null}
+
+              {assignmentDetailQuery.isError ? (
+                <p className="text-sm text-warning">
+                  {assignmentDetailQuery.error.response?.data?.message ||
+                    assignmentDetailQuery.error.message ||
+                    t("error.loadAssignmentFailed")}
+                </p>
+              ) : null}
+
+              {assignmentDetailQuery.data ? (
+                <>
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="text-sm tracking-wide text-greyscale-200">{t("fields.titleVN")}</p>
+                    <p className="text-base font-medium text-greyscale-25">{assignmentDetailQuery.data.titleVN}</p>
+
+                    <p className="mt-3 text-sm tracking-wide text-greyscale-200">{t("fields.titleEN")}</p>
+                    <p className="text-base font-medium text-greyscale-25">{assignmentDetailQuery.data.titleEN}</p>
+
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 rounded border border-tertiary/40 bg-tertiary/15 px-2 py-1 text-xs font-medium text-tertiary">
+                        <MdOutlineTimer size={14} />
+                        {t("fields.estimatedTime").replace(
+                          "{value}",
+                          String(assignmentDetailQuery.data.estimatedTime)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="mb-2 text-sm font-medium text-greyscale-200">{t("fields.assignmentDescriptionVN")}</p>
+                    <p className="whitespace-pre-line text-base text-greyscale-25">{assignmentDetailQuery.data.descriptionVN}</p>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="mb-2 text-xs font-medium text-greyscale-200">{t("fields.assignmentDescriptionEN")}</p>
+                    <p className="whitespace-pre-line text-base text-greyscale-25">{assignmentDetailQuery.data.descriptionEN}</p>
+                  </div>
+
+                  <div className="rounded border border-greyscale-700 bg-greyscale-900 p-4">
+                    <p className="mb-2 text-sm font-medium text-greyscale-200">{t("fields.assignmentRequirement")}</p>
+                    <p className="whitespace-pre-line text-base text-greyscale-25">{assignmentDetailQuery.data.requirement}</p>
                   </div>
                 </>
               ) : null}

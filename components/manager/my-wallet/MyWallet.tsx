@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import WithdrawHistory from "@/components/manager/withdraw-history/WithdrawHistory";
+import CommissionHistory from "@/components/manager/my-wallet/CommissionHistory";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -128,8 +129,9 @@ export default function MyWallet() {
                   Đang tải thông tin ví...
                 </div>
               ) : wallet ? (
-                <div>
+                <div className="space-y-6">
                   <WalletInfoCard wallet={wallet} />
+                  <CommissionHistory />
                 </div>
               ) : isWalletNotFound ? (
                 <div className="rounded-lg border border-dashed border-greyscale-600 bg-greyscale-900/50 p-8 text-center text-sm text-greyscale-100">
