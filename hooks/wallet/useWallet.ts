@@ -14,6 +14,20 @@ import {
 	UpdateWalletResponse,
 	updateWalletRequestSchema,
 	updateWalletResponseSchema,
+	WithdrawRequest,
+	getMyWithdrawRequestsResponseSchema,
+	GetWithdrawRequestsData,
+	GetWithdrawRequestsParams,
+	getWithdrawRequestsParamsSchema,
+	getWithdrawRequestsResponseSchema,
+	CreateWithdrawRequest,
+	CreateWithdrawRequestResponse,
+	createWithdrawRequestSchema,
+	createWithdrawRequestResponseSchema,
+	UpdateWithdrawRequestStatusRequest,
+	UpdateWithdrawRequestStatusResponse,
+	updateWithdrawRequestStatusRequestSchema,
+	updateWithdrawRequestStatusResponseSchema,
 } from "@/validations/wallet/wallet"
 
 export const useGetMyWallet = () => {
@@ -78,4 +92,92 @@ export const useUpdateWallet = () => {
 			},
 		}
 	)
+}
+
+export const useGetMyWithdrawRequests = () => {
+	return useQuery<WithdrawRequest[], AxiosError<ApiError>>({
+		queryKey: ["my-withdraw-requests"],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/wallets/withdraw-request/me")
+			const parsed = getMyWithdrawRequestsResponseSchema.parse(response.data)
+
+			return parsed.data
+		},
+	})
+}
+
+export const useGetWithdrawRequests = (params?: GetWithdrawRequestsParams) => {
+	const parsedParams = getWithdrawRequestsParamsSchema.parse(params ?? {})
+
+	return useQuery<GetWithdrawRequestsData, AxiosError<ApiError>>({
+		queryKey: [
+			"withdraw-requests",
+			parsedParams.currentPage,
+			parsedParams.pageSize,
+			parsedParams.status ?? null,
+		],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/wallets/withdraw-request", {
+				params: parsedParams,
+			})
+
+			const parsed = getWithdrawRequestsResponseSchema.parse(response.data)
+
+			return parsed.data
+		},
+	})
+}
+
+export const useCreateWithdrawRequest = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		CreateWithdrawRequestResponse,
+		AxiosError<ApiError>,
+		CreateWithdrawRequest
+	>({
+		mutationFn: async (data) => {
+			const payload = createWithdrawRequestSchema.parse(data)
+
+			const response = await apiClient.post("/community/wallets/withdraw-request", payload)
+
+			return createWithdrawRequestResponseSchema.parse(response.data)
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["my-withdraw-requests"] }),
+				queryClient.invalidateQueries({ queryKey: ["my-wallet"] }),
+				queryClient.invalidateQueries({ queryKey: ["withdraw-requests"] }),
+			])
+		},
+	})
+}
+
+export const useUpdateWithdrawRequestStatus = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		WithdrawRequest,
+		AxiosError<ApiError>,
+		{ id: string; data: UpdateWithdrawRequestStatusRequest }
+	>({
+		mutationFn: async ({ id, data }) => {
+			const payload = updateWithdrawRequestStatusRequestSchema.parse(data)
+
+			const response = await apiClient.put(
+				`/community/wallets/withdraw-request/${id}/status`,
+				payload
+			)
+
+			const parsed = updateWithdrawRequestStatusResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["my-withdraw-requests"] }),
+				queryClient.invalidateQueries({ queryKey: ["my-wallet"] }),
+				queryClient.invalidateQueries({ queryKey: ["withdraw-requests"] }),
+			])
+		},
+	})
 }

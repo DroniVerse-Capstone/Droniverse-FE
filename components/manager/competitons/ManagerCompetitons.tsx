@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCcw } from "lucide-react";
 import { IoFilterSharp, IoSearchOutline } from "react-icons/io5";
 import { MdOutlineClose } from "react-icons/md";
 
@@ -17,6 +17,7 @@ import { useGetCompetitionsByClub } from "@/hooks/competitions/useCompetitions";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { CompetitionStatus } from "@/validations/competitions/competitions";
 import { COMPETITION_STATUS } from "@/lib/constants/competition";
+import { cn } from "@/lib/utils";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -33,6 +34,7 @@ export default function ManagerCompetitons() {
   const [selectedStatus, setSelectedStatus] = React.useState<CompetitionStatus | null>(null);
   const [searchInput, setSearchInput] = React.useState("");
   const [searchKeyword, setSearchKeyword] = React.useState("");
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const clubId = React.useMemo(() => {
     if (!clubSlug) return undefined;
@@ -45,6 +47,8 @@ export default function ManagerCompetitons() {
     isLoading,
     isError,
     error,
+    refetch,
+    isRefetching,
   } = useGetCompetitionsByClub(clubId, { status: selectedStatus });
 
   const statusOptions = React.useMemo<InlineFilterOption<CompetitionStatus>[]>(
@@ -127,13 +131,33 @@ export default function ManagerCompetitons() {
               )}
             </div>
 
-            <Button
-              className="h-11 gap-2 bg-primary px-6 text-white hover:bg-primary/90 font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95"
-              onClick={() => setIsCreateDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("create")}</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  await refetch();
+                  // Giữ trạng thái xoay ít nhất 800ms để người dùng cảm nhận được
+                  setTimeout(() => setIsRefreshing(false), 800);
+                }}
+                disabled={isRefreshing || isRefetching}
+                className={cn(
+                  "h-11 w-11 rounded-md border border-greyscale-700 bg-greyscale-950 text-greyscale-400 hover:text-white transition-all",
+                  (isRefreshing || isRefetching) && "text-blue-400"
+                )}
+              >
+                <RefreshCcw size={18} className={cn((isRefreshing || isRefetching) && "animate-spin")} />
+              </Button>
+
+              <Button
+                className="h-11 gap-2 bg-primary px-6 text-white hover:bg-primary/90 font-bold text-sm shadow-lg shadow-primary/20 transition-all active:scale-95"
+                onClick={() => setIsCreateDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("create")}</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -2,17 +2,20 @@ import { LevelFactory } from "./types";
 import { LevelObstacleRun } from "./LevelObstacleRun";
 import { LevelRingRun } from "./LevelRingRun";
 import { LevelBasicFlight } from "./LevelBasicFlight";
+import { LevelFireRescue } from "./LevelFireRescue";
 
 export const LevelRegistry: Record<string, LevelFactory> = {
   basic_flight: LevelBasicFlight,
   obstacle_run: LevelObstacleRun,
   ring_run: LevelRingRun,
+  fire_rescue: LevelFireRescue,
 };
 
-export const LevelEnvironments: Record<string, "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL"> = {
+export const LevelEnvironments: Record<string, "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL" | "CITY_FIRE"> = {
   basic_flight: "DAY",
   obstacle_run: "INDUSTRIAL",
   ring_run: "SPACE",
+  fire_rescue: "CITY_FIRE",
 };
 
 export interface LabData {
@@ -22,7 +25,7 @@ export interface LabData {
   droneType: string;
   timeLimit: number;
   objective: string;
-  environmentType?: "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL";
+  environmentType?: "DAY" | "NIGHT" | "SPACE" | "INDUSTRIAL" | "CITY_FIRE";
 }
 
 export const mockLabs: Record<string, LabData> = {
@@ -55,5 +58,15 @@ export const mockLabs: Record<string, LabData> = {
     timeLimit: 240,
     objective: "Hoàn thành chặng bay phức tạp qua nhiều điểm nút",
     environmentType: "SPACE"
+  },
+  // BÀI 4: CỨU HỎA
+  "fire-rescue-mission-001": {
+    id: "fire-rescue-mission-001",
+    title: "Bài 4: Chiến dịch dặp tắt hỏa hoạn",
+    levelCode: "fire_rescue",
+    droneType: "quadcopter_basic",
+    timeLimit: 300,
+    objective: "Nạp nước tại trạm hồ và dập tắt 3 tòa nhà đang cháy trong thành phố",
+    environmentType: "CITY_FIRE"
   }
 };

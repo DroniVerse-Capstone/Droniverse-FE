@@ -93,7 +93,7 @@ export default function MemberSimulatorLessonContent({
       <div className="relative space-y-5">
         <div className="space-y-3">
           <span className="inline-flex items-center rounded-full border border-greyscale-600 bg-greyscale-900/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-greyscale-100">
-            {isVR ? "Bài học mô phỏng VR" : isPhysic ? "Bài học Vật lý" : isLabPhysic ? "Mô phỏng Vật lý" : isLab ? "Bài thực hành Blockly" : "Bài học mô phỏng"}
+            {isVR ? "Bài học mô phỏng VR" : isPhysic ? "Bài học Vật lý" : isLabPhysic ? "Thử thách bay" : isLab ? "Bài thực hành Blockly" : "Bài học mô phỏng"}
           </span>
 
           <h2 className="text-2xl font-semibold leading-tight text-greyscale-0 md:text-3xl">
@@ -195,7 +195,7 @@ export default function MemberSimulatorLessonContent({
               {userSimulator ? (
                 <span className="flex items-center gap-2"><FaRedo /> Làm lại bài</span>
               ) : (
-                isPhysic ? "Bắt đầu học ngay" : isLabPhysic ? "Bắt đầu thí nghiệm" : isLab ? "Bắt đầu lập trình" : "Bắt đầu mô phỏng"
+                isPhysic ? "Bắt đầu học ngay" : isLabPhysic ? "Bắt đầu bay ngay" : isLab ? "Bắt đầu lập trình" : "Bắt đầu mô phỏng"
               )}
             </Button>
           )}

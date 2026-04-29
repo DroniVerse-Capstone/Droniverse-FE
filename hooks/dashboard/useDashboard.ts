@@ -24,6 +24,15 @@ import {
 	getClubExpenseGrowthResponseSchema,
 	getClubRevenueOverviewParamsSchema,
 	getClubRevenueOverviewResponseSchema,
+	getAdminTopBuyersResponseSchema,
+	getAdminCompetitionStatsResponseSchema,
+	AdminCompetitionStats,
+	ClubCompetitionStats,
+	clubCompetitionStatsParamsSchema,
+	getClubCompetitionStatsResponseSchema,
+	ClubTopBuyersData,
+	getClubTopBuyersParamsSchema,
+	getClubTopBuyersResponseSchema,
 } from "@/validations/dashboard/dashboard"
 
 export const useGetClubRevenueOverview = (clubId?: string) => {
@@ -146,6 +155,32 @@ export const useGetAdminClubRanking = (
 	})
 }
 
+export const useGetAdminTopBuyers = (top: number = 10) => {
+	return useQuery<{ buyers: any[]; totalSystemRevenue: number }, AxiosError<ApiError>>({
+		queryKey: ["admin-top-buyers", top],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/dashboards/buyers/admin/top", {
+				params: { top },
+			})
+			const parsed = getAdminTopBuyersResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetAdminCompetitionStats = (top: number = 10) => {
+	return useQuery<AdminCompetitionStats, AxiosError<ApiError>>({
+		queryKey: ["admin-competition-stats", top],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/dashboards/competitions/admin/stats", {
+				params: { top },
+			})
+			const parsed = getAdminCompetitionStatsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
 type UseGetClubExpenseByCourseOptions = {
 	top?: number
 }
@@ -215,3 +250,35 @@ export type { UseGetClubExpenseGrowthOptions }
 export type { UseGetAdminRevenueGrowthOptions }
 export type { UseGetAdminRevenueByCourseOptions }
 export type { UseGetAdminClubRankingOptions }
+
+export const useGetClubCompetitionStats = (clubId?: string, top: number = 10) => {
+	return useQuery<ClubCompetitionStats, AxiosError<ApiError>>({
+		queryKey: ["club-competition-stats", clubId, top],
+		enabled: !!clubId,
+		queryFn: async () => {
+			const parsedParams = clubCompetitionStatsParamsSchema.parse({ clubId, top })
+			const response = await apiClient.get(
+				`/community/dashboards/competitions/clubs/${parsedParams.clubId}/stats`,
+				{ params: { top: parsedParams.top } }
+			)
+			const parsed = getClubCompetitionStatsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetClubTopBuyers = (clubId?: string, top: number = 10) => {
+	return useQuery<ClubTopBuyersData, AxiosError<ApiError>>({
+		queryKey: ["club-top-buyers", clubId, top],
+		enabled: !!clubId,
+		queryFn: async () => {
+			const parsedParams = getClubTopBuyersParamsSchema.parse({ clubId, top })
+			const response = await apiClient.get(
+				`/community/dashboards/buyers/clubs/${parsedParams.clubId}/top`,
+				{ params: { top: parsedParams.top } }
+			)
+			const parsed = getClubTopBuyersResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}

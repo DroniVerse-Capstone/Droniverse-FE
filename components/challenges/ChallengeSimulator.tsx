@@ -15,7 +15,9 @@ import { FlightDroneViewer } from "@/components/challenges/FlightDroneViewer";
 import { LevelRegistry, mockLabs, LabData, LevelEnvironments } from "@/components/challenges/levels/registry";
 import { LevelFactory, LevelResult } from "@/components/challenges/levels/types";
 import { useDroneSound } from "@/components/mechanics/flight-mechanics/useDroneSound";
-import { useGetWebSimulator, useSubmitUserSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import { useGetWebSimulator, useSubmitUserSimulatorLesson, useGetUserSimulatorLesson } from "@/hooks/simulator/useSimulator";
+import { Button } from "../ui/button";
+import { Spinner } from "../ui/spinner";
 
 type CameraMode = "FOLLOW" | "ORBIT" | "TOP" | "FPV";
 type GamePhase = "briefing" | "countdown" | "playing" | "complete";
@@ -54,15 +56,17 @@ const CONTROL_CONFIG = {
 
 function CountdownOverlay({ onComplete }: { onComplete: () => void }) {
   const [count, setCount] = useState(3);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     if (count <= 0) {
-      onComplete();
+      onCompleteRef.current();
       return;
     }
     const timer = setTimeout(() => setCount(c => c - 1), 1000);
     return () => clearTimeout(timer);
-  }, [count, onComplete]);
+  }, [count]);
 
   return (
     <motion.div
@@ -433,61 +437,105 @@ function CameraModeSelector({ mode, onChange }: { mode: CameraMode; onChange: (m
 
 // ─── FLYING HUD (compact hub-style — centered top) ───────────────────────────
 
-function FlyingHUD({ altitude, stability, vVelocity, hVelocity, roll, pitch, timeRemaining }: {
+function FireRescueHUD({ water, heat }: { water: number, heat: number }) {
+  return (
+    <div className="flex items-center gap-6 px-5 py-2 bg-slate-950/80 rounded-xl border border-white/10 backdrop-blur-md">
+      {/* Water Section - Controls [R] and [SPACE] */}
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col items-start -space-y-1">
+          <span className="text-[9px] font-black text-cyan-400 tracking-tighter">[R] NẠP</span>
+          <span className="text-[9px] font-black text-cyan-200 tracking-tighter">[SPACE] PHUN</span>
+        </div>
+        <div className="w-28 h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+          <motion.div
+            className="h-full bg-gradient-to-r from-cyan-600 to-cyan-300"
+            initial={{ width: 0 }}
+            animate={{ width: `${water}%` }}
+            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+          />
+        </div>
+        <span className="text-[11px] font-mono font-bold text-white w-8">{Math.floor(water)}%</span>
+      </div>
+
+      <div className="w-[1px] h-6 bg-white/10" />
+
+      {/* Heat Section - Passive Warning */}
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] font-black text-red-500 tracking-tighter flex items-center gap-1">
+          <span className={heat > 70 ? "animate-ping" : ""}>🔥</span> NHIỆT ĐỘ
+        </span>
+        <div className="w-28 h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+          <motion.div
+            className={`h-full ${heat > 70 ? 'bg-red-500' : 'bg-red-800'}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${heat}%` }}
+            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+          />
+        </div>
+        <span className="text-[11px] font-mono font-bold text-white w-8">{Math.floor(heat)}%</span>
+      </div>
+    </div>
+  );
+}
+
+function FlyingHUD({ altitude, stability, vVelocity, hVelocity, roll, pitch, timeRemaining, levelCode, customState }: {
   altitude: number; stability: number; vVelocity: number; hVelocity: number; roll: number; pitch: number; timeRemaining: number;
+  levelCode?: string; customState?: any;
 }) {
   const isLowTime = timeRemaining <= 30;
+  const isFireRescue = levelCode === "fire_rescue";
 
   return (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-0 bg-slate-950/40 px-1 py-0.5 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_15px_rgba(0,229,255,0.1)] backdrop-blur-xl transition-all hover:bg-slate-950/60 group">
-      {/* Time - Sleek indicator */}
-      <div className="flex flex-col items-center px-4 py-1 border-r border-white/5">
-        <span className="text-[6px] font-bold text-white/30 uppercase tracking-[0.2em] mb-0.5">Thời gian</span>
-        <span className={cn("text-base font-mono font-black leading-none tracking-tighter", isLowTime ? "text-red-500 animate-pulse" : "text-amber-400")}>
-          {formatTime(timeRemaining)}
-        </span>
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 pointer-events-none w-full max-w-5xl">
+      {/* ── ORIGINAL FLIGHT HUD ── */}
+      <div className="flex items-center gap-0 bg-slate-950/40 px-1 py-0.5 rounded-full border border-white/10 shadow-2xl backdrop-blur-xl">
+        {/* Time */}
+        <div className="flex flex-col items-center px-4 py-1 border-r border-white/5">
+          <span className="text-[6px] font-bold text-white/30 uppercase tracking-[0.2em] mb-0.5">Thời gian</span>
+          <span className={cn("text-base font-mono font-black leading-none tracking-tighter", isLowTime ? "text-red-500 animate-pulse" : "text-amber-400")}>
+            {formatTime(timeRemaining)}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-5 px-5 py-1">
+          <div className="flex flex-col items-center">
+            <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Độ cao (Alt)</span>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-sm font-mono font-black text-white leading-none">{altitude.toFixed(1)}</span>
+              <span className="text-[8px] text-white/40 font-bold">m</span>
+            </div>
+          </div>
+
+          <div className="w-px h-4 bg-white/5" />
+
+          <div className="flex flex-col items-center">
+            <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">V.Spd (Dọc)</span>
+            <div className="flex items-baseline gap-0.5">
+              <span className={cn("text-sm font-mono font-black leading-none", vVelocity > 0.1 ? "text-emerald-400" : vVelocity < -0.1 ? "text-red-400" : "text-white")}>
+                {vVelocity.toFixed(1)}
+              </span>
+              <span className="text-[8px] text-white/40 font-bold">m/s</span>
+            </div>
+          </div>
+
+          <div className="w-px h-4 bg-white/5" />
+
+          <div className="flex flex-col items-center">
+            <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">H.Spd (Ngang)</span>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-sm font-mono font-black leading-none text-white">
+                {hVelocity.toFixed(1)}
+              </span>
+              <span className="text-[8px] text-white/40 font-bold">m/s</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex items-center gap-5 px-5 py-1">
-        <div className="flex flex-col items-center">
-          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Độ cao (Alt)</span>
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-sm font-mono font-black text-white leading-none">{altitude.toFixed(1)}</span>
-            <span className="text-[8px] text-white/40 font-bold">m</span>
-          </div>
-        </div>
-
-        <div className="w-px h-4 bg-white/5" />
-
-        <div className="flex flex-col items-center">
-          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">V.Spd (Dọc)</span>
-          <div className="flex items-baseline gap-0.5">
-            <span className={cn("text-sm font-mono font-black leading-none", vVelocity > 0.1 ? "text-emerald-400" : vVelocity < -0.1 ? "text-red-400" : "text-white")}>
-              {vVelocity.toFixed(1)}
-            </span>
-            <span className="text-[8px] text-white/40 font-bold">m/s</span>
-          </div>
-        </div>
-
-        <div className="w-px h-4 bg-white/5" />
-
-        <div className="flex flex-col items-center">
-          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">H.Spd (Ngang)</span>
-          <div className="flex items-baseline gap-0.5">
-            <span className={cn("text-sm font-mono font-black leading-none text-white")}>
-              {hVelocity.toFixed(1)}
-            </span>
-            <span className="text-[8px] text-white/40 font-bold">m/s</span>
-          </div>
-        </div>
-
-        {/* <div className="w-px h-4 bg-white/5" /> */}
-
-        {/* <div className="flex flex-col items-center">
-          <span className="text-[6px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Nghiêng (Tilt)</span>
-          <span className="text-sm font-mono font-black text-amber-500/90 leading-none">{Math.abs(roll).toFixed(0)}° / {Math.abs(pitch).toFixed(0)}°</span>
-        </div> */}
-      </div>
+      {/* ── FIRE RESCUE HUD ── */}
+      {isFireRescue && customState && (
+        <FireRescueHUD water={customState.water} heat={customState.heat} />
+      )}
     </div>
   );
 }
@@ -498,13 +546,15 @@ interface ChallengeSimulatorProps {
   labId: string;
   returnUrl?: string | null;
   isAdmin?: boolean;
+  enrollmentId?: string | null;
+  lessonId?: string | null;
 }
 
-export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: ChallengeSimulatorProps) {
+export default function ChallengeSimulator({ labId, returnUrl, isAdmin, enrollmentId, lessonId }: ChallengeSimulatorProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const lessonId = searchParams.get("lessonId");
-  const enrollmentId = searchParams.get("enrollmentId");
+  // const searchParams = useSearchParams();
+  // const lessonId = searchParams.get("lessonId");
+  // const enrollmentId = searchParams.get("enrollmentId");
 
   const { mutate: submitSimulator, isPending: isSubmitting } = useSubmitUserSimulatorLesson({
     onSuccess: () => {
@@ -520,22 +570,41 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     }
   });
 
-  const { data: webSimulator, isLoading, isError } = useGetWebSimulator(labId);
+  const { data: webSimulator, isLoading: isLabLoading, isError: isLabError } = useGetWebSimulator(labId);
+
+  // XÁC THỰC QUYỀN TRUY CẬP TỪ BACKEND
+  const { data: userLessonData, isLoading: isVerifying, isError: isVerifyError } = useGetUserSimulatorLesson(
+    enrollmentId || undefined,
+    lessonId || undefined
+  );
 
   const lab: LabData | undefined = useMemo(() => {
-    if (!webSimulator) return undefined;
+    // Ưu tiên dữ liệu từ BE nếu có
+    if (webSimulator) {
+      return {
+        id: webSimulator.webSimulatorID,
+        title: webSimulator.titleVN,
+        levelCode: webSimulator.code as any, // Lấy mã màn chơi từ BE (VD: fire_rescue)
+        droneType: "quadcopter_basic", // Tạm thời để basic, BE có droneID có thể map thêm sau
+        timeLimit: (webSimulator.estimatedTime || 5) * 60,
+        objective: webSimulator.objectivesVN || "",
+      };
+    }
 
-    return {
-      id: webSimulator.webSimulatorID,
-      title: webSimulator.titleVN,
-      levelCode: webSimulator.code,
-      droneType: "quadcopter_basic",
-      timeLimit: (webSimulator.estimatedTime || 2) * 60,
-      objective: webSimulator.objectivesVN || "",
-    };
-  }, [webSimulator]);
+    // Fallback sang mockLabs local để test map mới chưa có trên BE
+    if (mockLabs[labId]) {
+      return mockLabs[labId];
+    }
+
+    return undefined;
+  }, [webSimulator, labId]);
 
   const [flightState, setFlightState] = useState<FlightState>(INITIAL_STATE);
+
+  // KIỂM TRA QUYỀN TRUY CẬP THỰC TẾ
+  // Cho phép nếu: 1. Là Admin HOẶC 2. Backend xác nhận dữ liệu hợp lệ
+  const isAuthorized = isAdmin || (!!userLessonData && !isVerifyError);
+  const isLoadingAccess = isVerifying || isLabLoading;
   const flightStateRef = useRef<FlightState>(INITIAL_STATE);
 
   const [controls, setControls] = useState({ throttle: 0, pitch: 0, roll: 0, yaw: 0 });
@@ -553,7 +622,15 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
   const [elapsedTime, setElapsedTime] = useState(0);
   const elapsedTimeRef = useRef(0);
   const [objective, setObjective] = useState("");
-  const [timeRemaining, setTimeRemaining] = useState(lab?.timeLimit ?? 60);
+  const [timeRemaining, setTimeRemaining] = useState(60);
+  
+  // Đồng bộ thời gian khi dữ liệu Lab được tải về thành công
+  useEffect(() => {
+    if (lab?.timeLimit) {
+      setTimeRemaining(lab.timeLimit);
+    }
+  }, [lab?.timeLimit]);
+
   const [resetTrigger, setResetTrigger] = useState(0);
 
   const keysPressed = useRef<Set<string>>(new Set());
@@ -580,8 +657,10 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
 
 
   const handleLevelUpdate = useCallback((result: LevelResult) => {
+    // Luôn cập nhật result để HUD lấy được customState (nước, nhiệt...)
+    setLevelResult(result);
+
     if (result.status !== "PLAYING") {
-      setLevelResult(result);
       setGamePhase("complete");
       setIsRunning(false);
       isRunningRef.current = false;
@@ -590,6 +669,14 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
       setObjective(result.objective);
     }
   }, []);
+
+  // Cố định hàm đếm ngược để không bị treo
+  const handleCountdownComplete = useCallback(() => {
+    setGamePhase("playing");
+    setIsRunning(true);
+    isRunningRef.current = true;
+    droneSound.init();
+  }, [droneSound]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -785,15 +872,46 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
     setGamePhase("briefing");
   };
 
-  if (isLoading) {
+  // ─── RENDER BẢO MẬT ───────────────────────────────────────────────────────────
+  if (isLoadingAccess) {
     return (
-      <div className="flex items-center justify-center h-full bg-slate-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      <div className="flex h-full items-center justify-center bg-slate-950">
+        <Spinner className="h-8 w-8 text-cyan-500" />
       </div>
     );
   }
 
-  if (isError || !lab) {
+  if (!isAuthorized) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center bg-slate-950 p-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md space-y-6"
+        >
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <Map className="h-10 w-10" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight uppercase">Truy cập bị chặn</h1>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Bạn không thể truy cập trực tiếp bài tập mô phỏng này. Vui lòng vào từ danh sách bài học trong khóa học của bạn để bắt đầu.
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={() => router.push("/")}
+          >
+            Quay về Trang chủ
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Chỉ báo lỗi nếu KHÔNG tải được từ API VÀ cũng KHÔNG có trong mockLabs local
+  if (!lab) {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-slate-950 text-white">
         <h2 className="text-xl font-bold text-red-400 mb-2">Không tìm thấy thử thách</h2>
@@ -992,15 +1110,17 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
           />
 
           <AnimatePresence>
-            {gamePhase === "countdown" && (
-              <CountdownOverlay
-                onComplete={() => {
-                  setGamePhase("playing");
-                  setIsRunning(true);
-                  isRunningRef.current = true;
-                  droneSound.init();
-                }}
+            {gamePhase === "briefing" && lab && (
+              <BriefingScreen
+                lab={lab}
+                onStart={handleStartGame}
+                onResume={isPaused ? handleResume : undefined}
+                timeRemaining={timeRemaining}
+                isPaused={isPaused}
               />
+            )}
+            {gamePhase === "countdown" && (
+              <CountdownOverlay onComplete={handleCountdownComplete} />
             )}
           </AnimatePresence>
 
@@ -1012,6 +1132,8 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin }: Challe
             roll={flightState.roll}
             pitch={flightState.pitch}
             timeRemaining={timeRemaining}
+            levelCode={lab.levelCode}
+            customState={levelResult?.customState}
           />
 
           <div className="absolute top-4 right-4">

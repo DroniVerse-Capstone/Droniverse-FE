@@ -16,6 +16,13 @@ import {
 	GetUserQuizDetailParams,
 	GetUserQuizQuestionsData,
 	GetUserQuizQuestionsParams,
+	GetUserAssignmentDetailData,
+	GetUserAssignmentDetailParams,
+	GetUserAssignmentAttemptsData,
+	GetUserAssignmentAttemptsParams,
+	SubmitUserAssignmentData,
+	SubmitUserAssignmentParams,
+	SubmitUserAssignmentRequest,
 	SubmitUserQuizData,
 	SubmitUserQuizParams,
 	UserLesson,
@@ -35,6 +42,13 @@ import {
 	getUserQuizDetailResponseSchema,
 	getUserQuizQuestionsParamsSchema,
 	getUserQuizQuestionsResponseSchema,
+	getUserAssignmentDetailParamsSchema,
+	getUserAssignmentDetailResponseSchema,
+	getUserAssignmentAttemptsParamsSchema,
+	getUserAssignmentAttemptsResponseSchema,
+	submitUserAssignmentParamsSchema,
+	submitUserAssignmentRequestSchema,
+	submitUserAssignmentResponseSchema,
 	submitUserQuizParamsSchema,
 	submitUserQuizResponseSchema,
 	UserLearningPath,
@@ -251,3 +265,95 @@ export const useGetUserLabMini = (params?: GetUserLabDetailParams) => {
 		},
 	})
 }
+
+export const useGetUserAssignmentDetail = (
+	params?: GetUserAssignmentDetailParams
+) => {
+	return useQuery<GetUserAssignmentDetailData, AxiosError<ApiError>>({
+		queryKey: ["user-assignment-detail", params?.enrollmentId, params?.assignmentId],
+		enabled: !!params?.enrollmentId && !!params?.assignmentId,
+		queryFn: async () => {
+			const parsedParams = getUserAssignmentDetailParamsSchema.parse(params)
+
+			const response = await apiClient.get(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/assignments/${parsedParams.assignmentId}`
+			)
+
+			const parsed = getUserAssignmentDetailResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetUserAssignmentAttempts = (
+	params?: GetUserAssignmentAttemptsParams
+) => {
+	return useQuery<GetUserAssignmentAttemptsData, AxiosError<ApiError>>({
+		queryKey: [
+			"user-assignment-attempts",
+			params?.enrollmentId,
+			params?.assignmentId,
+			params?.currentPage ?? 1,
+			params?.pageSize ?? 10,
+		],
+		enabled: !!params?.enrollmentId && !!params?.assignmentId,
+		queryFn: async () => {
+			const parsedParams = getUserAssignmentAttemptsParamsSchema.parse(params)
+
+			const response = await apiClient.get(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/assignments/${parsedParams.assignmentId}/attempts`,
+				{
+					params: {
+						currentPage: parsedParams.currentPage,
+						pageSize: parsedParams.pageSize,
+					},
+				}
+			)
+
+			const parsed = getUserAssignmentAttemptsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useSubmitUserAssignment = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		SubmitUserAssignmentData,
+		AxiosError<ApiError>,
+		SubmitUserAssignmentParams & SubmitUserAssignmentRequest
+	>({
+		mutationFn: async (params) => {
+			const parsedParams = submitUserAssignmentParamsSchema.parse({
+				enrollmentId: params.enrollmentId,
+				assignmentId: params.assignmentId,
+			})
+			const payload = submitUserAssignmentRequestSchema.parse({
+				mediaID: params.mediaID,
+				description: params.description,
+			})
+
+			const response = await apiClient.post(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/assignments/${parsedParams.assignmentId}/submit`,
+				payload
+			)
+
+			const parsed = submitUserAssignmentResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["user-learning-path", variables.enrollmentId],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ["user-assignment-detail", variables.enrollmentId, variables.assignmentId],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ["user-assignment-attempts", variables.enrollmentId, variables.assignmentId],
+			})
+		},
+	})
+}
+
+
