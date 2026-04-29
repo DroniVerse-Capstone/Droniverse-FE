@@ -36,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ClubSwitcherDialog from "@/components/layouts/ClubSwitcherDialog";
+import { BiUpArrow } from "react-icons/bi";
 
 type ManagerSidebarProps = {
   clubSlug: string;
@@ -107,6 +108,13 @@ function buildManagerNavItems(
           icon: BarChart,
           isActive: (pathname) =>
             pathname === `${base}/courses-learning-progress`,
+        },
+        {
+          title: t("courses.subitems.level"),
+          href: `${base}/level-up-requests`,
+          icon: BiUpArrow,
+          isActive: (pathname) =>
+            pathname === `${base}/level-up-requests`,
         },
       ],
     },

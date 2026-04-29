@@ -1364,7 +1364,8 @@
       "title": "Khóa học",
       "subitems": {
         "available": "Khóa học hiện có",
-        "progress": "Theo dõi tiến trình học"
+        "progress": "Theo dõi tiến trình học",
+        "level": "Yêu cầu thăng cấp"
       }
     },
     "competitions": "Cuộc thi",

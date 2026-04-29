@@ -452,7 +452,7 @@ export const userAssignmentSchema = z.object({
 	score: z.number().min(0).max(100).nullable(),
 	reviewComment: z.string().nullable(),
 	reviewedBy: z.string().nullable(),
-	reviewAt: z.string().nullable(),
+	reviewedAt: z.string().nullable(),
 	submittedAt: z.string(),
 }).nullable()
 
@@ -472,6 +472,71 @@ export const getUserAssignmentDetailResponseSchema = z.object({
 	message: z.string(),
 })
 
+// ------------- Get User Assignment Attempts -------------
+
+export const userAssignmentAttemptSchema = z.object({
+	userAssignmentID: z.string().uuid(),
+	assignmentID: z.string().uuid(),
+	enrollmentID: z.string().uuid(),
+	attemptNumber: z.number().int().positive(),
+	mediaID: z.string().uuid().nullable(),
+	description: z.string(),
+	status: z.enum(["SUBMITTED", "UNDER_REVIEW", "PASSED", "FAILED"]),
+	score: z.number().min(0).max(100).nullable(),
+	reviewComment: z.string().nullable(),
+	reviewedBy: z.string().nullable(),
+	reviewedAt: z.string().nullable(),
+	submittedAt: z.string(),
+})
+
+export const getUserAssignmentAttemptsParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	assignmentId: z.string().uuid(),
+	currentPage: z.number().int().positive().default(1),
+	pageSize: z.number().int().positive().default(10),
+})
+
+export const getUserAssignmentAttemptsDataSchema = z.object({
+	data: z.array(userAssignmentAttemptSchema),
+	totalRecords: z.number().int().nonnegative(),
+	pageIndex: z.number().int().positive(),
+	pageSize: z.number().int().positive(),
+	totalPages: z.number().int().nonnegative(),
+})
+
+export const getUserAssignmentAttemptsResponseSchema = z.object({
+	data: getUserAssignmentAttemptsDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+// ------------- Submit User Assignment -------------
+
+export const submitUserAssignmentParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	assignmentId: z.string().uuid(),
+})
+
+export const submitUserAssignmentRequestSchema = z.object({
+	mediaID: z.string().uuid(),
+	description: z.string(),
+})
+
+export const submitUserAssignmentDataSchema = z.object({
+	userAssignmentID: z.string().uuid(),
+	assignmentID: z.string().uuid(),
+	enrollmentID: z.string().uuid(),
+	attemptNumber: z.number().int().positive(),
+	status: z.enum(["SUBMITTED", "UNDER_REVIEW", "PASSED", "FAILED"]),
+	submittedAt: z.string(),
+})
+
+export const submitUserAssignmentResponseSchema = z.object({
+	data: submitUserAssignmentDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
 export type Assignment = z.infer<typeof assignmentSchema>
 export type UserAssignment = z.infer<typeof userAssignmentSchema>
 export type GetUserAssignmentDetailParams = z.infer<
@@ -482,4 +547,26 @@ export type GetUserAssignmentDetailData = z.infer<
 >
 export type GetUserAssignmentDetailResponse = z.infer<
 	typeof getUserAssignmentDetailResponseSchema
+>
+export type UserAssignmentAttempt = z.infer<typeof userAssignmentAttemptSchema>
+export type GetUserAssignmentAttemptsParams = z.infer<
+	typeof getUserAssignmentAttemptsParamsSchema
+>
+export type GetUserAssignmentAttemptsData = z.infer<
+	typeof getUserAssignmentAttemptsDataSchema
+>
+export type GetUserAssignmentAttemptsResponse = z.infer<
+	typeof getUserAssignmentAttemptsResponseSchema
+>
+export type SubmitUserAssignmentParams = z.infer<
+	typeof submitUserAssignmentParamsSchema
+>
+export type SubmitUserAssignmentRequest = z.infer<
+	typeof submitUserAssignmentRequestSchema
+>
+export type SubmitUserAssignmentData = z.infer<
+	typeof submitUserAssignmentDataSchema
+>
+export type SubmitUserAssignmentResponse = z.infer<
+	typeof submitUserAssignmentResponseSchema
 >

@@ -1368,7 +1368,8 @@
       "title": "Courses",
       "subitems": {
         "available": "Available courses",
-        "progress": "Learning progress"
+        "progress": "Learning progress",
+        "level": "Level up requests"
       }
     },
     "competitions": "Competitions",
