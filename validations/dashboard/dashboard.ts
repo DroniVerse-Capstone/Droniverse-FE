@@ -123,6 +123,7 @@ export const adminRevenueByCourseItemSchema = z.object({
 
 export const adminRevenueByCourseDataSchema = z.object({
 	revenueByCourse: z.array(adminRevenueByCourseItemSchema),
+	totalRevenue: z.number().nonnegative().optional(),
 })
 
 export const getAdminRevenueByCourseParamsSchema = z.object({
@@ -235,3 +236,96 @@ export type GetAdminClubRankingParams = z.infer<
 export type GetAdminClubRankingResponse = z.infer<
 	typeof getAdminClubRankingResponseSchema
 >
+
+// --- PHASE 3: BUYERS & COMPETITIONS ---
+
+export const adminTopBuyerSchema = z.object({
+	userId: z.string().uuid(),
+	userName: z.string(),
+	email: z.string(),
+	imageUrl: z.string().nullable(),
+	totalSpent: z.number().nonnegative(),
+	purchaseCount: z.number().int().nonnegative(),
+})
+
+export const getAdminTopBuyersResponseSchema = z.object({
+	data: z.object({
+		buyers: z.array(adminTopBuyerSchema),
+		totalSystemRevenue: z.number().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const adminCompetitionStatsOverviewSchema = z.object({
+	totalCompetitions: z.number().int().nonnegative(),
+	ongoingCompetitions: z.number().int().nonnegative(),
+	completedCompetitions: z.number().int().nonnegative(),
+	cancelledCompetitions: z.number().int().nonnegative(),
+	draftCompetitions: z.number().int().nonnegative(),
+	totalParticipants: z.number().int().nonnegative(),
+	averageParticipantsPerCompetition: z.number(),
+})
+
+export const adminCompetitionTopItemSchema = z.object({
+	competitionId: z.string().uuid(),
+	nameVN: z.string(),
+	nameEN: z.string(),
+	status: z.string(),
+	clubId: z.string().uuid(),
+	clubNameVN: z.string(),
+	participantCount: z.number().int().nonnegative(),
+	startDate: z.string(),
+	endDate: z.string(),
+})
+
+export const adminCompetitionStatsSchema = z.object({
+	overview: adminCompetitionStatsOverviewSchema,
+	topByParticipants: z.array(adminCompetitionTopItemSchema),
+})
+
+export const getAdminCompetitionStatsResponseSchema = z.object({
+	data: adminCompetitionStatsSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminTopBuyer = z.infer<typeof adminTopBuyerSchema>
+export type GetAdminTopBuyersResponse = z.infer<typeof getAdminTopBuyersResponseSchema>
+export type AdminCompetitionStats = z.infer<typeof adminCompetitionStatsSchema>
+export type GetAdminCompetitionStatsResponse = z.infer<typeof getAdminCompetitionStatsResponseSchema>
+
+// --- CLUB COMPETITION STATS ---
+export const clubCompetitionStatsParamsSchema = z.object({
+	clubId: z.string().uuid(),
+	top: z.number().int().positive().default(10),
+})
+
+// Reuse overview + topItem shapes (identical structure to admin)
+export const clubCompetitionStatsSchema = adminCompetitionStatsSchema
+
+export const getClubCompetitionStatsResponseSchema = z.object({
+	data: clubCompetitionStatsSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type ClubCompetitionStats = z.infer<typeof clubCompetitionStatsSchema>
+export type GetClubCompetitionStatsResponse = z.infer<typeof getClubCompetitionStatsResponseSchema>
+
+// --- CLUB TOP BUYERS ---
+export const getClubTopBuyersParamsSchema = z.object({
+	clubId: z.string().uuid(),
+	top: z.number().int().positive().default(10),
+})
+
+export const getClubTopBuyersResponseSchema = z.object({
+	data: z.object({
+		buyers: z.array(adminTopBuyerSchema),
+		totalSystemRevenue: z.number().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type ClubTopBuyersData = z.infer<typeof getClubTopBuyersResponseSchema>["data"]
