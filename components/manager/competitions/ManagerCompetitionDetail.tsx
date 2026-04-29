@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { IoChevronBackOutline } from "react-icons/io5";
+import { RefreshCcw } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     MdOutlineDashboard,
     MdOutlineStars,
@@ -36,11 +38,13 @@ export default function ManagerCompetitionDetail() {
     const params = useParams<{ clubSlug: string; competitionId: string }>();
     const competitionId = params?.competitionId;
     const clubSlug = params?.clubSlug;
+    const queryClient = useQueryClient();
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const t = useTranslations("ManagerCompetitions.detailPage");
     const tc = useTranslations("ManagerCompetitions");
 
-    const { data: competition, isLoading: isCompLoading, isError: isCompError, error: compError } = useGetCompetitionDetail(competitionId);
+    const { data: competition, isLoading: isCompLoading, isError: isCompError, error: compError, refetch, isFetching } = useGetCompetitionDetail(competitionId);
     const statusMutation = useUpdateCompetitionStatus();
 
     const handleUpdateStatus = async (status: 'PUBLISHED' | 'RESULT_PUBLISHED') => {
@@ -118,6 +122,31 @@ export default function ManagerCompetitionDetail() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={async () => {
+                                setIsRefreshing(true);
+                                await Promise.all([
+                                    queryClient.invalidateQueries({ queryKey: ["competition", competitionId] }),
+                                    queryClient.invalidateQueries({ queryKey: ["competition-rounds", competitionId] }),
+                                    queryClient.invalidateQueries({ queryKey: ["competition-participants", competitionId] }),
+                                    queryClient.invalidateQueries({ queryKey: ["competition-prizes", competitionId] }),
+                                ]);
+                                toast.success(locale === 'en' ? 'Data refreshed!' : 'Đã làm mới dữ liệu!');
+                                // Giữ trạng thái xoay ít nhất 800ms
+                                setTimeout(() => setIsRefreshing(false), 800);
+                            }}
+                            disabled={isRefreshing || isFetching}
+                            className={cn(
+                                "rounded-full border-greyscale-800 bg-greyscale-900 hover:bg-greyscale-800 text-greyscale-300 hover:text-white transition-all shadow-sm",
+                                (isRefreshing || isFetching) && "text-blue-400"
+                            )}
+                            title={locale === 'en' ? 'Refresh' : 'Làm mới'}
+                        >
+                            <RefreshCcw size={18} className={cn((isRefreshing || isFetching) && "animate-spin")} />
+                        </Button>
+
                         {competition.competitionStatus === "PUBLISHED" && (
                             (() => {
                                 const isEnded = new Date().getTime() > new Date(competition.endDate).getTime();

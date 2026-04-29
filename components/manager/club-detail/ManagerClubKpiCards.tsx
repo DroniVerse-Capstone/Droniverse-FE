@@ -1,95 +1,122 @@
+"use client";
+
 import React from "react";
-import { BiLineChart } from "react-icons/bi";
-import { HiOutlineCurrencyDollar } from "react-icons/hi";
-import { PiTrendUpBold } from "react-icons/pi";
-import { TbReceipt2 } from "react-icons/tb";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { ClubRevenueOverview } from "@/validations/dashboard/dashboard";
 
-import type { ClubRevenueOverview } from "@/validations/dashboard/dashboard";
+interface Props {
+  data?: ClubRevenueOverview;
+  isLoading: boolean;
+}
 
-type ManagerClubKpiCardsProps = {
-  overview?: ClubRevenueOverview;
-};
+const fmtVND = (v: number) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0
+  }).format(v);
 
-export default function ManagerClubKpiCards({ overview }: ManagerClubKpiCardsProps) {
-  const formatVND = React.useCallback((value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(value);
-  }, []);
+interface KpiCardProps {
+  label: string;
+  value: string;
+  sub?: string;
+  trend?: number;
+  diff?: number;
+  isLoading: boolean;
+  delay: number;
+}
 
-  const currentMonthExpense = overview?.expenseThisMonth ?? 0;
-  const previousMonthExpense = overview?.expenseLastMonth ?? 0;
-  const expenseMoMPercent =
-    previousMonthExpense === 0
-      ? currentMonthExpense === 0
-        ? 0
-        : 100
-      : ((currentMonthExpense - previousMonthExpense) / previousMonthExpense) *
-        100;
-  const isExpenseIncrease = currentMonthExpense > previousMonthExpense;
-  const isExpenseDecrease = currentMonthExpense < previousMonthExpense;
+function KpiCard({ label, value, sub, trend, diff, isLoading, delay }: KpiCardProps) {
+  const [m, setM] = React.useState(false);
+  React.useEffect(() => { setM(true); }, []);
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <div className="rounded border border-primary/40 bg-primary/8 p-4">
-        <div className="flex items-center gap-2 text-primary">
-          <HiOutlineCurrencyDollar size={18} />
-          <p className="text-sm font-semibold">Tổng chi phí</p>
-        </div>
-        <p className="mt-2 text-2xl font-semibold text-greyscale-0">
-          {formatVND(overview?.totalExpense ?? 0)}
-        </p>
-      </div>
-
-      <div className="rounded border border-tertiary/40 bg-tertiary/8 p-4">
-        <div className="flex items-center gap-2 text-tertiary">
-          <TbReceipt2 size={18} />
-          <p className="text-sm font-semibold">Tổng giao dịch</p>
-        </div>
-        <p className="mt-2 text-2xl font-semibold text-greyscale-0">
-          {overview?.totalTransactions ?? 0}
-        </p>
-      </div>
-
-      <div className="rounded border border-secondary/40 bg-secondary/8 p-4">
-        <div className="flex justify-between gap-2 items-center">
-          <div className="flex items-center gap-2 text-secondary">
-            <PiTrendUpBold size={18} />
-            <p className="text-sm font-semibold">Chi phí tháng này</p>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={m ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.35, delay: delay * 0.07 }}
+      className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+    >
+      <p className="text-[11px] text-[#7a8090] font-medium mb-3 uppercase tracking-wide">{label}</p>
+      {isLoading ? (
+        <Skeleton className="h-9 w-48 bg-white/[0.06]" />
+      ) : (
+        <p className="text-3xl font-bold text-white tracking-tight leading-none">{value}</p>
+      )}
+      {sub && !isLoading && (
+        <p className="text-[11px] text-[#5a6070] mt-2">{sub}</p>
+      )}
+      <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+        {trend !== undefined && !isLoading && (
+          <div className="flex items-center gap-1.5">
+            <span className={cn(
+              "text-[11px] font-bold",
+              trend >= 0 ? "text-emerald-400" : "text-red-400"
+            )}>
+              {trend >= 0 ? "+" : ""}{trend.toFixed(1)}%
+            </span>
           </div>
-
-          <span
-            className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${
-              isExpenseIncrease
-                ? "bg-warning/20 text-warning"
-                : isExpenseDecrease
-                  ? "bg-primary/20 text-primary"
-                  : "bg-greyscale-700/70 text-greyscale-200"
-            }`}
-          >
-            {isExpenseIncrease
-              ? `+${Math.abs(expenseMoMPercent).toFixed(1)}% vs tháng trước`
-              : isExpenseDecrease
-                ? `-${Math.abs(expenseMoMPercent).toFixed(1)}% vs tháng trước`
-                : "0% vs tháng trước"}
+        )}
+        {diff !== undefined && !isLoading && (
+          <span className={cn(
+            "text-[9px] font-bold px-1.5 py-0.5 rounded-md",
+            diff >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+          )}>
+            {diff >= 0 ? "+" : ""}{fmtVND(diff)}
           </span>
-        </div>
-        <p className="mt-2 text-2xl font-semibold text-greyscale-0">
-          {formatVND(overview?.expenseThisMonth ?? 0)}
-        </p>
+        )}
+        {trend !== undefined && !isLoading && (
+           <span className="text-[10px] text-[#4a5060]">so với kỳ trước</span>
+        )}
       </div>
+    </motion.div>
+  );
+}
 
-      <div className="rounded border border-warning/40 bg-warning/8 p-4">
-        <div className="flex items-center gap-2 text-warning">
-          <BiLineChart size={18} />
-          <p className="text-sm font-semibold">Tổng giao dịch tháng này</p>
-        </div>
-        <p className="mt-2 text-2xl font-semibold text-greyscale-0">
-          {overview?.transactionsThisMonth ?? 0}
-        </p>
-      </div>
-    </section>
+export default function ManagerClubKpiCards({ data, isLoading }: Props) {
+  const expenseDiff = (data?.expenseThisMonth ?? 0) - (data?.expenseLastMonth ?? 0);
+  const expenseGrowth = data?.expenseLastMonth
+    ? ((data.expenseThisMonth - data.expenseLastMonth) / data.expenseLastMonth) * 100
+    : 100;
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <KpiCard
+        label="Tổng chi phí đầu tư"
+        value={fmtVND(data?.totalExpense || 0)}
+        sub={`${fmtVND(data?.expenseThisMonth || 0)} tháng này`}
+        trend={expenseGrowth}
+        diff={expenseDiff}
+        isLoading={isLoading}
+        delay={0}
+      />
+      <KpiCard
+        label="Chi phí tháng này"
+        value={fmtVND(data?.expenseThisMonth || 0)}
+        sub={`${(data?.transactionsThisMonth || 0)} giao dịch`}
+        isLoading={isLoading}
+        delay={1}
+      />
+      <KpiCard
+        label="Tổng giao dịch"
+        value={(data?.totalTransactions || 0).toLocaleString("vi-VN")}
+        sub={`${(data?.transactionsThisMonth || 0).toLocaleString("vi-VN")} giao dịch tháng này`}
+        isLoading={isLoading}
+        delay={2}
+      />
+      <KpiCard
+        label="Chi phí TB / giao dịch"
+        value={fmtVND(
+          (data?.transactionsThisMonth ?? 0) > 0
+            ? (data?.expenseThisMonth ?? 0) / (data?.transactionsThisMonth ?? 1)
+            : 0
+        )}
+        sub="Trung bình mỗi giao dịch"
+        isLoading={isLoading}
+        delay={3}
+      />
+    </div>
   );
 }
