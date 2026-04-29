@@ -347,6 +347,12 @@
         "request": "Registration Requests"
       }
     },
+    "transactions": {
+      "title": "Transactions",
+      "subitems": {
+        "withdraw-request": "Withdrawal Requests"
+      }
+    },
     "courses": {
       "title": "Courses",
       "subitems": {

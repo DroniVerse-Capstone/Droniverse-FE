@@ -16,6 +16,8 @@ import {
 	GetUserQuizDetailParams,
 	GetUserQuizQuestionsData,
 	GetUserQuizQuestionsParams,
+	GetUserAssignmentDetailData,
+	GetUserAssignmentDetailParams,
 	SubmitUserQuizData,
 	SubmitUserQuizParams,
 	UserLesson,
@@ -35,6 +37,8 @@ import {
 	getUserQuizDetailResponseSchema,
 	getUserQuizQuestionsParamsSchema,
 	getUserQuizQuestionsResponseSchema,
+	getUserAssignmentDetailParamsSchema,
+	getUserAssignmentDetailResponseSchema,
 	submitUserQuizParamsSchema,
 	submitUserQuizResponseSchema,
 	UserLearningPath,
@@ -247,6 +251,25 @@ export const useGetUserLabMini = (params?: GetUserLabDetailParams) => {
 			)
 
 			const parsed = getUserLabMiniResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetUserAssignmentDetail = (
+	params?: GetUserAssignmentDetailParams
+) => {
+	return useQuery<GetUserAssignmentDetailData, AxiosError<ApiError>>({
+		queryKey: ["user-assignment-detail", params?.enrollmentId, params?.assignmentId],
+		enabled: !!params?.enrollmentId && !!params?.assignmentId,
+		queryFn: async () => {
+			const parsedParams = getUserAssignmentDetailParamsSchema.parse(params)
+
+			const response = await apiClient.get(
+				`/academy/user/enrollments/${parsedParams.enrollmentId}/assignments/${parsedParams.assignmentId}`
+			)
+
+			const parsed = getUserAssignmentDetailResponseSchema.parse(response.data)
 			return parsed.data
 		},
 	})

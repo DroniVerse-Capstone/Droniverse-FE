@@ -424,3 +424,62 @@ export type GetUserLabMiniResponse = z.infer<
 	typeof getUserLabMiniResponseSchema
 >
 export type StudentUserLab = z.infer<typeof studentUserLabSchema>
+
+// ------------- Get User Assignment Detail -------------
+
+export const assignmentSchema = z.object({
+	assignmentID: z.string().uuid(),
+	titleEN: z.string(),
+	titleVN: z.string(),
+	descriptionEN: z.string(),
+	descriptionVN: z.string(),
+	requirement: z.string(),
+	estimatedTime: z.number().int().nonnegative(),
+	createBy: z.string(),
+	updateBy: z.string().nullable(),
+	createAt: z.string(),
+	updateAt: z.string().nullable(),
+})
+
+export const userAssignmentSchema = z.object({
+	userAssignmentID: z.string().uuid(),
+	assignmentID: z.string().uuid(),
+	enrollmentID: z.string().uuid(),
+	attemptNumber: z.number().int().positive(),
+	mediaID: z.string().uuid().nullable(),
+	description: z.string(),
+	status: z.enum(["SUBMITTED", "UNDER_REVIEW", "PASSED", "FAILED"]),
+	score: z.number().min(0).max(100).nullable(),
+	reviewComment: z.string().nullable(),
+	reviewedBy: z.string().nullable(),
+	reviewAt: z.string().nullable(),
+	submittedAt: z.string(),
+}).nullable()
+
+export const getUserAssignmentDetailDataSchema = z.object({
+	assignment: assignmentSchema,
+	userAssignment: userAssignmentSchema,
+})
+
+export const getUserAssignmentDetailParamsSchema = z.object({
+	enrollmentId: z.string().uuid(),
+	assignmentId: z.string().uuid(),
+})
+
+export const getUserAssignmentDetailResponseSchema = z.object({
+	data: getUserAssignmentDetailDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type Assignment = z.infer<typeof assignmentSchema>
+export type UserAssignment = z.infer<typeof userAssignmentSchema>
+export type GetUserAssignmentDetailParams = z.infer<
+	typeof getUserAssignmentDetailParamsSchema
+>
+export type GetUserAssignmentDetailData = z.infer<
+	typeof getUserAssignmentDetailDataSchema
+>
+export type GetUserAssignmentDetailResponse = z.infer<
+	typeof getUserAssignmentDetailResponseSchema
+>

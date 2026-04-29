@@ -16,10 +16,18 @@ import {
 	updateWalletResponseSchema,
 	WithdrawRequest,
 	getMyWithdrawRequestsResponseSchema,
+	GetWithdrawRequestsData,
+	GetWithdrawRequestsParams,
+	getWithdrawRequestsParamsSchema,
+	getWithdrawRequestsResponseSchema,
 	CreateWithdrawRequest,
 	CreateWithdrawRequestResponse,
 	createWithdrawRequestSchema,
 	createWithdrawRequestResponseSchema,
+	UpdateWithdrawRequestStatusRequest,
+	UpdateWithdrawRequestStatusResponse,
+	updateWithdrawRequestStatusRequestSchema,
+	updateWithdrawRequestStatusResponseSchema,
 } from "@/validations/wallet/wallet"
 
 export const useGetMyWallet = () => {
@@ -98,6 +106,28 @@ export const useGetMyWithdrawRequests = () => {
 	})
 }
 
+export const useGetWithdrawRequests = (params?: GetWithdrawRequestsParams) => {
+	const parsedParams = getWithdrawRequestsParamsSchema.parse(params ?? {})
+
+	return useQuery<GetWithdrawRequestsData, AxiosError<ApiError>>({
+		queryKey: [
+			"withdraw-requests",
+			parsedParams.currentPage,
+			parsedParams.pageSize,
+			parsedParams.status ?? null,
+		],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/wallets/withdraw-request", {
+				params: parsedParams,
+			})
+
+			const parsed = getWithdrawRequestsResponseSchema.parse(response.data)
+
+			return parsed.data
+		},
+	})
+}
+
 export const useCreateWithdrawRequest = () => {
 	const queryClient = useQueryClient()
 
@@ -117,6 +147,36 @@ export const useCreateWithdrawRequest = () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: ["my-withdraw-requests"] }),
 				queryClient.invalidateQueries({ queryKey: ["my-wallet"] }),
+				queryClient.invalidateQueries({ queryKey: ["withdraw-requests"] }),
+			])
+		},
+	})
+}
+
+export const useUpdateWithdrawRequestStatus = () => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		WithdrawRequest,
+		AxiosError<ApiError>,
+		{ id: string; data: UpdateWithdrawRequestStatusRequest }
+	>({
+		mutationFn: async ({ id, data }) => {
+			const payload = updateWithdrawRequestStatusRequestSchema.parse(data)
+
+			const response = await apiClient.put(
+				`/community/wallets/withdraw-request/${id}/status`,
+				payload
+			)
+
+			const parsed = updateWithdrawRequestStatusResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["my-withdraw-requests"] }),
+				queryClient.invalidateQueries({ queryKey: ["my-wallet"] }),
+				queryClient.invalidateQueries({ queryKey: ["withdraw-requests"] }),
 			])
 		},
 	})

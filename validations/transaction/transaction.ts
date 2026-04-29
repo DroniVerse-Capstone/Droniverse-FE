@@ -72,12 +72,19 @@ export const transactionOrderSchema = z.object({
 	user: transactionUserSchema.nullable().optional(),
 })
 
+export const clubSchema = z.object({
+	clubID: z.string(),
+	nameVN: z.string(),
+	nameEN: z.string(),
+	imageUrl: z.string().nullable(),
+})
+
 export const transactionSchema = z.object({
 	transactionID: z.string(),
 	wallet: walletSchema.nullable().optional(),
 	amount: z.number(),
 	type: z.string(),
-	clubID: z.string().nullable().optional(),
+	club: clubSchema.nullable(),
 	referenceID: z.string().nullable().optional(),
 	createdAt: z.string(),
 	order: transactionOrderSchema.nullable().optional(),

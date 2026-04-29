@@ -14,6 +14,8 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import { GrTransaction } from "react-icons/gr";
+import { TbTransactionDollar } from "react-icons/tb";
 
 export type SubItem = {
   title: string;
@@ -61,6 +63,13 @@ export const primaryItems: NavItem[] = [
     title: "dashboard.title",
     icon: Home,
     href: "/dashboard",
+  },
+  {
+    title: "transactions.title",
+    icon: GrTransaction,
+    subItems: [
+      {title: "transactions.subitems.withdraw-request", href: "/withdraw-requests", icon: TbTransactionDollar},
+    ]
   },
   {
     title: "clubs.title",

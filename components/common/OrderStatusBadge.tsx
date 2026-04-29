@@ -13,7 +13,7 @@ type OrderStatusBadgeProps = {
 const statusClassMap: Record<string, string> = {
 	PENDING: "border border-warning/40 bg-warning/15 text-warning",
 	SUCCESS: "border border-success/40 bg-success/15 text-success",
-	FAILED: "border border-destructive/40 bg-destructive/15 text-destructive",
+	FAILED: "border border-primary/40 bg-primary/15 text-primary",
 	CANCELLED: "border border-greyscale-600 bg-greyscale-800 text-greyscale-100",
 };
 

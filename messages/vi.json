@@ -343,6 +343,12 @@
         "request": "Yêu cầu đăng ký"
       }
     },
+    "transactions": {
+      "title": "Giao dịch",
+      "subitems": {
+        "withdraw-request": "Yêu cầu rút tiền"
+      }
+    },
     "courses": {
       "title": "Khóa học",
       "subitems": {

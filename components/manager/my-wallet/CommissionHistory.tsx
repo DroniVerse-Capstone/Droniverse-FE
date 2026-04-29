@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-
+import Image from "next/image";
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
 import { TableCell } from "@/components/ui/table";
@@ -28,6 +28,7 @@ export default function CommissionHistory() {
     "STT",
     "Tên khóa học",
     "Người mua",
+    "Câu lạc bộ",
     "Tiền hoa hồng",
     "Ngày nhận",
   ];
@@ -83,6 +84,9 @@ export default function CommissionHistory() {
                 : transaction.order?.item?.productNameEN || transaction.order?.item?.productNameVN || "—";
 
             const username = transaction.order?.user?.username || "—";
+            const clubName = locale === "vi"
+              ? transaction.club?.nameVN || "—"
+              : transaction.club?.nameEN || "—";
 
             return (
               <>
@@ -94,6 +98,20 @@ export default function CommissionHistory() {
                 </TableCell>
                 <TableCell className="text-greyscale-0">
                   {username}
+                </TableCell>
+                <TableCell className="text-greyscale-0">
+                  <div className="flex items-center gap-2">
+                    {transaction.club?.imageUrl && (
+                      <Image
+                        src={transaction.club.imageUrl}
+                        alt={clubName}
+                        width={50}
+                        height={50}
+                        className="rounded object-cover"
+                      />
+                    )}
+                    <span>{clubName}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-greyscale-0">
                   {formatCurrency(transaction.amount)}
