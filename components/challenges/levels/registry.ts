@@ -62,11 +62,11 @@ export const mockLabs: Record<string, LabData> = {
   // BÀI 4: CỨU HỎA
   "fire-rescue-mission-001": {
     id: "fire-rescue-mission-001",
-    title: "Bài 4: Chiến dịch giải cứu hỏa hoạn",
+    title: "Bài 4: Chiến dịch dặp tắt hỏa hoạn",
     levelCode: "fire_rescue",
     droneType: "quadcopter_basic",
     timeLimit: 300,
-    objective: "Nạp nước tại trạm XANH DƯƠNG và dập tắt 3 tòa nhà đang cháy trong thành phố",
+    objective: "Nạp nước tại trạm hồ và dập tắt 3 tòa nhà đang cháy trong thành phố",
     environmentType: "CITY_FIRE"
   }
 };

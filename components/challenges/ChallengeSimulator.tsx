@@ -622,7 +622,15 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin, enrollme
   const [elapsedTime, setElapsedTime] = useState(0);
   const elapsedTimeRef = useRef(0);
   const [objective, setObjective] = useState("");
-  const [timeRemaining, setTimeRemaining] = useState(lab?.timeLimit ?? 60);
+  const [timeRemaining, setTimeRemaining] = useState(60);
+  
+  // Đồng bộ thời gian khi dữ liệu Lab được tải về thành công
+  useEffect(() => {
+    if (lab?.timeLimit) {
+      setTimeRemaining(lab.timeLimit);
+    }
+  }, [lab?.timeLimit]);
+
   const [resetTrigger, setResetTrigger] = useState(0);
 
   const keysPressed = useRef<Set<string>>(new Set());

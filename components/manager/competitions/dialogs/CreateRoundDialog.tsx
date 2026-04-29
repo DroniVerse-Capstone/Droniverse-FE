@@ -12,13 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import CommonDropdown from "@/components/common/CommonDropdown";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { useGetVRSimulators } from "@/hooks/simulator/useSimulator";
 import { formatDateTime } from "@/lib/utils/format-date";
@@ -58,29 +52,25 @@ export function CreateRoundDialog({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.vrSimilatorID || !formData.startTime || !formData.endTime || !limitMinutes || !formData.weight) {
+        if (!formData.vrSimilatorID || !formData.startTime || !formData.endTime || !formData.weight) {
             toast.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
         const start = new Date(formData.startTime).getTime();
         const end = new Date(formData.endTime).getTime();
-        
+
         if (end <= start) {
             toast.error("Thời gian kết thúc phải lớn hơn thời gian bắt đầu.");
             return;
         }
 
         const durationMinutes = Math.floor((end - start) / (1000 * 60));
-        const minutes = parseInt(limitMinutes);
-
-        if (isNaN(minutes) || minutes <= 0) {
-            toast.error("Thời gian làm bài phải là số lớn hơn 0.");
-            return;
-        }
+        const selectedSim = (simulators as any[])?.find(sim => sim.vrSimulatorID === formData.vrSimilatorID);
+        const minutes = selectedSim?.estimatedTime || 15;
 
         if (minutes > durationMinutes) {
-            toast.error(`Thời gian làm bài (${minutes} phút) không được vượt quá khoảng thời gian mở vòng thi (${durationMinutes} phút).`);
+            toast.error(`Thời gian làm bài của bài VR này (${minutes} phút) đang vượt quá khoảng thời gian mở vòng thi (${durationMinutes} phút). Vui lòng nới rộng thời gian bắt đầu/kết thúc.`);
             return;
         }
 
@@ -137,31 +127,17 @@ export function CreateRoundDialog({
                         <Label htmlFor="lab" className="text-sm font-medium text-greyscale-300">
                             Chọn Simulator
                         </Label>
-                        <Select
-                            onValueChange={(value) => setFormData({ ...formData, vrSimilatorID: value })}
+                        <CommonDropdown
+                            options={Array.isArray(simulators) ? simulators.map((sim: any) => ({
+                                value: sim.vrSimulatorID,
+                                label: `${locale === "en" ? sim.titleEN || sim.titleVN : sim.titleVN || sim.titleEN} • ⏱️ ${sim.estimatedTime} ${locale === "en" ? "mins" : "phút"}`
+                            })) : []}
                             value={formData.vrSimilatorID}
-                        >
-                            <SelectTrigger className="bg-greyscale-950 border-greyscale-700 focus:ring-2 focus:ring-primary/20 focus:border-primary h-11 text-greyscale-100 transition-all hover:border-greyscale-500">
-                                <SelectValue placeholder="Chọn VR cho vòng thi..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-greyscale-850 border-greyscale-700 text-greyscale-100 shadow-2xl overflow-hidden">
-                                {isLoadingSimulators ? (
-                                    <div className="flex items-center justify-center p-4">
-                                        <Loader2 className="animate-spin text-primary" size={20} />
-                                    </div>
-                                ) : (
-                                    Array.isArray(simulators) && simulators.map((sim: any) => (
-                                        <SelectItem 
-                                            key={sim.vrSimulatorID} 
-                                            value={sim.vrSimulatorID}
-                                            className="focus:bg-primary/20 focus:text-primary cursor-pointer transition-colors"
-                                        >
-                                            {locale === "en" ? sim.titleEN || sim.titleVN : sim.titleVN || sim.titleEN}
-                                        </SelectItem>
-                                    ))
-                                )}
-                            </SelectContent>
-                        </Select>
+                            onChange={(value) => setFormData({ ...formData, vrSimilatorID: value })}
+                            placeholder="Chọn VR cho vòng thi..."
+                            isLoading={isLoadingSimulators}
+                            triggerClassName="bg-greyscale-950 border-greyscale-700 h-11 text-greyscale-100 hover:bg-greyscale-900"
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -193,40 +169,21 @@ export function CreateRoundDialog({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="limitTime" className="text-sm font-medium text-greyscale-300">
-                                {t("fields.limitTime")}
-                            </Label>
-                            <Input
-                                id="limitTime"
-                                type="number"
-                                min="1"
-                                placeholder={t("fields.limitTimePlaceholder")}
-                                value={limitMinutes}
-                                onChange={(e) => setLimitMinutes(e.target.value)}
-                                className="bg-greyscale-950 border-greyscale-700 focus:ring-primary h-11 text-greyscale-100"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="weight" className="text-sm font-medium text-greyscale-300">
-                                Độ khó
-                            </Label>
-                            <Select
-                                onValueChange={(value) => setFormData({ ...formData, weight: parseInt(value) })}
-                                value={formData.weight?.toString() || "1"}
-                            >
-                                <SelectTrigger className="bg-greyscale-950 border-greyscale-700 focus:ring-primary h-11 text-greyscale-100">
-                                    <SelectValue placeholder="Chọn độ khó" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-greyscale-850 border-greyscale-700 text-greyscale-100 shadow-2xl">
-                                    <SelectItem value="1" className="focus:bg-emerald-500/20 focus:text-emerald-400">Dễ</SelectItem>
-                                    <SelectItem value="2" className="focus:bg-amber-500/20 focus:text-amber-400">Trung bình</SelectItem>
-                                    <SelectItem value="3" className="focus:bg-rose-500/20 focus:text-rose-400">Khó</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="weight" className="text-sm font-medium text-greyscale-300">
+                            Độ khó
+                        </Label>
+                        <CommonDropdown
+                            options={[
+                                { value: "1", label: "Dễ" },
+                                { value: "2", label: "Trung bình" },
+                                { value: "3", label: "Khó" }
+                            ]}
+                            value={formData.weight?.toString() || "1"}
+                            onChange={(value) => setFormData({ ...formData, weight: parseInt(value) })}
+                            placeholder="Chọn độ khó"
+                            triggerClassName="bg-greyscale-950 border-greyscale-700 h-11 text-greyscale-100 hover:bg-greyscale-900"
+                        />
                     </div>
 
                     <DialogFooter className="pt-4 border-t border-greyscale-800 mt-2">
