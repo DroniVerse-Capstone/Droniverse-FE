@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
-  FaCalendarAlt,
   FaCheckCircle,
   FaClock,
   FaRegEye,
@@ -15,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { useGetUserAssignmentDetail } from "@/hooks/learning/useUserLearning";
 import { useLocale } from "@/providers/i18n-provider";
 import { formatDateTime } from "@/lib/utils/format-date";
+import MemberAssignmentSubmitDialog from "@/components/member/course-learn/MemberAssignmentSubmitDialog";
+import MemberAssignmentAttemptsDialog from "@/components/member/course-learn/MemberAssignmentAttemptsDialog";
 
 type MemberAssignmentLessonContentProps = {
   assignmentId: string;
@@ -25,9 +26,10 @@ export default function MemberAssignmentLessonContent({
   assignmentId,
   enrollmentId,
 }: MemberAssignmentLessonContentProps) {
-  const router = useRouter();
-  const params = useParams<{ clubSlug?: string }>();
+  useParams<{ clubSlug?: string }>();
   const locale = useLocale();
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = React.useState(false);
+  const [isAttemptsDialogOpen, setIsAttemptsDialogOpen] = React.useState(false);
 
   const assignmentDetailQuery = useGetUserAssignmentDetail(
     enrollmentId
@@ -62,28 +64,25 @@ export default function MemberAssignmentLessonContent({
     return null;
   }
 
-  const canSubmitAssignment = Boolean(enrollmentId && params?.clubSlug);
+  const canSubmitAssignment = Boolean(enrollmentId);
+  const canViewReview = Boolean(enrollmentId);
   const assignment = assignmentDetailQuery.data.assignment;
   const userAssignment = assignmentDetailQuery.data.userAssignment;
 
   const handleSubmitAssignment = () => {
-    if (!enrollmentId || !params?.clubSlug) {
+    if (!enrollmentId) {
       return;
     }
 
-    router.push(
-      `/learn/${params.clubSlug}/${enrollmentId}/assignment/${assignmentId}/submit`
-    );
+    setIsSubmitDialogOpen(true);
   };
 
   const handleViewReview = () => {
-    if (!enrollmentId || !params?.clubSlug) {
+    if (!enrollmentId) {
       return;
     }
 
-    router.push(
-      `/learn/${params.clubSlug}/${enrollmentId}/assignment/${assignmentId}/review`
-    );
+    setIsAttemptsDialogOpen(true);
   };
 
   const getStatusBadgeInfo = (status: string) => {
@@ -226,19 +225,19 @@ export default function MemberAssignmentLessonContent({
 
               {userAssignment.reviewComment && (
                 <div className="rounded border border-greyscale-600 bg-greyscale-900/60 p-3">
-                  <p className="text-xs font-medium text-greyscale-200 mb-1">
+                  <p className="text-xs font-medium text-greyscale-0 mb-1">
                     {locale === "vi"
-                      ? "Nhận xét từ giáo viên"
-                      : "Teacher Review"}
+                      ? "Nhận xét từ người chấm"
+                      : "Grader Review"}
                   </p>
-                  <p className="text-sm text-greyscale-100 whitespace-pre-wrap wrap-break-word">
+                  <p className="text-sm text-greyscale-50 whitespace-pre-wrap wrap-break-word">
                     {userAssignment.reviewComment}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2 border-t border-greyscale-700 pt-4">
+            <div className="flex flex-wrap justify-end gap-2 border-t border-greyscale-700 pt-4">
               {userAssignment.status === "FAILED" && (
                 <Button
                   onClick={handleSubmitAssignment}
@@ -246,43 +245,54 @@ export default function MemberAssignmentLessonContent({
                   className="gap-2"
                 >
                   <FaPaperclip className="h-4 w-4" />
-                  {locale === "vi" ? "Gửi lại" : "Resubmit"}
+                  {locale === "vi" ? "Nộp lại" : "Resubmit"}
                 </Button>
               )}
 
-              {["PASSED", "FAILED", "UNDER_REVIEW"].includes(
+              {["PASSED", "FAILED", "UNDER_REVIEW", "SUBMITTED"].includes(
                 userAssignment.status
               ) && (
                 <Button
                   variant="outline"
                   onClick={handleViewReview}
-                  disabled={!canSubmitAssignment}
+                  disabled={!canViewReview}
                   className="gap-2"
                 >
                   <FaRegEye className="h-4 w-4" />
-                  {locale === "vi" ? "Xem chi tiết" : "View Details"}
+                  {locale === "vi" ? "Xem các lần nộp" : "View Submissions"}
                 </Button>
               )}
             </div>
           </div>
         ) : (
-          <div className="rounded border border-greyscale-600 bg-greyscale-900/40 p-4 text-center">
-            <p className="text-sm text-greyscale-100 mb-4">
-              {locale === "vi"
-                ? "Bạn chưa gửi bài tập này."
-                : "You haven't submitted this assignment yet."}
-            </p>
+          <div className="flex flex-wrap justify-end gap-2 border-t border-greyscale-700 pt-4">
             <Button
               onClick={handleSubmitAssignment}
               disabled={!canSubmitAssignment}
               className="gap-2"
             >
               <FaPaperclip className="h-4 w-4" />
-              {locale === "vi" ? "Gửi bài tập" : "Submit Assignment"}
+              {locale === "vi" ? "Nộp bài tập" : "Submit Assignment"}
             </Button>
           </div>
         )}
       </div>
+
+      <MemberAssignmentSubmitDialog
+        open={isSubmitDialogOpen}
+        onOpenChange={setIsSubmitDialogOpen}
+        enrollmentId={enrollmentId || ""}
+        assignmentId={assignmentId}
+        title={locale === "vi" ? "Nộp bài tập" : "Submit Assignment"}
+        requirement={assignment.requirement}
+      />
+
+      <MemberAssignmentAttemptsDialog
+        open={isAttemptsDialogOpen}
+        onOpenChange={setIsAttemptsDialogOpen}
+        enrollmentId={enrollmentId || ""}
+        assignmentId={assignmentId}
+      />
     </div>
   );
 }

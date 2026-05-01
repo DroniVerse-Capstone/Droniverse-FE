@@ -427,6 +427,18 @@ export type StudentUserLab = z.infer<typeof studentUserLabSchema>
 
 // ------------- Get User Assignment Detail -------------
 
+export const userMediaSchema = z.object({
+	mediaID: z.string(),
+	url: z.string(),
+})
+
+export const userSchema = z.object({
+	userId: z.string(),
+	fullName: z.string(),
+	email: z.string().email(),
+	avatarUrl: z.string().nullable(),
+})
+
 export const assignmentSchema = z.object({
 	assignmentID: z.string().uuid(),
 	titleEN: z.string(),
@@ -446,7 +458,8 @@ export const userAssignmentSchema = z.object({
 	assignmentID: z.string().uuid(),
 	enrollmentID: z.string().uuid(),
 	attemptNumber: z.number().int().positive(),
-	mediaID: z.string().uuid().nullable(),
+	media: userMediaSchema.nullable(),
+	user: userSchema.nullable(),
 	description: z.string(),
 	status: z.enum(["SUBMITTED", "UNDER_REVIEW", "PASSED", "FAILED"]),
 	score: z.number().min(0).max(100).nullable(),
@@ -479,7 +492,8 @@ export const userAssignmentAttemptSchema = z.object({
 	assignmentID: z.string().uuid(),
 	enrollmentID: z.string().uuid(),
 	attemptNumber: z.number().int().positive(),
-	mediaID: z.string().uuid().nullable(),
+	media: userMediaSchema.nullable(),
+	user: userSchema.nullable(),
 	description: z.string(),
 	status: z.enum(["SUBMITTED", "UNDER_REVIEW", "PASSED", "FAILED"]),
 	score: z.number().min(0).max(100).nullable(),
