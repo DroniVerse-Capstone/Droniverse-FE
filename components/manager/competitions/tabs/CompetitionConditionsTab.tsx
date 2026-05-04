@@ -31,7 +31,7 @@ export default function CompetitionConditionsTab({
         "Beginner": { vi: "Sơ Cấp", en: "Beginner" },
         "Intermediate": { vi: "Trung Cấp", en: "Intermediate" },
         "Advanced": { vi: "Cao Cấp", en: "Advanced" },
-        "Master": { vi: "Bậc Thầy", en: "Master" }
+        "Master": { vi: "Thành Thạo", en: "Master" }
     };
 
     const getLocalizedLevelName = (name: string) => {

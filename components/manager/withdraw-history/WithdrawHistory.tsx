@@ -105,26 +105,32 @@ export default function WithdrawHistory() {
                 {request.rejectReason || "—"}
               </TableCell>
               <TableCell>
-                <ConfirmActionPopover
-                  trigger={
-                    <Button
-                      disabled={request.status !== "PENDING" || isPending}
-                      icon={<GiCancel size={20}/>}
-                      size={"icon"}
-                      variant={"deleteIcon"}
-                    />
-                  }
-                  title={locale === "vi" ? "Xác nhận hủy?" : "Confirm cancellation?"}
-                  description={locale === "vi" 
-                    ? "Bạn có chắc chắn muốn hủy yêu cầu rút tiền này không?"
-                    : "Are you sure you want to cancel this withdraw request?"
-                  }
-                  confirmText={locale === "vi" ? "Hủy" : "Cancel"}
-                  cancelText={locale === "vi" ? "Không" : "No"}
-                  isLoading={isPending}
-                  onConfirm={() => handleCancel(request.withdrawID)}
-                  widthClassName="w-64"
-                />
+                {request.status !== "PENDING" ? (
+                  <span className="inline-flex rounded-full border border-greyscale-700 bg-greyscale-800 px-3 py-1 text-xs font-semibold text-greyscale-100">
+                    {locale === "vi" ? "Đã xử lý" : "Processed"}
+                  </span>
+                ) : (
+                  <ConfirmActionPopover
+                    trigger={
+                      <Button
+                        disabled={isPending}
+                        icon={<GiCancel size={20}/>}
+                        size={"icon"}
+                        variant={"deleteIcon"}
+                      />
+                    }
+                    title={locale === "vi" ? "Xác nhận hủy?" : "Confirm cancellation?"}
+                    description={locale === "vi" 
+                      ? "Bạn có chắc chắn muốn hủy yêu cầu rút tiền này không?"
+                      : "Are you sure you want to cancel this withdraw request?"
+                    }
+                    confirmText={locale === "vi" ? "Hủy" : "Cancel"}
+                    cancelText={locale === "vi" ? "Không" : "No"}
+                    isLoading={isPending}
+                    onConfirm={() => handleCancel(request.withdrawID)}
+                    widthClassName="w-64"
+                  />
+                )}
               </TableCell>
             </>
           );

@@ -103,12 +103,7 @@ export const canAccessRoute = (pathname: string, roleName?: string | null) => {
   if (!roleName) return false
 
   if (matchPathGroup(pathname, MEMBER_PATHS)) {
-    return (
-      roleName === CLUB_MEMBER_ROLE ||
-      roleName === CLUB_MANAGER_ROLE ||
-      roleName === ADMIN_ROLE ||
-      roleName === SYSTEM_MANAGER_ROLE
-    )
+    return roleName === CLUB_MEMBER_ROLE
   }
 
   if (matchPathGroup(pathname, MANAGER_PATHS)) {

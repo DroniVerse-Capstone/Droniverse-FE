@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateWithdrawRequest } from "@/hooks/wallet/useWallet";
@@ -31,6 +32,9 @@ export function WalletInfoCard({ wallet }: WalletInfoCardProps) {
   const [amount, setAmount] = React.useState("");
   const [note, setNote] = React.useState("");
   const { mutate: createWithdrawRequest, isPending } = useCreateWithdrawRequest();
+  const formattedAmount = amount ? Number(amount).toLocaleString("vi-VN") : "";
+  const minimumWithdrawAmount = 50000;
+  const quickAmounts = [50000, 100000, 200000, 500000];
   const maskAccount = (acct?: string) => {
     if (!acct) return "—";
     const s = acct.replace(/\s+/g, "");
@@ -56,9 +60,18 @@ export function WalletInfoCard({ wallet }: WalletInfoCardProps) {
       return;
     }
 
-    const amountNum = parseFloat(amount);
+    const amountNum = parseInt(amount, 10);
     if (isNaN(amountNum) || amountNum <= 0) {
       toast.error(locale === "vi" ? "Số tiền phải lớn hơn 0" : "Amount must be greater than 0");
+      return;
+    }
+
+    if (amountNum < minimumWithdrawAmount) {
+      toast.error(
+        locale === "vi"
+          ? `Số tiền rút tối thiểu là ${minimumWithdrawAmount.toLocaleString("vi-VN")} đ`
+          : `Minimum withdraw amount is ${minimumWithdrawAmount.toLocaleString("en-US")} VND`
+      );
       return;
     }
 
@@ -155,16 +168,45 @@ export function WalletInfoCard({ wallet }: WalletInfoCardProps) {
                 {locale === "vi" ? "Số tiền" : "Amount"} *
               </label>
               <Input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                value={formattedAmount}
+                onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))}
                 disabled={isPending}
-                min="0"
+                min={minimumWithdrawAmount.toString()}
                 className="mt-2"
               />
-              <div className="text-xs text-greyscale-300 mt-1">
-                {locale === "vi" ? `Số dư khả dụng: ${wallet.balance.toLocaleString("vi-VN")} đ` : `Available balance: ${wallet.balance.toLocaleString("en-US")} VND`}
+              <div className="mt-2 space-y-2 rounded border border-greyscale-700 bg-greyscale-900/60 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
+                    {locale === "vi"
+                      ? `Tối thiểu ${minimumWithdrawAmount.toLocaleString("vi-VN")} đ`
+                      : `Min ${minimumWithdrawAmount.toLocaleString("en-US")} VND`}
+                  </Badge>
+                  <Badge variant="outline" className="border-tertiary/30 bg-tertiary/10 text-tertiary">
+                    {locale === "vi"
+                      ? `Khả dụng ${wallet.balance.toLocaleString("vi-VN")} đ`
+                      : `Available ${wallet.balance.toLocaleString("en-US")} VND`}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {(quickAmounts.filter((value) => value <= wallet.balance)).map((value) => (
+                    <Button
+                      key={value}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={() => setAmount(value.toString())}
+                      className="h-8 rounded border-greyscale-700 bg-greyscale-800/80 px-3 text-xs text-greyscale-50 hover:bg-greyscale-700"
+                    >
+                      {value.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
 

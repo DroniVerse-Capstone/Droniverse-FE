@@ -584,7 +584,7 @@
       "easy": "Cơ bản",
       "medium": "Trung bình",
       "hard": "Nâng cao",
-      "master": "Bậc thầy"
+      "master": "Thành Thạo"
     },
     "management": {
       "total": "Tổng số khóa học",
@@ -641,7 +641,7 @@
         "easy": "Cơ bản",
         "medium": "Trung bình",
         "hard": "Nâng cao",
-        "master": "Bậc thầy"
+        "master": "Thành Thạo"
       }
     },
     "AdminCourseCard": {
@@ -1447,14 +1447,14 @@
     "Beginner": "Cơ bản",
     "Intermediate": "Trung bình",
     "Advanced": "Nâng cao",
-    "Master": "Bậc thầy",
+    "Master": "Thành Thạo",
     "level": {
       "label": "Cấp độ:",
       "all": "Tất cả",
       "easy": "Cơ bản",
       "medium": "Trung bình",
       "hard": "Nâng cao",
-      "master": "Bậc thầy"
+      "master": "Thành Thạo"
     },
     "sort": {
       "label": "Số người học:",
@@ -1796,7 +1796,7 @@
       "PHYSIC": "Tìm hiểu kiến thức về động cơ và các định luật vật lý ứng dụng trong drone.",
       "LAB_PHYSIC": "Thực hành các thí nghiệm vật lý để hiểu rõ cơ chế hoạt động của drone.",
       "VR": "Trải nghiệm học tập trong môi trường thực tế ảo sống động.",
-      "ASSIGNMENT": "Hoàn thành bài tập thực hành để được duyệt lên cấp độ bậc thầy."
+      "ASSIGNMENT": "Hoàn thành bài tập thực hành để được duyệt lên cấp độ Thành Thạo."
     },
     "minutes": "{value} phút",
     "unlock": "Mở khóa",
