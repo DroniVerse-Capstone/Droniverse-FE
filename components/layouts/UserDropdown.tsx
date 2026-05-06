@@ -17,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { User } from "@/validations/auth";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { GoHistory } from "react-icons/go";
+import { PiCertificate } from "react-icons/pi";
 
 interface UserDropdownProps {
   user: User | null;
@@ -104,6 +105,16 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           >
             <GoHistory className="mr-2" />
             Lịch sử thanh toán
+          </DropdownMenuItem>
+        )}
+
+        {user?.roleName === "CLUB_MEMBER" && (
+          <DropdownMenuItem
+            onClick={() => router.push(`/member/my-certificates`)}
+            className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
+          >
+            <PiCertificate className="mr-2" />
+            Chứng chỉ của bạn
           </DropdownMenuItem>
         )}
 

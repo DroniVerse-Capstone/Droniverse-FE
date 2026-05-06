@@ -47,6 +47,7 @@ export const userLearningPathSchema = z.object({
 	totalLessons: z.number().int().nonnegative(),
 	duration: z.number().int().nonnegative(),
 	progress: z.number().min(0).max(100),
+	isFeedbacked: z.boolean(),
 	userCertificate: userCertificateSchema.nullable(),
 	modules: z.array(moduleSchema),
 })

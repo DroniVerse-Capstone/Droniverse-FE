@@ -1,5 +1,8 @@
 import { z } from "zod"
 
+import { userSchema } from "@/validations/auth"
+import { clubStatusSchema } from "@/validations/club/club"
+
 export const codeUseStateSchema = z.enum(["UnUse", "Used"])
 
 export const codeOwnStateSchema = z.enum(["UnUserOwned", "UserOwned"])
@@ -7,6 +10,59 @@ export const codeOwnStateSchema = z.enum(["UnUserOwned", "UserOwned"])
 export const userCodesStateSchema = z.enum(["User_No_Codes", "User_Has_Codes"])
 
 export const codeProfitTypeSchema = z.enum(["PROFIT", "NONPROFIT"])
+
+export const academyCodeStatusSchema = z.enum(["AVAILABLE", "USED", "EXPIRED"])
+
+export const academyCodeClubSchema = z.object({
+	clubId: z.string().uuid(),
+	clubNameVN: z.string(),
+	clubNameEN: z.string(),
+	imageUrl: z.string().nullable(),
+	clubStatus: clubStatusSchema,
+})
+
+export const academyCodeItemSchema = z.object({
+	codeID: z.string().trim().min(1),
+	courseID: z.string().uuid(),
+	club: academyCodeClubSchema.nullable(),
+	ownerUser: userSchema,
+	usedByUser: userSchema.nullable(),
+	usedDate: z.string().nullable(),
+	expireDate: z.string().min(1),
+	status: academyCodeStatusSchema,
+})
+
+export const academyCodesPagingSchema = z.object({
+	data: z.array(academyCodeItemSchema),
+	totalRecords: z.number().int().nonnegative(),
+	pageIndex: z.number().int().positive(),
+	pageSize: z.number().int().positive(),
+	totalPages: z.number().int().nonnegative(),
+})
+
+export const academyCodesOverviewSchema = z.object({
+	totalCodes: z.number().int().nonnegative(),
+	availableCodes: z.number().int().nonnegative(),
+	usedCodes: z.number().int().nonnegative(),
+	expiredCodes: z.number().int().nonnegative(),
+})
+
+export const getAcademyCodesQuerySchema = z.object({
+	status: academyCodeStatusSchema.optional(),
+	currentPage: z.number().int().positive().default(1),
+	pageSize: z.number().int().positive().default(5),
+})
+
+export const getAcademyCodesDataSchema = z.object({
+	overview: academyCodesOverviewSchema,
+	codes: academyCodesPagingSchema,
+})
+
+export const getAcademyCodesResponseSchema = z.object({
+	data: getAcademyCodesDataSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
 
 export const getCourseCodesByClubParamsSchema = z.object({
 	clubId: z.string().uuid(),
@@ -245,6 +301,14 @@ export type CodeUseState = z.infer<typeof codeUseStateSchema>
 export type CodeOwnState = z.infer<typeof codeOwnStateSchema>
 export type UserCodesState = z.infer<typeof userCodesStateSchema>
 export type CodeProfitType = z.infer<typeof codeProfitTypeSchema>
+export type AcademyCodeStatus = z.infer<typeof academyCodeStatusSchema>
+export type AcademyCodeClub = z.infer<typeof academyCodeClubSchema>
+export type AcademyCodeItem = z.infer<typeof academyCodeItemSchema>
+export type AcademyCodesPaging = z.infer<typeof academyCodesPagingSchema>
+export type AcademyCodesOverview = z.infer<typeof academyCodesOverviewSchema>
+export type GetAcademyCodesQuery = z.infer<typeof getAcademyCodesQuerySchema>
+export type GetAcademyCodesData = z.infer<typeof getAcademyCodesDataSchema>
+export type GetAcademyCodesResponse = z.infer<typeof getAcademyCodesResponseSchema>
 export type GetCourseCodesByClubParams = z.infer<
 	typeof getCourseCodesByClubParamsSchema
 >

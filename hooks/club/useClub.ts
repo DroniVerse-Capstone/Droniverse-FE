@@ -7,10 +7,18 @@ import {
   Club,
   GetAllClubsData,
   GetClubParticipationsData,
+  LeaveClubResponse,
+  UpdateClubRequest,
+  UpdateClubResponse,
   getAllClubsResponseSchema,
   getClubParticipationsResponseSchema,
   getClubDetailResponseSchema,
   getMyClubsResponseSchema,
+  leaveClubParamsSchema,
+  leaveClubResponseSchema,
+  updateClubParamsSchema,
+  updateClubRequestSchema,
+  updateClubResponseSchema,
   UpdateClubStatus,
   UpdateClubStatusResponse,
   updateClubStatusResponseSchema,
@@ -43,6 +51,15 @@ type UploadTempClubImageResponse = {
 
 type UploadClubImageError = {
   message?: string
+}
+
+type LeaveClubVariables = {
+  clubId: string
+}
+
+type UpdateClubVariables = {
+  clubId: string
+  data: UpdateClubRequest
 }
 
 type UseUploadTempClubImageOptions = {
@@ -210,6 +227,55 @@ export const useUpdateClubStatus = () => {
         queryClient.invalidateQueries({
           queryKey: ["club-detail-by-code", response.data.clubCode],
         }),
+      ])
+    },
+  })
+}
+
+export const useLeaveClub = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<LeaveClubResponse, AxiosError<ApiError>, LeaveClubVariables>({
+    mutationFn: async ({ clubId }) => {
+      const parsedParams = leaveClubParamsSchema.parse({ clubId })
+
+      const response = await apiClient.post(
+        `/community/clubs/${parsedParams.clubId}/leave`
+      )
+
+      return leaveClubResponseSchema.parse(response.data)
+    },
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-clubs"] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-id", variables.clubId] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-code"] }),
+      ])
+    },
+  })
+}
+
+export const useUpdateClub = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<UpdateClubResponse, AxiosError<ApiError>, UpdateClubVariables>({
+    mutationFn: async ({ clubId, data }) => {
+      const parsedParams = updateClubParamsSchema.parse({ clubId })
+      const parsedPayload = updateClubRequestSchema.parse(data)
+
+      const response = await apiClient.put(
+        `/community/clubs/${parsedParams.clubId}`,
+        parsedPayload
+      )
+
+      return updateClubResponseSchema.parse(response.data)
+    },
+    onSuccess: async (response, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-clubs"] }),
+        queryClient.invalidateQueries({ queryKey: ["all-clubs"] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-id", variables.clubId] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-code", response.data.clubCode] }),
       ])
     },
   })

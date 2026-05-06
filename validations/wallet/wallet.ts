@@ -93,7 +93,7 @@ export type GetWithdrawRequestsResponse = z.infer<typeof getWithdrawRequestsResp
 export type GetWithdrawRequestsParams = z.infer<typeof getWithdrawRequestsParamsSchema>
 
 export const createWithdrawRequestSchema = z.object({
-	amount: z.number().nonnegative(),
+	amount: z.number().min(50000),
 	note: z.string(),
 })
 
