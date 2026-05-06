@@ -16,22 +16,60 @@ interface Props {
   isLoading: boolean;
 }
 
-const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  PUBLISHED: { label: "Đang diễn ra", color: "#3b82f6", bg: "bg-blue-500/15" },
-  RESULT_PUBLISHED: { label: "Hoàn thành", color: "#22c55e", bg: "bg-emerald-500/15" },
-  DRAFT: { label: "Bản nháp", color: "#6a7080", bg: "bg-zinc-500/15" },
-  CANCELLED: { label: "Đã hủy", color: "#ef4444", bg: "bg-red-500/15" },
+const STATUS: Record<string, { label: string; color: string }> = {
+  PUBLISHED: { label: "Đang công khai", color: "#3b82f6" },
+  RESULT_PUBLISHED: { label: "Đã hoàn tất", color: "#10b981" },
+  DRAFT: { label: "Bản nháp", color: "#9ca3af" },
+  CANCELLED: { label: "Đã hủy", color: "#ef4444" },
+  INVALID: { label: "Không hợp lệ", color: "#f97316" },
 };
 
-function StatusTag({ status }: { status: string }) {
-  const s = STATUS[status] || { label: status, color: "#6a7080", bg: "bg-zinc-500/15" };
+const PHASE: Record<string, { label: string; color: string }> = {
+  UPCOMING: { label: "Sắp tới", color: "#64748b" },
+  COMING_SOON: { label: "Sắp diễn ra", color: "#eab308" },
+  REGISTRATION_OPEN: { label: "Mở đăng ký", color: "#22c55e" },
+  REGISTRATION_CLOSED: { label: "Đóng đăng ký", color: "#ef4444" },
+  ONGOING: { label: "Đang diễn ra", color: "#3b82f6" },
+  FINISHED: { label: "Chờ công bố", color: "#f59e0b" },
+};
+
+function CompetitionTag({ status, phase }: { status: string; phase: string | null }) {
+  if (status === "RESULT_PUBLISHED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+        <CheckCircle size={10} />
+        Đã hoàn tất
+      </span>
+    );
+  }
+  
+  if (status === "PUBLISHED") {
+    if (phase === "FINISHED") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+          <Clock size={10} />
+          Chờ công bố
+        </span>
+      );
+    }
+    const p = PHASE[phase || ""] || { label: "Đang công khai", color: "#3b82f6" };
+    return (
+      <span 
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold"
+        style={{ backgroundColor: `${p.color}15`, color: p.color, border: `1px solid ${p.color}30` }}
+      >
+        <Timer size={10} />
+        {p.label}
+      </span>
+    );
+  }
+
+  const s = STATUS[status] || { label: status, color: "#6a7080" };
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold"
-      style={{ backgroundColor: `${s.color}15`, color: s.color, borderWidth: 1, borderColor: `${s.color}30` }}
+      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold"
+      style={{ backgroundColor: `${s.color}15`, color: s.color, border: `1px solid ${s.color}30` }}
     >
-      {status === "PUBLISHED" && <Timer size={10} />}
-      {status === "RESULT_PUBLISHED" && <CheckCircle size={10} />}
       {s.label}
     </span>
   );
@@ -50,13 +88,25 @@ function DonutTooltip({ active, payload }: any) {
 
 export default function ManagerClubCompetitionStatsSection({ data, isLoading }: Props) {
   const pieData = useMemo(() => {
-    if (!data?.overview) return [];
-    const { totalCompetitions, ongoingCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions } = data.overview;
+    if (!data?.overview || !data?.topByParticipants) return [];
+    const { publishedCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions, invalidCompetitions } = data.overview;
+    
+    const publishedInList = data.topByParticipants.filter(c => c.competitionStatus === "PUBLISHED");
+    const awaitingInList = publishedInList.filter(c => c.competitionPhase === "FINISHED").length;
+    
+    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions 
+      ? awaitingInList 
+      : publishedInList.length > 0 
+        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions) 
+        : 0;
+    const ongoingValue = publishedCompetitions - awaitingValue;
+
     return [
-      { name: "Đang diễn ra", value: ongoingCompetitions, color: "#3b82f6" },
-      { name: "Hoàn thành", value: completedCompetitions, color: "#22c55e" },
+      { name: "Đang diễn ra", value: ongoingValue, color: "#3b82f6" },
+      { name: "Chờ công bố", value: awaitingValue, color: "#f59e0b" },
+      { name: "Đã hoàn tất", value: completedCompetitions, color: "#10b981" },
       { name: "Bản nháp", value: draftCompetitions, color: "#6a7080" },
-      { name: "Đã hủy", value: cancelledCompetitions, color: "#ef4444" },
+      { name: "Khác", value: (cancelledCompetitions || 0) + (invalidCompetitions || 0), color: "#ef4444" },
     ].filter((d) => d.value > 0);
   }, [data]);
 
@@ -82,7 +132,7 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
   return (
     <div className="space-y-4">
       {/* Stat row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           {
             label: "Tổng cuộc thi",
@@ -93,15 +143,15 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
             borderColor: "border-white/[0.07]"
           },
           {
-            label: "Đang diễn ra",
-            value: ov?.ongoingCompetitions || 0,
+            label: "Đang triển khai",
+            value: ov?.publishedCompetitions || 0,
             icon: Timer,
             color: "text-blue-400",
             bg: "bg-blue-500/10",
             borderColor: "border-blue-500/20"
           },
           {
-            label: "Hoàn thành",
+            label: "Đã hoàn tất",
             value: ov?.completedCompetitions || 0,
             icon: CheckCircle,
             color: "text-emerald-400",
@@ -109,12 +159,20 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
             borderColor: "border-emerald-500/20"
           },
           {
-            label: "Tổng thí sinh",
-            value: (ov?.totalParticipants || 0).toLocaleString("vi-VN"),
-            icon: Users,
+            label: "Không hợp lệ",
+            value: ov?.invalidCompetitions || 0,
+            icon: Star,
             color: "text-purple-400",
             bg: "bg-purple-500/10",
             borderColor: "border-purple-500/20"
+          },
+          {
+            label: "Tổng thí sinh",
+            value: (ov?.totalParticipants || 0).toLocaleString("vi-VN"),
+            icon: Users,
+            color: "text-[#9ca3af]",
+            bg: "bg-[#1e2130]",
+            borderColor: "border-white/[0.07]"
           },
         ].map((item, i) => (
           <motion.div
@@ -208,10 +266,11 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
           <table className="w-full">
             <thead>
               <tr className="text-[9px] text-[#5a6070] uppercase tracking-widest font-bold border-b border-white/[0.05]">
+                <th className="text-left py-3 px-4 w-12">#</th>
                 <th className="text-left py-3 px-4">Cuộc thi</th>
                 <th className="text-center py-3 px-4">Trạng thái</th>
                 <th className="text-right py-3 px-4">Thí sinh</th>
-                <th className="text-center py-3 px-4">Bắt đầu</th>
+                <th className="text-center py-3 px-4">Thời gian</th>
               </tr>
             </thead>
             <tbody>
@@ -224,21 +283,14 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
                   className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
                 >
                   <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold",
-                        i === 0 && "bg-blue-500/20 text-blue-400",
-                        i === 1 && "bg-zinc-500/20 text-zinc-400",
-                        i === 2 && "bg-purple-500/20 text-purple-400",
-                        i > 2 && "bg-[#1e2130] text-zinc-500"
-                      )}>
-                        {i + 1}
-                      </div>
-                      <p className="text-[12px] font-semibold text-[#d1d5db] truncate">{comp.nameVN}</p>
-                    </div>
+                    <span className="text-[10px] font-bold text-[#5a6070]">#{i + 1}</span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <p className="text-[12px] font-semibold text-[#d1d5db] truncate max-w-[200px]">{comp.nameVN}</p>
+                    <p className="text-[9px] text-[#5a6070]">{comp.nameEN}</p>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <StatusTag status={comp.status} />
+                    <CompetitionTag status={comp.competitionStatus} phase={comp.competitionPhase} />
                   </td>
                   <td className="py-3 px-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -247,10 +299,14 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <span className="text-[10px] text-[#5a6070] flex items-center gap-1 justify-center">
-                      <Clock size={10} />
-                      {new Date(comp.startDate).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "2-digit" })}
-                    </span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] text-white font-medium">
+                        {new Date(comp.startDate).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <span className="text-[9px] text-[#5a6070]">
+                        đến {new Date(comp.endDate).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
                   </td>
                 </motion.tr>
               ))}

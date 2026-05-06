@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 import { CiLock, CiUnlock } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 import { IoPeopleOutline } from "react-icons/io5";
+import { MdOutlineAutoGraph } from "react-icons/md";
+import Link from "next/link";
 
 import ClubStatusBadge from "@/components/club/ClubStatusBadge";
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
@@ -367,6 +369,18 @@ export default function ClubManagement() {
                         onConfirm={() => handleActivateClub(club.clubID)}
                       />
                     )}
+
+                    <TooltipWrapper label={locale === "vi" ? "Tiến độ học tập" : "Learning Progress"}>
+                      <Link href={`/club-management/${club.clubID}/learning-progress`}>
+                        <Button
+                          variant="secondaryIcon"
+                          size="icon"
+                          className="text-blue-400 hover:text-blue-300 border-blue-500/30 hover:border-blue-500/50 bg-blue-500/5"
+                        >
+                          <MdOutlineAutoGraph size={18} />
+                        </Button>
+                      </Link>
+                    </TooltipWrapper>
 
                     <TooltipWrapper label={t("table.actions.view")}>
                       <Button

@@ -9,28 +9,89 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: AdminCompetitionStats;
   isLoading: boolean;
 }
 
-const STATUS: Record<string, { label: string; color: string }> = {
-  PUBLISHED: { label: "Đang bay", color: "#3b82f6" },
-  RESULT_PUBLISHED: { label: "Đã kết thúc", color: "#10b981" },
-  DRAFT: { label: "Bản nháp", color: "#6a7080" },
-  CANCELLED: { label: "Đã hủy", color: "#ef4444" },
-  PENDING: { label: "Chờ duyệt", color: "#f59e0b" },
-};
+function CompetitionTag({ status, phase }: { status: string; phase: string | null }) {
+  const t = useTranslations("SystemDashboard.competitionActivity.status");
+  
+  if (status === "RESULT_PUBLISHED") {
+    return (
+      <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+        {t("resultPublished")}
+      </span>
+    );
+  }
+  
+  if (status === "PUBLISHED") {
+    if (phase === "FINISHED") {
+      return (
+        <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          {t("awaiting")}
+        </span>
+      );
+    }
 
-function StatusTag({ status }: { status: string }) {
-  const s = STATUS[status] || { label: status, color: "#6a7080" };
+    const PHASE_KEYS: Record<string, string> = {
+      UPCOMING: "upcoming",
+      COMING_SOON: "comingSoon",
+      REGISTRATION_OPEN: "regOpen",
+      REGISTRATION_CLOSED: "regClosed",
+      ONGOING: "ongoing",
+      FINISHED: "awaiting",
+    };
+
+    const PHASE_COLORS: Record<string, string> = {
+      UPCOMING: "#64748b",
+      COMING_SOON: "#eab308",
+      REGISTRATION_OPEN: "#22c55e",
+      REGISTRATION_CLOSED: "#ef4444",
+      ONGOING: "#3b82f6",
+      FINISHED: "#f59e0b",
+    };
+
+    const key = PHASE_KEYS[phase || ""] || "published";
+    const color = PHASE_COLORS[phase || ""] || "#3b82f6";
+
+    return (
+      <span 
+        className="text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm"
+        style={{ backgroundColor: `${color}20`, color: color, border: `1px solid ${color}30` }}
+      >
+        {t(key as any)}
+      </span>
+    );
+  }
+
+  const STATUS_KEYS: Record<string, string> = {
+    PUBLISHED: "published",
+    RESULT_PUBLISHED: "resultPublished",
+    DRAFT: "draft",
+    CANCELLED: "cancelled",
+    INVALID: "invalid",
+  };
+
+  const STATUS_COLORS: Record<string, string> = {
+    PUBLISHED: "#3b82f6",
+    RESULT_PUBLISHED: "#10b981",
+    DRAFT: "#9ca3af",
+    CANCELLED: "#ef4444",
+    INVALID: "#f97316",
+  };
+
+  const key = STATUS_KEYS[status] || status;
+  const color = STATUS_COLORS[status] || "#6a7080";
+
   return (
     <span
-      className="text-[9px] font-semibold px-2 py-0.5 rounded-md"
-      style={{ backgroundColor: `${s.color}18`, color: s.color }}
+      className="text-[10px] font-bold px-2.5 py-1 rounded-lg"
+      style={{ backgroundColor: `${color}20`, color: color, border: `1px solid ${color}30` }}
     >
-      {s.label}
+      {STATUS_KEYS[status] ? t(key as any) : status}
     </span>
   );
 }
@@ -47,16 +108,33 @@ function DonutTooltip({ active, payload }: any) {
 }
 
 export default function AdminCompetitionStatsSection({ data, isLoading }: Props) {
+  const t = useTranslations("SystemDashboard.competitionActivity");
+  const locale = useLocale();
+
   const pieData = useMemo(() => {
-    if (!data?.overview) return [];
-    const { totalCompetitions, ongoingCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions } = data.overview;
+    if (!data?.overview || !data?.topByParticipants) return [];
+    const { publishedCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions, invalidCompetitions } = data.overview;
+    
+    // Calculate breakdown from top list (approximation)
+    const publishedInList = data.topByParticipants.filter(c => c.competitionStatus === "PUBLISHED");
+    const awaitingInList = publishedInList.filter(c => c.competitionPhase === "FINISHED").length;
+    
+    // Use the count from the list directly if the total is small, otherwise approximate
+    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions 
+      ? awaitingInList 
+      : publishedInList.length > 0 
+        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions) 
+        : 0;
+    const ongoingValue = publishedCompetitions - awaitingValue;
+
     return [
-      { name: "Đang bay", value: ongoingCompetitions, color: "#3b82f6" },
-      { name: "Đã kết thúc", value: completedCompetitions, color: "#10b981" },
-      { name: "Bản nháp", value: draftCompetitions, color: "#6a7080" },
-      { name: "Đã hủy", value: cancelledCompetitions, color: "#ef4444" },
+      { name: t("status.ongoing"), value: ongoingValue, color: "#3b82f6" },
+      { name: t("status.awaiting"), value: awaitingValue, color: "#f59e0b" },
+      { name: t("status.resultPublished"), value: completedCompetitions, color: "#10b981" },
+      { name: t("status.draft"), value: draftCompetitions, color: "#6a7080" },
+      { name: t("status.cancelled"), value: (cancelledCompetitions || 0) + (invalidCompetitions || 0), color: "#ef4444" },
     ].filter((d) => d.value > 0);
-  }, [data]);
+  }, [data, t]);
 
   const barData = useMemo(() => {
     if (!data?.topByParticipants) return [];
@@ -80,12 +158,13 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
   return (
     <div className="space-y-4">
       {/* Stat row */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         {[
-          { label: "Tổng cuộc thi", value: ov?.totalCompetitions || 0, color: "text-white", bg: "bg-[#1e2130]" },
-          { label: "Đang bay", value: ov?.ongoingCompetitions || 0, color: "text-blue-400", bg: "bg-blue-500/[0.06]" },
-          { label: "Đã kết thúc", value: ov?.completedCompetitions || 0, color: "text-emerald-400", bg: "bg-emerald-500/[0.06]" },
-          { label: "Tổng thí sinh", value: (ov?.totalParticipants || 0).toLocaleString("vi-VN"), color: "text-[#9ca3af]", bg: "bg-[#1e2130]" },
+          { label: t("summaryLabels.total"), value: ov?.totalCompetitions || 0, color: "text-white", bg: "bg-[#1e2130]" },
+          { label: t("summaryLabels.deploying"), value: ov?.publishedCompetitions || 0, color: "text-blue-400", bg: "bg-blue-500/[0.06]" },
+          { label: t("summaryLabels.completed"), value: ov?.completedCompetitions || 0, color: "text-emerald-400", bg: "bg-emerald-500/[0.06]" },
+          { label: t("summaryLabels.invalid"), value: ov?.invalidCompetitions || 0, color: "text-purple-400", bg: "bg-purple-500/[0.06]" },
+          { label: t("summaryLabels.participants"), value: (ov?.totalParticipants || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN"), color: "text-[#9ca3af]", bg: "bg-[#1e2130]" },
         ].map((item, i) => (
           <motion.div
             key={i}
@@ -105,7 +184,7 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
         {/* Donut */}
         {pieData.length > 0 && (
           <div className="bg-[#1e2130] rounded-xl p-4 border border-white/[0.05]">
-            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider mb-3">Phân bổ trạng thái</p>
+            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider mb-3">{t("charts.allocation")}</p>
             <div className="flex items-center gap-3">
               <div className="w-20 h-20 flex-shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
@@ -142,7 +221,7 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
         {/* Bar */}
         {barData.length > 0 && (
           <div className="bg-[#1e2130] rounded-xl p-4 border border-white/[0.05]">
-            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider mb-3">Top thí sinh theo cuộc thi</p>
+            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider mb-3">{t("charts.topParticipants")}</p>
             <div className="h-20">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barSize={10}>
@@ -167,10 +246,11 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
           <table className="w-full min-w-[450px]">
             <thead>
               <tr className="text-[10px] text-[#6a7080] uppercase tracking-wider border-b border-white/[0.05]">
-                <th className="text-left py-2 px-2 font-semibold">Cuộc thi</th>
-                <th className="text-center py-2 px-2 font-semibold">Trạng thái</th>
-                <th className="text-right py-2 px-2 font-semibold">Thí sinh</th>
-                <th className="text-center py-2 px-2 font-semibold">Ngày bắt đầu</th>
+                <th className="text-left py-2 px-2 font-semibold w-16">{t("table.id")}</th>
+                <th className="text-left py-2 px-2 font-semibold">{t("table.competition")}</th>
+                <th className="text-center py-2 px-2 font-semibold">{t("table.status")}</th>
+                <th className="text-right py-2 px-2 font-semibold">{t("table.participants")}</th>
+                <th className="text-center py-2 px-2 font-semibold">{t("table.time")}</th>
               </tr>
             </thead>
             <tbody>
@@ -183,19 +263,32 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
                   className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
                 >
                   <td className="py-2.5 px-2">
-                    <p className="text-[11px] text-white font-medium truncate">{comp.nameVN}</p>
+                    <span className="text-[10px] font-bold text-[#5a6070]">
+                      #{i + 1}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-2">
+                    <p className="text-[11px] text-white font-medium truncate max-w-[180px]">{comp.nameVN}</p>
                     <p className="text-[9px] text-[#6a7080]">{comp.clubNameVN}</p>
                   </td>
                   <td className="py-2.5 px-2 text-center">
-                    <StatusTag status={comp.status} />
+                    <CompetitionTag status={comp.competitionStatus} phase={comp.competitionPhase} />
                   </td>
                   <td className="py-2.5 px-2 text-right">
-                    <span className="text-[11px] font-semibold text-[#8a9099]">{comp.participantCount.toLocaleString("vi-VN")}</span>
+                    <span className="text-[11px] font-semibold text-[#8a9099]">{comp.participantCount.toLocaleString(locale === "en" ? "en-US" : "vi-VN")}</span>
                   </td>
                   <td className="py-2.5 px-2 text-center">
-                    <span className="text-[10px] text-[#6a7080]">
-                      {new Date(comp.startDate).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "2-digit" })}
-                    </span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] text-white font-medium">
+                        {new Date(comp.startDate).toLocaleString(locale === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-[1px] bg-[#333745]" />
+                        <span className="text-[9px] text-[#6a7080]">
+                          {new Date(comp.endDate).toLocaleString(locale === "en" ? "en-US" : "vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    </div>
                   </td>
                 </motion.tr>
               ))}

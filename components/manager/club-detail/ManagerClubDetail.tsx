@@ -18,7 +18,7 @@ import {
 } from "@/hooks/dashboard/useDashboard";
 import { Spinner } from "@/components/ui/spinner";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { RefreshCcw, Trophy, BookOpen, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -27,7 +27,9 @@ const UUID_SUFFIX_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 
 export default function ManagerClubDetail() {
   const [selectedTop, setSelectedTop] = useState<5 | 10 | 15>(10);
+  const [topComps, setTopComps] = useState(10);
   const [monthsGrowth, setMonthsGrowth] = useState(12);
+  const [displayStatus, setDisplayStatus] = useState<string>("ALL");
   const [mounted, setMounted] = useState(false);
   const params = useParams<{ clubSlug?: string }>();
   const clubSlug = params?.clubSlug;
@@ -47,7 +49,31 @@ export default function ManagerClubDetail() {
   const overviewQuery = useGetClubRevenueOverview(clubId);
   const byCourseQuery = useGetClubExpenseByCourse(clubId, { top: selectedTop });
   const growthQuery = useGetClubExpenseGrowth(clubId, { months: monthsGrowth });
-  const competitionQuery = useGetClubCompetitionStats(clubId, 10);
+  const compQueryParams = useMemo(() => {
+    const params: any = { top: topComps };
+    switch (displayStatus) {
+      case "ONGOING":
+        params.competitionStatus = "PUBLISHED";
+        params.competitionPhase = "ONGOING";
+        break;
+      case "AWAITING":
+        params.competitionStatus = "PUBLISHED";
+        params.competitionPhase = "FINISHED";
+        break;
+      case "COMPLETED":
+        params.competitionStatus = "RESULT_PUBLISHED";
+        break;
+      case "DRAFT":
+        params.competitionStatus = "DRAFT";
+        break;
+      case "CANCELLED":
+        params.competitionStatus = "CANCELLED";
+        break;
+    }
+    return params;
+  }, [topComps, displayStatus]);
+
+  const competitionQuery = useGetClubCompetitionStats(clubId, compQueryParams);
   const topBuyersQuery = useGetClubTopBuyers(clubId, 10);
 
   const growthSeries = growthQuery.data?.revenueGrowth ?? [];
@@ -188,10 +214,35 @@ export default function ManagerClubDetail() {
                       <div>
                         <h3 className="text-[13px] font-bold text-white">Hoạt động thi đấu</h3>
                         <p className="text-[11px] text-[#5a5f6a] mt-0.5">
-                          {competitionQuery.data?.overview.ongoingCompetitions || 0} đang diễn ra ·{" "}
-                          {competitionQuery.data?.overview.completedCompetitions || 0} đã kết thúc ·{" "}
+                          {competitionQuery.data?.overview.publishedCompetitions || 0} đang triển khai ·{" "}
+                          {competitionQuery.data?.overview.completedCompetitions || 0} đã hoàn tất ·{" "}
                           {competitionQuery.data?.overview.totalCompetitions || 0} tổng cuộc thi
                         </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={displayStatus}
+                          onChange={(e) => setDisplayStatus(e.target.value)}
+                          className="bg-[#1e2130] border border-white/[0.07] text-[10px] font-medium text-[#6a7080] rounded-lg px-2 py-1 outline-none cursor-pointer"
+                        >
+                          <option value="ALL">Tất cả trạng thái</option>
+                          <option value="ONGOING">Đang diễn ra</option>
+                          <option value="AWAITING">Chờ công bố</option>
+                          <option value="COMPLETED">Đã hoàn tất</option>
+                          <option value="DRAFT">Bản nháp</option>
+                          <option value="CANCELLED">Đã hủy</option>
+                        </select>
+                        <select
+                          value={topComps}
+                          onChange={(e) => setTopComps(Number(e.target.value))}
+                          className="bg-[#1e2130] border border-white/[0.07] text-[10px] font-medium text-[#6a7080] rounded-lg px-2 py-1 outline-none cursor-pointer"
+                        >
+                          <option value={5}>Hiện 5</option>
+                          <option value={10}>Hiện 10</option>
+                          <option value={20}>Hiện 20</option>
+                          <option value={50}>Hiện 50</option>
+                          <option value={100}>Hiện 100</option>
+                        </select>
                       </div>
                     </div>
                     <ManagerClubCompetitionStatsSection

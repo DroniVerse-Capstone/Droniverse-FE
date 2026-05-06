@@ -9,8 +9,9 @@ import {
 import { AdminRevenueGrowthData } from "@/validations/dashboard/dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { vi, enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: AdminRevenueGrowthData;
@@ -18,8 +19,12 @@ interface Props {
   months: number;
 }
 
-const fmtVND = (v: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(v);
+const formatVND = (v: number, locale: string) => {
+  const formatted = new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(v);
+  return locale === "en" ? `${formatted} VND` : `${formatted} ₫`;
+};
 
 interface TTProps {
   active?: boolean;
@@ -28,6 +33,8 @@ interface TTProps {
 }
 
 function ChartTooltip({ active, payload, label }: TTProps) {
+  const t = useTranslations("SystemDashboard.revenueTrend");
+  const locale = useLocale();
   if (!active || !payload?.length) return null;
   const cur = payload[0]?.value ?? 0;
   const prev = payload[1]?.value ?? 0;
@@ -38,18 +45,18 @@ function ChartTooltip({ active, payload, label }: TTProps) {
       <p className="text-[#7a8090] font-medium mb-2">{label}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-8">
-          <span className="text-[#8a9099]">Doanh thu</span>
-          <span className="font-bold text-white">{fmtVND(cur)}</span>
+          <span className="text-[#8a9099]">{t("revenue")}</span>
+          <span className="font-bold text-white">{formatVND(cur, locale)}</span>
         </div>
         <div className="flex justify-between gap-8">
-          <span className="text-[#6a7080]">Kỳ trước</span>
-          <span className="text-[#8a9099]">{fmtVND(prev)}</span>
+          <span className="text-[#6a7080]">{t("prevPeriod")}</span>
+          <span className="text-[#8a9099]">{formatVND(prev, locale)}</span>
         </div>
         <div className={cn(
           "flex justify-between gap-8 pt-1 border-t border-white/[0.06]",
           diff >= 0 ? "text-emerald-400" : "text-red-400"
         )}>
-          <span className="font-medium">{diff >= 0 ? "Tăng" : "Giảm"}</span>
+          <span className="font-medium">{diff >= 0 ? t("increase") : t("decrease")}</span>
           <span className="font-bold">{Math.abs(Number(pct))}%</span>
         </div>
       </div>
@@ -58,17 +65,20 @@ function ChartTooltip({ active, payload, label }: TTProps) {
 }
 
 export default function AdminRevenueGrowthSection({ data, isLoading, months }: Props) {
+  const t = useTranslations("SystemDashboard.revenueTrend");
+  const locale = useLocale();
   const [mode, setMode] = useState<"area" | "bar">("area");
 
   const chartData = useMemo(() => {
     if (!data?.revenueGrowth) return [];
+    const dateLocale = locale === "en" ? enUS : vi;
     return data.revenueGrowth.map((item, idx) => ({
-      name: format(new Date(item.month), "MMM", { locale: vi }),
-      fullName: format(new Date(item.month), "MMMM yyyy", { locale: vi }),
+      name: format(new Date(item.month), "MMM", { locale: dateLocale }),
+      fullName: format(new Date(item.month), "MMMM yyyy", { locale: dateLocale }),
       revenue: item.value,
       prev: idx > 0 ? data.revenueGrowth[idx - 1].value : item.value,
     }));
-  }, [data]);
+  }, [data, locale]);
 
   const avg = useMemo(() => {
     if (!chartData.length) return 0;
@@ -82,7 +92,7 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
   if (!chartData.length) {
     return (
       <div className="h-[260px] flex items-center justify-center">
-        <p className="text-[12px] text-[#5a5f6a]">Không có dữ liệu trong {months} tháng</p>
+        <p className="text-[12px] text-[#5a5f6a]">{t("empty", { count: months })}</p>
       </div>
     );
   }
@@ -100,7 +110,7 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
               mode === m ? "bg-blue-500 text-white" : "text-[#7a8090] hover:text-[#a0a8b8]"
             )}
           >
-            {m === "area" ? "Diện tích" : "Cột"}
+            {t(`chartType.${m}` as any)}
           </button>
         ))}
       </div>
@@ -162,7 +172,7 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
         )}>
           {(data?.growthRate ?? 0) >= 0 ? "+" : ""}{data?.growthRate ?? 0}%
         </span>
-        <span className="text-[11px] text-[#6a7080]">so với {months} tháng trước</span>
+        <span className="text-[11px] text-[#6a7080]">{t("growthSummary", { count: months })}</span>
         <div className="flex-1 h-0.5 bg-white/[0.05] rounded-full overflow-hidden">
           <div
             className={cn("h-full rounded-full transition-all", (data?.growthRate ?? 0) >= 0 ? "bg-emerald-500" : "bg-red-500")}

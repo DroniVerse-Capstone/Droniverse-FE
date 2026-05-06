@@ -6,14 +6,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: AdminClubRankingData;
   isLoading: boolean;
 }
 
-const fmtVND = (v: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(v);
+const formatVND = (v: number, locale: string) => {
+  const formatted = new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(v);
+  return locale === "en" ? `${formatted} VND` : `${formatted} ₫`;
+};
 
 const RANK_COLORS = [
   "text-blue-400 font-bold",
@@ -32,6 +37,9 @@ const BAR_COLORS = [
 ] as const;
 
 export default function AdminClubRankingSection({ data, isLoading }: Props) {
+  const t = useTranslations("SystemDashboard.clubRanking");
+  const locale = useLocale();
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -46,7 +54,7 @@ export default function AdminClubRankingSection({ data, isLoading }: Props) {
   if (!clubs.length) {
     return (
       <div className="py-10 text-center">
-        <p className="text-[12px] text-[#6a7080]">Chưa có dữ liệu câu lạc bộ</p>
+        <p className="text-[12px] text-[#6a7080]">{t("empty")}</p>
       </div>
     );
   }
@@ -56,12 +64,12 @@ export default function AdminClubRankingSection({ data, isLoading }: Props) {
       <table className="w-full min-w-[650px]">
         <thead>
           <tr className="text-[10px] text-[#6a7080] uppercase tracking-wider border-b border-white/[0.05]">
-            <th className="text-left py-3 px-4 font-semibold">#</th>
-            <th className="text-left py-3 px-4 font-semibold">Câu lạc bộ</th>
-            <th className="text-left py-3 px-4 font-semibold">Mã CLB</th>
-            <th className="text-right py-3 px-4 font-semibold">Giao dịch</th>
-            <th className="text-right py-3 px-4 font-semibold">Tổng chi tiêu</th>
-            <th className="text-center py-3 px-4 font-semibold w-44">Chiếm</th>
+            <th className="text-left py-3 px-4 font-semibold">{t("table.rank")}</th>
+            <th className="text-left py-3 px-4 font-semibold">{t("table.club")}</th>
+            <th className="text-left py-3 px-4 font-semibold">{t("table.code")}</th>
+            <th className="text-right py-3 px-4 font-semibold">{t("table.transactions")}</th>
+            <th className="text-right py-3 px-4 font-semibold">{t("table.revenue")}</th>
+            <th className="text-center py-3 px-4 font-semibold w-44">{t("table.share")}</th>
           </tr>
         </thead>
         <tbody>
@@ -105,10 +113,10 @@ export default function AdminClubRankingSection({ data, isLoading }: Props) {
                   </span>
                 </td>
                 <td className="py-4 px-4 text-right">
-                  <span className="text-[13px] text-[#9ca3af]">{club.transactionCount.toLocaleString("vi-VN")}</span>
+                  <span className="text-[13px] text-[#9ca3af]">{club.transactionCount.toLocaleString(locale === "en" ? "en-US" : "vi-VN")}</span>
                 </td>
                 <td className="py-4 px-4 text-right">
-                  <span className="text-[14px] font-bold text-white">{fmtVND(club.totalSpent)}</span>
+                  <span className="text-[14px] font-bold text-white">{formatVND(club.totalSpent, locale)}</span>
                 </td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-2">
@@ -128,10 +136,10 @@ export default function AdminClubRankingSection({ data, isLoading }: Props) {
         <tfoot>
           <tr className="border-t border-white/[0.07] bg-[#1e2130]/50">
             <td className="py-4 px-4" colSpan={4}>
-              <span className="text-[10px] text-[#6a7080] font-medium">{clubs.length} câu lạc bộ</span>
+              <span className="text-[10px] text-[#6a7080] font-medium">{t("footerLabel", { count: clubs.length })}</span>
             </td>
             <td className="py-4 px-4 text-right">
-              <span className="text-[14px] font-bold text-white">{fmtVND(totalAllSpent)}</span>
+              <span className="text-[14px] font-bold text-white">{formatVND(totalAllSpent, locale)}</span>
             </td>
             <td className="py-4 px-4 text-right">
               <span className="text-[10px] text-[#6a7080]">100%</span>

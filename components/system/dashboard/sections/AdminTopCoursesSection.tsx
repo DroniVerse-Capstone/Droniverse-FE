@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface Props {
@@ -18,19 +19,12 @@ const COLORS = [
   "#a855f7", "#c084fc", "#818cf8",
 ];
 
-const fmtVND = (v: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(v);
-
-function DonutTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0];
-  return (
-    <div className="bg-[#1e2130] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px]">
-      <p className="text-[#6a7080] mb-1">{d.name}</p>
-      <p className="font-bold text-white">{fmtVND(Number(d.value) || 0)}</p>
-    </div>
-  );
-}
+const formatVND = (v: number, locale: string) => {
+  const formatted = new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(v);
+  return locale === "en" ? `${formatted} VND` : `${formatted} ₫`;
+};
 
 interface CourseItem {
   courseId: string;
@@ -43,6 +37,20 @@ interface CourseItem {
 }
 
 export default function AdminTopCoursesSection({ data, isLoading }: Props) {
+  const t = useTranslations("SystemDashboard.topCourses");
+  const locale = useLocale();
+
+  function DonutTooltip({ active, payload }: any) {
+    if (!active || !payload?.length) return null;
+    const d = payload[0];
+    return (
+      <div className="bg-[#1e2130] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px]">
+        <p className="text-[#6a7080] mb-1">{d.name}</p>
+        <p className="font-bold text-white">{formatVND(Number(d.value) || 0, locale)}</p>
+      </div>
+    );
+  }
+
   const raw = data?.revenueByCourse;
   const rawTotal = raw && Array.isArray(raw)
     ? raw.reduce((s, item) => s + (Number(item.revenue) || 0), 0)
@@ -87,7 +95,7 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
   }
 
   if (!items.length) {
-    return <p className="text-[12px] text-[#6a7080] py-4">Chưa có dữ liệu khóa học</p>;
+    return <p className="text-[12px] text-[#6a7080] py-4">{t("empty")}</p>;
   }
 
   return (
@@ -115,26 +123,29 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-[9px] text-[#6a7080]">Tổng</p>
+            <p className="text-[9px] text-[#6a7080]">{t("totalLabel")}</p>
             <p className="text-[11px] font-bold text-white leading-tight">
               {displayTotal >= 1_000_000
                 ? `${(displayTotal / 1_000_000).toFixed(1)}M`
                 : displayTotal >= 1_000
                   ? `${(displayTotal / 1_000).toFixed(0)}K`
-                  : displayTotal.toLocaleString("vi-VN")}
+                  : displayTotal.toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
             </p>
           </div>
         </div>
 
         {/* Legend */}
         <div className="flex-1 space-y-1.5">
-          {items.map((item, i) => (
-            <div key={item.courseId} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-              <span className="text-[11px] text-[#8a9099] flex-1 truncate font-medium">{item.courseNameVN}</span>
-              <span className="text-[10px] text-[#5a6070] flex-shrink-0 font-medium">{item.sharePct.toFixed(1)}%</span>
-            </div>
-          ))}
+          {items.map((item, i) => {
+            const courseName = locale === "en" ? item.courseNameEN || item.courseNameVN : item.courseNameVN;
+            return (
+              <div key={item.courseId} className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <span className="text-[11px] text-[#8a9099] flex-1 truncate font-medium">{courseName}</span>
+                <span className="text-[10px] text-[#5a6070] flex-shrink-0 font-medium">{item.sharePct.toFixed(1)}%</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -142,6 +153,7 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
       <div className="divide-y divide-white/[0.03]">
         {items.map((item, i) => {
           const color = COLORS[i % COLORS.length];
+          const courseName = locale === "en" ? item.courseNameEN || item.courseNameVN : item.courseNameVN;
           return (
             <motion.div
               key={item.courseId}
@@ -159,7 +171,7 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
                 {item.imageUrl ? (
                   <Image
                     src={item.imageUrl}
-                    alt={item.courseNameVN}
+                    alt={courseName}
                     width={36}
                     height={36}
                     className="object-cover w-full h-full"
@@ -167,14 +179,14 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
                   />
                 ) : (
                   <div className="w-full h-full bg-[#232730] flex items-center justify-center">
-                    <span className="text-[11px] font-bold text-[#6a7080]">{item.courseNameVN.charAt(0) || "?"}</span>
+                    <span className="text-[11px] font-bold text-[#6a7080]">{courseName.charAt(0) || "?"}</span>
                   </div>
                 )}
               </div>
 
               {/* Info + bar */}
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-white truncate">{item.courseNameVN}</p>
+                <p className="text-[12px] font-semibold text-white truncate">{courseName}</p>
                 <div className="flex items-center gap-2 mt-1.5">
                   <div className="flex-1 h-1 bg-white/[0.04] rounded-full overflow-hidden">
                     <motion.div
@@ -190,7 +202,7 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
 
               {/* Revenue */}
               <div className="text-right flex-shrink-0">
-                <p className="text-[12px] font-bold text-white">{fmtVND(item.revenue)}</p>
+                <p className="text-[12px] font-bold text-white">{formatVND(item.revenue, locale)}</p>
                 <p className="text-[10px] text-[#6a7080]">{item.sharePct.toFixed(1)}%</p>
               </div>
             </motion.div>
@@ -200,8 +212,8 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
 
       {/* Summary */}
       <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
-        <span className="text-[10px] text-[#6a7080]">{items.length} khóa học</span>
-        <span className="text-[12px] font-bold text-white">{fmtVND(displayTotal)}</span>
+        <span className="text-[10px] text-[#6a7080]">{t("footerLabel", { count: items.length })}</span>
+        <span className="text-[12px] font-bold text-white">{formatVND(displayTotal, locale)}</span>
       </div>
     </div>
   );
