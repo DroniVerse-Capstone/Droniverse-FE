@@ -113,7 +113,7 @@ export default function LearningPathSideBar({
   return (
     <aside
       className={cn(
-        "relative border-r border-greyscale-700 bg-greyscale-900 transition-all duration-300",
+        "sticky top-0 h-screen self-start overflow-hidden border-r border-greyscale-700 bg-greyscale-900 transition-all duration-300",
         isOpen ? "w-full md:w-90" : "w-full md:w-15",
       )}
     >
@@ -141,7 +141,7 @@ export default function LearningPathSideBar({
       {!isOpen ? (
         <div className="hidden p-2 md:block" />
       ) : (
-        <div className="space-y-3 p-3">
+        <div className="flex h-[calc(100vh-3.5rem)] min-h-0 flex-col space-y-3 overflow-y-auto p-3">
           {isLoading || isFetching ? (
             <div className="flex min-h-24 items-center justify-center rounded border border-greyscale-700 bg-greyscale-900">
               <Spinner className="h-5 w-5" />
@@ -190,7 +190,7 @@ export default function LearningPathSideBar({
                 </div>
               </div>
 
-              <div className="max-h-[calc(100vh-200px)] space-y-2 overflow-y-auto pr-1">
+              <div className="space-y-2 overflow-y-auto pr-1">
                 {/* Overview Button - Only show when completed */}
                 {data.status === "COMPLETED" && (
                   <button
@@ -202,8 +202,8 @@ export default function LearningPathSideBar({
                         : "border-secondary/60 bg-secondary/20 text-white hover:bg-secondary/30"
                     )}
                   >
-                    <PiCertificateBold className="h-5 w-5 relative z-10 text-white" />
-                    <span className="text-sm font-black tracking-tight relative z-10 uppercase">Xem chứng chỉ</span>
+                    <PiCertificateBold className="h-5 w-5 text-white" />
+                    <span className="text-sm font-black tracking-tight uppercase">Xem chứng chỉ</span>
                   </button>
                 )}
 
