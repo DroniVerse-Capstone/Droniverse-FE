@@ -11,7 +11,7 @@ import { SIM_CANVAS } from "@/lib/config3D/simConfig";
 import { useDroneController } from "@/hooks/useDroneController";
 import { useTranslations } from "@/providers/i18n-provider";
 import { LabContentData, LabSolution } from "@/types/lab";
-import { FaPlay, FaRedo, FaBatteryFull, FaRegClock, FaGlobe, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaBug, FaTerminal, FaTrophy, FaClock, FaCube } from "react-icons/fa";
+import { FaPlay, FaRedo, FaBatteryFull, FaRegClock, FaGlobe, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaBug, FaTerminal, FaTrophy, FaClock, FaCube, FaClipboardList } from "react-icons/fa";
 import { projectToWorld, worldToCanvas } from "@/lib/config3D/simConfig";
 import { Command } from "@/lib/simulator/droneSimulator";
 import { validatePattern, validateFlightPattern, Point3D } from "@/lib/simulator/patternValidation";
@@ -678,11 +678,12 @@ export default function PlayLabWorkspace({
           {/* Info */}
           <button
             onClick={() => setShowMissionBrief(true)}
-            title="Đề bài"
-            className="w-9 h-9 flex items-center justify-center rounded text-slate-500 hover:text-slate-200 hover:bg-[#1e2030] border border-[#2a2d3a] hover:border-[#3a3f5a] transition-all"
+            className="flex items-center gap-2 px-3 h-9 rounded text-slate-300 hover:text-white hover:bg-[#1e2030] border border-[#2a2d3a] hover:border-[#3a3f5a] transition-all"
           >
-            <FaInfoCircle />
+            <FaClipboardList className="text-sm" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">Đề bài</span>
           </button>
+
 
           {/* Reset */}
           <button
