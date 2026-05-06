@@ -6,14 +6,14 @@
  * - S = Backward (Front stronger, Nose up, Pitch -)
  * - A = Left (Right stronger, Tilt left, Roll -)
  * - D = Right (Left stronger, Tilt right, Roll +)
- * - Arrow Left = Rotate Left (CCW motors stronger)
- * - Arrow Right = Rotate Right (CW motors stronger)
+ * - Arrow Left = Rotate Left (CW motors stronger, Body CCW)
+ * - Arrow Right = Rotate Right (CCW motors stronger, Body CW)
  * 
  * MOTOR LAYOUT:
- * 1 = Front Left  (CW)
- * 2 = Front Right (CCW)
- * 3 = Rear Left   (CCW)
- * 4 = Rear Right  (CW)
+ * 1 = Front Left  (CCW)
+ * 2 = Front Right (CW)
+ * 3 = Rear Left   (CW)
+ * 4 = Rear Right  (CCW)
  */
 
 export interface MotorValues {
@@ -102,9 +102,9 @@ export function processKeyboardInput(
 
   // Yaw: Arrow Left/Right
   if (keysPressed.has("arrowleft")) {
-    yaw = Math.max(-maxVal, yaw - config.yawSpeed * multiplier * dt);
-  } else if (keysPressed.has("arrowright")) {
     yaw = Math.min(maxVal, yaw + config.yawSpeed * multiplier * dt);
+  } else if (keysPressed.has("arrowright")) {
+    yaw = Math.max(-maxVal, yaw - config.yawSpeed * multiplier * dt);
   } else {
     yaw *= config.yawDecay;
     if (Math.abs(yaw) < config.yawDeadZone) yaw = 0;
@@ -269,8 +269,8 @@ export function updatePhysics(
   const tPitch = ((motors.m1 + motors.m2) - (motors.m3 + motors.m4)) * 0.45;
   // roll + = right: Left side (M1+M3) stronger → tilt right
   const tRoll = ((motors.m1 + motors.m3) - (motors.m2 + motors.m4)) * 0.45;
-  // yaw: CW stronger (m1, m4) = rotate LEFT (positive yaw), CCW stronger (m2, m3) = rotate RIGHT (negative yaw)
-  const tYawRate = ((motors.m1 + motors.m4) - (motors.m2 + motors.m3)) * 1.5;
+  // yaw: CW stronger (m2, m3) = rotate LEFT (positive yaw), CCW stronger (m1, m4) = rotate RIGHT (negative yaw)
+  const tYawRate = ((motors.m2 + motors.m3) - (motors.m1 + motors.m4)) * 1.5;
 
   // Gravity restoring torque: When tilted, gravity pulls back toward level (like a pendulum)
   // This means motors must continuously fight gravity to hold any angle.

@@ -449,8 +449,8 @@ export function updatePhysics(state: PhysicsState, lessonId: LessonId, delta: nu
         // CCW torque (FL, RR motors)
         const ccwTorque = calculateLiftForce(motorFL_RPM) + calculateLiftForce(motorRR_RPM);
 
-        // Net yaw torque: CCW motors stronger -> Rotate Left (+), CW motors stronger -> Rotate Right (-)
-        const netYawTorque = (ccwTorque - cwTorque) * YAW_SENSITIVITY;
+        // Net yaw torque: CW motors (FR, RL) create CCW torque (+), CCW motors (FL, RR) create CW torque (-)
+        const netYawTorque = (cwTorque - ccwTorque) * YAW_SENSITIVITY;
 
         // Apply yaw rotation (multiplier increased from 0.01 to 5.0 for visibility)
         newState.yaw += netYawTorque * delta * 5.0;

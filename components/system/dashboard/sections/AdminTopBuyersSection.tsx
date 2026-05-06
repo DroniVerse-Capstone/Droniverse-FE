@@ -5,14 +5,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AdminTopBuyer } from "@/validations/dashboard/dashboard";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: { buyers: AdminTopBuyer[]; totalSystemRevenue: number };
   isLoading: boolean;
 }
 
-const fmtVND = (v: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(v);
+const formatVND = (v: number, locale: string) => {
+  const formatted = new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(v);
+  return locale === "en" ? `${formatted} VND` : `${formatted} ₫`;
+};
 
 const RANK_COLORS = [
   "text-blue-400 font-bold",
@@ -23,6 +28,9 @@ const RANK_COLORS = [
 ] as const;
 
 export default function AdminTopBuyersSection({ data, isLoading }: Props) {
+  const t = useTranslations("SystemDashboard.vipStudents");
+  const locale = useLocale();
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -35,7 +43,7 @@ export default function AdminTopBuyersSection({ data, isLoading }: Props) {
   const totalRevenue = data?.totalSystemRevenue ?? 0;
 
   if (!buyers.length) {
-    return <p className="text-[12px] text-[#6a7080] py-4">Chưa có dữ liệu học viên</p>;
+    return <p className="text-[12px] text-[#6a7080] py-4">{t("empty")}</p>;
   }
 
   const maxSpent = Math.max(...buyers.map((b) => b.totalSpent), 1);
@@ -76,7 +84,7 @@ export default function AdminTopBuyersSection({ data, isLoading }: Props) {
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-semibold text-white truncate">{name}</p>
               <p className="text-[10px] text-[#6a7080] mt-0.5">
-                {buyer.purchaseCount.toLocaleString("vi-VN")} giao dịch
+                {t("transactions", { count: buyer.purchaseCount.toLocaleString(locale === "en" ? "en-US" : "vi-VN") })}
               </p>
               <div className="flex items-center gap-2 mt-1.5">
                 <div className="flex-1 h-0.5 bg-white/[0.05] rounded-full overflow-hidden">
@@ -92,8 +100,8 @@ export default function AdminTopBuyersSection({ data, isLoading }: Props) {
 
             {/* Spend */}
             <div className="text-right flex-shrink-0 w-36">
-              <p className="text-[12px] font-bold text-white">{fmtVND(buyer.totalSpent)}</p>
-              <p className="text-[10px] text-[#6a7080]">{sharePct.toFixed(2)}% tổng</p>
+              <p className="text-[12px] font-bold text-white">{formatVND(buyer.totalSpent, locale)}</p>
+              <p className="text-[10px] text-[#6a7080]">{t("shareOfTotal", { percent: sharePct.toFixed(2) })}</p>
             </div>
           </motion.div>
         );
@@ -101,10 +109,10 @@ export default function AdminTopBuyersSection({ data, isLoading }: Props) {
 
       {/* Summary */}
       <div className="flex items-center justify-between pt-3 border-t border-white/[0.05] mt-2">
-        <span className="text-[10px] text-[#6a7080]">{buyers.length} học viên</span>
+        <span className="text-[10px] text-[#6a7080]">{t("footerLabel", { count: buyers.length })}</span>
         <div className="text-right">
-          <span className="text-[12px] font-bold text-white">{fmtVND(totalRevenue)}</span>
-          <p className="text-[10px] text-[#6a7080]">tổng doanh thu hệ thống</p>
+          <span className="text-[12px] font-bold text-white">{formatVND(totalRevenue, locale)}</span>
+          <p className="text-[10px] text-[#6a7080]">{t("systemTotalLabel")}</p>
         </div>
       </div>
     </div>

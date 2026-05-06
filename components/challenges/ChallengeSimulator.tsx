@@ -324,7 +324,7 @@ function MotorNode({ id, val, isCW, label }: { id: string, val: number, isCW: bo
   const intensity = val / 100;
   const rpm = powerToRPM(val);
   const newtons = powerToNewtons(val);
-  const color = isCW ? "rgb(0, 229, 255)" : "rgb(251, 191, 36)";
+  const color = isCW ? "rgb(251, 191, 36)" : "rgb(0, 229, 255)";
 
   const isHigh = val > 55;
 
@@ -657,6 +657,9 @@ export default function ChallengeSimulator({ labId, returnUrl, isAdmin, enrollme
 
 
   const handleLevelUpdate = useCallback((result: LevelResult) => {
+    // Nếu game đang không chạy (đang countdown, briefing, hoặc đã xong), bỏ qua update từ frame cũ
+    if (!isRunningRef.current) return;
+
     // Luôn cập nhật result để HUD lấy được customState (nước, nhiệt...)
     setLevelResult(result);
 

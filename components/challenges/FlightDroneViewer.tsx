@@ -100,17 +100,17 @@ function CameraController({ mode, droneRef, altitude }: { mode: CameraMode, dron
 
 // Motor positions in X-config: FL, FR, RL, RR
 const MOTOR_POSITIONS: Record<string, { pos: [number, number, number], rotation: number }> = {
-  m1: { pos: [-1.1, 0.3, -0.5], rotation: 1 },    // Front Left  (CW)
-  m2: { pos: [0.3, 0.3, -0.5], rotation: -1 },   // Front Right (CCW)
-  m3: { pos: [-1.1, 0.3, 0.9], rotation: -1 },    // Rear Left   (CCW)
-  m4: { pos: [0.25, 0.3, 0.9], rotation: 1 },     // Rear Right  (CW)
+  m1: { pos: [-1.1, 0.3, -0.5], rotation: -1 },   // Front Left  (CCW)
+  m2: { pos: [0.3, 0.3, -0.5], rotation: 1 },    // Front Right (CW)
+  m3: { pos: [-1.1, 0.3, 0.9], rotation: 1 },    // Rear Left   (CW)
+  m4: { pos: [0.25, 0.3, 0.9], rotation: -1 },    // Rear Right  (CCW)
 };
 
 const MOTOR_COLORS = {
-  m1: "#34d399", // Emerald - CW
-  m2: "#fb923c", // Orange - CCW
-  m3: "#fb923c", // Orange - CCW
-  m4: "#34d399", // Emerald - CW
+  m1: "#34d399", // Cyan/Emerald - CCW
+  m2: "#fb923c", // Orange - CW
+  m3: "#fb923c", // Orange - CW
+  m4: "#34d399", // Cyan/Emerald - CCW
 };
 
 // Simple motor ring indicator (no internal refs to avoid lag)
@@ -282,7 +282,7 @@ function FlightDrone({ physicsRef, showForces, cameraMode, onDroneMount }: Drone
     Object.entries(propsRef.current).forEach(([key, obj]) => {
       const val = motors[key as keyof MotorValues] || 0;
       const speed = (Math.max(0, val) / 100) * 60; // Max 60 rad/s visual speed
-      const dir = (key === 'm1' || key === 'm4') ? 1 : -1; // CW vs CCW
+      const dir = (key === 'm2' || key === 'm3') ? 1 : -1; // CW vs CCW
       obj.rotation.y += speed * delta * dir;
     });
 

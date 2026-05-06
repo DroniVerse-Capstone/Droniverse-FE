@@ -6,6 +6,22 @@ const nextConfig = {
       allowedOrigins: ["localhost:3000"],
     },
   },
+  // [Bổ sung] Prevent webpack from bundling Node.js-only modules when mqtt is used in browser
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+        fs: false,
+        dns: false,
+        path: false,
+        stream: false,
+        crypto: false,
+      };
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       {

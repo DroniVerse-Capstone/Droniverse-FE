@@ -199,14 +199,18 @@ export function LevelFireRescue(scene: THREE.Scene, drone: THREE.Group): LevelIn
     firePositions.forEach(pos => fires.push(createFireEffect(pos)));
     createWaterStation();
 
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space") isSpraying = true;
-      if (e.code === "KeyR") isRefilling = true;
-    });
-    window.addEventListener("keyup", (e) => {
-      if (e.code === "Space") isSpraying = false;
-      if (e.code === "KeyR") isRefilling = false;
-    });
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.code === "Space") isSpraying = true;
+    if (e.code === "KeyR") isRefilling = true;
+  }
+
+  function handleKeyUp(e: KeyboardEvent) {
+    if (e.code === "Space") isSpraying = false;
+    if (e.code === "KeyR") isRefilling = false;
   }
 
   function update(delta: number): LevelResult {
@@ -346,6 +350,8 @@ export function LevelFireRescue(scene: THREE.Scene, drone: THREE.Group): LevelIn
   function cleanup() {
     objects.forEach(obj => scene.remove(obj));
     fires.length = 0;
+    window.removeEventListener("keydown", handleKeyDown);
+    window.removeEventListener("keyup", handleKeyUp);
   }
 
   return { init, update, cleanup };

@@ -35,6 +35,12 @@ function formatFallbackSegment(segment: string) {
     .join(" ");
 }
 
+function isUUID(str: string) {
+  const uuidRegex =
+    /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
 function getRouteEntries() {
   return primaryItems.flatMap((item) => {
     const itemEntries = item.href
@@ -108,15 +114,24 @@ export default function SystemHeader() {
         : courseTitleVNParam || courseTitleENParam || legacyCourseTitleParam;
 
     remainingSegments.forEach((segment, index) => {
+      if (isUUID(segment)) return;
+
       const isCourseDetailLastSegment =
         matchedEntry.href === "/course-management" &&
         index === remainingSegments.length - 1 &&
         Boolean(localizedCourseTitle);
 
+      let label = isCourseDetailLastSegment
+        ? (localizedCourseTitle as string)
+        : formatFallbackSegment(segment);
+      
+      // Manual localization for common technical segments
+      if (segment === "learning-progress") {
+        label = locale === "vi" ? "Tiến độ học tập" : "Learning Progress";
+      }
+
       items.push({
-        label: isCourseDetailLastSegment
-          ? (localizedCourseTitle as string)
-          : formatFallbackSegment(segment),
+        label,
         href: `${matchedEntry.href}/${remainingSegments
           .slice(0, index + 1)
           .join("/")}`,

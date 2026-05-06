@@ -1598,8 +1598,8 @@ export default function PhysicsBasicsTab() {
                       {/* Rotation Direction */}
                       <div className={cn(
                         "p-3 rounded-lg border transition-all",
-                        state.yawTorque > 0.1 ? "bg-blue-500/10 border-blue-500/30" :
-                          state.yawTorque < -0.1 ? "bg-orange-500/10 border-orange-500/30" : "bg-white/5 border-white/10"
+                        state.yawTorque > 0.1 ? "bg-orange-500/10 border-orange-500/30" :
+                          state.yawTorque < -0.1 ? "bg-blue-500/10 border-blue-500/30" : "bg-white/5 border-white/10"
                       )}>
                         <div className="flex items-center gap-1.5 mb-1">
                           <Target className="w-3 h-3 text-white/60" />
@@ -1607,8 +1607,8 @@ export default function PhysicsBasicsTab() {
                         </div>
                         <span className={cn(
                           "text-lg font-black",
-                          state.yawTorque > 0.1 ? "text-blue-400" :
-                            state.yawTorque < -0.1 ? "text-orange-400" : "text-white/60"
+                          state.yawTorque > 0.1 ? "text-orange-400" :
+                            state.yawTorque < -0.1 ? "text-blue-400" : "text-white/60"
                         )}>
                           {state.yawTorque > 0.1 ? "↺ Ngược" :
                             state.yawTorque < -0.1 ? "↻ Thuận" : "⊕ Cân bằng"}
@@ -1675,15 +1675,15 @@ export default function PhysicsBasicsTab() {
                       <div className="text-[14px] text-white font-mono text-center font-black">
                         <span className="text-yellow-400">τ<sub>net</sub></span>
                         <span className="text-white/40"> = </span>
-                        <span className="text-blue-400">τ<sub>CCW</sub></span>
-                        <span className="text-white/40"> − </span>
                         <span className="text-orange-400">τ<sub>CW</sub></span>
+                        <span className="text-white/40"> − </span>
+                        <span className="text-blue-400">τ<sub>CCW</sub></span>
                       </div>
                       <div className="text-[10px] text-white/50 font-mono text-center mt-1">
-                        = {state.ccwTorque.toFixed(2)} − {state.cwTorque.toFixed(2)}
+                        = {state.cwTorque.toFixed(2)} − {state.ccwTorque.toFixed(2)}
                       </div>
                       <div className="text-[12px] text-white font-mono text-center mt-2 pt-2 border-t border-yellow-500/20">
-                        <span className={state.yawTorque > 0 ? "text-blue-400" : state.yawTorque < 0 ? "text-orange-400" : "text-white"}>
+                        <span className={state.yawTorque > 0 ? "text-orange-400" : state.yawTorque < 0 ? "text-blue-400" : "text-white"}>
                           = {state.yawTorque > 0 ? "+" : ""}{state.yawTorque.toFixed(2)} N
                         </span>
                       </div>

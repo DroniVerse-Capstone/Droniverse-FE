@@ -25,7 +25,7 @@ export default function ManagerClubInfo({ clubId }: ManagerClubInfoProps) {
 
   const { data: club, isLoading, isError } = useGetClubDetailById(clubId);
   const { data: wallet, isLoading: isWalletLoading, error: walletError } = useGetMyWallet();
-  const { data: competitionStats } = useGetClubCompetitionStats(clubId, 1);
+  const { data: competitionStats } = useGetClubCompetitionStats(clubId, { top: 1 });
 
   if (isLoading) {
     return (

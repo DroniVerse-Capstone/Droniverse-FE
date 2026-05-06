@@ -394,6 +394,138 @@
       "title": "Support Requests"
     }
   },
+  "SystemDashboard": {
+    "title": "Operations Center",
+    "realtimeUpdate": "Real-time Update",
+    "kpi": {
+      "totalRevenue": "Total Revenue",
+      "netProfit": "Net Profit",
+      "totalTransactions": "Total Transactions",
+      "totalParticipants": "Total Participants",
+      "thisMonth": "{amount} this month",
+      "transactionsThisMonth": "{count} transactions this month",
+      "competitionsDeploying": "{count} competitions deploying",
+      "comparedToLastPeriod": "compared to last period"
+    },
+    "revenueTrend": {
+      "title": "Revenue Trends",
+      "summary": "{amount} in {count} months · {rate}% growth",
+      "months": "{count} months",
+      "revenue": "Revenue",
+      "prevPeriod": "Previous Period",
+      "increase": "Increase",
+      "decrease": "Decrease",
+      "empty": "No data available for {count} months",
+      "chartType": {
+        "area": "Area",
+        "bar": "Bar"
+      },
+      "growthSummary": "compared to {count} months ago"
+    },
+    "competitionActivity": {
+      "title": "Competition Activities",
+      "summary": "{deploying} deploying · {completed} completed · {total} total competitions",
+      "summaryLabels": {
+        "total": "Total Competitions",
+        "deploying": "Deploying",
+        "completed": "Completed",
+        "invalid": "Invalid",
+        "participants": "Total Participants"
+      },
+      "statusFilter": {
+        "all": "All Statuses",
+        "ongoing": "Ongoing",
+        "awaiting": "Awaiting Results",
+        "completed": "Completed",
+        "draft": "Draft",
+        "cancelled": "Cancelled"
+      },
+      "showCount": "Show {count}",
+      "table": {
+        "id": "ID",
+        "competition": "Competition",
+        "status": "Status",
+        "participants": "Participants",
+        "time": "Event Time"
+      },
+      "status": {
+        "published": "Published",
+        "resultPublished": "Completed",
+        "draft": "Draft",
+        "cancelled": "Cancelled",
+        "invalid": "Invalid",
+        "ongoing": "Ongoing",
+        "awaiting": "Awaiting Results",
+        "upcoming": "Upcoming",
+        "comingSoon": "Coming Soon",
+        "regOpen": "Registration Open",
+        "regClosed": "Registration Closed"
+      },
+      "charts": {
+        "allocation": "Status Allocation",
+        "topParticipants": "Top Participants by Competition"
+      }
+    },
+    "topCourses": {
+      "title": "Top Courses",
+      "subtitle": "Revenue by Course",
+      "empty": "No course data available",
+      "totalLabel": "Total",
+      "footerLabel": "{count} courses"
+    },
+    "vipStudents": {
+      "title": "VIP Students",
+      "subtitle": "Top spenders in the system",
+      "topCount": "Top {count}",
+      "empty": "No student data available",
+      "transactions": "{count} transactions",
+      "shareOfTotal": "{percent}% of total",
+      "footerLabel": "{count} students",
+      "systemTotalLabel": "total system revenue"
+    },
+    "clubRanking": {
+      "title": "Club Rankings",
+      "subtitle": "Top clubs by revenue on the system",
+      "topCount": "Top {count}",
+      "empty": "No club data available",
+      "footerLabel": "{count} clubs",
+      "table": {
+        "rank": "#",
+        "club": "Club",
+        "code": "Club Code",
+        "transactions": "Transactions",
+        "revenue": "Total Revenue",
+        "share": "Share"
+      }
+    },
+    "learningStatistics": {
+      "title": "Learning Statistics",
+      "summary": {
+        "title": "Learning Overview",
+        "totalEnrollments": "Total Enrollments",
+        "avgGlobalProgress": "Average Progress",
+        "totalCertificates": "Certificates Issued",
+        "activeLearners": "Learners (30 Days)"
+      },
+      "weeklyActivity": {
+        "title": "Learning Activity (7 Days)",
+        "lessons": "Lessons Completed",
+        "empty": "No activity"
+      },
+      "topClubs": {
+        "title": "Top Learning Clubs",
+        "subtitle": "Based on average member completion progress",
+        "members": "{count} members",
+        "avgProgress": "{percent}% progress"
+      },
+      "courseStats": {
+        "title": "Popularity & Completion",
+        "subtitle": "Enrollment and completion rate by course",
+        "enrollments": "{count} enrollments",
+        "completion": "{percent}% completion"
+      }
+    }
+  },
   "ErrorPage": {
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
@@ -1807,6 +1939,47 @@
     "errors": {
       "unknownEnrollment": "Unknown current enrollment.",
       "initFailed": "Could not initialize learning data."
+    }
+  },
+  "ManagerLearningProgress": {
+    "title": "Member Learning Progress",
+    "subtitle": "Track and manage the learning path of all club members.",
+    "searchPlaceholder": "Search members, courses...",
+    "filter": "Filter",
+    "kpi": {
+      "totalEnrollments": "Total Enrollments",
+      "totalEnrollmentsSub": "Members participating in courses",
+      "avgProgress": "Avg Completion Rate",
+      "avgProgressSub": "Average progress of the club",
+      "completed": "Completed",
+      "completedSub": "Courses with certificates issued"
+    },
+    "table": {
+      "member": "Member",
+      "course": "Course",
+      "level": "Level",
+      "progress": "Progress",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "detail": {
+      "title": "Progress Detail",
+      "overallProgress": "Overall Progress",
+      "courseStructure": "Course Structure",
+      "lessons": "lessons",
+      "minutes": "minutes",
+      "lastAccess": "Last Access",
+      "noData": "Learning path data not found."
+    },
+    "levels": {
+      "Beginner": "Beginner",
+      "Intermediate": "Intermediate",
+      "Advanced": "Advanced",
+      "Master": "Master"
+    },
+    "statuses": {
+      "ACTIVE": "Learning",
+      "COMPLETED": "Completed"
     }
   }
 }
