@@ -137,13 +137,7 @@ function buildManagerNavItems(
           href: `${base}/club-info`,
           icon: Info,
           isActive: (pathname) => pathname === `${base}/club-info`,
-        },
-        {
-          title: t("settings.subitems.clubRules"),
-          href: `${base}/club-rules`,
-          icon: ScrollText,
-          isActive: (pathname) => pathname === `${base}/club-rules`,
-        },
+        }
       ],
     },
   ];

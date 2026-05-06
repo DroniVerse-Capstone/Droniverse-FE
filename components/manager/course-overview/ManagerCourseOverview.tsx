@@ -8,15 +8,18 @@ import {
   IoChevronBackOutline,
   IoHelpCircleOutline,
   IoTimeOutline,
+  IoTimerOutline,
 } from "react-icons/io5";
 
 import EmptyState from "@/components/common/EmptyState";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetClubCourseOverview } from "@/hooks/club/useClubCourse";
+import { useGetCourseVersionFeedbacks } from "@/hooks/feedback/useFeedback";
 import { useLocale } from "@/providers/i18n-provider";
 import { TbDrone } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
 import CourseOverviewHero from "@/components/course/CourseOverviewHero";
+import ReactStars from "react-rating-stars-component";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -57,6 +60,11 @@ export default function ManagerCourseOverview() {
   const { data, isLoading, isError, error } = useGetClubCourseOverview(
     clubId,
     courseId,
+  );
+  const { data: feedbacks = [] } = useGetCourseVersionFeedbacks(
+    courseId,
+    data?.courseVersionID,
+    { enabled: !!clubId && !!courseId && !!data?.courseVersionID },
   );
 
   if (!clubId || !courseId) {
@@ -191,6 +199,98 @@ export default function ManagerCourseOverview() {
           </div>
         </aside>
       </div>
+
+      <section className="mt-6 space-y-4 rounded border border-greyscale-700 bg-greyscale-900/70 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-2xl font-semibold text-greyscale-0">
+              {locale === "vi" ? "Đánh giá khóa học" : "Course feedbacks"}
+            </h3>
+            <p className="text-sm text-greyscale-300">
+              {locale === "vi"
+                ? "Nhận xét từ học viên đã hoàn thành khóa học này."
+                : "Reviews from learners who completed this course."}
+            </p>
+          </div>
+          <p className="text-sm text-greyscale-300">
+            {feedbacks.length} {locale === "vi" ? "đánh giá" : "reviews"}
+          </p>
+        </div>
+
+        {feedbacks.length === 0 ? (
+          <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-4">
+            <EmptyState
+              title={locale === "vi" ? "Chưa có đánh giá" : "No feedback yet"}
+              description={
+                locale === "vi"
+                  ? "Khóa học này hiện chưa có phản hồi nào."
+                  : "This course does not have any feedback yet."
+              }
+            />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {feedbacks.map((feedback) => (
+              <div
+                key={feedback.feedbackID}
+                className="space-y-3 rounded border border-greyscale-700 bg-greyscale-950/70 p-3.5"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-greyscale-700 bg-greyscale-800 text-sm font-semibold text-greyscale-300">
+                    {feedback.user.avatarUrl ? (
+                      <Image
+                        src={feedback.user.avatarUrl}
+                        alt={feedback.user.fullName}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span>{feedback.user.fullName.slice(0, 1).toUpperCase()}</span>
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-greyscale-0">
+                          {feedback.user.fullName}
+                        </p>
+                        <p className="truncate text-xs text-greyscale-200">
+                          {feedback.user.email}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <ReactStars
+                          key={`${feedback.feedbackID}-${feedback.rating}`}
+                          count={5}
+                          value={feedback.rating}
+                          edit={false}
+                          size={22}
+                          isHalf={false}
+                          activeColor="#fbbf24"
+                          color="#52525b"
+                        />
+                      </div>
+                    </div>
+
+                    <p className="mt-2 text-sm text-greyscale-50">{feedback.content}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-1 text-xs text-greyscale-100">
+                    <IoTimerOutline />
+                    {new Date(feedback.createAt).toLocaleString(
+                      locale === "vi" ? "vi-VN" : "en-US",
+                    )}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

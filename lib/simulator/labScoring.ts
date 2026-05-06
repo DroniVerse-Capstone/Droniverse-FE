@@ -27,7 +27,7 @@ export function calculateLabScore(studentMetrics: LabMetrics, adminMetrics?: Lab
 }
 
 export function getRankDetails(totalScore: number) {
-  if (totalScore >= 95) return { label: 'S', color: 'text-yellow-400', bg: 'bg-yellow-500', glow: 'rgba(234,179,8,0.5)', desc: 'BẬC THẦY PHI CÔNG' };
+  if (totalScore >= 95) return { label: 'S', color: 'text-yellow-400', bg: 'bg-yellow-500', glow: 'rgba(234,179,8,0.5)', desc: 'THÀNH THẠO PHI CÔNG' };
   if (totalScore >= 80) return { label: 'A', color: 'text-emerald-400', bg: 'bg-emerald-500', glow: 'rgba(16,185,129,0.5)', desc: 'XUẤT SẮC' };
   if (totalScore >= 60) return { label: 'B', color: 'text-sky-400', bg: 'bg-sky-500', glow: 'rgba(14,165,233,0.5)', desc: 'HOÀN THÀNH TỐT' };
   return { label: 'C', color: 'text-orange-400', bg: 'bg-orange-500', glow: 'rgba(249,115,22,0.5)', desc: 'CẦN CẢI THIỆN' };

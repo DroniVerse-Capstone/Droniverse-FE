@@ -26,6 +26,10 @@ import {
 	receiveCourseCodeResponseSchema,
 	UpdateClubCourseProfitTypeRequest,
 	UpdateClubCourseProfitTypeResponse,
+	GetAcademyCodesData,
+	GetAcademyCodesQuery,
+	getAcademyCodesQuerySchema,
+	getAcademyCodesResponseSchema,
 	clubCourseCodeSummarySchema,
 	getClubCourseCodeSummaryParamsSchema,
 	GetCourseCodesByClubData,
@@ -42,6 +46,14 @@ import {
 	updateClubCourseProfitTypeRequestSchema,
 	updateClubCourseProfitTypeResponseSchema,
 } from "@/validations/code/code"
+
+type UseGetAcademyCodesOptions = Omit<
+	GetAcademyCodesQuery,
+	"currentPage" | "pageSize"
+> & {
+	currentPage?: number
+	pageSize?: number
+}
 
 type UseGetCourseCodesByClubOptions = Omit<
 	GetCourseCodesByClubQuery,
@@ -67,6 +79,32 @@ type EnterCourseCodeVariables = {
 type ReceiveCourseCodeVariables = {
 	clubId: string
 	courseId: string
+}
+
+export const useGetAcademyCodes = (options?: UseGetAcademyCodesOptions) => {
+	return useQuery<GetAcademyCodesData, AxiosError<ApiError>>({
+		queryKey: [
+			"academy-codes",
+			options?.status,
+			options?.currentPage,
+			options?.pageSize,
+		],
+		enabled: true,
+		queryFn: async () => {
+			const parsedOptions = getAcademyCodesQuerySchema.parse(options ?? {})
+
+			const response = await apiClient.get("/academy/codes", {
+				params: {
+					...(parsedOptions.status && { Status: parsedOptions.status }),
+					CurrentPage: parsedOptions.currentPage,
+					PageSize: parsedOptions.pageSize,
+				},
+			})
+
+			const parsed = getAcademyCodesResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
 }
 
 export const useGetCourseCodesByClub = (
@@ -247,6 +285,9 @@ export const useAssignCodeToUser = () => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
+				queryKey: ["academy-codes"],
+			})
+			queryClient.invalidateQueries({
 				queryKey: ["course-codes-by-club"],
 			})
 			queryClient.invalidateQueries({
@@ -275,6 +316,9 @@ export const useBulkAssignCodesToUsers = () => {
 			return bulkAssignCodesResponseSchema.parse(response.data)
 		},
 		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["academy-codes"],
+			})
 			queryClient.invalidateQueries({
 				queryKey: ["course-codes-by-club"],
 			})
@@ -306,6 +350,9 @@ export const useEnterCourseCode = () => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
+				queryKey: ["academy-codes"],
+			})
+			queryClient.invalidateQueries({
 				queryKey: ["club-course-overview"],
 			})
 		},
@@ -334,6 +381,9 @@ export const useReceiveCourseCode = () => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({
+				queryKey: ["academy-codes"],
+			})
+			queryClient.invalidateQueries({
 				queryKey: ["club-course-overview"],
 			})
 		},
@@ -355,6 +405,9 @@ export const useGenerateCodes = () => {
 			return generateCodesResponseSchema.parse(response.data)
 		},
 		onSuccess: (_data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["academy-codes"],
+			})
 			queryClient.invalidateQueries({
 				queryKey: ["course-codes-by-club", variables.clubId, variables.courseId],
 			})
@@ -378,3 +431,4 @@ export const useGenerateCodes = () => {
 
 export type { UseGetCourseCodesByClubOptions }
 export type { UseGetCourseUsersCodesByClubOptions }
+export type { UseGetAcademyCodesOptions }
