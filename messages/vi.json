@@ -343,6 +343,12 @@
         "request": "Yêu cầu đăng ký"
       }
     },
+    "transactions": {
+      "title": "Giao dịch",
+      "subitems": {
+        "withdraw-request": "Yêu cầu rút tiền"
+      }
+    },
     "courses": {
       "title": "Khóa học",
       "subitems": {
@@ -995,6 +1001,7 @@
         "lessonTypes": {
           "theory": "Lý thuyết",
           "quiz": "Bài kiểm tra",
+          "assignment": "Bài tập thực hành",
           "lab": "Lab",
           "physic": "Động cơ và vật lý",
           "lab_physic": "Lab vật lý",
@@ -1007,6 +1014,12 @@
           "titleEN": "Tiêu đề tiếng Anh",
           "titleVNPlaceholder": "Nhập tiêu đề tiếng Việt",
           "titleENPlaceholder": "Nhập tiêu đề tiếng Anh",
+          "assignmentDescriptionVN": "Mô tả tiếng Việt",
+          "assignmentDescriptionEN": "Mô tả tiếng Anh",
+          "assignmentDescriptionVNPlaceholder": "Nhập mô tả bài tập tiếng Việt",
+          "assignmentDescriptionENPlaceholder": "Nhập mô tả bài tập tiếng Anh",
+          "assignmentRequirement": "Yêu cầu",
+          "assignmentRequirementPlaceholder": "Nhập yêu cầu bài tập",
           "labSearch": "Tìm kiếm bài lab",
           "labSearchPlaceholder": "Nhập tên hoặc mô tả bài lab",
           "labType": "Loại",
@@ -1047,10 +1060,12 @@
           "missingTitle": "Vui lòng nhập tiêu đề tiếng Việt và tiếng Anh.",
           "missingTheory": "Vui lòng nhập đầy đủ thông tin cho bài lý thuyết.",
           "missingQuiz": "Vui lòng nhập đầy đủ thông tin cho bài kiểm tra.",
+          "missingAssignment": "Vui lòng nhập đầy đủ thông tin cho bài tập.",
           "missingLab": "Vui lòng chọn một bài lab.",
           "invalidPassScore": "Điểm đạt không được lớn hơn tổng điểm.",
           "createTheoryFailed": "Không thể tạo bài lý thuyết.",
           "createQuizFailed": "Không thể tạo bài kiểm tra.",
+          "createAssignmentFailed": "Không thể tạo bài tập.",
           "importLabFailed": "Không thể tạo lesson từ lab."
         }
       },
@@ -1058,7 +1073,8 @@
         "title": "Chỉnh sửa bài học",
         "subtitle": {
           "theory": "Cập nhật bài lý thuyết",
-          "quiz": "Cập nhật bài kiểm tra"
+          "quiz": "Cập nhật bài kiểm tra",
+          "assignment": "Cập nhật bài tập"
         },
         "fields": {
           "titleVN": "Tiêu đề tiếng Việt",
@@ -1070,7 +1086,10 @@
           "quizDescriptionEN": "Mô tả tiếng Anh",
           "quizTimeLimit": "Giới hạn thời gian",
           "quizTotalScore": "Tổng điểm",
-          "quizPassScore": "Điểm đạt"
+          "quizPassScore": "Điểm đạt",
+          "assignmentDescriptionVN": "Mô tả tiếng Việt",
+          "assignmentDescriptionEN": "Mô tả tiếng Anh",
+          "assignmentRequirement": "Yêu cầu"
         },
         "buttons": {
           "cancel": "Hủy",
@@ -1079,9 +1098,11 @@
         "error": {
           "missingTheory": "Vui lòng nhập đầy đủ thông tin bài lý thuyết.",
           "missingQuiz": "Vui lòng nhập đầy đủ thông tin bài kiểm tra.",
+          "missingAssignment": "Vui lòng nhập đầy đủ thông tin bài tập.",
           "invalidPassScore": "Điểm đạt không được lớn hơn tổng điểm.",
           "updateTheoryFailed": "Không thể cập nhật bài lý thuyết.",
-          "updateQuizFailed": "Không thể cập nhật bài kiểm tra."
+          "updateQuizFailed": "Không thể cập nhật bài kiểm tra.",
+          "updateAssignmentFailed": "Không thể cập nhật bài tập."
         }
       },
       "LessonDetailDialog": {
@@ -1089,6 +1110,7 @@
         "subtitle": {
           "theory": "Chi tiết bài lý thuyết",
           "quiz": "Chi tiết bài kiểm tra",
+          "assignment": "Chi tiết bài tập",
           "lab": "Chi tiết bài Lab",
           "physic": "Chi tiết bài Động cơ & Vật lý",
           "lab_physic": "Chi tiết bài Lab Vật lý",
@@ -1106,11 +1128,15 @@
           "theoryContentVN": "Nội dung tiếng Việt",
           "theoryContentEN": "Nội dung tiếng Anh",
           "quizDescriptionVN": "Mô tả tiếng Việt",
-          "quizDescriptionEN": "Mô tả tiếng Anh"
+          "quizDescriptionEN": "Mô tả tiếng Anh",
+          "assignmentDescriptionVN": "Mô tả tiếng Việt",
+          "assignmentDescriptionEN": "Mô tả tiếng Anh",
+          "assignmentRequirement": "Yêu cầu"
         },
         "error": {
           "loadTheoryFailed": "Không thể tải chi tiết bài lý thuyết.",
           "loadQuizFailed": "Không thể tải chi tiết bài kiểm tra.",
+          "loadAssignmentFailed": "Không thể tải chi tiết bài tập.",
           "loadLabFailed": "Không thể tải chi tiết bài Lab."
         }
       },
@@ -1470,7 +1496,8 @@
       "title": "Khóa học",
       "subitems": {
         "available": "Khóa học hiện có",
-        "progress": "Theo dõi tiến trình học"
+        "progress": "Theo dõi tiến trình học",
+        "level": "Yêu cầu thăng cấp"
       }
     },
     "competitions": "Cuộc thi",
@@ -1891,7 +1918,8 @@
       "LAB": "Bài thực hành",
       "PHYSIC": "Động cơ và vật lý",
       "LAB_PHYSIC": "Lab vật lý",
-      "VR": "VR"
+      "VR": "VR",
+      "ASSIGNMENT": "Bài tập thực hành"
     },
     "descriptions": {
       "THEORY": "Đọc nội dung bài học để nắm kiến thức nền tảng trước khi sang bài tiếp theo.",
@@ -1899,7 +1927,8 @@
       "LAB": "Thực hành các thao tác và tình huống mô phỏng để rèn kỹ năng thực tế.",
       "PHYSIC": "Tìm hiểu kiến thức về động cơ và các định luật vật lý ứng dụng trong drone.",
       "LAB_PHYSIC": "Thực hành các thí nghiệm vật lý để hiểu rõ cơ chế hoạt động của drone.",
-      "VR": "Trải nghiệm học tập trong môi trường thực tế ảo sống động."
+      "VR": "Trải nghiệm học tập trong môi trường thực tế ảo sống động.",
+      "ASSIGNMENT": "Hoàn thành bài tập thực hành để được duyệt lên cấp độ bậc thầy."
     },
     "minutes": "{value} phút",
     "unlock": "Mở khóa",

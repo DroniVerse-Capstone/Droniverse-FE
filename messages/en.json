@@ -347,6 +347,12 @@
         "request": "Registration Requests"
       }
     },
+    "transactions": {
+      "title": "Transactions",
+      "subitems": {
+        "withdraw-request": "Withdrawal Requests"
+      }
+    },
     "courses": {
       "title": "Courses",
       "subitems": {
@@ -999,6 +1005,7 @@
         "lessonTypes": {
           "theory": "Theory",
           "quiz": "Quiz",
+          "assignment": "Assignment",
           "lab": "Lab",
           "physic": "Engine & Physics",
           "lab_physic": "Physics Lab",
@@ -1011,6 +1018,12 @@
           "titleEN": "English Title",
           "titleVNPlaceholder": "Enter Vietnamese title",
           "titleENPlaceholder": "Enter English title",
+          "assignmentDescriptionVN": "Vietnamese Description",
+          "assignmentDescriptionEN": "English Description",
+          "assignmentDescriptionVNPlaceholder": "Enter Vietnamese assignment description",
+          "assignmentDescriptionENPlaceholder": "Enter English assignment description",
+          "assignmentRequirement": "Requirement",
+          "assignmentRequirementPlaceholder": "Enter assignment requirement",
           "labSearch": "Search labs",
           "labSearchPlaceholder": "Enter lab name or description",
           "labType": "Type",
@@ -1051,10 +1064,12 @@
           "missingTitle": "Please enter both Vietnamese and English titles.",
           "missingTheory": "Please fill in all required theory fields.",
           "missingQuiz": "Please fill in all required quiz fields.",
+          "missingAssignment": "Please fill in all required assignment fields.",
           "missingLab": "Please select one lab.",
           "invalidPassScore": "Pass score cannot be greater than total score.",
           "createTheoryFailed": "Failed to create theory lesson.",
           "createQuizFailed": "Failed to create quiz lesson.",
+          "createAssignmentFailed": "Failed to create assignment.",
           "importLabFailed": "Failed to create lesson from lab."
         }
       },
@@ -1062,7 +1077,8 @@
         "title": "Edit Lesson",
         "subtitle": {
           "theory": "Update theory lesson",
-          "quiz": "Update quiz lesson"
+          "quiz": "Update quiz lesson",
+          "assignment": "Update assignment"
         },
         "fields": {
           "titleVN": "Vietnamese Title",
@@ -1074,7 +1090,10 @@
           "quizDescriptionEN": "English Description",
           "quizTimeLimit": "Time Limit",
           "quizTotalScore": "Total Score",
-          "quizPassScore": "Pass Score"
+          "quizPassScore": "Pass Score",
+          "assignmentDescriptionVN": "Vietnamese Description",
+          "assignmentDescriptionEN": "English Description",
+          "assignmentRequirement": "Requirement"
         },
         "buttons": {
           "cancel": "Cancel",
@@ -1083,9 +1102,11 @@
         "error": {
           "missingTheory": "Please fill in all required theory fields.",
           "missingQuiz": "Please fill in all required quiz fields.",
+          "missingAssignment": "Please fill in all required assignment fields.",
           "invalidPassScore": "Pass score cannot be greater than total score.",
           "updateTheoryFailed": "Failed to update theory lesson.",
-          "updateQuizFailed": "Failed to update quiz lesson."
+          "updateQuizFailed": "Failed to update quiz lesson.",
+          "updateAssignmentFailed": "Failed to update assignment."
         }
       },
       "LessonDetailDialog": {
@@ -1093,6 +1114,7 @@
         "subtitle": {
           "theory": "Theory Lesson Details",
           "quiz": "Quiz Lesson Details",
+          "assignment": "Assignment Details",
           "lab": "Lab Lesson Details",
           "physic": "Engine & Physics Details",
           "lab_physic": "Physics Lab Details",
@@ -1110,11 +1132,15 @@
           "theoryContentVN": "Vietnamese Content",
           "theoryContentEN": "English Content",
           "quizDescriptionVN": "Vietnamese Description",
-          "quizDescriptionEN": "English Description"
+          "quizDescriptionEN": "English Description",
+          "assignmentDescriptionVN": "Vietnamese Description",
+          "assignmentDescriptionEN": "English Description",
+          "assignmentRequirement": "Requirement"
         },
         "error": {
           "loadTheoryFailed": "Failed to load theory lesson details.",
           "loadQuizFailed": "Failed to load quiz lesson details.",
+          "loadAssignmentFailed": "Failed to load assignment details.",
           "loadLabFailed": "Failed to load lab lesson details."
         }
       },
@@ -1474,7 +1500,8 @@
       "title": "Courses",
       "subitems": {
         "available": "Available courses",
-        "progress": "Learning progress"
+        "progress": "Learning progress",
+        "level": "Level up requests"
       }
     },
     "competitions": "Competitions",
@@ -1895,7 +1922,8 @@
       "LAB": "Practical Lab",
       "PHYSIC": "Engine & Physics",
       "LAB_PHYSIC": "Physics Lab",
-      "VR": "VR"
+      "VR": "VR",
+      "ASSIGNMENT": "Assignment"
     },
     "descriptions": {
       "THEORY": "Read the lesson content to gain foundational knowledge before moving to the next lesson.",
@@ -1903,7 +1931,8 @@
       "LAB": "Practice maneuvers and simulated situations to build real-world skills.",
       "PHYSIC": "Learn about engines and physics laws applied in drones.",
       "LAB_PHYSIC": "Conduct physics experiments to understand drone mechanisms.",
-      "VR": "Experience immersive learning in a virtual reality environment."
+      "VR": "Experience immersive learning in a virtual reality environment.",
+      "ASSIGNMENT": "Complete the assignment to be approved for the master level."
     },
     "minutes": "{value} minutes",
     "unlock": "Unlock",

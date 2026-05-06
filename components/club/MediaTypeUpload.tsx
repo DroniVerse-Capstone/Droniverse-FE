@@ -35,6 +35,7 @@ type MediaTypeUploadProps = {
   label?: string;
   disabled?: boolean;
   defaultMediaType?: MediaType;
+  fixedMediaType?: MediaType;
   onUploaded?: (media: UploadedMediaInfo) => void;
   initialMedia?: InitialMediaInfo | null;
 };
@@ -45,12 +46,13 @@ export function MediaTypeUpload({
   label = "Media",
   disabled = false,
   defaultMediaType = "IMAGE",
+  fixedMediaType,
   onUploaded,
   initialMedia = null,
 }: MediaTypeUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedMediaType, setSelectedMediaType] =
-    useState<MediaType>(defaultMediaType);
+    useState<MediaType>(fixedMediaType ?? defaultMediaType);
   const [localPreviewUrl, setLocalPreviewUrl] = useState("");
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [uploadedMediaType, setUploadedMediaType] = useState<MediaType | null>(
@@ -90,6 +92,12 @@ export function MediaTypeUpload({
       setFileName(fileNameFromUrl);
     }
   }, [initialMedia]);
+
+  useEffect(() => {
+    if (fixedMediaType) {
+      setSelectedMediaType(fixedMediaType);
+    }
+  }, [fixedMediaType]);
 
   const uploadMutation = useUploadTempMedia({
     onSuccess: ({ data }) => {
@@ -206,22 +214,24 @@ export function MediaTypeUpload({
     <div className="space-y-2">
       <Label>{label}</Label>
 
-      <div className="grid gap-2 sm:max-w-60">
-        <Label className="text-xs text-greyscale-100">Loại phương tiện</Label>
-        <Select
-          value={selectedMediaType}
-          onValueChange={(value) => setSelectedMediaType(value as MediaType)}
-          disabled={disabled || uploadMutation.isPending}
-        >
-          <SelectTrigger className="border-greyscale-600 bg-greyscale-900">
-            <SelectValue placeholder="Chọn loại media" />
-          </SelectTrigger>
-          <SelectContent className="border-greyscale-600 bg-greyscale-900 text-greyscale-0">
-            <SelectItem value="IMAGE">Hình ảnh</SelectItem>
-            <SelectItem value="VIDEO">Video</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {!fixedMediaType ? (
+        <div className="grid gap-2 sm:max-w-60">
+          <Label className="text-xs text-greyscale-100">Loại phương tiện</Label>
+          <Select
+            value={selectedMediaType}
+            onValueChange={(value) => setSelectedMediaType(value as MediaType)}
+            disabled={disabled || uploadMutation.isPending}
+          >
+            <SelectTrigger className="border-greyscale-600 bg-greyscale-900">
+              <SelectValue placeholder="Chọn loại media" />
+            </SelectTrigger>
+            <SelectContent className="border-greyscale-600 bg-greyscale-900 text-greyscale-0">
+              <SelectItem value="IMAGE">Hình ảnh</SelectItem>
+              <SelectItem value="VIDEO">Video</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
 
       <input
         ref={inputRef}

@@ -145,7 +145,7 @@ export default function JoinClubDialog() {
           </DialogClose>
           <Button
             onClick={handleOpenEvidenceDialog}
-            disabled={!club || isJoining || !clubRequirement.trim()}
+            disabled={!club || isJoining}
           >
             {t("buttons.confirm")}
           </Button>

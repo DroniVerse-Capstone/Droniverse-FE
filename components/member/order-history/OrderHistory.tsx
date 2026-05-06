@@ -1,18 +1,23 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
+import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetMyOrders } from "@/hooks/order/useOrder";
 import { formatDateTime } from "@/lib/utils/format-date";
 import { useLocale } from "@/providers/i18n-provider";
+import OrderStatusBadge from "@/components/common/OrderStatusBadge";
+import { IoMdArrowBack } from "react-icons/io";
 
 const PAGE_SIZE = 10;
 
 export default function OrderHistory() {
+  const router = useRouter();
   const locale = useLocale();
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -29,7 +34,7 @@ export default function OrderHistory() {
     "Số tiền",
     "Trạng thái",
     "Ngày tạo",
-    "Thanh toán lúc",
+    "Ngày xử lý",
   ];
 
   const formatCurrency = (value: number) =>
@@ -41,7 +46,12 @@ export default function OrderHistory() {
 
   return (
     <div className="space-y-4 px-6 py-4">
-      <h1 className="text-3xl font-bold text-greyscale-0">Lịch sử thanh toán</h1>
+      <div className="flex flex- items-center gap-3">
+        <Button variant="outline" icon={<IoMdArrowBack />} onClick={() => router.back()}>
+          Quay lại
+        </Button>
+        <h1 className="text-3xl font-bold text-greyscale-0">Lịch sử thanh toán</h1>
+      </div>
       {isLoading ? (
         <div className="flex min-h-40 items-center justify-center">
           <Spinner className="h-5 w-5" />
@@ -84,9 +94,7 @@ export default function OrderHistory() {
                   {formatCurrency(order.totalAmount)}
                 </TableCell>
                 <TableCell>
-                  <span className="rounded-full bg-greyscale-800 px-3 py-1 text-xs font-medium text-greyscale-25">
-                    {order.status || "—"}
-                  </span>
+                  <OrderStatusBadge status={order.status} />
                 </TableCell>
                 <TableCell className="text-greyscale-50">
                   {formatDateTime(order.createAt)}

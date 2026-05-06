@@ -15,7 +15,7 @@ export const orderPaymentSchema = z.object({
 	transactionId: z.string().uuid(),
 	paymentUrl: z.string().url(),
 	paymentMethod: z.string().trim().min(1),
-	status: z.enum(["PENDING", "SUCCESS", "FAILED"]),
+	status: z.enum(["PENDING", "SUCCESS", "FAILED", "CANCELLED"]),
 	transactionDate: z.string(),
 });
 
@@ -25,7 +25,7 @@ export const orderUserSchema = z.object({
 	firstName: z.string().trim().min(1),
 	lastName: z.string().trim().min(1),
 	email: z.string().email(),
-	dateOfBirth: z.string(),
+	dateOfBirth: z.string().nullable(),
 	roleName: z.string().trim().min(1),
 	imageUrl: z.string().url().nullable().optional(),
 	gender: z.string().trim().min(1).nullable().optional(),
@@ -38,7 +38,7 @@ export const orderDataSchema = z.object({
 	orderID: z.string().uuid(),
 	type: z.string().trim().min(1),
 	totalAmount: z.number().int().nonnegative(),
-	status: z.enum(["PENDING", "SUCCESS", "FAILED"]),
+	status: z.enum(["PENDING", "SUCCESS", "FAILED", "CANCELLED"]),
 	createAt: z.string(),
 	item: orderItemSchema.nullable(),
 	payment: orderPaymentSchema.nullable(),
