@@ -259,10 +259,11 @@ export const getAdminTopBuyersResponseSchema = z.object({
 
 export const adminCompetitionStatsOverviewSchema = z.object({
 	totalCompetitions: z.number().int().nonnegative(),
-	ongoingCompetitions: z.number().int().nonnegative(),
+	publishedCompetitions: z.number().int().nonnegative(),
 	completedCompetitions: z.number().int().nonnegative(),
 	cancelledCompetitions: z.number().int().nonnegative(),
 	draftCompetitions: z.number().int().nonnegative(),
+	invalidCompetitions: z.number().int().nonnegative(),
 	totalParticipants: z.number().int().nonnegative(),
 	averageParticipantsPerCompetition: z.number(),
 })
@@ -271,7 +272,8 @@ export const adminCompetitionTopItemSchema = z.object({
 	competitionId: z.string().uuid(),
 	nameVN: z.string(),
 	nameEN: z.string(),
-	status: z.string(),
+	competitionStatus: z.string(),
+	competitionPhase: z.string().nullable(),
 	clubId: z.string().uuid(),
 	clubNameVN: z.string(),
 	participantCount: z.number().int().nonnegative(),
@@ -284,6 +286,25 @@ export const adminCompetitionStatsSchema = z.object({
 	topByParticipants: z.array(adminCompetitionTopItemSchema),
 })
 
+export const getAdminCompetitionStatsParamsSchema = z.object({
+	top: z.number().int().positive().default(10),
+	competitionStatus: z.string().optional().nullable(),
+	competitionPhase: z.string().optional().nullable(),
+	clubId: z.string().uuid().optional().nullable(),
+	startDateFrom: z.string().datetime().optional().nullable(),
+	startDateTo: z.string().datetime().optional().nullable(),
+	endDateFrom: z.string().datetime().optional().nullable(),
+	endDateTo: z.string().datetime().optional().nullable(),
+	createdBy: z.string().uuid().optional().nullable(),
+	updatedBy: z.string().uuid().optional().nullable(),
+	minTotalRounds: z.number().int().nonnegative().optional().nullable(),
+	maxTotalRounds: z.number().int().nonnegative().optional().nullable(),
+	minTotalPrizes: z.number().int().nonnegative().optional().nullable(),
+	maxTotalPrizes: z.number().int().nonnegative().optional().nullable(),
+	minTotalCompetitors: z.number().int().nonnegative().optional().nullable(),
+	maxTotalCompetitors: z.number().int().nonnegative().optional().nullable(),
+})
+
 export const getAdminCompetitionStatsResponseSchema = z.object({
 	data: adminCompetitionStatsSchema,
 	isSuccess: z.boolean(),
@@ -294,12 +315,29 @@ export type AdminTopBuyer = z.infer<typeof adminTopBuyerSchema>
 export type GetAdminTopBuyersResponse = z.infer<typeof getAdminTopBuyersResponseSchema>
 export type AdminCompetitionStats = z.infer<typeof adminCompetitionStatsSchema>
 export type GetAdminCompetitionStatsResponse = z.infer<typeof getAdminCompetitionStatsResponseSchema>
+export type GetAdminCompetitionStatsParams = z.infer<typeof getAdminCompetitionStatsParamsSchema>
 
 // --- CLUB COMPETITION STATS ---
 export const clubCompetitionStatsParamsSchema = z.object({
 	clubId: z.string().uuid(),
 	top: z.number().int().positive().default(10),
+	competitionStatus: z.string().optional().nullable(),
+	competitionPhase: z.string().optional().nullable(),
+	startDateFrom: z.string().datetime().optional().nullable(),
+	startDateTo: z.string().datetime().optional().nullable(),
+	endDateFrom: z.string().datetime().optional().nullable(),
+	endDateTo: z.string().datetime().optional().nullable(),
+	createdBy: z.string().uuid().optional().nullable(),
+	updatedBy: z.string().uuid().optional().nullable(),
+	minTotalRounds: z.number().int().nonnegative().optional().nullable(),
+	maxTotalRounds: z.number().int().nonnegative().optional().nullable(),
+	minTotalPrizes: z.number().int().nonnegative().optional().nullable(),
+	maxTotalPrizes: z.number().int().nonnegative().optional().nullable(),
+	minTotalCompetitors: z.number().int().nonnegative().optional().nullable(),
+	maxTotalCompetitors: z.number().int().nonnegative().optional().nullable(),
 })
+
+export type ClubCompetitionStatsParams = z.infer<typeof clubCompetitionStatsParamsSchema>
 
 // Reuse overview + topItem shapes (identical structure to admin)
 export const clubCompetitionStatsSchema = adminCompetitionStatsSchema
@@ -329,3 +367,47 @@ export const getClubTopBuyersResponseSchema = z.object({
 })
 
 export type ClubTopBuyersData = z.infer<typeof getClubTopBuyersResponseSchema>["data"]
+
+// --- LEARNING STATISTICS ---
+export const adminLearningSummarySchema = z.object({
+	totalEnrollments: z.number().int().nonnegative(),
+	avgGlobalProgress: z.number(),
+	totalCertificates: z.number().int().nonnegative(),
+	activeLearners30Days: z.number().int().nonnegative(),
+})
+
+export const adminTopClubLearningSchema = z.object({
+	clubName: z.string(),
+	clubImageUrl: z.string().nullable(),
+	avgProgress: z.number(),
+	membersCount: z.number().int().nonnegative(),
+	clubId: z.string().uuid(),
+})
+
+export const adminCourseLearningStatSchema = z.object({
+	courseName: z.string(),
+	enrollments: z.number().int().nonnegative(),
+	completionRate: z.number(),
+	courseId: z.string().uuid(),
+})
+
+export const adminWeeklyActivityItemSchema = z.object({
+	date: z.string(),
+	lessonsCompleted: z.number().int().nonnegative(),
+})
+
+export const adminLearningStatisticsSchema = z.object({
+	summary: adminLearningSummarySchema,
+	topClubs: z.array(adminTopClubLearningSchema),
+	courseStats: z.array(adminCourseLearningStatSchema),
+	weeklyActivity: z.array(adminWeeklyActivityItemSchema),
+})
+
+export const getAdminLearningStatisticsResponseSchema = z.object({
+	data: adminLearningStatisticsSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminLearningStatistics = z.infer<typeof adminLearningStatisticsSchema>
+export type GetAdminLearningStatisticsResponse = z.infer<typeof getAdminLearningStatisticsResponseSchema>

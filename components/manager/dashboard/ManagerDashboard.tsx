@@ -20,7 +20,7 @@ export default function ManagerDashboard() {
               {t("myRequests")}
             </TabsTrigger>
           </TabsList>
-            <RegisterClubDialog />
+          <RegisterClubDialog />
         </div>
 
         <TabsContent value="my-clubs" className="mt-4">

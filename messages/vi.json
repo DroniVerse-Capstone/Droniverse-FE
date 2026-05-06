@@ -384,6 +384,138 @@
       "title": "Yêu cầu hỗ trợ"
     }
   },
+  "SystemDashboard": {
+    "title": "Trung tâm Điều hành",
+    "realtimeUpdate": "Cập nhật thời gian thực",
+    "kpi": {
+      "totalRevenue": "Tổng doanh thu",
+      "netProfit": "Lợi nhuận ròng",
+      "totalTransactions": "Tổng giao dịch",
+      "totalParticipants": "Tổng thí sinh",
+      "thisMonth": "{amount} tháng này",
+      "transactionsThisMonth": "{count} giao dịch tháng này",
+      "competitionsDeploying": "{count} cuộc thi đang triển khai",
+      "comparedToLastPeriod": "so với kỳ trước"
+    },
+    "revenueTrend": {
+      "title": "Xu hướng doanh thu",
+      "summary": "{amount} trong {count} tháng · {rate}% tăng trưởng",
+      "months": "{count} tháng",
+      "revenue": "Doanh thu",
+      "prevPeriod": "Kỳ trước",
+      "increase": "Tăng",
+      "decrease": "Giảm",
+      "empty": "Không có dữ liệu trong {count} tháng",
+      "chartType": {
+        "area": "Diện tích",
+        "bar": "Cột"
+      },
+      "growthSummary": "so với {count} tháng trước"
+    },
+    "competitionActivity": {
+      "title": "Hoạt động cuộc thi",
+      "summary": "{deploying} đang triển khai · {completed} đã hoàn tất · {total} tổng cuộc thi",
+      "summaryLabels": {
+        "total": "Tổng cuộc thi",
+        "deploying": "Đang triển khai",
+        "completed": "Đã hoàn tất",
+        "invalid": "Không hợp lệ",
+        "participants": "Tổng thí sinh"
+      },
+      "statusFilter": {
+        "all": "Tất cả trạng thái",
+        "ongoing": "Đang diễn ra",
+        "awaiting": "Chờ công bố",
+        "completed": "Đã hoàn tất",
+        "draft": "Bản nháp",
+        "cancelled": "Đã hủy"
+      },
+      "showCount": "Hiện {count}",
+      "table": {
+        "id": "ID",
+        "competition": "Cuộc thi",
+        "status": "Trạng thái",
+        "participants": "Thí sinh",
+        "time": "Thời gian tổ chức"
+      },
+      "status": {
+        "published": "Đang công khai",
+        "resultPublished": "Đã hoàn tất",
+        "draft": "Bản nháp",
+        "cancelled": "Đã hủy",
+        "invalid": "Không hợp lệ",
+        "ongoing": "Đang diễn ra",
+        "awaiting": "Chờ công bố",
+        "upcoming": "Sắp tới",
+        "comingSoon": "Sắp diễn ra",
+        "regOpen": "Mở đăng ký",
+        "regClosed": "Đóng đăng ký"
+      },
+      "charts": {
+        "allocation": "Phân bổ trạng thái",
+        "topParticipants": "Top thí sinh theo cuộc thi"
+      }
+    },
+    "topCourses": {
+      "title": "Top khóa học",
+      "subtitle": "Doanh thu theo khóa học",
+      "empty": "Chưa có dữ liệu khóa học",
+      "totalLabel": "Tổng",
+      "footerLabel": "{count} khóa học"
+    },
+    "vipStudents": {
+      "title": "Học viên VIP",
+      "subtitle": "Người chi tiêu nhiều nhất hệ thống",
+      "topCount": "Top {count}",
+      "empty": "Chưa có dữ liệu học viên",
+      "transactions": "{count} giao dịch",
+      "shareOfTotal": "{percent}% tổng",
+      "footerLabel": "{count} học viên",
+      "systemTotalLabel": "tổng doanh thu hệ thống"
+    },
+    "clubRanking": {
+      "title": "Xếp hạng câu lạc bộ",
+      "subtitle": "Top câu lạc bộ theo doanh thu trên hệ thống",
+      "topCount": "Top {count}",
+      "empty": "Chưa có dữ liệu câu lạc bộ",
+      "footerLabel": "{count} câu lạc bộ",
+      "table": {
+        "rank": "#",
+        "club": "Câu lạc bộ",
+        "code": "Mã CLB",
+        "transactions": "Giao dịch",
+        "revenue": "Tổng doanh thu",
+        "share": "Chiếm"
+      }
+    },
+    "learningStatistics": {
+      "title": "Thống kê học tập",
+      "summary": {
+        "title": "Tổng quan học tập",
+        "totalEnrollments": "Tổng số lượt đăng ký",
+        "avgGlobalProgress": "Tiến độ trung bình",
+        "totalCertificates": "Chứng chỉ đã cấp",
+        "activeLearners": "Người học (30 ngày)"
+      },
+      "weeklyActivity": {
+        "title": "Hoạt động học tập 7 ngày qua",
+        "lessons": "Bài học hoàn thành",
+        "empty": "Không có hoạt động"
+      },
+      "topClubs": {
+        "title": "Câu lạc bộ học tập xuất sắc",
+        "subtitle": "Dựa trên tiến độ hoàn thành trung bình của thành viên",
+        "members": "{count} thành viên",
+        "avgProgress": "Tiến độ {percent}%"
+      },
+      "courseStats": {
+        "title": "Phổ biến & Hoàn thành",
+        "subtitle": "Thống kê đăng ký và tỷ lệ hoàn thành theo khóa học",
+        "enrollments": "{count} lượt học",
+        "completion": "Hoàn thành {percent}%"
+      }
+    }
+  },
   "ErrorPage": {
     "title": "Oops! Không tìm thấy trang",
     "description": "Trang bạn đang tìm kiếm có thể đã bị xóa, đã được đổi tên hoặc hiện đang tạm thời không khả dụng.",
@@ -1774,6 +1906,47 @@
     "errors": {
       "unknownEnrollment": "Không xác định được enrollment hiện tại.",
       "initFailed": "Không thể khởi tạo dữ liệu học bài."
+    }
+  },
+  "ManagerLearningProgress": {
+    "title": "Tiến độ học tập của thành viên",
+    "subtitle": "Theo dõi và quản lý lộ trình học tập của tất cả thành viên trong câu lạc bộ.",
+    "searchPlaceholder": "Tìm kiếm học viên, khóa học...",
+    "filter": "Lọc",
+    "kpi": {
+      "totalEnrollments": "Tổng số lượt đăng ký",
+      "totalEnrollmentsSub": "Học viên tham gia các khóa học",
+      "avgProgress": "Tỷ lệ hoàn thành (Avg)",
+      "avgProgressSub": "Tiến độ trung bình của toàn clb",
+      "completed": "Đã hoàn thành",
+      "completedSub": "Khóa học đã cấp chứng chỉ"
+    },
+    "table": {
+      "member": "Học viên",
+      "course": "Khóa học",
+      "level": "Cấp độ",
+      "progress": "Tiến độ",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "detail": {
+      "title": "Chi tiết tiến độ",
+      "overallProgress": "Tiến độ tổng thể",
+      "courseStructure": "Cấu trúc khóa học",
+      "lessons": "bài học",
+      "minutes": "phút",
+      "lastAccess": "Truy cập",
+      "noData": "Không tìm thấy dữ liệu lộ trình."
+    },
+    "levels": {
+      "Beginner": "Cơ bản",
+      "Intermediate": "Trung cấp",
+      "Advanced": "Cao cấp",
+      "Master": "Thành thạo"
+    },
+    "statuses": {
+      "ACTIVE": "Đang học",
+      "COMPLETED": "Đã hoàn thành"
     }
   }
 }
