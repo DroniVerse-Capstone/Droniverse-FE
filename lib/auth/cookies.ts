@@ -50,7 +50,7 @@ export const updateAccessTokenCookie = (accessToken: string) => {
 export const clearAuthCookies = () => {
   if (typeof window === 'undefined') return
 
-  deleteCookie(ACCESS_TOKEN_COOKIE_NAME, { path: '/' })
-  deleteCookie(REFRESH_TOKEN_COOKIE_NAME, { path: '/' })
-  deleteCookie(ROLE_NAME_COOKIE_NAME, { path: '/' })
+  deleteCookie(ACCESS_TOKEN_COOKIE_NAME, AUTH_COOKIE_OPTIONS)
+  deleteCookie(REFRESH_TOKEN_COOKIE_NAME, AUTH_COOKIE_OPTIONS)
+  deleteCookie(ROLE_NAME_COOKIE_NAME, AUTH_COOKIE_OPTIONS)
 }
