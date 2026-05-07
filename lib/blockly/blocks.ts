@@ -123,7 +123,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			args1: [{ type: "input_statement", name: "DO" }],
 			previousStatement: true,
 			nextStatement: true,
-			colour: 120,
+			style: "control_blocks",
 			tooltip: translations.repeat.tooltip,
 		},
 		{
@@ -134,7 +134,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			args1: [{ type: "input_statement", name: "DO" }],
 			previousStatement: true,
 			nextStatement: true,
-			colour: 210,
+			style: "control_blocks",
 			tooltip: translations.if.tooltip,
 		},
 		{
@@ -147,14 +147,14 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			args2: [{ type: "input_statement", name: "ELSE" }],
 			previousStatement: true,
 			nextStatement: true,
-			colour: 210,
+			style: "control_blocks",
 			tooltip: translations.ifElse.tooltip,
 		},
 		{
 			type: "drone_is_obstacle_ahead",
 			message0: translations.isObstacleAhead.message,
 			output: "Boolean",
-			colour: 210,
+			style: "logic_blocks",
 			tooltip: translations.isObstacleAhead.tooltip,
 		},
 		{
@@ -162,7 +162,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			message0: "%1",
 			args0: [{ type: "field_number", name: "VAL", value: 1, min: 1, max: 100 }],
 			output: "Number",
-			colour: 230,
+			style: "motion_blocks",
 			tooltip: translations.amountValue.tooltip,
 		},
 		{
@@ -174,7 +174,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 				{ type: "input_value", name: "B", check: "Number" },
 			],
 			output: "Number",
-			colour: 230,
+			style: "motion_blocks",
 			tooltip: translations.mathOperation.tooltip,
 		},
 		{
@@ -185,7 +185,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			],
 			previousStatement: true,
 			nextStatement: true,
-			colour: 290,
+			style: "control_blocks",
 			tooltip: translations.playSound.tooltip,
 		},
 		{
@@ -193,7 +193,7 @@ export function registerDroneBlocks(Blockly: typeof BlocklyType, translations: B
 			message0: translations.inputNumber.message,
 			args0: [{ type: "field_input", name: "PROMPT", text: "Nhập số" }],
 			output: "Number",
-			colour: 160,
+			style: "motion_blocks",
 			tooltip: translations.inputNumber.tooltip,
 		},
 	]);

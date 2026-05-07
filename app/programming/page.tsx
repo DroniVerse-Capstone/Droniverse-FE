@@ -87,7 +87,7 @@ export default function ProgrammingPage() {
     });
 
     return () => mqttClient.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // [Fix] Bỏ 'status' khỏi deps để tránh ngắt kết nối MQTT mỗi khi status đổi (từ online -> running)
 
   // [Tinh chỉnh] Connection check interval (every 2s)
@@ -208,7 +208,7 @@ export default function ProgrammingPage() {
     executionIdRef.current += 1;
     setSimulationStatus("ĐÃ DỪNG");
     if (status === 'running') setStatus('online');
-    
+
     // Emergency stop via MQTT if online
     let currentDroneId = droneId;
     if (!currentDroneId && discoveredDrones.length > 0) {
@@ -263,8 +263,8 @@ export default function ProgrammingPage() {
         switch (cmd) {
           case 'TAKEOFF':
             setCurrentCommandDisplay("Cất cánh...");
-            updateDroneState({ throttle: 58 });
-            await sleep(2000);
+            updateDroneState({ throttle: 70 });
+            await sleep(1500);
             if (cancelled()) break;
             updateDroneState({ throttle: 55 });
             await sleep(500);
@@ -318,7 +318,7 @@ export default function ProgrammingPage() {
             const deg = Number(args[1]);
             setCurrentCommandDisplay(`Quay: ${dir === 'LEFT' ? 'Trái' : 'Phải'} ${deg}°`);
             // Approximate duration for visual simulation: 1 sec per 90 degrees at ~50% power
-            const dur = (deg / 90) * 1; 
+            const dur = (deg / 90) * 1;
             const yawVal = dir === 'LEFT' ? -50 : 50;
             updateDroneState({ yaw: yawVal });
             await sleep(dur * 1000);
@@ -350,12 +350,42 @@ export default function ProgrammingPage() {
             break;
           }
 
+          case 'PITCH_ADV': {
+            const dir = args[0];
+            const angle = Number(args[1]);
+            const dur = Number(args[2]);
+            const pwr = Number(args[3]);
+            const label = dir === 'FORWARD' ? 'Tiến' : 'Lùi';
+            setCurrentCommandDisplay(`Nghiêng dọc: ${label} ${angle}° (${pwr}%)`);
+            const pitchVal = (dir === 'FORWARD' ? angle : -angle) * (pwr / 100);
+            updateDroneState({ pitch: pitchVal });
+            await sleep(dur * 1000);
+            if (cancelled()) break;
+            updateDroneState({ pitch: 0 });
+            break;
+          }
+
           case 'ROLL': {
             const dir = args[0];
             const pwr = Number(args[1]);
             const dur = Number(args[2]);
             setCurrentCommandDisplay(`Nghiêng: ${dir === 'LEFT' ? 'Trái' : 'Phải'} ${pwr}% (${dur}s)`);
             updateDroneState({ roll: dir === 'LEFT' ? -pwr * 0.3 : pwr * 0.3 });
+            await sleep(dur * 1000);
+            if (cancelled()) break;
+            updateDroneState({ roll: 0 });
+            break;
+          }
+
+          case 'ROLL_ADV': {
+            const dir = args[0];
+            const angle = Number(args[1]);
+            const dur = Number(args[2]);
+            const pwr = Number(args[3]);
+            const label = dir === 'LEFT' ? 'Trái' : 'Phải';
+            setCurrentCommandDisplay(`Nghiêng ngang: ${label} ${angle}° (${pwr}%)`);
+            const rollVal = (dir === 'LEFT' ? -angle : angle) * (pwr / 100);
+            updateDroneState({ roll: rollVal });
             await sleep(dur * 1000);
             if (cancelled()) break;
             updateDroneState({ roll: 0 });
@@ -406,16 +436,16 @@ export default function ProgrammingPage() {
   return (
     <main className="h-screen w-screen bg-[#0f172a] text-slate-200 overflow-hidden flex flex-col font-sans selection:bg-[#db4139]/30">
       {showOnboarding && <DroneOnboarding onComplete={() => setShowOnboarding(false)} />}
-      
+
       <header className="h-14 border-b border-white/10 bg-[#1a2333]/90 backdrop-blur-xl flex items-center justify-between px-8 z-50 shrink-0 relative shadow-lg">
         <div className="flex items-center gap-4">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#db4139] to-[#c53a33] flex items-center justify-center shadow-lg shadow-red-900/30">
+          {/* <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#db4139] to-[#c53a33] flex items-center justify-center shadow-lg shadow-red-900/30">
             <span className="text-white font-black text-sm">D</span>
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-[#db4139] uppercase tracking-widest leading-none">DroniVerse</span>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Hệ thống điều khiển</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/10 p-1 rounded-2xl border border-white/10 shadow-inner">
@@ -441,23 +471,21 @@ export default function ProgrammingPage() {
           {/* Smart drone status chip */}
           <button
             onClick={() => setShowOnboarding(true)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-[9px] font-bold uppercase tracking-widest ${
-              status === 'running'
-                ? 'bg-[#db4139]/15 border-[#db4139]/40 text-[#db4139]'
-                : status === 'online'
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-[9px] font-bold uppercase tracking-widest ${status === 'running'
+              ? 'bg-[#db4139]/15 border-[#db4139]/40 text-[#db4139]'
+              : status === 'online'
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                 : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-            }`}
+              }`}
           >
-            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              status === 'running' ? 'bg-[#db4139] animate-pulse' :
+            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${status === 'running' ? 'bg-[#db4139] animate-pulse' :
               status === 'online' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-slate-600'
-            }`} />
+              }`} />
             {status === 'offline'
               ? 'Kết nối Drone'
               : droneId
-              ? droneId.replace('drone_', '').toUpperCase()
-              : status === 'online' ? 'Online' : 'Đang bay'
+                ? droneId.replace('drone_', '').toUpperCase()
+                : status === 'online' ? 'Online' : 'Đang bay'
             }
           </button>
         </div>
@@ -465,26 +493,24 @@ export default function ProgrammingPage() {
 
       <div className="flex-1 flex overflow-hidden p-3 gap-3">
         <div className="w-[45%] h-full relative flex flex-col gap-2">
-          
+
           {/* Tab Selector */}
           <div className="flex items-center gap-1 bg-[#1a2333] p-1 rounded-md border border-white/10 shrink-0">
             <button
               onClick={() => setActiveTab('blockly')}
-              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${
-                activeTab === 'blockly' 
-                  ? 'bg-[#db4139] text-white shadow-lg shadow-red-900/30' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'blockly'
+                ? 'bg-[#db4139] text-white shadow-lg shadow-red-900/30'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
             >
               Khối lệnh (Blockly)
             </button>
             <button
               onClick={() => setActiveTab('manual')}
-              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${
-                activeTab === 'manual' 
-                  ? 'bg-[#2dd4bf] text-[#0f172a] shadow-lg shadow-teal-900/30' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
+              className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'manual'
+                ? 'bg-[#2dd4bf] text-[#0f172a] shadow-lg shadow-teal-900/30'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
             >
               Điều khiển thủ công
             </button>
@@ -506,15 +532,14 @@ export default function ProgrammingPage() {
           <div className="absolute top-6 left-6 z-20 pointer-events-none flex items-center gap-3">
             <div className="bg-[#243147]/95 backdrop-blur-xl border border-white/10 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-5">
               <div className="flex items-center gap-2.5 pr-5 border-r border-white/10">
-                <div className={`w-2 h-2 rounded-full ${
-                  status === 'running' ? 'bg-[#db4139] animate-pulse shadow-[0_0_10px_#db4139]' :
+                <div className={`w-2 h-2 rounded-full ${status === 'running' ? 'bg-[#db4139] animate-pulse shadow-[0_0_10px_#db4139]' :
                   status === 'online' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-slate-600'
-                }`} />
+                  }`} />
                 <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest">
                   {status === 'running' ? 'Đang bay' : status === 'online' ? 'Sẵn sàng' : 'Ngoại tuyến'}
                 </span>
               </div>
-              
+
               <div className="flex items-baseline gap-2 pr-5 border-r border-white/10">
                 <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Độ cao</span>
                 <div className="flex items-baseline gap-0.5">

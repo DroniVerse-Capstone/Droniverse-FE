@@ -678,7 +678,7 @@ export default function PlayLabWorkspace({
           {/* Info */}
           <button
             onClick={() => setShowMissionBrief(true)}
-            className="flex items-center gap-2 px-3 h-9 rounded text-slate-300 hover:text-white hover:bg-[#1e2030] border border-[#2a2d3a] hover:border-[#3a3f5a] transition-all"
+            className="flex items-center gap-2 px-3 h-9 rounded text-slate-300 hover:text-white hover:bg-[#252840] border bg-[#252840] hover:border-[#252840] transition-all"
           >
             <FaClipboardList className="text-sm" />
             <span className="text-[11px] font-bold uppercase tracking-wider">Đề bài</span>
@@ -698,10 +698,10 @@ export default function PlayLabWorkspace({
           <button
             onClick={handleRun}
             disabled={!hasBlocks || status === "running"}
-            className="flex items-center gap-2.5 px-5 py-2 rounded text-[11px] font-semibold text-white bg-red-600 hover:bg-red-500 border border-red-700 shadow-lg disabled:opacity-40 disabled:grayscale transition-all active:scale-95 min-w-[130px] justify-center"
+            className="flex items-center gap-2.5 px-5 py-2 rounded text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-500 border border-blue-700 shadow-lg disabled:opacity-40 disabled:grayscale transition-all active:scale-95 min-w-[130px] justify-center"
           >
             <FaPlay className="text-[9px]" />
-            {status === "running" ? "Đang chạy..." : "▶ Bắt đầu chạy"}
+            {status === "running" ? "Đang chạy..." : "Bắt đầu chạy"}
           </button>
         </div>
       </div>
