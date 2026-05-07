@@ -8,11 +8,16 @@
 .blocklyToolboxDiv {
   width: var(--toolbox-width) !important;
   background: linear-gradient(180deg,
-      #2f3e4e 0%,
-      #1f2a38 100%) !important;
+      #1e293b 0%,
+      #0f172a 100%) !important;
   border-right: 1px solid rgba(148, 163, 184, 0.2) !important;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
-  color: #e0e7ff !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  color: #f8fafc !important;
+  padding-top: 8px !important;
+}
+
+.blocklyToolbox {
+  padding: 0 10px 0 10px;
 }
 
 @media (max-width: 640px) {
@@ -31,22 +36,84 @@
   }
 }
 
-.blocklyTreeRow {
-  height: 44px !important;
-  line-height: 44px !important;
-  padding: 0 16px !important;
-  margin: 4px 8px !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    sans-serif !important;
-  border-radius: 8px !important;
-  cursor: pointer !important;
+/* --- Modern Toolbox Categories (UI 2) --- */
+.blocklyTreeRow,
+.blocklyToolboxCategory {
+  height: 48px !important;
+  margin: 8px 6px !important;
+  /* Giảm lề ngang để sát cạnh hơn */
+  border-radius: 12px !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   display: flex !important;
   align-items: center !important;
-  background-color: rgba(63, 81, 101, 0.5) !important;
-  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  justify-content: center !important;
+  background-color: rgba(63, 81, 101, 0.2) !important;
+  border: 1px solid rgba(148, 163, 184, 0.1) !important;
+  color: #cbd5e1 !important;
+  position: relative !important;
+  gap: 10px !important;
+  padding: 0 15px !important;
+  /* Tăng padding để chữ trông đầy đặn hơn */
+  cursor: pointer !important;
+}
+
+/* Xóa bỏ khoảng hở giữa Toolbox và Flyout */
+.blocklyFlyout {
+  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.blocklyToolboxDiv {
+  border-right: none !important;
+  background-color: #111122 !important;
+}
+
+/* Ẩn các vạch màu và icon mặc định của Blockly */
+.blocklyTreeIcon,
+.blocklyTreeSeparator,
+.blocklyToolboxCategoryIcon,
+.blocklyTreeRowContentContainer>.blocklyTreeIcon {
+  display: none !important;
+}
+
+/* Trạng thái Hover */
+.blocklyTreeRow:hover,
+.blocklyToolboxCategory:hover {
+  background-color: rgba(63, 81, 101, 0.4) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Trạng thái được chọn (Selected) */
+.blocklyTreeRow.blocklyTreeSelected,
+.blocklyToolboxCategory.blocklyToolboxSelected {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
+  color: #fff !important;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Đảm bảo nội dung bên trong (Container) cũng phải căn giữa */
+.blocklyTreeRowContentContainer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Đảm bảo text nằm giữa tuyệt đối */
+.blocklyTreeLabel,
+.blocklyToolboxLabel {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  text-align: center !important;
+  display: block !important;
+  white-space: nowrap !important;
 }
 
 @media (max-width: 640px) {
@@ -77,41 +144,48 @@
   }
 }
 
-.blocklyTreeRow:hover {
-  background-color: rgba(97, 116, 138, 0.6) !important;
+.blocklyTreeRow:hover,
+.blocklyToolboxCategory:hover {
+  background-color: rgba(97, 116, 138, 0.4) !important;
   border-color: rgba(148, 163, 184, 0.3) !important;
+  color: #ffffff !important;
   transform: translateX(2px) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
-.blocklyTreeRow.blocklyTreeSelected {
-  background: linear-gradient(135deg,
-      rgba(79, 163, 255, 0.35),
-      rgba(99, 146, 255, 0.25)) !important;
-  border: 2px solid rgba(59, 130, 246, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15),
-    0 4px 12px rgba(59, 130, 246, 0.25) !important;
+.blocklyTreeRow.blocklyTreeSelected,
+.blocklyToolboxCategory.blocklyToolboxSelected {
+  background: rgba(59, 130, 246, 0.25) !important;
+  border: 2px solid rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
   pointer-events: none !important;
 }
 
-.blocklyTreeRow.blocklyTreeSelected .blocklyTreeLabel {
+.blocklyTreeRow.blocklyTreeSelected .blocklyTreeLabel,
+.blocklyToolboxCategory.blocklyToolboxSelected .blocklyToolboxLabel {
   color: #ffffff !important;
   font-weight: 700 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
-.blocklyTreeRow input[type="checkbox"],
-.blocklyTreeIcon {
+.blocklyTreeRow input[type="checkbox"] {
   display: none !important;
 }
 
+.blocklyTreeIcon,
+.blocklyToolboxIcon {
+  margin-right: 8px !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .blocklyFlyout {
-  transition: transform 0.25s ease, opacity 0.2s ease !important;
+  transition: opacity 0.2s ease !important;
   background: linear-gradient(180deg,
       #0f172a 0%,
       #0c1224 55%,
       #0b1220 100%) !important;
-  transform: translate(var(--flyout-offset), 0px) !important;
   z-index: 10 !important;
   border-right: 1px solid rgba(148, 163, 184, 0.15) !important;
   box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25),
@@ -189,20 +263,22 @@
 
 .blocklyToggleBtn {
   position: absolute;
-  top: 10px;
-  left: calc(var(--toolbox-width) + var(--flyout-width) - 80px);
-  z-index: 30;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #e2e8f0;
-  font-weight: 700;
-  font-size: 13px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  top: 14px;
+  left: calc(var(--toolbox-width) + var(--flyout-width) - 20px);
+  z-index: 9999 !important;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.15s ease, box-shadow 0.2s ease,
-    left 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 640px) {
@@ -227,9 +303,7 @@
 }
 
 .blockly-panels-collapsed .blocklyToolboxDiv {
-  transform: translateX(calc(-1 * (var(--toolbox-width) + 10px))) !important;
-  opacity: 0;
-  pointer-events: none;
+  display: none !important;
 }
 
 .blockly-panels-collapsed .blocklyFlyout {
@@ -244,7 +318,10 @@
 }
 
 .blockly-panels-collapsed .blocklyToggleBtn {
-  left: 12px;
+  left: 200px;
+  background: #3b82f6;
+  border-color: #60a5fa;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
 
 .blockly-panels-collapsed .blocklyFlyout .blocklyScrollbarVertical,

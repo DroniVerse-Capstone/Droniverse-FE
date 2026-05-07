@@ -87,6 +87,8 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
+    const pitchForce = droneState.pitch * 0.003;
+    const rollForce = droneState.roll * 0.003;
     const targetPitch = (droneState.pitch * Math.PI) / 180;
     const targetRoll = (droneState.roll * Math.PI) / 180;
     const yawVelocity = -(droneState.yaw / 100) * (Math.PI / 2);
@@ -137,7 +139,7 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
     }
 
     if (onUpdateAltitude) {
-      onUpdateAltitude(groupRef.current.position.y);
+      onUpdateAltitude(groupRef.current.position.y / 5);
     }
 
     // Propellers
@@ -181,7 +183,7 @@ export default function Drone3D({ droneState, onUpdateAltitude }: Drone3DProps) 
         background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, rgba(10, 10, 26, 0.4) 100%)'
       }} />
 
-      <Canvas shadows camera={{ position: [0, 10, -18], fov: 45 }}>
+      <Canvas shadows camera={{ position: [0, 18, -35], fov: 50 }}>
         <fog attach="fog" args={["#0a0a1a", 150, 600]} />
 
         {/* Neon Ambient & Accent Lighting */}
@@ -246,7 +248,7 @@ export default function Drone3D({ droneState, onUpdateAltitude }: Drone3DProps) 
           makeDefault
           enableDamping={true}
           dampingFactor={0.05}
-          minDistance={5}
+          minDistance={10}
           maxDistance={150}
         />
       </Canvas>
