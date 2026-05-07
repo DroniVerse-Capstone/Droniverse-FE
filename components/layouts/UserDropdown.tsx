@@ -128,9 +128,11 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           </DropdownMenuItem>
         )}
 
-        {user?.roleName === "CLUB_MEMBER" && clubSlug && (
+
+
+        {user?.roleName === "CLUB_MEMBER" && (
           <DropdownMenuItem
-            onClick={() => router.push(`/member/${clubSlug}/prizes`)}
+            onClick={() => router.push(`/member/my-prizes`)}
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <FiAward className="mr-2" />
