@@ -104,20 +104,23 @@ export const canAccessRoute = (pathname: string, roleName?: string | null) => {
   if (!isProtectedRoute(pathname)) return true
   if (!roleName) return false
 
-  if (pathname.startsWith('/programming')) {
-    return (
-      roleName === CLUB_MEMBER_ROLE ||
-      roleName === ADMIN_ROLE ||
-      roleName === SYSTEM_MANAGER_ROLE
-    )
-  }
-
   if (matchPathGroup(pathname, MEMBER_PATHS)) {
+    if (pathname.startsWith('/programming') || pathname.startsWith('/mechanics')) {
+      return (
+        roleName === CLUB_MEMBER_ROLE ||
+        roleName === ADMIN_ROLE ||
+        roleName === SYSTEM_MANAGER_ROLE
+      )
+    }
     return roleName === CLUB_MEMBER_ROLE
   }
 
   if (matchPathGroup(pathname, MANAGER_PATHS)) {
-    return roleName === CLUB_MANAGER_ROLE
+    return (
+      roleName === CLUB_MANAGER_ROLE ||
+      roleName === ADMIN_ROLE ||
+      roleName === SYSTEM_MANAGER_ROLE
+    )
   }
 
   if (matchPathGroup(pathname, SYSTEM_PATHS)) {
