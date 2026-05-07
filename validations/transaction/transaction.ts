@@ -109,6 +109,8 @@ export const getCommissionTransactionsParamsSchema = z.object({
 	currentPage: z.number().int().positive().default(1),
 	pageSize: z.number().int().positive().default(10),
 	type: z.literal("COMMISSION").default("COMMISSION"),
+	createdFrom: z.string().optional().nullable(),
+	createdTo: z.string().optional().nullable(),
 })
 
 export type Wallet = z.infer<typeof walletSchema>

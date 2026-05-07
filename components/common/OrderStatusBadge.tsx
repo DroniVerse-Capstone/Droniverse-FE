@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/providers/i18n-provider";
 
 type OrderStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
 
@@ -17,15 +18,29 @@ const statusClassMap: Record<string, string> = {
 	CANCELLED: "border border-greyscale-600 bg-greyscale-800 text-greyscale-100",
 };
 
-const statusLabelMap: Record<string, string> = {
-	PENDING: "Đang xử lý",
-	SUCCESS: "Thành công",
-	FAILED: "Thất bại",
-	CANCELLED: "Đã hủy",
+const statusLabelMap: Record<string, { vi: string; en: string }> = {
+	PENDING: {
+		vi: "Đang xử lý",
+		en: "Pending",
+	},
+	SUCCESS: {
+		vi: "Thành công",
+		en: "Success",
+	},
+	FAILED: {
+		vi: "Thất bại",
+		en: "Failed",
+	},
+	CANCELLED: {
+		vi: "Đã hủy",
+		en: "Cancelled",
+	},
 };
 
 export default function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
+	const locale = useLocale();
 	const normalizedStatus = status.toUpperCase();
+	const statusLabel = statusLabelMap[normalizedStatus];
 
 	return (
 		<Badge
@@ -36,7 +51,7 @@ export default function OrderStatusBadge({ status, className }: OrderStatusBadge
 				className,
 			)}
 		>
-			{statusLabelMap[normalizedStatus] ?? normalizedStatus}
+			{statusLabel?.[locale === "vi" ? "vi" : "en"] ?? normalizedStatus}
 		</Badge>
 	);
 }

@@ -7,13 +7,19 @@ import {
 	CreateQuizQuestionRequest,
 	CreateQuizQuestionResponse,
 	DeleteQuizQuestionResponse,
+	ImportQuizQuestionRequest,
+	ImportQuizQuestionResponse,
 	QuizQuestion,
+	QuizQuestionTemplateResponse,
 	UpdateQuizQuestionRequest,
 	UpdateQuizQuestionResponse,
 	createQuizQuestionRequestSchema,
 	createQuizQuestionResponseSchema,
 	deleteQuizQuestionResponseSchema,
 	getQuizQuestionsResponseSchema,
+	importQuizQuestionRequestSchema,
+	importQuizQuestionResponseSchema,
+	quizQuestionTemplateResponseSchema,
 	updateQuizQuestionRequestSchema,
 	updateQuizQuestionResponseSchema,
 } from "@/validations/quiz-question/quiz-question"
@@ -49,6 +55,21 @@ type UseDeleteQuizQuestionOptions = {
 	onError?: (error: AxiosError<ApiError>) => void
 }
 
+type UseGetQuizQuestionTemplateOptions = {
+	onSuccess?: (data: QuizQuestionTemplateResponse) => void
+	onError?: (error: AxiosError<ApiError>) => void
+}
+
+type ImportQuizQuestionsVariables = {
+	quizId: string
+	file: ImportQuizQuestionRequest
+}
+
+type UseImportQuizQuestionsOptions = {
+	onSuccess?: (data: ImportQuizQuestionResponse) => void
+	onError?: (error: AxiosError<ApiError>) => void
+}
+
 export const useGetQuizQuestions = (quizId?: string) => {
 	return useQuery<QuizQuestion[], AxiosError<ApiError>>({
 		queryKey: ["quiz-questions", quizId],
@@ -61,6 +82,67 @@ export const useGetQuizQuestions = (quizId?: string) => {
 			const response = await apiClient.get(`/academy/quizzes/${quizId}/questions`)
 			const parsed = getQuizQuestionsResponseSchema.parse(response.data)
 			return parsed.data
+		},
+	})
+}
+
+export const useGetQuizQuestionTemplate = (
+	options?: UseGetQuizQuestionTemplateOptions,
+) => {
+	return useMutation<QuizQuestionTemplateResponse, AxiosError<ApiError>, void>({
+		mutationFn: async () => {
+			const response = await apiClient.get("/academy/imports/quizquestion-template", {
+				responseType: "blob",
+			})
+
+			return quizQuestionTemplateResponseSchema.parse(response.data)
+		},
+		onSuccess: (data) => {
+			options?.onSuccess?.(data)
+		},
+		onError: (error) => {
+			options?.onError?.(error)
+		},
+	})
+}
+
+export const useImportQuizQuestions = (
+	options?: UseImportQuizQuestionsOptions,
+) => {
+	const queryClient = useQueryClient()
+
+	return useMutation<
+		ImportQuizQuestionResponse,
+		AxiosError<ApiError>,
+		ImportQuizQuestionsVariables
+	>({
+		mutationFn: async ({ quizId, file }) => {
+			const parsedFile = importQuizQuestionRequestSchema.parse(file)
+			const formData = new FormData()
+			formData.append("file", parsedFile)
+
+			const response = await apiClient.post(
+				"/academy/imports/quizquestion-template",
+				formData,
+				{
+					params: { quizId },
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				},
+			)
+
+			return importQuizQuestionResponseSchema.parse(response.data)
+		},
+		onSuccess: async (data, variables) => {
+			await queryClient.invalidateQueries({
+				queryKey: ["quiz-questions", variables.quizId],
+			})
+
+			options?.onSuccess?.(data)
+		},
+		onError: (error) => {
+			options?.onError?.(error)
 		},
 	})
 }

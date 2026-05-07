@@ -9,6 +9,7 @@ import { Star } from "lucide-react";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { formatDate } from "@/lib/utils/format-date";
 import { Level } from "@/validations/level/level";
+import { useLocale } from "@/providers/i18n-provider";
 
 type CourseOverviewHeroProps = {
   title: string;
@@ -33,6 +34,8 @@ export default function CourseOverviewHero({
   lastUpdatedAt,
   imageUrl,
 }: CourseOverviewHeroProps) {
+  const locale = useLocale();
+
   return (
     <section className="rounded bg-linear-120 from-greyscale-900 to-greyscale-700 p-6">
       <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_500px]">
@@ -44,33 +47,39 @@ export default function CourseOverviewHero({
           <div className="flex flex-wrap items-center gap-2">
             <CourseLevelBadge level={level} className="text-sm" />
             <span className="inline-flex rounded border-2 border-tertiary bg-tertiary/15 px-3 py-1 text-sm font-semibold text-tertiary">
-              {estimatedDuration} phút
+              {estimatedDuration} {locale === "vi" ? "phút" : "minutes"}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-5 text-sm text-greyscale-25">
             <div className="flex items-center gap-2">
-              <span className="font-semibold">{averageRating.toFixed(1)}</span>
+              <span className="font-semibold">
+                {averageRating === 0 ? locale === "vi" ? "Chưa có đánh giá" : "No ratings yet" : averageRating.toFixed(1)}
+              </span>
               <span className="flex items-center gap-1 text-yellow-400">
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <Star key={idx} className="h-4 w-4 fill-current" />
-                ))}
+                {averageRating === 0
+                  ? Array.from({ length: 1 }).map((_, idx) => (
+                      <Star key={idx} className="h-4 w-4 fill-current" />
+                    ))
+                  : Array.from({ length: 5 }).map((_, idx) => (
+                      <Star key={idx} className="h-4 w-4 fill-current" />
+                    ))}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <IoPeople className="text-primary" />
-              <span className="font-semibold">{totalLearners} đã học</span>
+              <span className="font-semibold">{totalLearners} {locale === "vi" ? "đã học" : "learners"}</span>
             </div>
           </div>
 
           <p className="text-sm text-greyscale-25">
-            Tác giả: <span className="font-semibold text-primary">{authorName}</span>
+            {locale === "vi" ? "Tác giả: " : "Author: "} <span className="font-semibold text-primary">{authorName}</span>
           </p>
 
           <p className="flex items-center gap-2 text-sm text-greyscale-25">
             <RiRefreshLine className="text-greyscale-100" />
-            Cập nhật gần nhất {formatDate(lastUpdatedAt)}
+            {locale === "vi" ? "Cập nhật gần nhất " : "Last updated "} {formatDate(lastUpdatedAt)}
           </p>
         </div>
 

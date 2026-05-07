@@ -4,6 +4,7 @@ import * as React from "react"
 import { Check, ChevronDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -33,8 +34,11 @@ type CommonDropdownBaseProps = {
   label?: string
   menuLabel?: string
   emptyMessage?: string
+  searchPlaceholder?: string
+  searchEmptyMessage?: string
   errorMessage?: string
   isLoading?: boolean
+  searchable?: boolean
   triggerClassName?: string
   contentClassName?: string
   itemClassName?: string
@@ -64,12 +68,38 @@ export default function CommonDropdown(props: CommonDropdownProps) {
     label,
     menuLabel,
     emptyMessage = "Không có dữ liệu",
+    searchPlaceholder = "Tìm kiếm",
+    searchEmptyMessage = "Không tìm thấy kết quả",
     errorMessage,
     isLoading = false,
+    searchable = false,
     triggerClassName,
     contentClassName,
     itemClassName,
   } = props
+
+  const [searchValue, setSearchValue] = React.useState("")
+
+  const filteredOptions = React.useMemo(() => {
+    if (!searchable) {
+      return options
+    }
+
+    const normalizedSearch = searchValue.trim().toLowerCase()
+
+    if (!normalizedSearch) {
+      return options
+    }
+
+    return options.filter((option) => {
+      const searchableText = [option.label, option.description]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+
+      return searchableText.includes(normalizedSearch)
+    })
+  }, [options, searchValue, searchable])
 
   const selectedOptions = React.useMemo(() => {
     if (props.multiple) {
@@ -127,7 +157,11 @@ export default function CommonDropdown(props: CommonDropdownProps) {
         <label className="text-sm font-medium text-greyscale-0">{label}</label>
       ) : null}
 
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => {
+        if (!open) {
+          setSearchValue("")
+        }
+      }}>
         <DropdownMenuTrigger asChild disabled={disabled || isLoading}>
           <Button
             type="button"
@@ -173,6 +207,17 @@ export default function CommonDropdown(props: CommonDropdownProps) {
             </>
           ) : null}
 
+          {searchable && options.length > 0 ? (
+            <div className="px-2 pb-2 pt-1">
+              <Input
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder={searchPlaceholder}
+                className="h-10 border-greyscale-700 bg-greyscale-950/90 text-greyscale-0 placeholder:text-greyscale-300"
+              />
+            </div>
+          ) : null}
+
           {errorMessage ? (
             <DropdownMenuItem disabled className="text-greyscale-300">
               {errorMessage}
@@ -181,9 +226,13 @@ export default function CommonDropdown(props: CommonDropdownProps) {
             <DropdownMenuItem disabled className="text-greyscale-300">
               {emptyMessage}
             </DropdownMenuItem>
+          ) : filteredOptions.length === 0 ? (
+            <DropdownMenuItem disabled className="text-greyscale-300">
+              {searchable ? searchEmptyMessage : emptyMessage}
+            </DropdownMenuItem>
           ) : props.multiple ? (
             <div className="space-y-1">
-              {options.map((option) => {
+              {filteredOptions.map((option) => {
                 const isChecked = props.value.includes(option.value)
 
                 return (
@@ -219,7 +268,7 @@ export default function CommonDropdown(props: CommonDropdownProps) {
               })}
             </div>
           ) : (
-            options.map((option) => {
+            filteredOptions.map((option) => {
               const isSelected = option.value === props.value
 
               return (

@@ -8,11 +8,15 @@ import {
   GetAllClubsData,
   GetClubParticipationsData,
   LeaveClubResponse,
+  KickClubParticipantParams,
+  KickClubParticipantResponse,
   UpdateClubRequest,
   UpdateClubResponse,
   getAllClubsResponseSchema,
   getClubParticipationsResponseSchema,
   getClubDetailResponseSchema,
+  kickClubParticipantParamsSchema,
+  kickClubParticipantResponseSchema,
   getMyClubsResponseSchema,
   leaveClubParamsSchema,
   leaveClubResponseSchema,
@@ -55,6 +59,11 @@ type UploadClubImageError = {
 
 type LeaveClubVariables = {
   clubId: string
+}
+
+type KickClubParticipantVariables = {
+  clubId: string
+  userId: string
 }
 
 type UpdateClubVariables = {
@@ -248,6 +257,33 @@ export const useLeaveClub = () => {
     onSuccess: async (_data, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["my-clubs"] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-id", variables.clubId] }),
+        queryClient.invalidateQueries({ queryKey: ["club-detail-by-code"] }),
+      ])
+    },
+  })
+}
+
+export const useKickClubParticipant = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<
+    KickClubParticipantResponse,
+    AxiosError<ApiError>,
+    KickClubParticipantVariables
+  >({
+    mutationFn: async ({ clubId, userId }) => {
+      const parsedParams = kickClubParticipantParamsSchema.parse({ clubId, userId })
+
+      const response = await apiClient.post(
+        `/community/clubs/${parsedParams.clubId}/participants/${parsedParams.userId}/kick`
+      )
+
+      return kickClubParticipantResponseSchema.parse(response.data)
+    },
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["club-participations", variables.clubId] }),
         queryClient.invalidateQueries({ queryKey: ["club-detail-by-id", variables.clubId] }),
         queryClient.invalidateQueries({ queryKey: ["club-detail-by-code"] }),
       ])

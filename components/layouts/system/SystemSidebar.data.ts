@@ -5,10 +5,12 @@ import {
   Barcode,
   BookOpen,
   CircleHelp,
+  Coins,
   FolderKanban,
   Grid2x2,
   Home,
   Plane,
+  Receipt,
   Route,
   Settings,
   UserCog,
@@ -69,6 +71,8 @@ export const primaryItems: NavItem[] = [
     icon: GrTransaction,
     subItems: [
       {title: "transactions.subitems.withdraw-request", href: "/withdraw-requests", icon: TbTransactionDollar},
+      {title: "transactions.subitems.order-management", href: "/order-management", icon: Receipt},
+      {title: "transactions.subitems.commission-management", href: "/commission-management", icon: Coins},
     ]
   },
   {
