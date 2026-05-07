@@ -390,6 +390,9 @@
     },
     "help": {
       "title": "Yêu cầu hỗ trợ"
+    },
+    "reports":{
+      "title": "Khiếu nại"
     }
   },
   "SystemDashboard": {

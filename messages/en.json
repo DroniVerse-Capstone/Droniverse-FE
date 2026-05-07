@@ -394,6 +394,9 @@
     },
     "help": {
       "title": "Support Requests"
+    },
+    "reports": {
+      "title": "User Reports"
     }
   },
   "SystemDashboard": {

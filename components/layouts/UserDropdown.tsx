@@ -18,6 +18,7 @@ import { User } from "@/validations/auth";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { GoHistory } from "react-icons/go";
 import { PiCertificate } from "react-icons/pi";
+import { MdOutlineReport } from "react-icons/md";
 
 interface UserDropdownProps {
   user: User | null;
@@ -140,13 +141,15 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuItem
-          onClick={() => router.push("/settings")}
-          className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
-        >
-          <FiSettings className="mr-2" />
-          Cài đặt
-        </DropdownMenuItem>
+        {user?.roleName === "CLUB_MEMBER" && (
+          <DropdownMenuItem
+            onClick={() => router.push(`/member/my-reports`)}
+            className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
+          >
+            <MdOutlineReport className="mr-2" />
+            Lịch sử khiếu nại
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuSeparator className="bg-greyscale-700" />
 
