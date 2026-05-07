@@ -1,71 +1,89 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 
-import CommonDropdown, { type CommonDropdownOption } from "@/components/common/CommonDropdown"
-import { TableCustom } from "@/components/common/TableCustom"
-import { Badge } from "@/components/ui/badge"
-import { Empty } from "@/components/ui/empty"
-import { Spinner } from "@/components/ui/spinner"
-import { TableCell } from "@/components/ui/table"
-import { useGetAcademyCodes } from "@/hooks/code/useCode"
-import { useLocale } from "@/providers/i18n-provider"
-import type { AcademyCodeItem, AcademyCodeStatus } from "@/validations/code/code"
-import { formatDateTime } from "@/lib/utils/format-date"
-import Image from "next/image"
+import CommonDropdown, {
+  type CommonDropdownOption,
+} from "@/components/common/CommonDropdown";
+import { TableCustom } from "@/components/common/TableCustom";
+import { Badge } from "@/components/ui/badge";
+import { Empty } from "@/components/ui/empty";
+import { Spinner } from "@/components/ui/spinner";
+import { TableCell } from "@/components/ui/table";
+import CourseLevelBadge from "@/components/course/CourseLevelBadge";
+import { useGetAcademyCodes } from "@/hooks/code/useCode";
+import { useLocale } from "@/providers/i18n-provider";
+import type {
+  AcademyCodeItem,
+  AcademyCodeStatus,
+} from "@/validations/code/code";
+import { formatDateTime } from "@/lib/utils/format-date";
+import Image from "next/image";
 
-const STATUS_OPTIONS: Array<{ value: AcademyCodeStatus | ""; labelVi: string; labelEn: string }> = [
+const STATUS_OPTIONS: Array<{
+  value: AcademyCodeStatus | "";
+  labelVi: string;
+  labelEn: string;
+}> = [
   { value: "", labelVi: "Tất cả", labelEn: "All" },
   { value: "AVAILABLE", labelVi: "Khả dụng", labelEn: "Available" },
   { value: "USED", labelVi: "Đã dùng", labelEn: "Used" },
   { value: "EXPIRED", labelVi: "Hết hạn", labelEn: "Expired" },
-]
+];
 
 function formatUserName(user: { firstName: string; lastName: string }) {
-  return `${user.firstName} ${user.lastName}`.trim()
+  return `${user.firstName} ${user.lastName}`.trim();
+}
+
+function getCourseTitle(course: AcademyCodeItem["course"], locale: string) {
+  const currentVersion = course.courseVersions[0];
+
+  return locale === "vi"
+    ? currentVersion?.titleVN || currentVersion?.titleEN || course.courseID
+    : currentVersion?.titleEN || currentVersion?.titleVN || course.courseID;
 }
 
 function getStatusBadgeClass(status: AcademyCodeStatus) {
   switch (status) {
     case "AVAILABLE":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-300";
     case "USED":
-      return "border-sky-500/20 bg-sky-500/10 text-sky-300"
+      return "border-sky-500/20 bg-sky-500/10 text-sky-300";
     case "EXPIRED":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-300"
+      return "border-amber-500/20 bg-amber-500/10 text-amber-300";
     default:
-      return "border-greyscale-600 bg-greyscale-800 text-greyscale-100"
+      return "border-greyscale-600 bg-greyscale-800 text-greyscale-100";
   }
 }
 
 function getStatusLabel(status: AcademyCodeStatus, locale: string) {
   switch (status) {
     case "AVAILABLE":
-      return locale === "vi" ? "Khả dụng" : "Available"
+      return locale === "vi" ? "Khả dụng" : "Available";
     case "USED":
-      return locale === "vi" ? "Đã dùng" : "Used"
+      return locale === "vi" ? "Đã dùng" : "Used";
     case "EXPIRED":
-      return locale === "vi" ? "Hết hạn" : "Expired"
+      return locale === "vi" ? "Hết hạn" : "Expired";
     default:
-      return status
+      return status;
   }
 }
 
 export default function CourseCodeManagement() {
-  const locale = useLocale()
-  const [status, setStatus] = React.useState<AcademyCodeStatus | "">("")
-  const [currentPage, setCurrentPage] = React.useState(1)
-  const [pageSize, setPageSize] = React.useState(8)
+  const locale = useLocale();
+  const [status, setStatus] = React.useState<AcademyCodeStatus | "">("");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(8);
 
   const { data, isLoading, isError, error } = useGetAcademyCodes({
     status: status || undefined,
     currentPage,
     pageSize,
-  })
+  });
 
-  const overview = data?.overview
-  const codesPaging = data?.codes
-  const codes = codesPaging?.data ?? []
+  const overview = data?.overview;
+  const codesPaging = data?.codes;
+  const codes = codesPaging?.data ?? [];
   const statusOptions = React.useMemo<CommonDropdownOption[]>(
     () =>
       STATUS_OPTIONS.map((option) => ({
@@ -73,25 +91,25 @@ export default function CourseCodeManagement() {
         label: locale === "vi" ? option.labelVi : option.labelEn,
       })),
     [locale],
-  )
+  );
 
   const headers = [
     locale === "vi" ? "STT" : "No.",
     locale === "vi" ? "Mã code" : "Code ID",
-    locale === "vi" ? "Khóa học" : "Course ID",
+    locale === "vi" ? "Khóa học" : "Course",
     locale === "vi" ? "Câu lạc bộ" : "Club",
     locale === "vi" ? "Chủ sở hữu" : "Owner",
     locale === "vi" ? "Người dùng" : "Used by",
     locale === "vi" ? "Hết hạn" : "Expired at",
     locale === "vi" ? "Trạng thái" : "Status",
-  ]
+  ];
 
   if (isLoading) {
     return (
       <div className="flex min-h-40 items-center justify-center">
         <Spinner className="h-5 w-5" />
       </div>
-    )
+    );
   }
 
   if (isError) {
@@ -105,7 +123,7 @@ export default function CourseCodeManagement() {
               : "Unable to load codes list.")}
         </p>
       </Empty>
-    )
+    );
   }
 
   return (
@@ -164,12 +182,16 @@ export default function CourseCodeManagement() {
             <CommonDropdown
               value={status}
               onChange={(value) => {
-                setCurrentPage(1)
-                setStatus(value as AcademyCodeStatus | "")
+                setCurrentPage(1);
+                setStatus(value as AcademyCodeStatus | "");
               }}
               options={statusOptions}
-              label={locale === "vi" ? "Lọc theo trạng thái" : "Filter by status"}
-              placeholder={locale === "vi" ? "Chọn trạng thái" : "Choose status"}
+              label={
+                locale === "vi" ? "Lọc theo trạng thái" : "Filter by status"
+              }
+              placeholder={
+                locale === "vi" ? "Chọn trạng thái" : "Choose status"
+              }
               triggerClassName="mt-0 h-11 border-greyscale-700 bg-greyscale-950/90 text-greyscale-0 hover:bg-greyscale-900"
               contentClassName="bg-greyscale-900 border-greyscale-700"
             />
@@ -189,9 +211,27 @@ export default function CourseCodeManagement() {
           data={codes}
           renderRow={(code: AcademyCodeItem, index) => (
             <>
-              <TableCell>{(codesPaging?.pageIndex ?? currentPage) * pageSize - pageSize + index + 1}</TableCell>
-              <TableCell className="font-medium text-greyscale-0">{code.codeID}</TableCell>
-              <TableCell className="max-w-44 text-greyscale-100">{code.courseID}</TableCell>
+              <TableCell>
+                {(codesPaging?.pageIndex ?? currentPage) * pageSize -
+                  pageSize +
+                  index +
+                  1}
+              </TableCell>
+              <TableCell className="font-medium text-greyscale-0">
+                {code.codeID}
+              </TableCell>
+              <TableCell className="max-w-72 text-greyscale-100">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate font-medium text-greyscale-0">
+                      {getCourseTitle(code.course, locale)}
+                    </p>
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <CourseLevelBadge level={code.course.level} />
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
               <TableCell className="max-w-64 text-greyscale-100">
                 {code.club ? (
                   <div className="flex min-w-0 items-center gap-3">
@@ -199,7 +239,11 @@ export default function CourseCodeManagement() {
                       {code.club.imageUrl ? (
                         <Image
                           src={code.club.imageUrl}
-                          alt={locale === "vi" ? code.club.clubNameVN : code.club.clubNameEN}
+                          alt={
+                            locale === "vi"
+                              ? code.club.clubNameVN
+                              : code.club.clubNameEN
+                          }
                           className="h-full w-full object-cover"
                           width={40}
                           height={40}
@@ -212,7 +256,9 @@ export default function CourseCodeManagement() {
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-medium text-greyscale-0">
-                        {locale === "vi" ? code.club.clubNameVN : code.club.clubNameEN}
+                        {locale === "vi"
+                          ? code.club.clubNameVN
+                          : code.club.clubNameEN}
                       </p>
                     </div>
                   </div>
@@ -225,7 +271,9 @@ export default function CourseCodeManagement() {
                   <span className="truncate font-medium text-greyscale-0">
                     {formatUserName(code.ownerUser)}
                   </span>
-                  <span className="truncate text-xs text-greyscale-300">{code.ownerUser.email}</span>
+                  <span className="truncate text-xs text-greyscale-300">
+                    {code.ownerUser.email}
+                  </span>
                 </div>
               </TableCell>
               <TableCell className="max-w-56 text-greyscale-100">
@@ -242,7 +290,9 @@ export default function CourseCodeManagement() {
                   "-"
                 )}
               </TableCell>
-              <TableCell className="text-greyscale-100">{formatDateTime(code.expireDate)}</TableCell>
+              <TableCell className="text-greyscale-100">
+                {formatDateTime(code.expireDate)}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
@@ -267,5 +317,5 @@ export default function CourseCodeManagement() {
         />
       )}
     </section>
-  )
+  );
 }

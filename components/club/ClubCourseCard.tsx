@@ -68,7 +68,7 @@ export default function ClubCourseCard({
         <div className="mt-auto flex items-center justify-between border-t border-greyscale-700 pt-2 text-sm text-greyscale-25">
           <div className="flex items-center gap-2">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium">{course.rating.toFixed(1)}</span>
+            <span className="font-medium">{course.rating === 0 ? locale === "vi" ? "Chưa có đánh giá" : "No ratings yet" : course.rating.toFixed(1)}</span>
           </div>
 
           <div className="flex items-center gap-2">
