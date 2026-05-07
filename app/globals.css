@@ -107,22 +107,9 @@
   /* Default radius */
 }
 
-/* Blockly UX tweaks (Scratch-like) */
-.blocklyToolboxDiv {
-  width: 220px;
-}
-
-.blocklyFlyoutBackground {
-  fill: #f3f4f6 !important;
-  fill-opacity: 1 !important;
-}
-
-.blocklyTreeLabel {
-  font-size: 13px !important;
-}
-
-.blocklyZoom>image,
-.blocklyTrash>image {
+/* Blockly UX tweaks - Handled in blocklyCustom.css */
+.blocklyZoom > image,
+.blocklyTrash > image {
   opacity: 0.9;
 }
 

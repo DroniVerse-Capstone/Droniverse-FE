@@ -9,7 +9,8 @@ export type ToolboxCategory =
 
 type CategoryDefinition = {
 	name: string;
-	colour: string;
+	colour?: string;
+	categorystyle?: string;
 	custom?: string;
 	blocks?: string[];
 };
@@ -30,7 +31,7 @@ function getCategoryDefinitions(translations: Translations): Record<ToolboxCateg
 	return {
 		motion: {
 			name: translations.categories.motion,
-			colour: "#3b82f6",
+			categorystyle: "motion_category",
 			blocks: [
 				"drone_take_off",
 				"drone_up",
@@ -46,32 +47,32 @@ function getCategoryDefinitions(translations: Translations): Record<ToolboxCateg
 		},
 		loops: {
 			name: translations.categories.loops,
-			colour: "#10b981",
+			categorystyle: "control_category",
 			blocks: ["drone_repeat"],
 		},
 		logic: {
 			name: translations.categories.logic,
-			colour: "#f59e0b",
+			categorystyle: "logic_category",
 			blocks: ["drone_if", "drone_if_else", "logic_compare", "logic_operation", "logic_negate", "logic_boolean"],
 		},
 		sensors: {
 			name: translations.categories.sensors,
-			colour: "#ef4444",
+			categorystyle: "logic_category",
 			blocks: ["drone_is_obstacle_ahead"],
 		},
 		math: {
 			name: translations.categories.math,
-			colour: "#a855f7",
+			categorystyle: "motion_category",
 			blocks: ["math_number", "math_arithmetic", "math_modulo", "drone_amount_value", "drone_math_operation"],
 		},
 		variables: {
 			name: translations.categories.variables,
-			colour: "#ec4899",
+			categorystyle: "variable_category",
 			custom: "VARIABLE",
 		},
 		functions: {
 			name: translations.categories.functions,
-			colour: "#9966ff",
+			categorystyle: "variable_category",
 			custom: "PROCEDURE",
 		},
 	};
@@ -97,13 +98,13 @@ export function buildToolboxXml(
 ): string {
 	const defaultTranslations: Translations = {
 		categories: {
-			motion: "📍 Motion",
-			loops: "🔄 Loops",
-			logic: "🧠 Logic",
-			sensors: "📡 Sensors",
-			math: "➗ Math",
-			variables: "📦 Variables",
-			functions: "🧩 Functions",
+			motion: " Motion",
+			loops: " Loops",
+			logic: " Logic",
+			sensors: " Sensors",
+			math: " Math",
+			variables: " Variables",
+			functions: " Functions",
 		},
 	};
 	const CATEGORY_DEFINITIONS = getCategoryDefinitions(translations || defaultTranslations);
@@ -142,7 +143,8 @@ export function buildToolboxXml(
 					if (def.custom === "VARIABLE" && !allowedArray?.includes("category_variables")) return "";
 					if (def.custom === "PROCEDURE" && !allowedArray?.includes("category_functions")) return "";
 				}
-				return `<category name="${def.name}" colour="${def.colour}" custom="${def.custom}"></category>`;
+				const styleAttr = def.categorystyle ? `categorystyle="${def.categorystyle}"` : `colour="${def.colour}"`;
+				return `<category name="${def.name}" ${styleAttr} custom="${def.custom}"></category>`;
 			}
 
 			const availableBlocks = (def.blocks || []).filter(type => {
@@ -165,7 +167,8 @@ export function buildToolboxXml(
 				}
 				return `<block type="${type}" />`;
 			}).join("\n") ?? "";
-			return `<category name="${def.name}" colour="${def.colour}">
+			const styleAttr = def.categorystyle ? `categorystyle="${def.categorystyle}"` : `colour="${def.colour}"`;
+			return `<category name="${def.name}" ${styleAttr}>
 ${blocks}
 </category>`;
 		})

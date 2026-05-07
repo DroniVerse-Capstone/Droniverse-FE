@@ -45,7 +45,7 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         m['PROCEDURES_DEFNORETURN_PROCEDURE'] = 'tên_hàm';
         m['PROCEDURES_DEFNORETURN_DO'] = t("blockly.blocks.procedures.do") || (locale === "vi" ? 'thực hiện' : 'do');
         m['PROCEDURES_CALL_BEFORE_PARAMS'] = t("blockly.blocks.procedures.call") || (locale === "vi" ? 'gọi hàm' : 'call');
-        
+
         m['PROCEDURES_DEFRETURN_TITLE'] = t("blockly.blocks.procedures.defReturnTitle") || (locale === "vi" ? 'Định nghĩa hàm có kết quả' : 'Define function with result');
         m['PROCEDURES_DEFRETURN_PROCEDURE'] = 'tên_hàm';
         m['PROCEDURES_DEFRETURN_DO'] = t("blockly.blocks.procedures.do") || (locale === "vi" ? 'thực hiện' : 'do');
@@ -175,7 +175,10 @@ export default function BlocklyWorkspace({ toolboxXml, onWorkspaceReady, onBlock
         contextMenu: false,
       } as any);
 
-      // ... rest of the code remains same ...
+      setTimeout(() => {
+        Blockly.svgResize(workspace);
+      }, 100);
+
       let currentSelectedItem: any = null;
 
       const checkBlocksChange = () => {
