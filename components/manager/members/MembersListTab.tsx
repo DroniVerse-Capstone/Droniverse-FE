@@ -1,18 +1,27 @@
 "use client";
 
 import React from "react";
-
+import { TiDeleteOutline } from "react-icons/ti";
+import toast from "react-hot-toast";
+import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import EmptyState from "@/components/common/EmptyState";
 import GenderBadge from "@/components/common/GenderBadge";
 import { TableCustom } from "@/components/common/TableCustom";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { TableCell } from "@/components/ui/table";
-import { useGetClubParticipations, useGetClubDetailById } from "@/hooks/club/useClub";
+import {
+  useGetClubParticipations,
+  useGetClubDetailById,
+  useKickClubParticipant,
+} from "@/hooks/club/useClub";
 import { formatDate, formatDateTime } from "@/lib/utils/format-date";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
+import { Tooltip } from "recharts";
+import TooltipWrapper from "@/components/common/ToolTipWrapper";
 
 type MembersListTabProps = {
   clubId: string;
@@ -54,6 +63,7 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
 
   const { data: clubDetail } = useGetClubDetailById(clubId);
   const clubDroneId = clubDetail?.drone?.droneID ?? null;
+  const kickMemberMutation = useKickClubParticipant();
 
   const members = data?.data ?? [];
 
@@ -67,8 +77,22 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
     t("headers.gender"),
     t("headers.dateOfBirth"),
     t("headers.joinDate"),
+    t("headers.actions"),
     
   ];
+
+  const handleKickMember = async (userId: string, memberName: string) => {
+    try {
+      const response = await kickMemberMutation.mutateAsync({ clubId, userId });
+      toast.success(response.message || (locale === "vi" ? `Đã kick ${memberName}.` : `Removed ${memberName}.`));
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (error as { message?: string })?.message ||
+        (locale === "vi" ? "Không thể kick thành viên." : "Unable to remove member.");
+      toast.error(message);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -118,8 +142,12 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
                   1}
               </TableCell>
               <TableCell>
-                <Avatar className="h-10 w-10 border border-greyscale-700">
-                  <AvatarImage src={member.imageUrl || undefined} alt={member.username} />
+                <Avatar className="mx-auto h-12 w-12 overflow-hidden border border-greyscale-700 shadow-sm">
+                  <AvatarImage
+                    src={member.imageUrl || undefined}
+                    alt={member.username}
+                    className="object-cover"
+                  />
                   <AvatarFallback className="bg-greyscale-700 text-xs text-greyscale-50">
                     {getInitials(member.firstName, member.lastName, member.username)}
                   </AvatarFallback>
@@ -160,6 +188,32 @@ export default function MembersListTab({ clubId }: MembersListTabProps) {
               </TableCell>
               <TableCell className="text-greyscale-50">
                 {formatDateTime(member.joinDate ?? null)}
+              </TableCell>
+              <TableCell>
+                <ConfirmActionPopover
+                  title={locale === "vi" ? "Loại thành viên?" : "Kick member?"}
+                  description={
+                    locale === "vi"
+                      ? `Xác nhận loại ${member.username} khỏi câu lạc bộ?`
+                      : `Confirm removing ${member.username} from the club?`
+                  }
+                  confirmText={locale === "vi" ? "Loại" : "Remove"}
+                  cancelText={locale === "vi" ? "Hủy" : "Cancel"}
+                  isLoading={kickMemberMutation.isPending}
+                  onConfirm={() => handleKickMember(member.userId, member.username)}
+                  trigger={
+                    <TooltipWrapper label={locale === "vi" ? "Loại thành viên" : "Kick member"}>
+                    <Button
+                      type="button"
+                      variant="deleteIcon"
+                      size="icon"
+                      disabled={kickMemberMutation.isPending}
+                    >
+                      <TiDeleteOutline size={20} />
+                    </Button>
+                    </TooltipWrapper>
+                  }
+                />
               </TableCell>
             </>
           )}

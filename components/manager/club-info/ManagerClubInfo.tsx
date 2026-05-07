@@ -365,6 +365,7 @@ export default function ManagerClubInfo() {
               <ClubStatusBadge status={club.status} />
             </div>
           </div>
+
         </div>
       </section>
 
@@ -523,6 +524,45 @@ export default function ManagerClubInfo() {
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[#8b93a4]">Trạng thái</span>
                     <ClubStatusBadge status={club.status} />
+                  </div>
+                </div>
+
+                <div className="space-y-3 rounded border border-greyscale-700 bg-greyscale-800 p-4">
+                  <div>
+                    <h4 className="text-base font-semibold text-white">
+                      Xem trước nội quy
+                    </h4>
+                    <p className="text-xs text-[#8b93a4]">
+                      Nội dung hiển thị đúng như khi người dùng xem câu lạc bộ.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b93a4]">
+                        VI
+                      </p>
+                      <div className="dv-quill-render ql-editor max-h-100 overflow-y-auto rounded border border-greyscale-700 bg-greyscale-900 p-3 text-sm leading-6 text-greyscale-0">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: clubPolicyVN || "<p>Chưa có nội quy.</p>",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b93a4]">
+                        EN
+                      </p>
+                      <div className="dv-quill-render ql-editor max-h-100 overflow-y-auto rounded border border-greyscale-700 bg-greyscale-900 p-3 text-sm leading-6 text-greyscale-0">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: clubPolicyEN || "<p>No policy available.</p>",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

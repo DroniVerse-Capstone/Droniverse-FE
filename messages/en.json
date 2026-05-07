@@ -350,7 +350,9 @@
     "transactions": {
       "title": "Transactions",
       "subitems": {
-        "withdraw-request": "Withdrawal Requests"
+        "withdraw-request": "Withdrawal Requests",
+        "order-management": "Order Management",
+        "commission-management": "Commission Management"
       }
     },
     "courses": {
