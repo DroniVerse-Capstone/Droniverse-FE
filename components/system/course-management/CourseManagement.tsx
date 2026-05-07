@@ -40,7 +40,7 @@ export default function CourseManagement() {
       1: "Cơ bản",
       2: "Trung bình",
       3: "Nâng cao",
-      4: "Bậc thầy",
+      4: "Thành Thạo",
     };
 
     const levelNameMapEn: Record<number, string> = {

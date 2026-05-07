@@ -120,6 +120,7 @@ export const useLogin = (options?: UseLoginOptions) => {
     onSuccess: (data) => {
       // Store tokens in cookies
       if (typeof window !== 'undefined') {
+        clearAuthCookies()
         setAuthCookies(
           data.data.accessToken,
           data.data.refreshToken,

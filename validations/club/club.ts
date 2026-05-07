@@ -1,6 +1,5 @@
 import { z } from "zod"
 
-import { categorySchema } from "@/validations/category/category"
 import { userLevelSchema } from "@/validations/auth"
 
 export const clubStatusSchema = z.enum([
@@ -113,6 +112,36 @@ export const getClubDetailResponseSchema = z.object({
   message: z.string(),
 })
 
+export const updateClubParamsSchema = z.object({
+  clubId: z.string().uuid(),
+})
+
+export const updateClubRequestSchema = z.object({
+  nameVN: z.string().trim().min(1),
+  nameEN: z.string().trim().min(1),
+  imageUrl: z.string().nullable().optional(),
+  limitParticipation: z.number().int().nonnegative(),
+  clubPolicyVN: z.string().trim().min(1),
+  clubPolicyEN: z.string().trim().min(1),
+  clubRequirement: z.string().nullable().optional(),
+})
+
+export const updateClubResponseSchema = z.object({
+  data: clubSchema,
+  isSuccess: z.boolean(),
+  message: z.string(),
+})
+
+export const leaveClubParamsSchema = z.object({
+  clubId: z.string().uuid(),
+})
+
+export const leaveClubResponseSchema = z.object({
+  data: z.null(),
+  isSuccess: z.boolean(),
+  message: z.string(),
+})
+
 export const updateClubStatusSchema = z
   .object({
     status: clubStatusSchema,
@@ -148,6 +177,11 @@ export type GetClubParticipationsResponse = z.infer<
 >
 export type GetMyClubsResponse = z.infer<typeof getMyClubsResponseSchema>
 export type GetClubDetailResponse = z.infer<typeof getClubDetailResponseSchema>
+export type UpdateClubParams = z.infer<typeof updateClubParamsSchema>
+export type UpdateClubRequest = z.infer<typeof updateClubRequestSchema>
+export type UpdateClubResponse = z.infer<typeof updateClubResponseSchema>
+export type LeaveClubParams = z.infer<typeof leaveClubParamsSchema>
+export type LeaveClubResponse = z.infer<typeof leaveClubResponseSchema>
 export type UpdateClubStatus = z.infer<typeof updateClubStatusSchema>
 export type UpdateClubStatusResponse = z.infer<
   typeof updateClubStatusResponseSchema

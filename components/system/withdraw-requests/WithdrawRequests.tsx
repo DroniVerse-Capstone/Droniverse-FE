@@ -301,44 +301,50 @@ export default function WithdrawRequests() {
               </TableCell>
 
               <TableCell>
-                <div className="flex flex-wrap gap-2">
-                  <ConfirmActionPopover
-                    trigger={
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="secondaryIcon"
-                        disabled={isPending || request.status !== "PENDING"}
-                      >
-                        <Check size={16} />
-                      </Button>
-                    }
-                    title={
-                      locale === "vi"
-                        ? "Xác nhận duyệt yêu cầu rút tiền?"
-                        : "Confirm approve withdraw request?"
-                    }
-                    description={
-                      locale === "vi"
-                        ? `Duyệt yêu cầu ${request.amount.toLocaleString("vi-VN")}đ của ${request.wallet?.ownerName || "người dùng"}.`
-                        : `Approve ${request.amount.toLocaleString("en-US")} VND request from ${request.wallet?.ownerName || "user"}.`
-                    }
-                    confirmText={locale === "vi" ? "Duyệt" : "Approve"}
-                    cancelText={locale === "vi" ? "Đóng" : "Close"}
-                    isLoading={isPending}
-                    onConfirm={() => handleApprove(request)}
-                  />
+                {request.status !== "PENDING" ? (
+                  <span className="inline-flex rounded-full border border-greyscale-700 bg-greyscale-800 px-3 py-1 text-xs font-semibold text-greyscale-100">
+                    Đã xử lý
+                  </span>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <ConfirmActionPopover
+                      trigger={
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="secondaryIcon"
+                          disabled={isPending || request.status !== "PENDING"}
+                        >
+                          <Check size={16} />
+                        </Button>
+                      }
+                      title={
+                        locale === "vi"
+                          ? "Xác nhận duyệt yêu cầu rút tiền?"
+                          : "Confirm approve withdraw request?"
+                      }
+                      description={
+                        locale === "vi"
+                          ? `Duyệt yêu cầu ${request.amount.toLocaleString("vi-VN")}đ của ${request.wallet?.ownerName || "người dùng"}.`
+                          : `Approve ${request.amount.toLocaleString("en-US")} VND request from ${request.wallet?.ownerName || "user"}.`
+                      }
+                      confirmText={locale === "vi" ? "Duyệt" : "Approve"}
+                      cancelText={locale === "vi" ? "Đóng" : "Close"}
+                      isLoading={isPending}
+                      onConfirm={() => handleApprove(request)}
+                    />
 
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="deleteIcon"
-                    disabled={isPending || request.status !== "PENDING"}
-                    onClick={() => openRejectDialog(request)}
-                  >
-                    <X size={16} />
-                  </Button>
-                </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="deleteIcon"
+                      disabled={isPending || request.status !== "PENDING"}
+                      onClick={() => openRejectDialog(request)}
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                )}
               </TableCell>
             </>
           )}

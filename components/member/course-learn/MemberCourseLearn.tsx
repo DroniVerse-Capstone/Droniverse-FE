@@ -13,16 +13,21 @@ import { LanguageSwitcher } from "@/components/layouts/LanguageSwitcher";
 import LearningPathSideBar from "@/components/member/course-learn/LearningPathSideBar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useCheckUserLessonExists,
   useGetUserLearningPath,
 } from "@/hooks/learning/useUserLearning";
+import { useCreateCourseVersionFeedback } from "@/hooks/feedback/useFeedback";
+import { useLocale } from "@/providers/i18n-provider";
 import type { Lesson } from "@/validations/learning/user-learning";
+import ReactStars from "react-rating-stars-component";
 import { PiCertificateBold, PiPathBold } from "react-icons/pi";
 import { RiArrowGoBackFill } from "react-icons/ri";
 
 export default function MemberCourseLearn() {
   const router = useRouter();
+  const locale = useLocale();
   const params = useParams<{ enrollmentId?: string; clubSlug?: string }>();
   const searchParams = useSearchParams();
   const clubSlug = params?.clubSlug;
@@ -32,6 +37,8 @@ export default function MemberCourseLearn() {
     null,
   );
   const [isDownloading, setIsDownloading] = React.useState(false);
+  const [feedbackRating, setFeedbackRating] = React.useState(5);
+  const [feedbackContent, setFeedbackContent] = React.useState("");
 
   const handleDownloadCertificate = async (url: string, fileName: string) => {
     try {
@@ -67,22 +74,51 @@ export default function MemberCourseLearn() {
   const lessonExistsQuery = useCheckUserLessonExists(
     selectedLesson && enrollmentId
       ? {
-        enrollmentId,
-        lessonId: selectedLesson.lessonID,
-      }
+          enrollmentId,
+          lessonId: selectedLesson.lessonID,
+        }
       : undefined,
   );
 
-  const { data: learningPath, isLoading: isPathLoading } = useGetUserLearningPath(enrollmentId);
+  const {
+    data: learningPath,
+    isLoading: isPathLoading,
+    refetch: refetchLearningPath,
+  } = useGetUserLearningPath(enrollmentId);
+  const createCourseVersionFeedbackMutation = useCreateCourseVersionFeedback();
   const canShowCertificate =
     learningPath?.status === "COMPLETED" && !!learningPath.userCertificate;
+
+  const handleSubmitFeedback = async () => {
+    if (!learningPath?.courseID || !learningPath?.courseVersionID) {
+      return;
+    }
+
+    try {
+      await createCourseVersionFeedbackMutation.mutateAsync({
+        courseId: learningPath.courseID,
+        versionId: learningPath.courseVersionID,
+        payload: {
+          rating: feedbackRating,
+          content: feedbackContent.trim(),
+        },
+      });
+
+      setFeedbackContent("");
+      setFeedbackRating(5);
+      await refetchLearningPath();
+    } catch (error) {
+      console.error("Unable to submit feedback:", error);
+    }
+  };
 
   // Auto-select first incomplete lesson if none selected
   React.useEffect(() => {
     if (!selectedLesson && learningPath?.modules && !canShowCertificate) {
       const allLessons = learningPath.modules.flatMap((m) => m.lessons || []);
       if (allLessons.length > 0) {
-        const firstIncomplete = allLessons.find((l) => !l.isCompleted) || allLessons[0];
+        const firstIncomplete =
+          allLessons.find((l) => !l.isCompleted) || allLessons[0];
         if (firstIncomplete) {
           setSelectedLesson(firstIncomplete);
         }
@@ -100,13 +136,16 @@ export default function MemberCourseLearn() {
       <section className="min-h-screen min-w-0 flex-1 bg-greyscale-950 px-6 py-6">
         <header className="mb-5">
           <div className="flex items-center justify-between gap-3">
-            <Button icon={<RiArrowGoBackFill />} variant="outline" onClick={handleExitLearning}>
+            <Button
+              icon={<RiArrowGoBackFill />}
+              variant="outline"
+              onClick={handleExitLearning}
+            >
               Thoát khỏi chế độ học
             </Button>
             <LanguageSwitcher />
           </div>
         </header>
-
 
         {selectedLesson ? (
           lessonExistsQuery.isLoading ? (
@@ -156,7 +195,7 @@ export default function MemberCourseLearn() {
             />
           )
         ) : (
-          <div className="mx-auto h-full min-h-[60vh] w-full max-w-4xl space-y-6">
+          <div className="mx-auto w-full max-w-4xl space-y-6">
             {canShowCertificate ? (
               <div className="space-y-6">
                 {/* Clean Certificate Header */}
@@ -187,12 +226,14 @@ export default function MemberCourseLearn() {
                     <Button
                       variant="secondary"
                       disabled={isDownloading}
-                      icon={isDownloading ? <Spinner className="h-4 w-4" /> : null}
+                      icon={
+                        isDownloading ? <Spinner className="h-4 w-4" /> : null
+                      }
                       onClick={() =>
                         learningPath.userCertificate?.certificateUrl &&
                         handleDownloadCertificate(
                           learningPath.userCertificate.certificateUrl,
-                          `ChungChi_${learningPath.titleVN.replace(/\s+/g, "_")}.png`
+                          `ChungChi_${learningPath.titleVN.replace(/\s+/g, "_")}.png`,
                         )
                       }
                       className="flex h-11 items-center justify-center gap-2 rounded px-6 text-sm font-bold text-white transition-all shadow-md shadow-secondary/20"
@@ -200,18 +241,92 @@ export default function MemberCourseLearn() {
                       {isDownloading ? "Đang tải..." : "Tải về máy"}
                     </Button>
                   </div>
-                </div>
+                </div>{" "}
+                <div className="rounded border border-greyscale-800 bg-greyscale-900/80 p-5 space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-greyscale-0">
+                        {locale === "en"
+                          ? "Course feedback"
+                          : "Đánh giá khóa học"}
+                      </h3>
+                      <p className="text-sm text-greyscale-300">
+                        {locale === "en"
+                          ? "Help us improve this learning path with your review."
+                          : "Góp ý của bạn giúp chúng tôi cải thiện lộ trình học này."}
+                      </p>
+                    </div>
+                  </div>
 
+                  {learningPath.isFeedbacked ? (
+                    <div className="rounded border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-yellow-200">
+                      {locale === "en"
+                        ? "You have already reviewed this course."
+                        : "Bạn đã đánh giá khóa học này."}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <ReactStars
+                          count={5}
+                          value={feedbackRating}
+                          onChange={(value: number) => setFeedbackRating(value)}
+                          size={28}
+                          isHalf={false}
+                          edit
+                          activeColor="#fbbf24"
+                          color="#52525b"
+                        />
+                      </div>
+
+                      <Textarea
+                        value={feedbackContent}
+                        onChange={(event) =>
+                          setFeedbackContent(event.target.value)
+                        }
+                        placeholder={
+                          locale === "en"
+                            ? "Write your feedback here..."
+                            : "Nhập đánh giá của bạn..."
+                        }
+                        className="min-h-32 bg-greyscale-900/80 text-greyscale-0"
+                      />
+
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            void handleSubmitFeedback();
+                          }}
+                          disabled={
+                            createCourseVersionFeedbackMutation.isPending ||
+                            feedbackContent.trim().length === 0
+                          }
+                        >
+                          {createCourseVersionFeedbackMutation.isPending
+                            ? locale === "en"
+                              ? "Sending..."
+                              : "Đang gửi..."
+                            : locale === "en"
+                              ? "Send feedback"
+                              : "Gửi phản hồi"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {/* Minimalist Certificate Preview */}
-                <div className="rounded border border-greyscale-800 bg-greyscale-950 p-2 shadow-xl">
+                <div className="rounded border border-greyscale-800 bg-greyscale-900 p-2 shadow-xl">
                   <div className="relative group overflow-hidden rounded border border-greyscale-800">
                     <img
                       src={learningPath.userCertificate?.certificateUrl}
                       alt="Certificate"
                       className="h-full w-full object-contain p-4 md:p-8"
                     />
-                    <div className="absolute inset-0 bg-greyscale-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <p className="text-white text-sm font-medium">Nhấp để xem ảnh gốc</p>
+                    <div className="absolute inset-0 bg-greyscale-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <p className="text-greyscale-0 text-xl font-medium">
+                        Nhấp để xem ảnh gốc
+                      </p>
                     </div>
                     <a
                       href={learningPath.userCertificate?.certificateUrl}
