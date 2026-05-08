@@ -398,6 +398,12 @@
   "SystemDashboard": {
     "title": "Trung tâm Điều hành",
     "realtimeUpdate": "Cập nhật thời gian thực",
+    "tabs": {
+      "finance": "Báo cáo Tài chính",
+      "learning": "Phân tích học tập",
+      "orders": "Nhật ký Giao dịch",
+      "operations": "Vận hành hệ thống"
+    },
     "kpi": {
       "totalRevenue": "Tổng doanh thu",
       "netProfit": "Lợi nhuận ròng",
@@ -412,6 +418,8 @@
       "title": "Xu hướng doanh thu",
       "summary": "{amount} trong {count} tháng · {rate}% tăng trưởng",
       "months": "{count} tháng",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
       "revenue": "Doanh thu",
       "prevPeriod": "Kỳ trước",
       "increase": "Tăng",
@@ -525,6 +533,102 @@
         "enrollments": "{count} lượt học",
         "completion": "Hoàn thành {percent}%"
       }
+    },
+    "orders": {
+      "kpi": {
+        "total": "Tổng đơn hàng",
+        "pending": "Chờ xử lý",
+        "success": "Thành công",
+        "failed": "Thất bại",
+        "cancelled": "Đã hủy"
+      },
+      "status": {
+        "all": "Tất cả trạng thái",
+        "pending": "Chờ xử lý",
+        "success": "Thành công",
+        "failed": "Thất bại",
+        "cancelled": "Đã hủy"
+      },
+      "table": {
+        "title": "Lịch sử giao dịch toàn hệ thống",
+        "subtitle": "{count} giao dịch được ghi nhận",
+        "filtering": "Đang lọc",
+        "clearFilter": "Xóa lọc",
+        "statusLabel": "Trạng thái",
+        "perPage": "Số đơn / trang",
+        "perPageOption": "{n} đơn",
+        "empty": "Không tìm thấy giao dịch nào",
+        "page": "Trang {current} / {total} · {records} giao dịch",
+        "order": "Đơn hàng",
+        "user": "Học viên",
+        "product": "Khóa học",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "club": "Câu lạc bộ",
+        "date": "Thời gian",
+        "pagination": "Hiển thị từ {start} đến {end} trong tổng số {total} đơn hàng"
+      }
+    },
+    "opsOverview": {
+      "totalUsers": "Tổng người dùng",
+      "newUsers": "Người dùng mới",
+      "memberCount": "Tổng học viên",
+      "clubOwnerCount": "Chủ nhiệm CLB",
+      "pendingApprovals": "Chờ phê duyệt",
+      "timelineFilter": "Bộ lọc thời gian",
+      "userGrowthTitle": "Tăng trưởng người dùng",
+      "userGrowthDesc": "Biểu đồ chi tiết về lượng người dùng mới gia nhập hệ thống theo thời gian.",
+      "clubActivityTitle": "Hoạt động Câu lạc bộ",
+      "clubActivityDesc": "Thống kê về mức độ tương tác và hoạt động của các câu lạc bộ toàn hệ thống."
+    }
+  },
+  "ClubManagerDashboard": {
+    "kpi": {
+      "totalRevenue": "Tổng doanh thu",
+      "revenueThisMonth": "Doanh thu tháng này",
+      "totalTransactions": "Tổng giao dịch",
+      "transactionsThisMonth": "{count} giao dịch tháng này",
+      "avgRevenuePerTran": "Doanh thu TB / giao dịch",
+      "avgLabel": "Trung bình mỗi giao dịch",
+      "comparedToLastPeriod": "so với kỳ trước",
+      "totalLabel": "Tổng cộng"
+    },
+    "revenueTrend": {
+      "chartType": {
+        "area": "Diện tích",
+        "bar": "Cột"
+      },
+      "title": "Xu hướng doanh thu",
+      "subtitle": "Phân tích doanh thu câu lạc bộ theo thời gian",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "revenue": "Doanh thu"
+    },
+    "competitionActivity": {
+      "title": "Hoạt động thi đấu",
+      "statusFilter": "Tất cả trạng thái",
+      "ongoing": "Đang diễn ra",
+      "awaiting": "Chờ công bố",
+      "completed": "Đã hoàn tất",
+      "draft": "Bản nháp",
+      "cancelled": "Đã hủy",
+      "showCount": "Hiện {count}"
+    },
+    "topCourses": {
+      "title": "Top khóa học",
+      "subtitle": "Top khóa học có doanh thu cao nhất",
+      "topCount": "Top {count}",
+      "footerLabel": "khóa học",
+      "empty": "Chưa có dữ liệu khóa học",
+      "errorTitle": "Không tải được dữ liệu khóa học"
+    },
+    "vipStudents": {
+      "title": "Học viên VIP",
+      "subtitle": "Top học viên đóng góp nhiều nhất",
+      "empty": "Chưa có học viên mua khóa học",
+      "transactions": "{count} giao dịch",
+      "footerLabel": "{count} học viên",
+      "summaryLabel": "tổng doanh thu CLB"
     }
   },
   "ErrorPage": {
@@ -1010,6 +1114,7 @@
           "lab": "Lab",
           "physic": "Động cơ và vật lý",
           "lab_physic": "Lab vật lý",
+          "real_physic": "Lập trình Drone thực tế",
           "vr": "VR",
           "learning": "Học tập",
           "competition": "Thi đấu"
@@ -1923,6 +2028,7 @@
       "LAB": "Bài thực hành",
       "PHYSIC": "Động cơ và vật lý",
       "LAB_PHYSIC": "Lab vật lý",
+      "REAL_PHYSIC": "Lập trình Drone thực tế",
       "VR": "VR",
       "ASSIGNMENT": "Bài tập thực hành"
     },
@@ -1932,6 +2038,7 @@
       "LAB": "Thực hành các thao tác và tình huống mô phỏng để rèn kỹ năng thực tế.",
       "PHYSIC": "Tìm hiểu kiến thức về động cơ và các định luật vật lý ứng dụng trong drone.",
       "LAB_PHYSIC": "Thực hành các thí nghiệm vật lý để hiểu rõ cơ chế hoạt động của drone.",
+      "REAL_PHYSIC": "Điều khiển drone thật thông qua các khối lệnh lập trình trực quan.",
       "VR": "Trải nghiệm học tập trong môi trường thực tế ảo sống động.",
       "ASSIGNMENT": "Hoàn thành bài tập thực hành để được duyệt lên cấp độ Thành Thạo."
     },

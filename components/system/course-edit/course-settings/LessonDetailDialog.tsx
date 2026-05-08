@@ -46,7 +46,7 @@ export default function LessonDetailDialog({
   const assignmentId =
     open && lesson?.type === "ASSIGNMENT" ? lesson.referenceID : undefined;
   const labId = open && ["LAB"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
-  const simulatorId = open && ["PHYSIC", "LAB_PHYSIC"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
+  const simulatorId = open && ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lesson?.type || "") ? (lesson?.referenceID ?? null) : null;
   const vrSimulatorId = open && lesson?.type === "VR" ? (lesson?.referenceID ?? null) : null;
 
   const theoryDetailQuery = useGetTheoryDetail(theoryId);
@@ -80,7 +80,7 @@ export default function LessonDetailDialog({
                 ? t("subtitle.quiz")
                 : lesson?.type === "ASSIGNMENT"
                   ? t("subtitle.assignment")
-                : lesson?.type === "PHYSIC" || lesson?.type === "LAB_PHYSIC"
+                : lesson?.type === "PHYSIC" || lesson?.type === "LAB_PHYSIC" || lesson?.type === "REAL_PHYSIC"
                   ? "Chi tiết bài mô phỏng"
                   : lesson?.type === "VR"
                     ? "Chi tiết bài thực tế ảo (VR)"
@@ -384,7 +384,7 @@ export default function LessonDetailDialog({
             </div>
           ) : null}
 
-          {["PHYSIC", "LAB_PHYSIC"].includes(lesson?.type || "") ? (
+          {["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lesson?.type || "") ? (
             <div className="space-y-4">
               {simulatorDetailQuery.isLoading ? (
                 <div className="flex items-center justify-center py-3">

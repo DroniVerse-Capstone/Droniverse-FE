@@ -61,6 +61,7 @@ export default function MemberSimulatorLessonContent({
   const isVR = currentLesson?.type === "VR" || (!!vrSimulator && !webSimulator);
   const isPhysic = currentLesson?.type === "PHYSIC";
   const isLabPhysic = currentLesson?.type === "LAB_PHYSIC";
+  const isRealPhysic = currentLesson?.type === "REAL_PHYSIC";
   const isLab = currentLesson?.type === "LAB";
 
   const handleRefreshVR = async () => {
@@ -76,12 +77,17 @@ export default function MemberSimulatorLessonContent({
   const handleOpenSimulator = () => {
     const currentUrl = `${pathname}${lessonId ? `?lessonId=${lessonId}` : ""}`;
     let route = getSimulatorRoute(webSimulator!.code, webSimulator!.webSimulatorID, currentUrl, webSimulator!.type);
-    if (lessonId) {
-      route += `&lessonId=${lessonId}`;
-    }
-    if (enrollmentId) {
-      route += `&enrollmentId=${enrollmentId}`;
-    }
+    
+    // Đảm bảo lessonId và enrollmentId luôn ở cấp cao nhất của URL tham số
+    const appendParam = (url: string, key: string, value: string) => {
+      if (!value) return url;
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}${key}=${value}`;
+    };
+
+    route = appendParam(route, "lessonId", lessonId || "");
+    route = appendParam(route, "enrollmentId", enrollmentId || "");
+    
     router.push(route);
   };
 
@@ -93,7 +99,7 @@ export default function MemberSimulatorLessonContent({
       <div className="relative space-y-5">
         <div className="space-y-3">
           <span className="inline-flex items-center rounded-full border border-greyscale-600 bg-greyscale-900/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-greyscale-100">
-            {isVR ? "Bài học mô phỏng VR" : isPhysic ? "Bài học Vật lý" : isLabPhysic ? "Thử thách bay" : isLab ? "Bài thực hành Blockly" : "Bài học mô phỏng"}
+            {isVR ? "Bài học mô phỏng VR" : isPhysic ? "Bài học Vật lý" : isLabPhysic ? "Thử thách bay" : isRealPhysic ? "Lập trình Drone thực tế" : isLab ? "Bài thực hành Blockly" : "Bài học mô phỏng"}
           </span>
 
           <h2 className="text-2xl font-semibold leading-tight text-greyscale-0 md:text-3xl">
@@ -195,7 +201,7 @@ export default function MemberSimulatorLessonContent({
               {userSimulator ? (
                 <span className="flex items-center gap-2"><FaRedo /> Làm lại bài</span>
               ) : (
-                isPhysic ? "Bắt đầu học ngay" : isLabPhysic ? "Bắt đầu bay ngay" : isLab ? "Bắt đầu lập trình" : "Bắt đầu mô phỏng"
+                isPhysic ? "Bắt đầu học ngay" : isLabPhysic ? "Bắt đầu bay ngay" : isRealPhysic ? "Bắt đầu mô phỏng" : isLab ? "Bắt đầu lập trình" : "Bắt đầu mô phỏng"
               )}
             </Button>
           )}

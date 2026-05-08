@@ -3,7 +3,7 @@ import { BsQuestionCircle, BsHeadsetVr } from "react-icons/bs";
 import { GoBook } from "react-icons/go";
 
 import { LessonType } from "@/validations/lesson/lesson";
-import { TbAtom, TbDrone, TbEngine } from "react-icons/tb";
+import { TbAtom, TbDrone, TbEngine, TbDroneOff } from "react-icons/tb";
 import { cn } from "@/lib/utils";
 import { MdAssignment } from "react-icons/md";
 
@@ -18,6 +18,7 @@ const iconByType: Record<LessonType, React.ReactNode> = {
   LAB: <TbDrone size={18} />,
   PHYSIC: <TbEngine size={18} />,
   LAB_PHYSIC: <TbAtom size={18} />,
+  REAL_PHYSIC: <TbDroneOff size={18} />,
   VR: <BsHeadsetVr size={18} />,
   ASSIGNMENT: <MdAssignment size={18} />
 };
@@ -28,6 +29,7 @@ const colorByType: Record<LessonType, { bg: string; text: string; border: string
   LAB: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   LAB_PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  REAL_PHYSIC: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   VR: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
   ASSIGNMENT: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
 };

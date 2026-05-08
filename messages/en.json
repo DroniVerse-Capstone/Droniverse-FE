@@ -402,6 +402,12 @@
   "SystemDashboard": {
     "title": "Operations Center",
     "realtimeUpdate": "Real-time Update",
+    "tabs": {
+      "finance": "Financial Report",
+      "learning": "Learning Analytics",
+      "orders": "Transaction Logs",
+      "operations": "System Operations"
+    },
     "kpi": {
       "totalRevenue": "Total Revenue",
       "netProfit": "Net Profit",
@@ -416,6 +422,8 @@
       "title": "Revenue Trends",
       "summary": "{amount} in {count} months · {rate}% growth",
       "months": "{count} months",
+      "fromDate": "From Date",
+      "toDate": "To Date",
       "revenue": "Revenue",
       "prevPeriod": "Previous Period",
       "increase": "Increase",
@@ -529,9 +537,105 @@
         "enrollments": "{count} enrollments",
         "completion": "{percent}% completion"
       }
+    },
+    "orders": {
+      "kpi": {
+        "total": "Total Orders",
+        "pending": "Pending",
+        "success": "Success",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "status": {
+        "all": "All Statuses",
+        "pending": "Pending",
+        "success": "Success",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "table": {
+        "title": "System Transaction Logs",
+        "subtitle": "{count} transactions recorded",
+        "filtering": "Filtered",
+        "clearFilter": "Clear Filter",
+        "statusLabel": "Status",
+        "perPage": "Per Page",
+        "perPageOption": "{n} orders",
+        "empty": "No transactions found",
+        "page": "Page {current} of {total} · {records} transactions",
+        "order": "Order",
+        "user": "Student",
+        "product": "Course",
+        "amount": "Amount",
+        "status": "Status",
+        "club": "Club",
+        "date": "Date",
+        "pagination": "Showing {start} to {end} of {total} orders"
+      }
+    },
+    "opsOverview": {
+      "totalUsers": "Total Users",
+      "newUsers": "New Users",
+      "memberCount": "Total Students",
+      "clubOwnerCount": "Club Owners",
+      "pendingApprovals": "Pending Approvals",
+      "timelineFilter": "Timeline Filter",
+      "userGrowthTitle": "User Growth",
+      "userGrowthDesc": "Detailed chart of new users joining the system over time.",
+      "clubActivityTitle": "Club Activity",
+      "clubActivityDesc": "Statistics on engagement and activities of all clubs system-wide."
     }
   },
-  "ErrorPage": {
+  "ClubManagerDashboard": {
+    "kpi": {
+        "totalRevenue": "Total Revenue",
+        "revenueThisMonth": "Revenue This Month",
+        "totalTransactions": "Total Transactions",
+        "transactionsThisMonth": "{count} transactions this month",
+        "avgRevenuePerTran": "Avg Revenue / Tran",
+        "avgLabel": "Average per transaction",
+        "comparedToLastPeriod": "compared to last period",
+        "totalLabel": "Total"
+      },
+      "revenueTrend": {
+        "title": "Revenue Trend",
+        "subtitle": "Club revenue analysis over time",
+        "fromDate": "From Date",
+        "toDate": "To Date",
+        "revenue": "Revenue",
+        "chartType": {
+          "area": "Area",
+          "bar": "Bar"
+        }
+      },
+      "competitionActivity": {
+        "title": "Competitions",
+        "statusFilter": "All Statuses",
+        "ongoing": "Ongoing",
+        "awaiting": "Awaiting",
+        "completed": "Completed",
+        "draft": "Draft",
+        "cancelled": "Cancelled",
+        "showCount": "Show {count}"
+      },
+      "topCourses": {
+        "title": "Top Courses",
+        "subtitle": "Highest revenue courses",
+        "topCount": "Top {count}",
+        "footerLabel": "courses",
+        "empty": "No course data found",
+        "errorTitle": "Failed to load courses"
+      },
+      "vipStudents": {
+        "title": "VIP Students",
+        "subtitle": "Top contributors by revenue",
+        "empty": "No buyer data found",
+        "transactions": "{count} transactions",
+        "footerLabel": "{count} students",
+        "summaryLabel": "total club revenue"
+      }
+    },
+    "ErrorPage": {
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
     "cta": "Go Back"
@@ -1014,6 +1118,7 @@
           "lab": "Lab",
           "physic": "Engine & Physics",
           "lab_physic": "Physics Lab",
+          "real_physic": "Real Drone Programming",
           "vr": "VR",
           "learning": "Learning",
           "competition": "Competition"
@@ -1927,6 +2032,7 @@
       "LAB": "Practical Lab",
       "PHYSIC": "Engine & Physics",
       "LAB_PHYSIC": "Physics Lab",
+      "REAL_PHYSIC": "Real Drone Programming",
       "VR": "VR",
       "ASSIGNMENT": "Assignment"
     },
@@ -1936,6 +2042,7 @@
       "LAB": "Practice maneuvers and simulated situations to build real-world skills.",
       "PHYSIC": "Learn about engines and physics laws applied in drones.",
       "LAB_PHYSIC": "Conduct physics experiments to understand drone mechanisms.",
+      "REAL_PHYSIC": "Control a real drone using visual programming blocks.",
       "VR": "Experience immersive learning in a virtual reality environment.",
       "ASSIGNMENT": "Complete the assignment to be approved for the master level."
     },

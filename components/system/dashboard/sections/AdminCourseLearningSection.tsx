@@ -5,7 +5,7 @@ import { AdminLearningStatistics } from "@/validations/dashboard/dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { BookOpen, CheckCircle2 } from "lucide-react";
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
 
 export default function AdminCourseLearningSection({ data, isLoading }: Props) {
   const t = useTranslations("SystemDashboard.learningStatistics.courseStats");
+  const locale = useLocale();
 
   if (isLoading) {
     return (
@@ -47,7 +48,9 @@ export default function AdminCourseLearningSection({ data, isLoading }: Props) {
           className="p-4 rounded-xl bg-[#1e2130]/30 border border-white/[0.04] hover:bg-[#1e2130]/50 transition-all group"
         >
           <h4 className="text-[12px] font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
-            {course.courseName}
+            {locale === "en" 
+              ? (course.courseNameEN || course.courseName) 
+              : (course.courseNameVN || course.courseName)}
           </h4>
           
           <div className="grid grid-cols-2 gap-4">
