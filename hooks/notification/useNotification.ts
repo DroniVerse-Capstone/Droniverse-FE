@@ -23,6 +23,7 @@ type UseGetMyNotificationsOptions = Omit<
 > & {
 	currentPage?: number;
 	pageSize?: number;
+	enabled?: boolean;
 };
 
 export const useGetMyNotifications = (
@@ -37,6 +38,7 @@ export const useGetMyNotifications = (
 			parsedOptions.currentPage,
 			parsedOptions.pageSize,
 		],
+		enabled: options?.enabled ?? true,
 		queryFn: async () => {
 			const response = await apiClient.get("/identity/notitications/me", {
 				params: {
@@ -52,9 +54,16 @@ export const useGetMyNotifications = (
 	});
 };
 
-export const useGetUnreadNotificationCount = () => {
+type UseGetUnreadNotificationCountOptions = {
+	enabled?: boolean;
+};
+
+export const useGetUnreadNotificationCount = (
+	options?: UseGetUnreadNotificationCountOptions,
+) => {
 	return useQuery<number, AxiosError<ApiError>>({
 		queryKey: ["unread-notification-count"],
+		enabled: options?.enabled ?? true,
 		queryFn: async () => {
 			const response = await apiClient.get(
 				"/identity/notitications/unread-count",

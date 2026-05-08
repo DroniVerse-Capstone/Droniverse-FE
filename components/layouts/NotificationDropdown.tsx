@@ -20,6 +20,7 @@ import {
   useMarkNotificationAsRead,
 } from "@/hooks/notification/useNotification";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
 import { NotificationItem } from "@/validations/notification/notification";
 
 interface NotificationDropdownProps {
@@ -30,8 +31,15 @@ export default function NotificationDropdown({
   hasNotifications = true,
 }: NotificationDropdownProps) {
   const router = useRouter();
-  const notificationsQuery = useGetMyNotifications({ currentPage: 1, pageSize: 5 });
-  const unreadCountQuery = useGetUnreadNotificationCount();
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = !!user;
+
+  const notificationsQuery = useGetMyNotifications({
+    currentPage: 1,
+    pageSize: 5,
+    enabled: isAuthenticated,
+  });
+  const unreadCountQuery = useGetUnreadNotificationCount({ enabled: isAuthenticated });
   const markNotificationAsReadMutation = useMarkNotificationAsRead();
   const markAllNotificationsAsReadMutation = useMarkAllNotificationsAsRead();
 
@@ -66,10 +74,18 @@ export default function NotificationDropdown({
   };
 
   const handleMarkAllAsRead = async () => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     await markAllNotificationsAsReadMutation.mutateAsync();
   };
 
   const handleMarkNotificationAsRead = async (notification: NotificationItem) => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     if (notification.status === "READ") {
       return;
     }
