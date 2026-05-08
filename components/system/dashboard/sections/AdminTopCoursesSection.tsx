@@ -106,7 +106,10 @@ export default function AdminTopCoursesSection({ data, isLoading }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={items.map((item) => ({ name: item.courseNameVN, value: item.revenue }))}
+                data={items.map((item) => ({ 
+                  name: locale === "en" ? item.courseNameEN || item.courseNameVN : item.courseNameVN, 
+                  value: item.revenue 
+                }))}
                 cx="50%"
                 cy="50%"
                 innerRadius={28}

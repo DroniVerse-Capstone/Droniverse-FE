@@ -11,6 +11,8 @@ type Drone3DProps = {
   onUpdateAltitude?: (altitude: number) => void;
 };
 
+const GROUND_HEIGHT = 3;
+
 function MotorFeedback({ pos, pwr, color }: { pos: [number, number, number], pwr: number, color: string }) {
   const isSpinning = pwr > 0;
   const opacity = (pwr / 100) * 0.4;
@@ -77,7 +79,7 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
 
   React.useEffect(() => {
     if (groupRef.current) {
-      groupRef.current.position.set(0, 0.1, 0);
+      groupRef.current.position.set(0, GROUND_HEIGHT, 0);
       groupRef.current.rotation.set(0, 0, 0);
       groupRef.current.rotation.order = 'YXZ';
       velocityY.current = 0;
@@ -91,7 +93,7 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
     const rollForce = droneState.roll * 0.003;
     const targetPitch = (droneState.pitch * Math.PI) / 180;
     const targetRoll = (droneState.roll * Math.PI) / 180;
-    const yawVelocity = -(droneState.yaw / 100) * (Math.PI / 2);
+    const yawVelocity = -(droneState.yaw / 100) * Math.PI;
 
     groupRef.current.rotation.x += (targetPitch - groupRef.current.rotation.x) * 0.15;
     groupRef.current.rotation.z += (targetRoll - groupRef.current.rotation.z) * 0.15;
@@ -112,16 +114,21 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
 
     // Vertical
     const lift = droneState.throttle - 55;
-    if (droneState.throttle === 0 && groupRef.current.position.y <= 0.15) {
-      velocityY.current = 0;
-    } else if (droneState.throttle === 0) {
-      velocityY.current -= 0.005;
+    const isOnGround = groupRef.current.position.y <= GROUND_HEIGHT + 0.05;
+
+    if (droneState.throttle === 0) {
+      if (isOnGround) {
+        velocityY.current = 0;
+      } else {
+        // Slower descent for a more premium feel
+        velocityY.current = THREE.MathUtils.lerp(velocityY.current, -0.008, delta * 1.5);
+      }
     } else {
       velocityY.current += lift * 0.002;
       velocityY.current *= 0.85;
     }
     groupRef.current.position.y += velocityY.current;
-    groupRef.current.position.y = Math.max(0.1, Math.min(100, groupRef.current.position.y));
+    groupRef.current.position.y = Math.max(GROUND_HEIGHT, Math.min(100, groupRef.current.position.y));
 
     // Update Camera Target (Follow Drone)
     state.camera.lookAt(groupRef.current.position);
@@ -139,15 +146,32 @@ function DroneScene({ droneState, onUpdateAltitude }: { droneState: DroneState, 
     }
 
     if (onUpdateAltitude) {
-      onUpdateAltitude(groupRef.current.position.y / 5);
+      onUpdateAltitude(Math.max(0, (groupRef.current.position.y - GROUND_HEIGHT) / 5));
     }
 
-    // Propellers
+    // Propellers with inertia
+    if (!propsRef.current.actualSpeeds) {
+      (propsRef.current as any).actualSpeeds = { m1: 0, m2: 0, m3: 0, m4: 0 };
+    }
+    const actualSpeeds = (propsRef.current as any).actualSpeeds;
+
     Object.entries(propsRef.current).forEach(([key, prop]) => {
-      const pwr = (droneState.motors as any)[key] || 0;
-      const speed = (pwr / 100) * 80;
+      if (key === 'actualSpeeds') return;
+      
+      const isOnGround = groupRef.current!.position.y <= GROUND_HEIGHT + 0.05;
+      const targetPwr = (droneState.motors as any)[key] || 0;
+      
+      // Idle speed if in air but throttle is 0
+      let targetSpeed = (targetPwr / 100) * 80;
+      if (targetPwr === 0 && !isOnGround) {
+        targetSpeed = 15; // Idle spin during fall
+      }
+      
+      // Interpolate speed for spin-down effect
+      actualSpeeds[key] = THREE.MathUtils.lerp(actualSpeeds[key], targetSpeed, delta * (targetPwr === 0 ? 1 : 4));
+      
       const dir = (key === 'm1' || key === 'm4') ? 1 : -1;
-      prop.rotation.y += speed * delta * dir;
+      prop.rotation.y += actualSpeeds[key] * delta * dir;
     });
   });
 

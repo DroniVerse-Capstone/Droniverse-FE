@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Crown, ShoppingBag, Medal, TrendingUp, User } from "lucide-react";
+import { useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: ClubTopBuyersData;
@@ -23,6 +24,7 @@ const RANK_COLORS = [
 ] as const;
 
 export default function ManagerClubTopBuyersSection({ data, isLoading }: Props) {
+  const t = useTranslations("ClubManagerDashboard");
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -50,7 +52,7 @@ export default function ManagerClubTopBuyersSection({ data, isLoading }: Props) 
           <div className="w-14 h-14 rounded-2xl bg-[#1e2130] flex items-center justify-center mx-auto">
             <User size={24} className="text-[#5a6070]" />
           </div>
-          <p className="text-[12px] text-[#6a7080]">Chưa có học viên mua khóa học</p>
+          <p className="text-[12px] text-[#6a7080]">{t("vipStudents.empty") || "No buyer data"}</p>
         </div>
       </div>
     );
@@ -106,7 +108,7 @@ export default function ManagerClubTopBuyersSection({ data, isLoading }: Props) 
               </div>
               <p className="text-[10px] text-[#5a6070] mt-0.5 flex items-center gap-1">
                 <ShoppingBag size={10} />
-                {buyer.purchaseCount.toLocaleString("vi-VN")} giao dịch
+                {t("vipStudents.transactions", { count: buyer.purchaseCount })}
               </p>
               {/* Progress bar */}
               <div className="mt-2">
@@ -137,11 +139,13 @@ export default function ManagerClubTopBuyersSection({ data, isLoading }: Props) 
       <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/[0.05]">
         <div className="flex items-center gap-2">
           <User size={12} className="text-[#5a6070]" />
-          <span className="text-[10px] text-[#6a7080] font-medium">{buyers.length} học viên</span>
+          <span className="text-[10px] text-[#6a7080] font-medium">
+            {t("vipStudents.footerLabel", { count: buyers.length })}
+          </span>
         </div>
         <div className="text-right">
           <p className="text-[14px] font-bold text-white">{fmtVND(totalRevenue)}</p>
-          <p className="text-[10px] text-[#5a6070]">tổng doanh thu CLB</p>
+          <p className="text-[10px] text-[#5a6070]">{t("vipStudents.summaryLabel") || "total club revenue"}</p>
         </div>
       </div>
     </div>

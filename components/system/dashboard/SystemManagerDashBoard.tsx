@@ -9,10 +9,14 @@ import {
   useGetAdminRevenueByCourse,
   useGetAdminTopBuyers,
   useGetAdminCompetitionStats,
-  useGetAdminLearningStatistics
+  useGetAdminLearningStatistics,
+  useGetAdminOrderStatistics,
+  useGetAdminSystemSummary,
+  AdminOrderStatisticsParams,
 } from "@/hooks/dashboard/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { format, startOfDay, endOfDay, subDays, startOfWeek, endOfWeek, startOfMonth } from "date-fns";
 import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import AdminRevenueGrowthSection from "./sections/AdminRevenueGrowthSection";
@@ -23,7 +27,8 @@ import AdminCompetitionStatsSection from "./sections/AdminCompetitionStatsSectio
 import AdminLearningActivitySection from "./sections/AdminLearningActivitySection";
 import AdminTopClubsLearningSection from "./sections/AdminTopClubsLearningSection";
 import AdminCourseLearningSection from "./sections/AdminCourseLearningSection";
-import { BookOpen, GraduationCap, Trophy, Users, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { BookOpen, GraduationCap, Trophy, Users, BarChart3, PieChart as PieChartIcon, ShoppingCart, Calendar, Clock } from "lucide-react";
+import AdminOrderStatisticsSection from "./sections/AdminOrderStatisticsSection";
 
 // === FORMAT ===
 const formatVND = (v: number, locale: string) => {
@@ -95,18 +100,26 @@ function KpiCard({ label, value, sub, subLabel, trend, diff, isLoading, delay, l
 export default function SystemManagerDashBoard() {
   const t = useTranslations("SystemDashboard");
   const locale = useLocale();
-  const [monthsGrowth, setMonthsGrowth] = useState(12);
+  const [monthsGrowth, setMonthsGrowth] = useState<number | "custom">(12);
+  const [fromDateGrowth, setFromDateGrowth] = useState<string>("");
+  const [toDateGrowth, setToDateGrowth] = useState<string>("");
   const [topClubs, setTopClubs] = useState(10);
   const [topBuyers, setTopBuyers] = useState(10);
   const [topComps, setTopComps] = useState(5);
   const [displayStatus, setDisplayStatus] = useState<string>("ALL");
-  const [activeTab, setActiveTab] = useState<"finance" | "learning">("finance");
+  const [activeTab, setActiveTab] = useState<"finance" | "learning" | "orders" | "operations">("finance");
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderFilters, setOrderFilters] = useState<AdminOrderStatisticsParams>({ currentPage: 1, pageSize: 10 });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   const { data: overview, isLoading: isOverviewLoading, refetch: refetchOverview, isRefetching } = useGetAdminRevenueOverview();
-  const { data: growth, isLoading: isGrowthLoading } = useGetAdminRevenueGrowth({ months: monthsGrowth });
+  const { data: growth, isLoading: isGrowthLoading } = useGetAdminRevenueGrowth({
+    months: monthsGrowth === "custom" ? undefined : monthsGrowth,
+    fromDate: monthsGrowth === "custom" ? fromDateGrowth : undefined,
+    toDate: monthsGrowth === "custom" ? toDateGrowth : undefined,
+  });
   const { data: rankings, isLoading: isRankingsLoading } = useGetAdminClubRanking({ top: topClubs });
   const { data: courseRevenue, isLoading: isCourseLoading } = useGetAdminRevenueByCourse({ top: 6 });
   const { data: topBuyersData, isLoading: isBuyersLoading } = useGetAdminTopBuyers(topBuyers);
@@ -136,6 +149,13 @@ export default function SystemManagerDashBoard() {
 
   const { data: compStats, isLoading: isCompLoading } = useGetAdminCompetitionStats(compQueryParams);
   const { data: learningStats, isLoading: isLearningLoading } = useGetAdminLearningStatistics();
+  const { data: orderStats, isLoading: isOrdersLoading, refetch: refetchOrders } = useGetAdminOrderStatistics({
+    ...orderFilters,
+    currentPage: orderPage,
+  });
+
+  const [systemTimeline, setSystemTimeline] = useState<string>("month");
+  const { data: systemSummary, isLoading: isSystemLoading } = useGetAdminSystemSummary(systemTimeline);
 
   const revenueDiff = (overview?.revenueThisMonth ?? 0) - (overview?.revenueLastMonth ?? 0);
   const profitDiff = (overview?.profitThisMonth ?? 0) - (overview?.profitLastMonth ?? 0);
@@ -185,7 +205,7 @@ export default function SystemManagerDashBoard() {
             )}
           >
             <BarChart3 size={14} />
-            <span>{locale === "en" ? "Financial Report" : "Báo cáo Tài chính"}</span>
+            <span>{t("tabs.finance")}</span>
             {activeTab === "finance" && (
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
             )}
@@ -198,11 +218,37 @@ export default function SystemManagerDashBoard() {
             )}
           >
             <GraduationCap size={16} />
-            <span>{locale === "en" ? "Learning Analytics" : "Phân tích Học tập"}</span>
+            <span>{t("tabs.learning")}</span>
             {activeTab === "learning" && (
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full" />
             )}
           </button>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 text-[12px] font-bold transition-all relative",
+              activeTab === "orders" ? "text-amber-400" : "text-[#5a6070] hover:text-[#a0a8b8]"
+            )}
+          >
+            <ShoppingCart size={16} />
+            <span>{t("tabs.orders")}</span>
+            {activeTab === "orders" && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-full" />
+            )}
+          </button>
+          {/* <button
+            onClick={() => setActiveTab("operations")}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 text-[12px] font-bold transition-all relative",
+              activeTab === "operations" ? "text-emerald-400" : "text-[#5a6070] hover:text-[#a0a8b8]"
+            )}
+          >
+            <RefreshCcw size={16} />
+            <span>{t("tabs.operations")}</span>
+            {activeTab === "operations" && (
+              <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-full" />
+            )}
+          </button> */}
         </div>
       </div>
 
@@ -268,11 +314,16 @@ export default function SystemManagerDashBoard() {
                     <div>
                       <h3 className="text-[13px] font-bold text-white">{t("revenueTrend.title")}</h3>
                       <p className="text-[11px] text-[#5a5f6a] mt-0.5">
-                        {t("revenueTrend.summary", {
-                          amount: formatVND(growth?.totalValue || 0, locale),
-                          count: monthsGrowth,
-                          rate: growth?.growthRate || 0,
-                        })}
+                        {monthsGrowth === "custom"
+                          ? (locale === "en"
+                            ? `Analysis from ${fromDateGrowth || '...'} to ${toDateGrowth || '...'}`
+                            : `Phân tích từ ${fromDateGrowth || '...'} đến ${toDateGrowth || '...'}`)
+                          : t("revenueTrend.summary", {
+                            amount: formatVND(growth?.totalValue || 0, locale),
+                            count: monthsGrowth,
+                            rate: growth?.growthRate || 0,
+                          })
+                        }
                       </p>
                     </div>
                     <div className="flex items-center gap-1 bg-[#1e2130] border border-white/[0.07] rounded-xl p-1">
@@ -290,9 +341,127 @@ export default function SystemManagerDashBoard() {
                           {t("revenueTrend.months", { count: m })}
                         </button>
                       ))}
+                      <button
+                        onClick={() => setMonthsGrowth("custom")}
+                        className={cn(
+                          "px-3 py-1.5 text-[10px] font-medium rounded-lg transition-all",
+                          monthsGrowth === "custom"
+                            ? "bg-blue-500 text-white shadow-sm"
+                            : "text-[#6a7080] hover:text-[#a0a8b8]"
+                        )}
+                      >
+                        {locale === "en" ? "Custom" : "Tùy chỉnh"}
+                      </button>
                     </div>
                   </div>
-                  <AdminRevenueGrowthSection data={growth} isLoading={isGrowthLoading} months={monthsGrowth} />
+
+                  {monthsGrowth === "custom" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-col gap-6 mb-8 p-6 bg-white/[0.02] border border-white/[0.08] rounded-2xl backdrop-blur-md shadow-xl relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/40" />
+
+                      {/* Inputs Row */}
+                      <div className="flex items-center gap-6">
+                        <div className="flex flex-col gap-2.5 flex-1">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+                            <Calendar size={12} />
+                            <span>{t("revenueTrend.fromDate")}</span>
+                          </div>
+                          <div className="relative group/date">
+                            <input
+                              type="date"
+                              value={fromDateGrowth}
+                              onChange={(e) => setFromDateGrowth(e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
+                            />
+                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                              <span className={fromDateGrowth ? "text-white font-medium" : "text-[#5a6070]"}>
+                                {fromDateGrowth ? format(new Date(fromDateGrowth), "dd/MM/yyyy") : "DD/MM/YYYY"}
+                              </span>
+                              <Calendar size={14} className="text-[#5a6070] group-hover/date:text-blue-400 transition-colors" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-center pt-6 opacity-20">
+                          <div className="w-6 h-[1px] bg-white" />
+                        </div>
+
+                        <div className="flex flex-col gap-2.5 flex-1">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
+                            <Calendar size={12} />
+                            <span>{t("revenueTrend.toDate")}</span>
+                          </div>
+                          <div className="relative group/date">
+                            <input
+                              type="date"
+                              value={toDateGrowth}
+                              onChange={(e) => setToDateGrowth(e.target.value)}
+                              className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
+                            />
+                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                              <span className={toDateGrowth ? "text-white font-medium" : "text-[#5a6070]"}>
+                                {toDateGrowth ? format(new Date(toDateGrowth), "dd/MM/yyyy") : "DD/MM/YYYY"}
+                              </span>
+                              <Calendar size={14} className="text-[#5a6070] group-hover/date:text-blue-400 transition-colors" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quick Filters Row */}
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/[0.04]">
+                        <span className="text-[10px] font-bold text-[#4a5060] uppercase mr-2 flex items-center gap-1.5">
+                          <Clock size={12} />
+                          {locale === "en" ? "Quick Select:" : "Chọn nhanh:"}
+                        </span>
+                        {[
+                          {
+                            label: locale === "en" ? "Today" : "Hôm nay",
+                            range: [new Date(), new Date()]
+                          },
+                          {
+                            label: locale === "en" ? "Yesterday" : "Hôm qua",
+                            range: [subDays(new Date(), 1), subDays(new Date(), 1)]
+                          },
+                          {
+                            label: locale === "en" ? "This Week" : "Tuần này",
+                            range: [startOfWeek(new Date(), { weekStartsOn: 1 }), new Date()]
+                          },
+                          {
+                            label: locale === "en" ? "Last Week" : "Tuần trước",
+                            range: [startOfWeek(subDays(new Date(), 7), { weekStartsOn: 1 }), endOfWeek(subDays(new Date(), 7), { weekStartsOn: 1 })]
+                          },
+                          {
+                            label: locale === "en" ? "This Month" : "Tháng này",
+                            range: [startOfMonth(new Date()), new Date()]
+                          },
+                        ].map((q) => (
+                          <button
+                            key={q.label}
+                            onClick={() => {
+                              setFromDateGrowth(format(q.range[0], "yyyy-MM-dd"));
+                              setToDateGrowth(format(q.range[1], "yyyy-MM-dd"));
+                            }}
+                            className="px-3 py-1.5 text-[10px] font-medium bg-white/[0.04] border border-white/[0.06] text-[#8a9099] rounded-lg hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all active:scale-95"
+                          >
+                            {q.label}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                  <AdminRevenueGrowthSection
+                    data={growth}
+                    isLoading={isGrowthLoading}
+                    months={monthsGrowth === "custom" ? 0 : monthsGrowth}
+                    isCustom={monthsGrowth === "custom"}
+                    fromDate={fromDateGrowth}
+                    toDate={toDateGrowth}
+                  />
                 </motion.div>
 
                 {/* Competition */}
@@ -417,7 +586,7 @@ export default function SystemManagerDashBoard() {
               <AdminClubRankingSection data={rankings} isLoading={isRankingsLoading} />
             </motion.div>
           </>
-        ) : (
+        ) : activeTab === "learning" ? (
           <div className="space-y-6">
             {/* LEARNING KPI */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -501,7 +670,99 @@ export default function SystemManagerDashBoard() {
               </div>
             </div>
           </div>
-        )}
+        ) : activeTab === "orders" ? (
+          <AdminOrderStatisticsSection
+            filters={orderFilters}
+            onFilterChange={(f) => {
+              setOrderFilters(f);
+              setOrderPage(1);
+            }}
+            data={orderStats}
+            isLoading={isOrdersLoading}
+            currentPage={orderPage}
+            onPageChange={setOrderPage}
+          />
+        ) : activeTab === "operations" ? (
+          <div className="space-y-6">
+            {/* System KPIs */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              <KpiCard
+                label={t("opsOverview.totalUsers")}
+                value={(systemSummary?.totalUsers || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
+                isLoading={isSystemLoading}
+                delay={0}
+                locale={locale}
+              />
+              <KpiCard
+                label={t("opsOverview.newUsers")}
+                value={(systemSummary?.newUsersThisMonth || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
+                sub={systemSummary?.filterTimeLines.find((f) => f.value === systemTimeline)?.label}
+                isLoading={isSystemLoading}
+                delay={1}
+                locale={locale}
+              />
+              <KpiCard
+                label={t("opsOverview.memberCount")}
+                value={(systemSummary?.memberCount || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
+                isLoading={isSystemLoading}
+                delay={2}
+                locale={locale}
+              />
+              <KpiCard
+                label={t("opsOverview.clubOwnerCount")}
+                value={(systemSummary?.clubOwnerCount || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
+                isLoading={isSystemLoading}
+                delay={3}
+                locale={locale}
+              />
+              <KpiCard
+                label={t("opsOverview.pendingApprovals")}
+                value={(systemSummary?.pendingClubApprovals || 0).toLocaleString(locale === "en" ? "en-US" : "vi-VN")}
+                isLoading={isSystemLoading}
+                delay={4}
+                locale={locale}
+              />
+            </div>
+
+            {/* Timeline Filter */}
+            <div className="flex items-center justify-between bg-[#181b22] p-4 rounded-2xl border border-white/[0.07]">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="text-emerald-400" size={18} />
+                <h3 className="text-[13px] font-bold text-white">{t("opsOverview.timelineFilter")}</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {systemSummary?.filterTimeLines.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSystemTimeline(opt.value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border",
+                      systemTimeline === opt.value
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+                        : "bg-white/[0.02] border-white/[0.05] text-[#5a6070] hover:text-[#a0a8b8] hover:border-white/[0.1]"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Placeholder for future operation charts/lists */}
+              <div className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07] min-h-[300px] flex flex-col items-center justify-center text-center">
+                <Users className="text-emerald-500/20 mb-4" size={48} />
+                <h4 className="text-[14px] font-bold text-white mb-2">{t("opsOverview.userGrowthTitle")}</h4>
+                <p className="text-[11px] text-[#6a7080] max-w-[280px]">{t("opsOverview.userGrowthDesc")}</p>
+              </div>
+              <div className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07] min-h-[300px] flex flex-col items-center justify-center text-center">
+                <Trophy className="text-emerald-500/20 mb-4" size={48} />
+                <h4 className="text-[14px] font-bold text-white mb-2">{t("opsOverview.clubActivityTitle")}</h4>
+                <p className="text-[11px] text-[#6a7080] max-w-[280px]">{t("opsOverview.clubActivityDesc")}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

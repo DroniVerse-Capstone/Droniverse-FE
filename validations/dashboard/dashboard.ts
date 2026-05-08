@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { userSchema } from "../auth"
 
 export const clubRevenueOverviewSchema = z.object({
 	totalExpense: z.number().nonnegative(),
@@ -58,7 +59,9 @@ export const clubExpenseGrowthDataSchema = z.object({
 
 export const getClubExpenseGrowthParamsSchema = z.object({
 	clubId: z.string().uuid(),
-	months: z.number().int().positive().default(12),
+	months: z.number().int().positive().optional().default(12),
+	fromDate: z.string().optional().nullable(),
+	toDate: z.string().optional().nullable(),
 })
 
 export const getClubExpenseGrowthResponseSchema = z.object({
@@ -100,7 +103,9 @@ export const adminRevenueGrowthDataSchema = z.object({
 })
 
 export const getAdminRevenueGrowthParamsSchema = z.object({
-	months: z.number().int().positive().default(12),
+	months: z.number().int().positive().optional().default(12),
+	fromDate: z.string().optional().nullable(),
+	toDate: z.string().optional().nullable(),
 })
 
 export const getAdminRevenueGrowthResponseSchema = z.object({
@@ -377,7 +382,9 @@ export const adminLearningSummarySchema = z.object({
 })
 
 export const adminTopClubLearningSchema = z.object({
-	clubName: z.string(),
+	clubName: z.string().optional(),
+	clubNameVN: z.string().optional(),
+	clubNameEN: z.string().optional(),
 	clubImageUrl: z.string().nullable(),
 	avgProgress: z.number(),
 	membersCount: z.number().int().nonnegative(),
@@ -385,7 +392,9 @@ export const adminTopClubLearningSchema = z.object({
 })
 
 export const adminCourseLearningStatSchema = z.object({
-	courseName: z.string(),
+	courseName: z.string().optional(),
+	courseNameVN: z.string().optional(),
+	courseNameEN: z.string().optional(),
 	enrollments: z.number().int().nonnegative(),
 	completionRate: z.number(),
 	courseId: z.string().uuid(),
@@ -411,3 +420,99 @@ export const getAdminLearningStatisticsResponseSchema = z.object({
 
 export type AdminLearningStatistics = z.infer<typeof adminLearningStatisticsSchema>
 export type GetAdminLearningStatisticsResponse = z.infer<typeof getAdminLearningStatisticsResponseSchema>
+
+// --- ORDER STATISTICS (Detailed) ---
+
+export const adminOrderOverviewSchema = z.object({
+	totalOrders: z.number().int().nonnegative(),
+	pendingOrders: z.number().int().nonnegative(),
+	successOrders: z.number().int().nonnegative(),
+	failedOrders: z.number().int().nonnegative(),
+	cancelledOrders: z.number().int().nonnegative(),
+})
+
+export const adminOrderItemSchema = z.object({
+	productID: z.string().uuid(),
+	productNameVN: z.string(),
+	productNameEN: z.string(),
+	type: z.string(),
+	quantity: z.number().int().nonnegative(),
+})
+
+export const adminOrderPaymentSchema = z.object({
+	orderId: z.string().uuid(),
+	transactionId: z.string().nullable(),
+	paymentUrl: z.string().nullable(),
+	paymentMethod: z.string(),
+	status: z.string(),
+	transactionDate: z.string().nullable(),
+})
+
+export const adminOrderClubSchema = z.object({
+	clubID: z.string().uuid(),
+	nameVN: z.string(),
+	nameEN: z.string(),
+	imageUrl: z.string().nullable(),
+})
+
+export const adminOrderDetailSchema = z.object({
+	orderID: z.string().uuid(),
+	type: z.string(),
+	totalAmount: z.number().nonnegative(),
+	status: z.string(),
+	createAt: z.string(),
+	item: adminOrderItemSchema,
+	payment: adminOrderPaymentSchema,
+	user: userSchema,
+	club: adminOrderClubSchema,
+})
+
+export const adminOrderStatisticsSchema = z.object({
+	overview: adminOrderOverviewSchema,
+	orders: z.object({
+		data: z.array(adminOrderDetailSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+})
+
+export const getAdminOrderStatisticsResponseSchema = z.object({
+	data: adminOrderStatisticsSchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminOrderOverview = z.infer<typeof adminOrderOverviewSchema>
+export type AdminOrderDetail = z.infer<typeof adminOrderDetailSchema>
+export type AdminOrderStatistics = z.infer<typeof adminOrderStatisticsSchema>
+export type GetAdminOrderStatisticsResponse = z.infer<typeof getAdminOrderStatisticsResponseSchema>
+
+// --- SYSTEM SUMMARY ---
+
+export const adminSystemSummarySchema = z.object({
+	pendingClubApprovals: z.number().int().nonnegative(),
+	totalUsers: z.number().int().nonnegative(),
+	newUsersThisMonth: z.number().int().nonnegative(),
+	memberCount: z.number().int().nonnegative(),
+	clubOwnerCount: z.number().int().nonnegative(),
+	filterTimeLines: z.array(z.object({
+		value: z.string(),
+		label: z.string(),
+	})),
+})
+
+export const getAdminSystemSummaryParamsSchema = z.object({
+	identityFilterTimeLine: z.string().optional(),
+})
+
+export const getAdminSystemSummaryResponseSchema = z.object({
+	data: adminSystemSummarySchema,
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminSystemSummary = z.infer<typeof adminSystemSummarySchema>
+export type GetAdminSystemSummaryResponse = z.infer<typeof getAdminSystemSummaryResponseSchema>
+export type GetAdminSystemSummaryParams = z.infer<typeof getAdminSystemSummaryParamsSchema>

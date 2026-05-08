@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import EmptyState from "@/components/common/EmptyState";
 import { BookOpen, Flame, TrendingUp } from "lucide-react";
+import { useTranslations } from "@/providers/i18n-provider";
 
 const TOP_OPTIONS = [5, 10, 15] as const;
 
@@ -51,6 +52,7 @@ export default function ManagerTopCoursesSection({
   isError = false,
   errorMessage,
 }: ManagerTopCoursesSectionProps) {
+  const t = useTranslations("ClubManagerDashboard");
   const items = useMemo(() => {
     if (!byCourseSeries || !Array.isArray(byCourseSeries) || byCourseSeries.length === 0) return [];
 
@@ -93,8 +95,8 @@ export default function ManagerTopCoursesSection({
   if (isError) {
     return (
       <EmptyState
-        title="Không tải được dữ liệu khóa học"
-        description={errorMessage || "Vui lòng thử lại sau."}
+        title={t("topCourses.errorTitle") || "Failed to load courses"}
+        description={errorMessage || "Please try again later."}
       />
     );
   }
@@ -106,7 +108,7 @@ export default function ManagerTopCoursesSection({
           <div className="w-14 h-14 rounded-2xl bg-[#1e2130] flex items-center justify-center mx-auto">
             <BookOpen size={24} className="text-[#5a6070]" />
           </div>
-          <p className="text-[12px] text-[#6a7080]">Chưa có dữ liệu khóa học</p>
+          <p className="text-[12px] text-[#6a7080]">{t("topCourses.empty") || "No course data"}</p>
         </div>
       </div>
     );
@@ -236,11 +238,15 @@ export default function ManagerTopCoursesSection({
       <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
         <div className="flex items-center gap-2">
           <BookOpen size={12} className="text-[#5a6070]" />
-          <span className="text-[10px] text-[#6a7080] font-medium">{items.length} khóa học</span>
+          <span className="text-[10px] text-[#6a7080] font-medium">
+            {items.length} {t("topCourses.footerLabel") || "courses"}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-bold text-white">{fmtVND(displayTotal)}</span>
-          <span className="text-[9px] text-[#5a6070] px-1.5 py-0.5 bg-[#1e2130] rounded">Tổng</span>
+          <span className="text-[9px] text-[#5a6070] px-1.5 py-0.5 bg-[#1e2130] rounded">
+            {t("kpi.totalLabel") || "Total"}
+          </span>
         </div>
       </div>
     </div>

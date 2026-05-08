@@ -68,7 +68,7 @@ export default function ModuleLessons({
   };
 
   const handleOpenEdit = (lesson: Lesson) => {
-    if (["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lesson.type)) {
+    if (["LAB", "PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lesson.type)) {
       toast("Tính năng chỉnh sửa Lab sẽ được cập nhật sau.");
       return;
     }
@@ -169,7 +169,7 @@ export default function ModuleLessons({
 
                 {canManageLessons ? (
                   <>
-                    {!["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lesson.type) ? (
+                    {!["LAB", "PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lesson.type) ? (
                       <TooltipWrapper label={t("tooltip.edit")}>
                         <Button
                           type="button"

@@ -9,6 +9,15 @@ import ManualControl from "@/components/programming/ManualControl";
 import { mqttClient } from "@/lib/mqttClient";
 import { parseScriptToJSON } from "@/lib/blockParser";
 import { useDroneStore } from "@/lib/droneStore";
+import { ArrowLeft, RotateCcw } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getCurrentUser } from "@/hooks/auth/useAuth";
+import { ADMIN_ROLE, SYSTEM_MANAGER_ROLE } from "@/lib/auth/access";
+import { cn } from "@/lib/utils";
+import { useCompleteUserLesson } from "@/hooks/learning/useUserLearning";
+import { toast } from "react-hot-toast";
+import { CheckCircle2, Loader2, Clock } from "lucide-react";
+import { useCheckUserLessonExists, useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
 
 const BlocklyEditor = dynamic(() => import("@/components/programming/BlocklyEditor"), { ssr: false });
 
@@ -54,10 +63,99 @@ export default function ProgrammingPage() {
   const [simulationStatus, setSimulationStatus] = useState<"ĐÃ DỪNG" | "ĐANG CHẠY">("ĐÃ DỪNG");
   const [currentCommandDisplay, setCurrentCommandDisplay] = useState<string>("Sẵn sàng");
   const [showOnboarding, setShowOnboarding] = useState(false); // [Tinh chỉnh] Mặc định không hiện để user trải nghiệm trước
+  const [canComplete, setCanComplete] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(60); // 1 phút trải nghiệm
 
   // Drone Store Integration
   const { droneId, status, setStatus, setDroneId, updateTelemetry, checkConnection, addDiscoveredDrone, discoveredDrones } = useDroneStore();
   const executionIdRef = React.useRef(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const user = getCurrentUser();
+  const returnUrl = searchParams.get("returnUrl");
+  let lessonId = searchParams.get("lessonId");
+  let enrollmentId = searchParams.get("enrollmentId");
+
+  // Fallback: Nếu không tìm thấy ở cấp cao nhất, thử tìm trong returnUrl (đề phòng bị mã hóa)
+  if (!lessonId && returnUrl) {
+    try {
+      const url = new URL(returnUrl, window.location.origin);
+      lessonId = url.searchParams.get("lessonId");
+      if (!enrollmentId) enrollmentId = url.searchParams.get("enrollmentId");
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+
+  // Staff check
+  const isStaff = user?.roleName === "ADMIN" || user?.roleName === "SYSTEM_MANAGER";
+  const isStudent = user?.roleName === "STUDENT" || !isStaff;
+
+  // Completion check - Sử dụng learning path như bạn gợi ý để đồng bộ nhất
+  const { data: learningPath, isLoading: isPathLoading } = useGetUserLearningPath(enrollmentId || "");
+
+  const isActuallyCompleted = learningPath?.modules
+    .flatMap(m => m.lessons)
+    .find(l => l.lessonID === lessonId)?.isCompleted ?? false;
+
+  // Final condition to show completion features
+  const showCompletionFeatures = isStudent && !!lessonId && !!enrollmentId && !isActuallyCompleted;
+
+  // Completion Mutation
+  const completeLessonMutation = useCompleteUserLesson();
+  const isCompleting = completeLessonMutation.isPending;
+
+  const handleCompleteLesson = async () => {
+    if (!lessonId || !enrollmentId) return;
+
+    const toastId = toast.loading("Đang lưu kết quả bài học...");
+    try {
+      await completeLessonMutation.mutateAsync({
+        lessonId,
+        enrollmentId,
+      });
+
+      toast.success("Hoàn thành bài học thành công!", { id: toastId });
+
+      setTimeout(() => {
+        handleBack();
+      }, 1500);
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi lưu kết quả.", { id: toastId });
+    }
+  };
+
+  // Đếm ngược thời gian trải nghiệm (1 phút)
+  useEffect(() => {
+    if (!showCompletionFeatures || canComplete) return;
+
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanComplete(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lessonId, enrollmentId, canComplete]);
+
+  const handleBack = () => {
+    if (returnUrl) {
+      router.push(returnUrl);
+      return;
+    }
+
+    if (user?.roleName === ADMIN_ROLE || user?.roleName === SYSTEM_MANAGER_ROLE) {
+      router.push("/dashboard");
+    } else {
+      router.push("/learn");
+    }
+  };
+
 
   // MQTT Initialization
   useEffect(() => {
@@ -272,10 +370,13 @@ export default function ProgrammingPage() {
 
           case 'LAND':
             setCurrentCommandDisplay("Hạ cánh...");
-            updateDroneState({ throttle: 45, pitch: 0, roll: 0, yaw: 0 });
-            await sleep(1000);
+            // [Cải tiến] Hạ cánh mượt mà bằng cách giảm dần lực nâng
+            for (let t = 45; t >= 0; t -= 5) {
+              updateDroneState({ throttle: t, pitch: 0, roll: 0, yaw: 0 });
+              await sleep(200);
+              if (cancelled()) break;
+            }
             updateDroneState({ throttle: 0 });
-            await sleep(1000);
             break;
 
           case 'GO': {
@@ -406,7 +507,13 @@ export default function ProgrammingPage() {
 
           case 'EMERGENCY_STOP':
             setCurrentCommandDisplay("Dừng khẩn cấp!");
-            updateDroneState({ throttle: 0, pitch: 0, roll: 0, yaw: 0 });
+            // [Cải tiến] Dừng khẩn cấp nhưng vẫn có độ giảm tốc để không rơi quá nhanh trong simulation
+            for (let t = 35; t >= 0; t -= 7) {
+              updateDroneState({ throttle: t, pitch: 0, roll: 0, yaw: 0 });
+              await sleep(100);
+              if (cancelled()) break;
+            }
+            updateDroneState({ throttle: 0 });
             // Exit loop immediately
             i = nonEmpty.length;
             break;
@@ -439,13 +546,13 @@ export default function ProgrammingPage() {
 
       <header className="h-14 border-b border-white/10 bg-[#1a2333]/90 backdrop-blur-xl flex items-center justify-between px-8 z-50 shrink-0 relative shadow-lg">
         <div className="flex items-center gap-4">
-          {/* <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#db4139] to-[#c53a33] flex items-center justify-center shadow-lg shadow-red-900/30">
-            <span className="text-white font-black text-sm">D</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black text-[#db4139] uppercase tracking-widest leading-none">DroniVerse</span>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Hệ thống điều khiển</span>
-          </div> */}
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-[10px] font-bold text-slate-300 uppercase tracking-widest group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+            Quay lại
+          </button>
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/10 p-1 rounded-2xl border border-white/10 shadow-inner">
@@ -464,6 +571,17 @@ export default function ProgrammingPage() {
             className="px-6 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 transition-all text-[10px] font-black uppercase tracking-widest disabled:opacity-20"
           >
             Dừng lại
+          </button>
+
+          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 border border-cyan-500/20 transition-all text-[10px] font-black uppercase tracking-widest"
+            title="Đặt lại vị trí"
+          >
+            <RotateCcw size={14} />
+            Đặt lại
           </button>
         </div>
 
@@ -488,6 +606,50 @@ export default function ProgrammingPage() {
                 : status === 'online' ? 'Online' : 'Đang bay'
             }
           </button>
+
+          {showCompletionFeatures && (
+            canComplete ? (
+              <button
+                onClick={handleCompleteLesson}
+                disabled={isCompleting}
+                className="group relative flex items-center gap-2 px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:opacity-50"
+              >
+                <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                {isCompleting ? (
+                  <Loader2 size={14} className="animate-spin text-white" />
+                ) : (
+                  <CheckCircle2 size={14} className="text-white" />
+                )}
+                <span className="text-[10px] font-black text-white uppercase tracking-[0.15em] relative z-10">
+                  {isCompleting ? "Đang lưu..." : "Hoàn thành bài học"}
+                </span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-3 px-5 py-2 rounded-xl bg-[#1a2333]/60 backdrop-blur-md border border-white/10 shadow-inner group">
+                <div className="relative w-4 h-4 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                  <svg className="absolute inset-0 w-4 h-4 -rotate-90">
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray={44}
+                      strokeDashoffset={44 * (timeRemaining / 60)}
+                      className="text-emerald-500 transition-all duration-1000"
+                    />
+                  </svg>
+                  <Clock size={8} className="text-slate-400 group-hover:text-emerald-400 transition-colors" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-none">Trải nghiệm</span>
+                  <span className="text-[10px] font-black text-slate-200 font-mono leading-none mt-0.5">{timeRemaining}s</span>
+                </div>
+              </div>
+            )
+          )}
         </div>
       </header>
 

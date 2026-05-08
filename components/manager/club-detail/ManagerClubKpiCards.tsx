@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ClubRevenueOverview } from "@/validations/dashboard/dashboard";
+import { useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: ClubRevenueOverview;
@@ -68,7 +69,7 @@ function KpiCard({ label, value, sub, trend, diff, isLoading, delay }: KpiCardPr
           </span>
         )}
         {trend !== undefined && !isLoading && (
-           <span className="text-[10px] text-[#4a5060]">so với kỳ trước</span>
+          <span className="text-[10px] text-[#4a5060]">so với kỳ trước</span>
         )}
       </div>
     </motion.div>
@@ -76,6 +77,7 @@ function KpiCard({ label, value, sub, trend, diff, isLoading, delay }: KpiCardPr
 }
 
 export default function ManagerClubKpiCards({ data, isLoading }: Props) {
+  const t = useTranslations("ClubManagerDashboard.kpi");
   const expenseDiff = (data?.expenseThisMonth ?? 0) - (data?.expenseLastMonth ?? 0);
   const expenseGrowth = data?.expenseLastMonth
     ? ((data.expenseThisMonth - data.expenseLastMonth) / data.expenseLastMonth) * 100
@@ -84,36 +86,36 @@ export default function ManagerClubKpiCards({ data, isLoading }: Props) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <KpiCard
-        label="Tổng chi phí đầu tư"
+        label={t("totalRevenue")}
         value={fmtVND(data?.totalExpense || 0)}
-        sub={`${fmtVND(data?.expenseThisMonth || 0)} tháng này`}
+        sub={t("comparedToLastPeriod")}
         trend={expenseGrowth}
         diff={expenseDiff}
         isLoading={isLoading}
         delay={0}
       />
       <KpiCard
-        label="Chi phí tháng này"
+        label={t("revenueThisMonth")}
         value={fmtVND(data?.expenseThisMonth || 0)}
-        sub={`${(data?.transactionsThisMonth || 0)} giao dịch`}
+        sub={t("transactionsThisMonth", { count: data?.transactionsThisMonth || 0 })}
         isLoading={isLoading}
         delay={1}
       />
       <KpiCard
-        label="Tổng giao dịch"
+        label={t("totalTransactions")}
         value={(data?.totalTransactions || 0).toLocaleString("vi-VN")}
-        sub={`${(data?.transactionsThisMonth || 0).toLocaleString("vi-VN")} giao dịch tháng này`}
+        sub={t("transactionsThisMonth", { count: data?.transactionsThisMonth || 0 })}
         isLoading={isLoading}
         delay={2}
       />
       <KpiCard
-        label="Chi phí TB / giao dịch"
+        label={t("avgRevenuePerTran")}
         value={fmtVND(
           (data?.transactionsThisMonth ?? 0) > 0
             ? (data?.expenseThisMonth ?? 0) / (data?.transactionsThisMonth ?? 1)
             : 0
         )}
-        sub="Trung bình mỗi giao dịch"
+        sub={t("avgLabel")}
         isLoading={isLoading}
         delay={3}
       />

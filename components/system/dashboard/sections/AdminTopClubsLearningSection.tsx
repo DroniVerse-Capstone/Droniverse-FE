@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 
 interface Props {
   data?: AdminLearningStatistics["topClubs"];
@@ -15,6 +15,7 @@ interface Props {
 
 export default function AdminTopClubsLearningSection({ data, isLoading }: Props) {
   const t = useTranslations("SystemDashboard.learningStatistics.topClubs");
+  const locale = useLocale();
 
   if (isLoading) {
     return (
@@ -52,7 +53,7 @@ export default function AdminTopClubsLearningSection({ data, isLoading }: Props)
             {club.clubImageUrl ? (
               <Image
                 src={club.clubImageUrl}
-                alt={club.clubName}
+                alt={locale === "en" ? (club.clubNameEN || club.clubName || "") : (club.clubNameVN || club.clubName || "")}
                 width={40}
                 height={40}
                 className="object-cover w-full h-full"
@@ -60,13 +61,17 @@ export default function AdminTopClubsLearningSection({ data, isLoading }: Props)
               />
             ) : (
               <div className="w-full h-full bg-[#232730] flex items-center justify-center text-xs font-bold text-[#6a7080]">
-                {club.clubName.charAt(0)}
+                {(locale === "en" ? (club.clubNameEN || club.clubName || "?") : (club.clubNameVN || club.clubName || "?")).charAt(0)}
               </div>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h4 className="text-[12px] font-bold text-white truncate">{club.clubName}</h4>
+            <h4 className="text-[12px] font-bold text-white truncate">
+              {locale === "en" 
+                ? (club.clubNameEN || club.clubName) 
+                : (club.clubNameVN || club.clubName)}
+            </h4>
             <p className="text-[10px] text-[#6a7080] mt-0.5">{t("members", { count: club.membersCount })}</p>
           </div>
 

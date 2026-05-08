@@ -17,6 +17,9 @@ interface Props {
   data?: AdminRevenueGrowthData;
   isLoading: boolean;
   months: number;
+  isCustom?: boolean;
+  fromDate?: string;
+  toDate?: string;
 }
 
 const formatVND = (v: number, locale: string) => {
@@ -37,12 +40,12 @@ function ChartTooltip({ active, payload, label }: TTProps) {
   const locale = useLocale();
   if (!active || !payload?.length) return null;
   const cur = payload[0]?.value ?? 0;
-  const prev = payload[1]?.value ?? 0;
+  const prev = payload[0]?.payload?.prev ?? 0;
   const diff = cur - prev;
   const pct = prev > 0 ? ((diff / prev) * 100).toFixed(1) : "0";
   return (
     <div className="bg-[#1e2130] border border-white/[0.08] rounded-xl px-4 py-3 text-[11px]">
-      <p className="text-[#7a8090] font-medium mb-2">{label}</p>
+      <p className="text-[#7a8090] font-medium mb-2">{payload[0].payload.fullName}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-8">
           <span className="text-[#8a9099]">{t("revenue")}</span>
@@ -64,7 +67,7 @@ function ChartTooltip({ active, payload, label }: TTProps) {
   );
 }
 
-export default function AdminRevenueGrowthSection({ data, isLoading, months }: Props) {
+export default function AdminRevenueGrowthSection({ data, isLoading, months, isCustom, fromDate, toDate }: Props) {
   const t = useTranslations("SystemDashboard.revenueTrend");
   const locale = useLocale();
   const [mode, setMode] = useState<"area" | "bar">("area");
@@ -72,12 +75,32 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
   const chartData = useMemo(() => {
     if (!data?.revenueGrowth) return [];
     const dateLocale = locale === "en" ? enUS : vi;
-    return data.revenueGrowth.map((item, idx) => ({
-      name: format(new Date(item.month), "MMM", { locale: dateLocale }),
-      fullName: format(new Date(item.month), "MMMM yyyy", { locale: dateLocale }),
-      revenue: item.value,
-      prev: idx > 0 ? data.revenueGrowth[idx - 1].value : item.value,
-    }));
+    
+    // Check if we have multiple points in the same month
+    const monthCounts = new Map();
+    data.revenueGrowth.forEach(item => {
+      const monthStr = format(new Date(item.month), "yyyy-MM");
+      monthCounts.set(monthStr, (monthCounts.get(monthStr) || 0) + 1);
+    });
+    
+    const hasHighGranularity = Array.from(monthCounts.values()).some(count => count > 1);
+
+    return data.revenueGrowth.map((item, idx) => {
+      const date = new Date(item.month);
+      // If high granularity (e.g. daily/weekly), show day/month
+      const name = hasHighGranularity 
+        ? format(date, locale === "en" ? "MMM d" : "d/M", { locale: dateLocale })
+        : (data.revenueGrowth.length > 12 
+            ? format(date, "MM/yy", { locale: dateLocale }) 
+            : format(date, "MMM", { locale: dateLocale }));
+        
+      return {
+        name,
+        fullName: format(date, locale === "en" ? "MMMM d, yyyy" : "d MMMM yyyy", { locale: dateLocale }),
+        revenue: item.value,
+        prev: idx > 0 ? data.revenueGrowth[idx - 1].value : 0,
+      };
+    });
   }, [data, locale]);
 
   const avg = useMemo(() => {
@@ -92,7 +115,12 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
   if (!chartData.length) {
     return (
       <div className="h-[260px] flex items-center justify-center">
-        <p className="text-[12px] text-[#5a5f6a]">{t("empty", { count: months })}</p>
+        <p className="text-[12px] text-[#5a5f6a]">
+          {isCustom 
+            ? (locale === "en" ? "No data in selected range" : "Không có dữ liệu trong khoảng thời gian này")
+            : t("empty", { count: months })
+          }
+        </p>
       </div>
     );
   }
@@ -127,7 +155,14 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} dy={10} />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: "#5a6070", fontSize: 10 }} 
+                dy={10} 
+                interval={months > 12 ? (months > 24 ? 4 : 2) : 0}
+              />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} tickFormatter={(v) => {
                 if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}B`;
                 if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(0)}M`;
@@ -150,7 +185,14 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} dy={10} />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: "#5a6070", fontSize: 10 }} 
+                dy={10} 
+                interval={months > 12 ? (months > 24 ? 4 : 2) : 0}
+              />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} tickFormatter={(v) => {
                 if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1)}B`;
                 if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(0)}M`;
@@ -172,7 +214,12 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months }: P
         )}>
           {(data?.growthRate ?? 0) >= 0 ? "+" : ""}{data?.growthRate ?? 0}%
         </span>
-        <span className="text-[11px] text-[#6a7080]">{t("growthSummary", { count: months })}</span>
+        <span className="text-[11px] text-[#6a7080]">
+          {isCustom 
+            ? (locale === "en" ? "growth in selected period" : "tăng trưởng trong giai đoạn chọn")
+            : t("growthSummary", { count: months })
+          }
+        </span>
         <div className="flex-1 h-0.5 bg-white/[0.05] rounded-full overflow-hidden">
           <div
             className={cn("h-full rounded-full transition-all", (data?.growthRate ?? 0) >= 0 ? "bg-emerald-500" : "bg-red-500")}
