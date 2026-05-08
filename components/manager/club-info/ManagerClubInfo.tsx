@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import EmptyState from "@/components/common/EmptyState";
 import QuillEditor from "@/components/common/QuillEditor";
 import { ClubImageUpload } from "@/components/manager/dashboard/ClubImageUpload";
+import type { UploadTempMediaData } from "@/validations/media/media";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -63,6 +64,7 @@ export default function ManagerClubInfo() {
   const [clubNameVN, setClubNameVN] = React.useState("");
   const [clubNameEN, setClubNameEN] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState("");
+  const [clubImageMediaId, setClubImageMediaId] = React.useState("");
   const [limitParticipation, setLimitParticipation] = React.useState(10);
   const [clubPolicyVN, setClubPolicyVN] = React.useState("");
   const [clubPolicyEN, setClubPolicyEN] = React.useState("");
@@ -113,7 +115,7 @@ export default function ManagerClubInfo() {
         data: {
           nameVN: clubNameVN.trim(),
           nameEN: clubNameEN.trim(),
-          imageUrl: imageUrl.trim() || null,
+          imageMedia: clubImageMediaId.trim() || null,
           limitParticipation,
           clubPolicyVN: clubPolicyVN.trim(),
           clubPolicyEN: clubPolicyEN.trim(),
@@ -139,6 +141,7 @@ export default function ManagerClubInfo() {
     setClubNameVN(club.nameVN ?? "");
     setClubNameEN(club.nameEN ?? "");
     setImageUrl(club.imageUrl ?? "");
+    setClubImageMediaId("");
     setLimitParticipation(club.limitParticipation ?? 0);
     setClubPolicyVN(club.clubPolicyVN ?? "");
     setClubPolicyEN(club.clubPolicyEN ?? "");
@@ -377,6 +380,7 @@ export default function ManagerClubInfo() {
             setClubNameVN(club.nameVN ?? "");
             setClubNameEN(club.nameEN ?? "");
             setImageUrl(club.imageUrl ?? "");
+            setClubImageMediaId("");
             setLimitParticipation(club.limitParticipation ?? 0);
             setClubPolicyVN(club.clubPolicyVN ?? "");
             setClubPolicyEN(club.clubPolicyEN ?? "");
@@ -422,6 +426,15 @@ export default function ManagerClubInfo() {
                   <ClubImageUpload
                     value={imageUrl}
                     onChange={setImageUrl}
+                    onUploaded={(data: UploadTempMediaData | null) => {
+                      if (data) {
+                        setClubImageMediaId(data.mediaID);
+                        setImageUrl(data.url);
+                      } else {
+                        setClubImageMediaId("");
+                        setImageUrl("");
+                      }
+                    }}
                     label="Tải ảnh mới"
                   />
                 </div>

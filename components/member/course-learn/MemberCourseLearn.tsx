@@ -24,6 +24,7 @@ import type { Lesson } from "@/validations/learning/user-learning";
 import ReactStars from "react-rating-stars-component";
 import { PiCertificateBold, PiPathBold } from "react-icons/pi";
 import { RiArrowGoBackFill } from "react-icons/ri";
+import ReportCourseDialog from "@/components/member/course-learn/ReportCourseDialog";
 
 export default function MemberCourseLearn() {
   const router = useRouter();
@@ -103,7 +104,6 @@ export default function MemberCourseLearn() {
           content: feedbackContent.trim(),
         },
       });
-
       setFeedbackContent("");
       setFeedbackRating(5);
       await refetchLearningPath();
@@ -143,7 +143,12 @@ export default function MemberCourseLearn() {
             >
               Thoát khỏi chế độ học
             </Button>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-3">
+              <ReportCourseDialog
+                courseVersionId={learningPath?.courseVersionID}
+              /><LanguageSwitcher />
+              
+            </div>
           </div>
         </header>
 

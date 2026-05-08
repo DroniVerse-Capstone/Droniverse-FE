@@ -117,12 +117,13 @@ export const updateClubCreationRequestDataSchema = z.object({
     droneID: z.string().uuid(),
     clubPolicyVN: z.string().min(1),
     clubPolicyEN: z.string().min(1),
+    clubRequirement: z.string().min(1),
     media: z.string().uuid(),
     nameVN: z.string().min(1),
     nameEN: z.string().min(1),
     description: z.string().min(1),
     limitParticipant: z.number().int().positive(),
-    image: z.string(),
+    imageMedia: z.string().nullable(),
 })
 
 export const updateClubCreationResponseDataSchema = z.object({
