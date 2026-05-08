@@ -9,7 +9,7 @@ import ManualControl from "@/components/programming/ManualControl";
 import { mqttClient } from "@/lib/mqttClient";
 import { parseScriptToJSON } from "@/lib/blockParser";
 import { useDroneStore } from "@/lib/droneStore";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, RotateCcw, Map } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getCurrentUser } from "@/hooks/auth/useAuth";
 import { ADMIN_ROLE, SYSTEM_MANAGER_ROLE } from "@/lib/auth/access";
@@ -18,6 +18,9 @@ import { useCompleteUserLesson } from "@/hooks/learning/useUserLearning";
 import { toast } from "react-hot-toast";
 import { CheckCircle2, Loader2, Clock } from "lucide-react";
 import { useCheckUserLessonExists, useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import Loading from "@/app/loading";
 
 const BlocklyEditor = dynamic(() => import("@/components/programming/BlocklyEditor"), { ssr: false });
 
@@ -65,6 +68,11 @@ export default function ProgrammingPage() {
   const [showOnboarding, setShowOnboarding] = useState(false); // [Tinh chỉnh] Mặc định không hiện để user trải nghiệm trước
   const [canComplete, setCanComplete] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(60); // 1 phút trải nghiệm
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Drone Store Integration
   const { droneId, status, setStatus, setDroneId, updateTelemetry, checkConnection, addDiscoveredDrone, discoveredDrones } = useDroneStore();
@@ -91,8 +99,8 @@ export default function ProgrammingPage() {
   const isStaff = user?.roleName === "ADMIN" || user?.roleName === "SYSTEM_MANAGER";
   const isStudent = user?.roleName === "STUDENT" || !isStaff;
 
-  // Completion check - Sử dụng learning path như bạn gợi ý để đồng bộ nhất
-  const { data: learningPath, isLoading: isPathLoading } = useGetUserLearningPath(enrollmentId || "");
+  // Completion check
+  const { data: learningPath, isLoading: isPathLoading, isError: isPathError } = useGetUserLearningPath(enrollmentId || "");
 
   const isActuallyCompleted = learningPath?.modules
     .flatMap(m => m.lessons)
@@ -104,6 +112,43 @@ export default function ProgrammingPage() {
   // Completion Mutation
   const completeLessonMutation = useCompleteUserLesson();
   const isCompleting = completeLessonMutation.isPending;
+
+  const [accessStatus, setAccessStatus] = useState<'loading' | 'allowed' | 'denied'>('loading');
+
+  // Security Check: Redirect if student is not enrolled in this lesson
+  useEffect(() => {
+    if (!mounted) return;
+    
+    // Admin/Staff luôn có quyền xem
+    if (isStaff) {
+      setAccessStatus('allowed');
+      return;
+    }
+
+    // 1. Chặn ngay nếu thiếu thông tin bắt buộc trên URL
+    if (!enrollmentId || !lessonId) {
+      setAccessStatus('denied');
+      return;
+    }
+
+    // 2. Chờ API load xong
+    if (isPathLoading) return;
+
+    // 3. Nếu API trả về lỗi (404/403)
+    if (isPathError) {
+      setAccessStatus('denied');
+      return;
+    }
+
+    // 4. Nếu có dữ liệu nhưng bài học không thuộc về học sinh này
+    if (learningPath) {
+      const hasAccess = learningPath.modules
+        .flatMap(m => m.lessons)
+        .some(l => l.lessonID === lessonId);
+
+      setAccessStatus(hasAccess ? 'allowed' : 'denied');
+    }
+  }, [learningPath, isPathLoading, isPathError, lessonId, enrollmentId, isStaff, mounted]);
 
   const handleCompleteLesson = async () => {
     if (!lessonId || !enrollmentId) return;
@@ -539,6 +584,43 @@ export default function ProgrammingPage() {
   };
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  if (accessStatus === 'loading' || !mounted) {
+    return <Loading />;
+  }
+
+  if (accessStatus === 'denied') {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-slate-950 p-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md space-y-8"
+        >
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_40px_rgba(239,68,68,0.25)] relative">
+            <div className="absolute inset-0 bg-red-500/5 animate-ping rounded-full" />
+            <Map className="h-10 w-10 relative z-10" />
+          </div>
+          
+          <div className="space-y-3">
+            <h1 className="text-4xl font-black text-white tracking-tight uppercase leading-none">Truy cập bị chặn</h1>
+            <p className="text-slate-400 text-sm leading-relaxed font-medium">
+              Bạn không thể truy cập trực tiếp bài tập mô phỏng này. 
+              Vui lòng vào từ danh sách bài học trong khóa học của bạn để bắt đầu.
+            </p>
+          </div>
+
+          <Button 
+            variant="secondary"
+            className="w-full py-7 rounded-2xl text-base font-black uppercase tracking-widest shadow-[0_0_30px_rgba(45,212,191,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+            onClick={() => window.location.href = "/member"}
+          >
+            Quay về Trang chủ
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <main className="h-screen w-screen bg-[#0f172a] text-slate-200 overflow-hidden flex flex-col font-sans selection:bg-[#db4139]/30">

@@ -3,15 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGetStudentLabDetail, useSubmitStudentLab } from "@/hooks/lab/useLabs";
 import { useGetUserLearningPath } from "@/hooks/learning/useUserLearning";
 import PlayLabWorkspace from "@/components/simulator/PlayLabWorkspace";
 import { SimulatorErrorBoundary } from "@/components/simulator/SimulatorErrorBoundary";
 import { LabContentData, LabSolution } from "@/types/lab";
 import Loading from "@/app/loading";
-import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Map } from "lucide-react";
 import { useTranslations } from "@/providers/i18n-provider";
 import { useLessonNavigation } from "@/hooks/learning/useLessonNavigation";
+import { Button } from "@/components/ui/button";
 
 // Auto-generate feedback based on score
 function generateFeedback(score: number): { vn: string; en: string } {
@@ -102,62 +104,30 @@ export default function StudentPlayLabPage() {
   // Show error only if it actually failed AND it's not loading anymore
   if (isError || (!isLoading && !labContent)) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 font-sans text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(220,38,38,0.15)_0%,rgba(2,6,23,1)_80%)]" />
-        <div className="absolute inset-0 pointer-events-none z-10 opacity-[0.07] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px]" />
-
-        <div className="relative z-20 flex flex-col items-center max-w-lg w-full px-6">
-          <div className="mb-8 relative">
-            <div className="w-24 h-24 rounded-2xl bg-red-600/10 border border-red-500/40 flex items-center justify-center text-red-500 animate-dv-pulse-glow">
-              <AlertTriangle className="h-12 w-12" />
-            </div>
-            <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-red-500/60" />
-            <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-red-500/60" />
+      <div className="flex h-screen flex-col items-center justify-center bg-slate-950 p-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md space-y-6"
+        >
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <Map className="h-10 w-10" />
           </div>
-
-          <div className="dv-glass-error p-8 rounded-2xl w-full flex flex-col items-center text-center gap-6">
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-red-500 flex items-center gap-3 justify-center">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
-                {t("signalLost")}
-              </h2>
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-slate-200 text-sm leading-relaxed font-medium">
-                {beErrorMessage || t("authFailure")}
-              </p>
-
-              <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-lg flex flex-col gap-2">
-                <div className="flex justify-between items-center text-[10px] uppercase font-mono text-red-400/50">
-                  <span>{t("diagnosticReport")}</span>
-                  <span>UNAUTHORIZED_ACCESS_EXCEPTION</span>
-                </div>
-                <div className="text-[11px] text-red-300 font-mono text-left leading-tight italic">
-                  {t("authFailure")}
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={handleExit}
-              className="group mt-2 relative overflow-hidden px-10 py-4 bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 rounded-xl transition-all active:scale-95"
-            >
-              <div className="relative z-10 flex items-center gap-3 text-red-400 font-bold uppercase tracking-widest text-xs">
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                {t("backToBase")}
-              </div>
-              <div className="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black text-white tracking-tight uppercase">Truy cập bị chặn</h1>
+            <p className="text-slate-400 text-sm leading-relaxed font-medium">
+              Bạn không thể truy cập trực tiếp bài tập mô phỏng này.
+              Vui lòng vào từ danh sách bài học trong khóa học của bạn để bắt đầu.
+            </p>
           </div>
-
-          <div className="mt-12 text-[10px] uppercase font-mono text-slate-600 tracking-widest flex items-center gap-4">
-            <span>DroniVerse System v4.0.2</span>
-            <span className="w-1 h-3 bg-slate-700" />
-            <span className="animate-dv-blink">{t("connectionTerminated")}</span>
-          </div>
-        </div>
+          <Button
+            variant="secondary"
+            className="w-full py-6 rounded-xl text-base font-black uppercase tracking-widest shadow-[0_0_20px_rgba(45,212,191,0.15)]"
+            onClick={() => router.push("/member")}
+          >
+            Quay về Trang chủ
+          </Button>
+        </motion.div>
       </div>
     );
   }
