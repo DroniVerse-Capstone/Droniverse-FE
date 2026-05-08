@@ -21,9 +21,35 @@ export const academyCodeClubSchema = z.object({
 	clubStatus: clubStatusSchema,
 })
 
+export const academyCodeLevelSchema = z.object({
+	levelID: z.string().uuid(),
+	levelNumber: z.number().int().positive(),
+	name: z.string(),
+})
+
+export const academyCodeDroneSchema = z.object({
+	droneID: z.string().uuid(),
+	name: z.string(),
+	imgURL: z.string().nullable(),
+})
+
+export const academyCodeCourseVersionSchema = z.object({
+	courseVersionID: z.string().uuid(),
+	titleVN: z.string(),
+	titleEN: z.string(),
+	version: z.number().int().positive(),
+})
+
+export const academyCodeCourseSchema = z.object({
+	courseID: z.string().uuid(),
+	level: academyCodeLevelSchema,
+	drone: academyCodeDroneSchema,
+	courseVersions: z.array(academyCodeCourseVersionSchema),
+})
+
 export const academyCodeItemSchema = z.object({
 	codeID: z.string().trim().min(1),
-	courseID: z.string().uuid(),
+	course: academyCodeCourseSchema,
 	club: academyCodeClubSchema.nullable(),
 	ownerUser: userSchema,
 	usedByUser: userSchema.nullable(),

@@ -4,7 +4,7 @@ import React from "react";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { BiEdit } from "react-icons/bi";
-import { MdDeleteOutline } from "react-icons/md";
+import { MdDeleteOutline, MdOutlineCloudDownload } from "react-icons/md";
 
 import ConfirmActionPopover from "@/components/common/ConfirmActionPopover";
 import EmptyState from "@/components/common/EmptyState";
@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -24,13 +23,16 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateQuizQuestion,
   useDeleteQuizQuestion,
+  useGetQuizQuestionTemplate,
   useGetQuizQuestions,
+  useImportQuizQuestions,
   useUpdateQuizQuestion,
 } from "@/hooks/quiz-question/useQuizQuestion";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { ApiError } from "@/types/api/common";
 import { Lesson } from "@/validations/lesson/lesson";
 import { QuizQuestion } from "@/validations/quiz-question/quiz-question";
+import { FaRegFileExcel } from "react-icons/fa";
 
 type QuizQuestionConfigDialogProps = {
   open: boolean;
@@ -45,7 +47,9 @@ export default function QuizQuestionConfigDialog({
   canManageQuestions,
   onOpenChange,
 }: QuizQuestionConfigDialogProps) {
-  const t = useTranslations("CourseManagement.CourseSettings.QuizQuestionConfigDialog");
+  const t = useTranslations(
+    "CourseManagement.CourseSettings.QuizQuestionConfigDialog",
+  );
   const locale = useLocale();
   const [editingQuestionId, setEditingQuestionId] = React.useState<
     string | null
@@ -63,11 +67,30 @@ export default function QuizQuestionConfigDialog({
   const [correctAnswer, setCorrectAnswer] = React.useState("A");
   const [score, setScore] = React.useState("");
   const [searchKeyword, setSearchKeyword] = React.useState("");
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const quizId =
     open && lesson?.type === "QUIZ" ? lesson.referenceID : undefined;
 
   const quizQuestionsQuery = useGetQuizQuestions(quizId);
+  const downloadQuizQuestionTemplateMutation = useGetQuizQuestionTemplate();
+  const importQuizQuestionsMutation = useImportQuizQuestions({
+    onSuccess: (data) => {
+      toast.success(
+        locale === "vi"
+          ? `Import xong: ${data.success}/${data.total} câu hỏi, lỗi ${data.failed}.`
+          : `Imported: ${data.success}/${data.total} questions, ${data.failed} failed.`,
+      );
+    },
+    onError: (error) => {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          (locale === "vi" ? "Import thất bại." : "Import failed."),
+      );
+    },
+  });
 
   const createQuizQuestionMutation = useCreateQuizQuestion({
     onSuccess: (data) => {
@@ -165,6 +188,57 @@ export default function QuizQuestionConfigDialog({
     setCorrectAnswer("A");
     setScore("");
   }
+
+  const handleDownloadTemplate = async () => {
+    if (!quizId) {
+      return;
+    }
+
+    try {
+      const blob = await downloadQuizQuestionTemplateMutation.mutateAsync();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `quiz-question-template-${quizId}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          (locale === "vi"
+            ? "Không thể tải mẫu."
+            : "Unable to download template."),
+      );
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!quizId || !file) {
+      return;
+    }
+
+    try {
+      await importQuizQuestionsMutation.mutateAsync({
+        quizId,
+        file,
+      });
+    } catch {
+      // Error is handled by mutation callback.
+    }
+  };
 
   const parsePositiveInt = (value: string) => {
     const numberValue = Number(value);
@@ -355,128 +429,178 @@ export default function QuizQuestionConfigDialog({
         >
           {canManageQuestions ? (
             <div className="order-2 space-y-3 rounded border border-greyscale-700 bg-greyscale-900 p-3 md:order-2">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-medium text-greyscale-0">
-                  {editingQuestionId ? t("form.updateTitle") : t("form.createTitle")}
-                </p>
-                <p className="text-xs text-greyscale-300">
-                  {t("form.description")}
-                </p>
-              </div>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-medium text-greyscale-0">
+                    {editingQuestionId
+                      ? t("form.updateTitle")
+                      : t("form.createTitle")}
+                  </p>
+                  <p className="text-xs text-greyscale-300">
+                    {t("form.description")}
+                  </p>
+                </div>
 
-              {editingQuestionId ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={resetForm}
-                >
-                  {t("form.reset")}
-                </Button>
-              ) : null}
-            </div>
-
-            <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-              <div className="space-y-2">
-                <Label htmlFor="quiz-question-content-vn">
-                  {t("form.contentVN")}
-                </Label>
-                <Textarea
-                  id="quiz-question-content-vn"
-                  value={contentVN}
-                  onChange={(event) => setContentVN(event.target.value)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="quiz-question-content-en">
-                  {t("form.contentEN")}
-                </Label>
-                <Textarea
-                  id="quiz-question-content-en"
-                  value={contentEN}
-                  onChange={(event) => setContentEN(event.target.value)}
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>{t("form.answers")}</Label>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="quiz-question-score">{t("form.score")}:</Label>
-                    <Input
-                      id="quiz-question-score"
-                      type="number"
-                      min={1}
-                      value={score}
-                      onChange={(event) => setScore(event.target.value)}
-                      disabled={isSaving}
-                      className="w-12"
+                {canManageQuestions ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="viewIcon"
+                      size="sm"
+                      icon={<MdOutlineCloudDownload size={16} />}
+                      onClick={() => void handleDownloadTemplate()}
+                      disabled={
+                        !quizId ||
+                        downloadQuizQuestionTemplateMutation.isPending
+                      }
+                    >
+                      {downloadQuizQuestionTemplateMutation.isPending
+                        ? <Spinner className="h-4 w-4" />
+                        : locale === "vi"
+                          ? "Tải mẫu"
+                          : "Download template"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="successIcon"
+                      size="sm" 
+                      icon={<FaRegFileExcel size={16} />}
+                      onClick={handleImportClick}
+                      disabled={
+                        !quizId || importQuizQuestionsMutation.isPending
+                      }
+                    >
+                      {importQuizQuestionsMutation.isPending
+                        ? <Spinner className="h-4 w-4" />
+                        : locale === "vi"
+                          ? "Nhập Excel"
+                          : "Import Excel"}
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={handleImportFileChange}
                     />
+                    {editingQuestionId ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={resetForm}
+                      >
+                        {t("form.reset")}
+                      </Button>
+                    ) : null}
                   </div>
+                ) : null}
+              </div>
+
+              <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+                <div className="space-y-2">
+                  <Label htmlFor="quiz-question-content-vn">
+                    {t("form.contentVN")}
+                  </Label>
+                  <Textarea
+                    id="quiz-question-content-vn"
+                    value={contentVN}
+                    onChange={(event) => setContentVN(event.target.value)}
+                    disabled={isSaving}
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  {(["A", "B", "C", "D"] as const).map((choice) => (
-                    <div
-                      key={choice}
-                      className="grid grid-cols-[54px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2"
-                    >
-                      <label
-                        htmlFor={`quiz-question-answer-${choice.toLowerCase()}`}
-                        className="flex items-center gap-2 text-sm font-medium text-greyscale-100"
-                      >
-                        <input
-                          type="radio"
-                          name="quiz-correct-answer"
-                          checked={correctAnswer === choice}
-                          onChange={() => setCorrectAnswer(choice)}
-                          disabled={isSaving}
-                          className="h-4 w-4 accent-primary-200"
-                        />
-                        {choice}
-                      </label>
-                      <div className="min-w-0 w-full">
-                        <Input
-                          id={`quiz-question-answer-${choice.toLowerCase()}`}
-                          value={getAnswerValue(choice)}
-                          onChange={(event) =>
-                            setAnswerValue(choice, event.target.value)
-                          }
-                          disabled={isSaving}
-                          placeholder={t("form.answerVNPlaceholder")}
-                        />
-                      </div>
-                      <div className="min-w-0 w-full">
-                        <Input
-                          id={`quiz-question-answer-${choice.toLowerCase()}-en`}
-                          value={getAnswerValueEN(choice)}
-                          onChange={(event) =>
-                            setAnswerValueEN(choice, event.target.value)
-                          }
-                          disabled={isSaving}
-                          placeholder={t("form.answerENPlaceholder")}
-                        />
-                      </div>
+                  <Label htmlFor="quiz-question-content-en">
+                    {t("form.contentEN")}
+                  </Label>
+                  <Textarea
+                    id="quiz-question-content-en"
+                    value={contentEN}
+                    onChange={(event) => setContentEN(event.target.value)}
+                    disabled={isSaving}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{t("form.answers")}</Label>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="quiz-question-score">
+                        {t("form.score")}:
+                      </Label>
+                      <Input
+                        id="quiz-question-score"
+                        type="number"
+                        min={1}
+                        value={score}
+                        onChange={(event) => setScore(event.target.value)}
+                        disabled={isSaving}
+                        className="w-12"
+                      />
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="space-y-2">
+                    {(["A", "B", "C", "D"] as const).map((choice) => (
+                      <div
+                        key={choice}
+                        className="grid grid-cols-[54px_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2"
+                      >
+                        <label
+                          htmlFor={`quiz-question-answer-${choice.toLowerCase()}`}
+                          className="flex items-center gap-2 text-sm font-medium text-greyscale-100"
+                        >
+                          <input
+                            type="radio"
+                            name="quiz-correct-answer"
+                            checked={correctAnswer === choice}
+                            onChange={() => setCorrectAnswer(choice)}
+                            disabled={isSaving}
+                            className="h-4 w-4 accent-primary-200"
+                          />
+                          {choice}
+                        </label>
+                        <div className="min-w-0 w-full">
+                          <Input
+                            id={`quiz-question-answer-${choice.toLowerCase()}`}
+                            value={getAnswerValue(choice)}
+                            onChange={(event) =>
+                              setAnswerValue(choice, event.target.value)
+                            }
+                            disabled={isSaving}
+                            placeholder={t("form.answerVNPlaceholder")}
+                          />
+                        </div>
+                        <div className="min-w-0 w-full">
+                          <Input
+                            id={`quiz-question-answer-${choice.toLowerCase()}-en`}
+                            value={getAnswerValueEN(choice)}
+                            onChange={(event) =>
+                              setAnswerValueEN(choice, event.target.value)
+                            }
+                            disabled={isSaving}
+                            placeholder={t("form.answerENPlaceholder")}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-greyscale-700 pt-3">
-              <Button
-                type="button"
-                onClick={() => void handleSubmit()}
-                disabled={isSaving}
-                className="w-full"
-              >
-                {isSaving ? <Spinner className="h-4 w-4" /> : null}
-                {editingQuestionId ? t("form.submitUpdate") : t("form.submitCreate")}
-              </Button>
-            </div>
+              <div className="border-t border-greyscale-700 pt-3">
+                <Button
+                  type="button"
+                  onClick={() => void handleSubmit()}
+                  disabled={isSaving}
+                  className="w-full"
+                >
+                  {isSaving ? <Spinner className="h-4 w-4" /> : null}
+                  {editingQuestionId
+                    ? t("form.submitUpdate")
+                    : t("form.submitCreate")}
+                </Button>
+              </div>
             </div>
           ) : null}
 
@@ -487,7 +611,8 @@ export default function QuizQuestionConfigDialog({
                   {t("list.title")}
                 </p>
                 <p className="text-xs text-greyscale-300">
-                  {questions.length} {t("list.questionSuffix")} | {t("list.totalScore")}: {totalScore}
+                  {questions.length} {t("list.questionSuffix")} |{" "}
+                  {t("list.totalScore")}: {totalScore}
                 </p>
               </div>
 
@@ -565,10 +690,14 @@ export default function QuizQuestionConfigDialog({
                     </div>
 
                     <p className="line-clamp-2 text-base font-medium text-greyscale-25">
-                      {locale === "vi" ? question.contentVN : question.contentEN}
+                      {locale === "vi"
+                        ? question.contentVN
+                        : question.contentEN}
                     </p>
                     <p className="line-clamp-2 text-sm text-greyscale-200">
-                      {locale === "vi" ? question.contentEN : question.contentVN}
+                      {locale === "vi"
+                        ? question.contentEN
+                        : question.contentVN}
                     </p>
 
                     <div className="grid gap-1 text-sm sm:grid-cols-2">
@@ -600,7 +729,8 @@ export default function QuizQuestionConfigDialog({
                                 : "text-greyscale-200"
                             }
                           >
-                            {choice}. {locale === "vi"? answerVN : answerEN } / {locale === "vi" ? answerEN : answerVN}
+                            {choice}. {locale === "vi" ? answerVN : answerEN} /{" "}
+                            {locale === "vi" ? answerEN : answerVN}
                           </p>
                         );
                       })}

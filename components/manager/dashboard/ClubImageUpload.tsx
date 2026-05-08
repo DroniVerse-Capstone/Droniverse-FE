@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useUploadTempMedia } from "@/hooks/media/useMedia";
+import { UploadTempMediaData } from "@/validations/media/media";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "@/providers/i18n-provider";
@@ -13,6 +14,8 @@ import { useTranslations } from "@/providers/i18n-provider";
 type ClubImageUploadProps = {
   value?: string;
   onChange: (url: string) => void;
+  /** Called when upload finishes with the uploaded media data (or null when removed) */
+  onUploaded?: (data: UploadTempMediaData | null) => void;
   label?: string;
   disabled?: boolean;
 };
@@ -20,6 +23,7 @@ type ClubImageUploadProps = {
 export function ClubImageUpload({
   value = "",
   onChange,
+  onUploaded,
   label = "Ảnh Club",
   disabled = false,
 }: ClubImageUploadProps) {
@@ -40,6 +44,8 @@ export function ClubImageUpload({
   const uploadMutation = useUploadTempMedia({
     onSuccess: (data) => {
       onChange(data.data.url);
+      // expose the uploaded media data (so callers can pick up mediaID)
+      onUploaded?.(data.data);
       toast.success(t("toast.success"));
     },
     onError: (error) => {
@@ -77,6 +83,7 @@ export function ClubImageUpload({
     setFileName("");
     setIsDragging(false);
     onChange("");
+    onUploaded?.(null);
 
     if (inputRef.current) {
       inputRef.current.value = "";

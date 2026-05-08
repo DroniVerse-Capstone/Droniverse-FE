@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import EmptyState from "@/components/common/EmptyState";
 import QuillEditor from "@/components/common/QuillEditor";
 import { ClubImageUpload } from "@/components/manager/dashboard/ClubImageUpload";
+import type { UploadTempMediaData } from "@/validations/media/media";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -63,6 +64,7 @@ export default function ManagerClubInfo() {
   const [clubNameVN, setClubNameVN] = React.useState("");
   const [clubNameEN, setClubNameEN] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState("");
+  const [clubImageMediaId, setClubImageMediaId] = React.useState("");
   const [limitParticipation, setLimitParticipation] = React.useState(10);
   const [clubPolicyVN, setClubPolicyVN] = React.useState("");
   const [clubPolicyEN, setClubPolicyEN] = React.useState("");
@@ -113,7 +115,7 @@ export default function ManagerClubInfo() {
         data: {
           nameVN: clubNameVN.trim(),
           nameEN: clubNameEN.trim(),
-          imageUrl: imageUrl.trim() || null,
+          imageMedia: clubImageMediaId.trim() || null,
           limitParticipation,
           clubPolicyVN: clubPolicyVN.trim(),
           clubPolicyEN: clubPolicyEN.trim(),
@@ -139,6 +141,7 @@ export default function ManagerClubInfo() {
     setClubNameVN(club.nameVN ?? "");
     setClubNameEN(club.nameEN ?? "");
     setImageUrl(club.imageUrl ?? "");
+    setClubImageMediaId("");
     setLimitParticipation(club.limitParticipation ?? 0);
     setClubPolicyVN(club.clubPolicyVN ?? "");
     setClubPolicyEN(club.clubPolicyEN ?? "");
@@ -365,6 +368,7 @@ export default function ManagerClubInfo() {
               <ClubStatusBadge status={club.status} />
             </div>
           </div>
+
         </div>
       </section>
 
@@ -376,6 +380,7 @@ export default function ManagerClubInfo() {
             setClubNameVN(club.nameVN ?? "");
             setClubNameEN(club.nameEN ?? "");
             setImageUrl(club.imageUrl ?? "");
+            setClubImageMediaId("");
             setLimitParticipation(club.limitParticipation ?? 0);
             setClubPolicyVN(club.clubPolicyVN ?? "");
             setClubPolicyEN(club.clubPolicyEN ?? "");
@@ -421,6 +426,15 @@ export default function ManagerClubInfo() {
                   <ClubImageUpload
                     value={imageUrl}
                     onChange={setImageUrl}
+                    onUploaded={(data: UploadTempMediaData | null) => {
+                      if (data) {
+                        setClubImageMediaId(data.mediaID);
+                        setImageUrl(data.url);
+                      } else {
+                        setClubImageMediaId("");
+                        setImageUrl("");
+                      }
+                    }}
                     label="Tải ảnh mới"
                   />
                 </div>
@@ -523,6 +537,45 @@ export default function ManagerClubInfo() {
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[#8b93a4]">Trạng thái</span>
                     <ClubStatusBadge status={club.status} />
+                  </div>
+                </div>
+
+                <div className="space-y-3 rounded border border-greyscale-700 bg-greyscale-800 p-4">
+                  <div>
+                    <h4 className="text-base font-semibold text-white">
+                      Xem trước nội quy
+                    </h4>
+                    <p className="text-xs text-[#8b93a4]">
+                      Nội dung hiển thị đúng như khi người dùng xem câu lạc bộ.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b93a4]">
+                        VI
+                      </p>
+                      <div className="dv-quill-render ql-editor max-h-100 overflow-y-auto rounded border border-greyscale-700 bg-greyscale-900 p-3 text-sm leading-6 text-greyscale-0">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: clubPolicyVN || "<p>Chưa có nội quy.</p>",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#8b93a4]">
+                        EN
+                      </p>
+                      <div className="dv-quill-render ql-editor max-h-100 overflow-y-auto rounded border border-greyscale-700 bg-greyscale-900 p-3 text-sm leading-6 text-greyscale-0">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: clubPolicyEN || "<p>No policy available.</p>",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

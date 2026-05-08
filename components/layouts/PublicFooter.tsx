@@ -105,10 +105,10 @@ export default function PublicFooter() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="/policies"
                   className="text-md hover:text-primary-300 transition-colors"
                 >
-                  {t("community.instruction")}
+                  {t("community.policiesTerms")}
                 </Link>
               </li>
               <li>

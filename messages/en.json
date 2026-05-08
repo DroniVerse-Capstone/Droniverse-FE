@@ -232,7 +232,7 @@
       "title": "Community",
       "join": "Join the Club",
       "ask": "Q&A",
-      "instruction": "Guides",
+      "policiesTerms": "Policies & Terms",
       "support": "Contact Support"
     },
     "connect": "Connect",
@@ -350,7 +350,9 @@
     "transactions": {
       "title": "Transactions",
       "subitems": {
-        "withdraw-request": "Withdrawal Requests"
+        "withdraw-request": "Withdrawal Requests",
+        "order-management": "Order Management",
+        "commission-management": "Commission Management"
       }
     },
     "courses": {
@@ -392,6 +394,9 @@
     },
     "help": {
       "title": "Support Requests"
+    },
+    "reports": {
+      "title": "User Reports"
     }
   },
   "SystemDashboard": {

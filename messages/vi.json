@@ -228,7 +228,7 @@
       "title": "Cộng đồng",
       "join": "Tham gia Club",
       "ask": "Hỏi đáp",
-      "instruction": "Hướng dẫn",
+      "policiesTerms": "Chính sách & Điều khoản",
       "support": "Liên hệ hỗ trợ"
     },
     "connect": "Kết nối",
@@ -346,7 +346,9 @@
     "transactions": {
       "title": "Giao dịch",
       "subitems": {
-        "withdraw-request": "Yêu cầu rút tiền"
+        "withdraw-request": "Yêu cầu rút tiền",
+        "order-management": "Quản lý đơn hàng",
+        "commission-management": "Quản lý hoa hồng"
       }
     },
     "courses": {
@@ -388,6 +390,9 @@
     },
     "help": {
       "title": "Yêu cầu hỗ trợ"
+    },
+    "reports":{
+      "title": "Khiếu nại"
     }
   },
   "SystemDashboard": {
@@ -2052,8 +2057,8 @@
     "kpi": {
       "totalEnrollments": "Tổng số lượt đăng ký",
       "totalEnrollmentsSub": "Học viên tham gia các khóa học",
-      "avgProgress": "Tỷ lệ hoàn thành (Avg)",
-      "avgProgressSub": "Tiến độ trung bình của toàn clb",
+      "avgProgress": "Tỷ lệ hoàn thành (Trung bình)",
+      "avgProgressSub": "Tiến độ trung bình của toàn câu lạc bộ",
       "completed": "Đã hoàn thành",
       "completedSub": "Khóa học đã cấp chứng chỉ"
     },

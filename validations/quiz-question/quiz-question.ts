@@ -1,5 +1,22 @@
 import { z } from "zod"
 
+export const quizQuestionTemplateResponseSchema = z.custom<Blob>(
+	(value) => typeof Blob !== "undefined" && value instanceof Blob,
+	"Template file is required",
+)
+
+export const importQuizQuestionRequestSchema = z.custom<File>(
+	(value) => typeof File !== "undefined" && value instanceof File,
+	"Quiz question import file is required",
+)
+
+export const importQuizQuestionResponseSchema = z.object({
+	total: z.number().int().nonnegative(),
+	success: z.number().int().nonnegative(),
+	failed: z.number().int().nonnegative(),
+	errors: z.array(z.unknown()),
+})
+
 export const quizQuestionSchema = z.object({
 	questionID: z.string(),
 	quizID: z.string(),
@@ -88,4 +105,13 @@ export type UpdateQuizQuestionResponse = z.infer<
 >
 export type DeleteQuizQuestionResponse = z.infer<
 	typeof deleteQuizQuestionResponseSchema
+>
+export type QuizQuestionTemplateResponse = z.infer<
+	typeof quizQuestionTemplateResponseSchema
+>
+export type ImportQuizQuestionRequest = z.infer<
+	typeof importQuizQuestionRequestSchema
+>
+export type ImportQuizQuestionResponse = z.infer<
+	typeof importQuizQuestionResponseSchema
 >

@@ -106,6 +106,17 @@ export const getClubParticipationsResponseSchema = z.object({
   message: z.string(),
 })
 
+export const kickClubParticipantParamsSchema = z.object({
+  clubId: z.string().uuid(),
+  userId: z.string().uuid(),
+})
+
+export const kickClubParticipantResponseSchema = z.object({
+  data: z.string().nullable(),
+  isSuccess: z.boolean(),
+  message: z.string(),
+})
+
 export const getClubDetailResponseSchema = z.object({
   data: clubSchema,
   isSuccess: z.boolean(),
@@ -119,7 +130,7 @@ export const updateClubParamsSchema = z.object({
 export const updateClubRequestSchema = z.object({
   nameVN: z.string().trim().min(1),
   nameEN: z.string().trim().min(1),
-  imageUrl: z.string().nullable().optional(),
+  imageMedia: z.string().nullable().optional(),
   limitParticipation: z.number().int().nonnegative(),
   clubPolicyVN: z.string().trim().min(1),
   clubPolicyEN: z.string().trim().min(1),
@@ -174,6 +185,12 @@ export type GetClubParticipationsData = z.infer<
 >
 export type GetClubParticipationsResponse = z.infer<
   typeof getClubParticipationsResponseSchema
+>
+export type KickClubParticipantParams = z.infer<
+  typeof kickClubParticipantParamsSchema
+>
+export type KickClubParticipantResponse = z.infer<
+  typeof kickClubParticipantResponseSchema
 >
 export type GetMyClubsResponse = z.infer<typeof getMyClubsResponseSchema>
 export type GetClubDetailResponse = z.infer<typeof getClubDetailResponseSchema>
