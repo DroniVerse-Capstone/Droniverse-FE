@@ -18,7 +18,7 @@ interface Props {
 
 function CompetitionTag({ status, phase }: { status: string; phase: string | null }) {
   const t = useTranslations("SystemDashboard.competitionActivity.status");
-  
+
   if (status === "RESULT_PUBLISHED") {
     return (
       <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -26,7 +26,7 @@ function CompetitionTag({ status, phase }: { status: string; phase: string | nul
       </span>
     );
   }
-  
+
   if (status === "PUBLISHED") {
     if (phase === "FINISHED") {
       return (
@@ -58,7 +58,7 @@ function CompetitionTag({ status, phase }: { status: string; phase: string | nul
     const color = PHASE_COLORS[phase || ""] || "#3b82f6";
 
     return (
-      <span 
+      <span
         className="text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm"
         style={{ backgroundColor: `${color}20`, color: color, border: `1px solid ${color}30` }}
       >
@@ -114,16 +114,16 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
   const pieData = useMemo(() => {
     if (!data?.overview || !data?.topByParticipants) return [];
     const { publishedCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions, invalidCompetitions } = data.overview;
-    
+
     // Calculate breakdown from top list (approximation)
     const publishedInList = data.topByParticipants.filter(c => c.competitionStatus === "PUBLISHED");
     const awaitingInList = publishedInList.filter(c => c.competitionPhase === "FINISHED").length;
-    
+
     // Use the count from the list directly if the total is small, otherwise approximate
-    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions 
-      ? awaitingInList 
-      : publishedInList.length > 0 
-        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions) 
+    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions
+      ? awaitingInList
+      : publishedInList.length > 0
+        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions)
         : 0;
     const ongoingValue = publishedCompetitions - awaitingValue;
 
@@ -138,11 +138,14 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
 
   const barData = useMemo(() => {
     if (!data?.topByParticipants) return [];
-    return data.topByParticipants.slice(0, 6).map((c) => ({
-      name: c.nameVN.length > 16 ? c.nameVN.substring(0, 16) + "..." : c.nameVN,
-      participants: c.participantCount,
-    }));
-  }, [data]);
+    return data.topByParticipants.slice(0, 6).map((c) => {
+      const name = locale === "en" ? c.nameEN : c.nameVN;
+      return {
+        name: name.length > 16 ? name.substring(0, 16) + "..." : name,
+        participants: c.participantCount,
+      };
+    });
+  }, [data, locale]);
 
   if (isLoading) {
     return (
@@ -268,8 +271,13 @@ export default function AdminCompetitionStatsSection({ data, isLoading }: Props)
                     </span>
                   </td>
                   <td className="py-2.5 px-2">
-                    <p className="text-[11px] text-white font-medium truncate max-w-[180px]">{comp.nameVN}</p>
-                    <p className="text-[9px] text-[#6a7080]">{comp.clubNameVN}</p>
+                    <p className="text-[11px] text-white font-medium truncate max-w-[180px]">
+                      {locale === "en" ? comp.nameEN : comp.nameVN}
+                    </p>
+                    <p className="text-[9px] text-[#6a7080]">
+                      {/* Note: backend returns clubNameVN/clubNameEN for competitions stats */}
+                      {locale === "en" ? (comp as any).clubNameEN : (comp as any).clubNameVN}
+                    </p>
                   </td>
                   <td className="py-2.5 px-2 text-center">
                     <CompetitionTag status={comp.competitionStatus} phase={comp.competitionPhase} />

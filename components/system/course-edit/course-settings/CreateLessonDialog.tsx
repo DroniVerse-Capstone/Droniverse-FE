@@ -192,7 +192,7 @@ export default function CreateLessonDialog({
   console.log("CreateLessonDialog - droneId:", droneId, "lessonType:", lessonType);
 
   const { data: webSimulators = [], isLoading: isWebSimulatorsLoading } = useGetWebSimulators({
-    type: ["PHYSIC", "LAB_PHYSIC"].includes(lessonType) ? lessonType : undefined,
+    type: ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType) ? lessonType : undefined,
     droneId: lessonType === "PHYSIC" ? droneId : undefined,
   });
   const { data: vrSimulators = [], isLoading: isVRSimulatorsLoading } = useGetVRSimulators({ type: "LEARNING" });
@@ -220,6 +220,7 @@ export default function CreateLessonDialog({
     { value: "LAB", label: t("lessonTypes.lab") },
     { value: "PHYSIC", label: t("lessonTypes.physic") },
     { value: "LAB_PHYSIC", label: t("lessonTypes.lab_physic") },
+    { value: "REAL_PHYSIC", label: t("lessonTypes.real_physic") },
     { value: "VR", label: t("lessonTypes.vr") },
     { value: "ASSIGNMENT", label: t("lessonTypes.assignment") },
   ];
@@ -297,7 +298,7 @@ export default function CreateLessonDialog({
     const normalizedTitleEN = titleEN.trim();
     const isTheoryOrQuiz = lessonType === "THEORY" || lessonType === "QUIZ";
     const isAssignment = lessonType === "ASSIGNMENT";
-    const isLabBased = ["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(
+    const isLabBased = ["LAB", "PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(
       lessonType,
     );
 
@@ -420,7 +421,7 @@ export default function CreateLessonDialog({
       return;
     }
 
-    if (["PHYSIC", "LAB_PHYSIC"].includes(lessonType)) {
+    if (["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType)) {
       await importSimulatorLessonMutation.mutateAsync({
         simulatorId: selectedLabId,
         payload: {
@@ -678,11 +679,11 @@ export default function CreateLessonDialog({
             </div>
           ) : null}
 
-          {["LAB", "PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) ? (
+          {["LAB", "PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) ? (
             <div className="space-y-4 rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
               <div className="space-y-2">
                 <Label htmlFor="lab-search">
-                  {lessonType === "PHYSIC"
+                  {["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType)
                     ? t("fields.simulatorSearch")
                     : t("fields.labSearch")}
                 </Label>
@@ -692,7 +693,7 @@ export default function CreateLessonDialog({
                   value={labSearchTerm}
                   onChange={(event) => setLabSearchTerm(event.target.value)}
                   placeholder={
-                    lessonType === "PHYSIC"
+                    ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType)
                       ? t("fields.simulatorSearchPlaceholder")
                       : t("fields.labSearchPlaceholder")
                   }
@@ -702,10 +703,10 @@ export default function CreateLessonDialog({
 
               <p className="text-xs text-greyscale-300">
                 {selectedLabId
-                  ? lessonType === "PHYSIC"
+                  ? ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType)
                     ? t("fields.simulatorSelected")
                     : t("fields.labSelected")
-                  : lessonType === "PHYSIC"
+                  : ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC"].includes(lessonType)
                     ? t("fields.simulatorSelectHint")
                     : t("fields.labSelectHint")}
               </p>
@@ -716,19 +717,19 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              {["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) &&
               !isSimulatorsLoading &&
               filteredSimulators.length === 0 ? (
                 <EmptyState title={t("fields.simulatorEmpty")} />
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              {!["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) &&
               !isLabsLoading &&
               activeLabs.length === 0 ? (
                 <EmptyState title={t("fields.labEmpty")} />
               ) : null}
 
-              {["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              {["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) &&
               !isSimulatorsLoading &&
               filteredSimulators.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
@@ -748,7 +749,7 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              {!["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) &&
               !isLabsLoading &&
               activeLabs.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2">
@@ -766,7 +767,7 @@ export default function CreateLessonDialog({
                 </div>
               ) : null}
 
-              {!["PHYSIC", "LAB_PHYSIC", "VR"].includes(lessonType) &&
+              {!["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(lessonType) &&
               !isLabsLoading ? (
                 <AppPagination
                   currentPage={labPageIndex}

@@ -182,7 +182,7 @@ export default function MemberCourseLearn() {
               assignmentId={selectedLesson.referenceID}
               enrollmentId={enrollmentId}
             />
-          ) : ["PHYSIC", "LAB_PHYSIC", "VR"].includes(selectedLesson.type) ? (
+          ) : ["PHYSIC", "LAB_PHYSIC", "REAL_PHYSIC", "VR"].includes(selectedLesson.type) ? (
             <MemberSimulatorLessonContent
               referenceId={selectedLesson.referenceID}
               enrollmentId={enrollmentId}

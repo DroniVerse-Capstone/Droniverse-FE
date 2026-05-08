@@ -20,6 +20,8 @@ export function getSimulatorRoute(code: string, id: string, returnUrl?: string, 
   if (!targetRoute) {
     if (type === "LAB_PHYSIC") {
       targetRoute = `/challenges/${id}`;
+    } else if (type === "REAL_PHYSIC") {
+      targetRoute = `/programming`;
     } else {
       targetRoute = `/simulator-lab?id=${id}`;
     }

@@ -102,8 +102,12 @@ export default function AdminClubRankingSection({ data, isLoading }: Props) {
                       )}
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-white">{club.nameVN}</p>
-                      {club.nameEN && <p className="text-[10px] text-[#6a7080]">{club.nameEN}</p>}
+                      <p className="text-[13px] font-semibold text-white">
+                        {locale === "en" ? club.nameEN : club.nameVN}
+                      </p>
+                      <p className="text-[10px] text-[#6a7080]">
+                        {locale === "en" ? club.nameVN : club.nameEN}
+                      </p>
                     </div>
                   </div>
                 </td>

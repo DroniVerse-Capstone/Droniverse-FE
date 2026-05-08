@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { AxiosError } from "axios"
 
 import apiClient from "@/lib/api/client"
@@ -38,6 +38,11 @@ import {
 	getClubTopBuyersResponseSchema,
 	AdminLearningStatistics,
 	getAdminLearningStatisticsResponseSchema,
+	AdminOrderStatistics,
+	getAdminOrderStatisticsResponseSchema,
+	AdminSystemSummary,
+	getAdminSystemSummaryParamsSchema,
+	getAdminSystemSummaryResponseSchema,
 } from "@/validations/dashboard/dashboard"
 
 export const useGetClubRevenueOverview = (clubId?: string) => {
@@ -75,24 +80,26 @@ export const useGetAdminRevenueOverview = () => {
 
 type UseGetAdminRevenueGrowthOptions = {
 	months?: number
+	fromDate?: string
+	toDate?: string
 }
 
 export const useGetAdminRevenueGrowth = (
 	options?: UseGetAdminRevenueGrowthOptions
 ) => {
 	return useQuery<AdminRevenueGrowthData, AxiosError<ApiError>>({
-		queryKey: ["admin-revenue-growth", options?.months],
+		queryKey: ["admin-revenue-growth", options?.months, options?.fromDate, options?.toDate],
 		queryFn: async () => {
 			const parsedParams = getAdminRevenueGrowthParamsSchema.parse({
 				months: options?.months,
+				fromDate: options?.fromDate,
+				toDate: options?.toDate,
 			})
 
 			const response = await apiClient.get(
 				"/community/dashboards/revenue/admin/growth",
 				{
-					params: {
-						months: parsedParams.months,
-					},
+					params: parsedParams,
 				}
 			)
 
@@ -198,6 +205,7 @@ export const useGetClubExpenseByCourse = (
 	return useQuery<ClubExpenseByCourseData, AxiosError<ApiError>>({
 		queryKey: ["club-expense-by-course", clubId, options?.top],
 		enabled: !!clubId,
+		placeholderData: keepPreviousData,
 		queryFn: async () => {
 			const parsedParams = getClubExpenseByCourseParamsSchema.parse({
 				clubId,
@@ -221,6 +229,8 @@ export const useGetClubExpenseByCourse = (
 
 type UseGetClubExpenseGrowthOptions = {
 	months?: number
+	fromDate?: string
+	toDate?: string
 }
 
 export const useGetClubExpenseGrowth = (
@@ -228,12 +238,15 @@ export const useGetClubExpenseGrowth = (
 	options?: UseGetClubExpenseGrowthOptions
 ) => {
 	return useQuery<ClubExpenseGrowthData, AxiosError<ApiError>>({
-		queryKey: ["club-expense-growth", clubId, options?.months],
+		queryKey: ["club-expense-growth", clubId, options?.months, options?.fromDate, options?.toDate],
 		enabled: !!clubId,
+		placeholderData: keepPreviousData,
 		queryFn: async () => {
 			const parsedParams = getClubExpenseGrowthParamsSchema.parse({
 				clubId,
 				months: options?.months,
+				fromDate: options?.fromDate,
+				toDate: options?.toDate,
 			})
 
 			const response = await apiClient.get(
@@ -241,6 +254,8 @@ export const useGetClubExpenseGrowth = (
 				{
 					params: {
 						months: parsedParams.months,
+						fromDate: parsedParams.fromDate,
+						toDate: parsedParams.toDate,
 					},
 				}
 			)
@@ -298,6 +313,60 @@ export const useGetAdminLearningStatistics = () => {
 				"/academy/system/learning-statistics"
 			)
 			const parsed = getAdminLearningStatisticsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export type AdminOrderStatisticsParams = {
+	currentPage?: number
+	pageSize?: number
+	clubId?: string
+	buyerId?: string
+	status?: string
+	type?: string
+	createAt?: string
+	receiveDate?: string
+}
+
+export const useGetAdminOrderStatistics = (params?: AdminOrderStatisticsParams) => {
+	return useQuery<AdminOrderStatistics, AxiosError<ApiError>>({
+		queryKey: ["admin-order-statistics", params],
+		queryFn: async () => {
+			// Build clean params - omit undefined/empty values
+			const cleanParams: Record<string, any> = {}
+			if (params?.currentPage) cleanParams.currentPage = params.currentPage
+			if (params?.pageSize) cleanParams.pageSize = params.pageSize
+			if (params?.clubId) cleanParams.clubId = params.clubId
+			if (params?.buyerId) cleanParams.buyerId = params.buyerId
+			if (params?.status) cleanParams.status = params.status
+			if (params?.type) cleanParams.type = params.type
+			if (params?.createAt) cleanParams.createAt = params.createAt
+			if (params?.receiveDate) cleanParams.receiveDate = params.receiveDate
+
+			const response = await apiClient.get(
+				"/community/dashboards/system/orders",
+				{ params: cleanParams }
+			)
+			const parsed = getAdminOrderStatisticsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetAdminSystemSummary = (identityFilterTimeLine?: string) => {
+	return useQuery<AdminSystemSummary, AxiosError<ApiError>>({
+		queryKey: ["admin-system-summary", identityFilterTimeLine],
+		queryFn: async () => {
+			const parsedParams = getAdminSystemSummaryParamsSchema.parse({
+				identityFilterTimeLine,
+			})
+
+			const response = await apiClient.get("/community/dashboards/system/summary", {
+				params: parsedParams,
+			})
+
+			const parsed = getAdminSystemSummaryResponseSchema.parse(response.data)
 			return parsed.data
 		},
 	})

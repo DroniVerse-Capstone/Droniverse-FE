@@ -97,16 +97,16 @@ const defineBlocks = () => {
     }
   };
 
-  Blockly.Blocks['drone_emergency_stop'] = {
-    init: function () {
-      this.appendDummyInput()
-        .appendField(" DỪNG KHẨN CẤP");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour("#ef4444");
-      this.setTooltip("Dừng toàn bộ động cơ ngay lập tức!");
-    }
-  };
+  // Blockly.Blocks['drone_emergency_stop'] = {
+  //   init: function () {
+  //     this.appendDummyInput()
+  //       .appendField(" DỪNG KHẨN CẤP");
+  //     this.setPreviousStatement(true, null);
+  //     this.setNextStatement(true, null);
+  //     this.setColour("#ef4444");
+  //     this.setTooltip("Dừng toàn bộ động cơ ngay lập tức!");
+  //   }
+  // };
 
   // Move Blocks
   Blockly.Blocks['drone_go_simple'] = {
@@ -259,7 +259,7 @@ const defineBlocks = () => {
 const defineGenerators = () => {
   javascriptGenerator.forBlock['drone_takeoff'] = (block: any) => `TAKEOFF|${block.id}\n`;
   javascriptGenerator.forBlock['drone_land'] = (block: any) => `LAND|${block.id}\n`;
-  javascriptGenerator.forBlock['drone_emergency_stop'] = (block: any) => `EMERGENCY_STOP|${block.id}\n`;
+  // javascriptGenerator.forBlock['drone_emergency_stop'] = (block: any) => `EMERGENCY_STOP|${block.id}\n`;
   javascriptGenerator.forBlock['drone_go_simple'] = (block: any) => `GO|${block.id} ${block.getFieldValue('DIRECTION')} ${block.getFieldValue('DURATION')} ${block.getFieldValue('POWER')}\n`;
   javascriptGenerator.forBlock['drone_turn_simple'] = (block: any) => `TURN|${block.id} ${block.getFieldValue('DIRECTION')} ${block.getFieldValue('DURATION')} ${block.getFieldValue('POWER')}\n`;
   javascriptGenerator.forBlock['drone_turn_degrees'] = (block: any) => `TURN_DEG|${block.id} ${block.getFieldValue('DIRECTION')} ${block.getFieldValue('DEGREES')}\n`;
@@ -274,14 +274,11 @@ const toolboxXml = `
   <category name="Lệnh bay" categorystyle="flight_category">
     <block type="drone_takeoff"></block>
     <block type="drone_land"></block>
-    <block type="drone_emergency_stop"></block>
   </category>
   <category name="Di chuyển" categorystyle="timing_category">
     <block type="drone_go_simple"></block>
     <block type="drone_turn_simple"></block>
     <block type="drone_turn_degrees"></block>
-  </category>
-  <category name="Cài đặt" categorystyle="variable_category">
     <block type="drone_set_throttle"></block>
     <block type="drone_set_pitch"></block>
     <block type="drone_set_roll"></block>
@@ -312,7 +309,7 @@ const BlocklyEditor = React.memo(({ onRunScript, activeBlockId }: BlocklyEditorP
         trashcan: true,
         move: { scrollbars: true, drag: true, wheel: true },
         scrollbars: false,
-        zoom: { controls: true, wheel: true, startScale: 0.8, maxScale: 1.2, minScale: 0.6, pinch: true },
+        zoom: { controls: true, wheel: true, startScale: 0.6, maxScale: 1.2, minScale: 0.4, pinch: true },
         grid: { spacing: 30, length: 3, colour: '#38bdf8', snap: true }
       });
 
