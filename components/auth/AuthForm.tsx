@@ -9,7 +9,7 @@ import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { SlideIn, StaggerContainer } from "@/components/animation";
 import CommonDropdown from "@/components/common/CommonDropdown";
 import { useLogin, useRegister } from "@/hooks/auth/useAuth";
@@ -56,6 +56,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const t = useTranslations("Auth.authForm");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,6 +64,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<Role>("CLUB_MEMBER");
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   const isLogin = mode === "login";
 
@@ -144,6 +146,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
+    if (!acceptedPolicies) {
+      toast.error(
+        locale === "vi"
+          ? "Vui lòng đồng ý với Chính sách và Điều khoản của hệ thống."
+          : "Please agree to the system Policies & Terms.",
+      );
+      return;
+    }
+
     register.mutate({
       email: result.data.email,
       password: result.data.password,
@@ -188,17 +199,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
           <div className="space-y-3">
             <Button
               variant="outline"
+              onClick={() => toast(locale === "vi" ? "Chức năng đăng nhập bằng Google chưa được hỗ trợ." : "Google login is not supported yet.")}
               className="w-full gap-2 text-greyscale-900 bg-greyscale-0 hover:bg-greyscale-50"
             >
               <FcGoogle className="text-xl" />
               {t("google")}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full gap-2 bg-[#1877F2] text-white hover:bg-[#166FE5]"
-            >
-              <FaFacebook className="text-xl" />
-              {t("facebook")}
             </Button>
           </div>
 
@@ -330,10 +335,34 @@ export default function AuthForm({ mode }: AuthFormProps) {
               </div>
             )}
 
+            {!isLogin && (
+              <label className="mt-2 flex items-center gap-2 text-xs text-greyscale-0">
+                <input
+                  type="checkbox"
+                  checked={acceptedPolicies}
+                  onChange={(e) => setAcceptedPolicies(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-greyscale-400 bg-transparent accent-primary-200"
+                />
+                <span>
+                  {locale === "vi" ? "Tôi đồng ý với " : "I agree to the "}
+                  <Link
+                    href="/policies"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-primary-200 hover:underline"
+                  >
+                    {locale === "vi"
+                      ? "Chính sách & Điều khoản của hệ thống"
+                      : "system Policies & Terms"}
+                  </Link>
+                </span>
+              </label>
+            )}
+
             <Button
               type="submit"
               className="w-full bg-primary-200 hover:bg-primary-300"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (!isLogin && !acceptedPolicies)}
             >
               {isSubmitting ? <Spinner /> : isLogin ? t("login") : t("register")}
             </Button>

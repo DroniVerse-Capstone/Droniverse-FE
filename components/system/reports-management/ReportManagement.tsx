@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import toast from "react-hot-toast";
 
 import EmptyState from "@/components/common/EmptyState";
@@ -54,6 +55,7 @@ export default function ReportManagement() {
   const headers = [
     "STT",
     locale === "vi" ? "Loại khiếu nại" : "Report type",
+    locale === "vi" ? "Nội dung bị khiếu nại" : "Reported item",
     locale === "vi" ? "Người gửi" : "Reporter",
     locale === "vi" ? "Nội dung" : "Content",
     locale === "vi" ? "Phản hồi" : "Response",
@@ -223,6 +225,22 @@ export default function ReportManagement() {
             const reporterName = report.user?.fullName || "—";
             const reporterEmail = report.user?.email || "";
 
+            // Get reported item image and title based on report type
+            let reportedItemImage = "";
+            let reportedItemTitle = "";
+
+            if (report.reportType === "Club" && report.reportedClub) {
+              reportedItemImage = report.reportedClub.imageUrl || "/images/club-placeholder.jpg";
+              reportedItemTitle = locale === "vi" ? report.reportedClub.nameVN : report.reportedClub.nameEN || report.reportedClub.nameVN;
+            } else if (report.reportType === "CourseVersion" && report.reportedCourseVersion) {
+              reportedItemImage = report.reportedCourseVersion.imageUrl || "/images/course-placeholder.jpg";
+              const courseTitle = locale === "vi" ? report.reportedCourseVersion.titleVN : report.reportedCourseVersion.titleEN || report.reportedCourseVersion.titleVN;
+              reportedItemTitle = `${courseTitle} (v${report.reportedCourseVersion.version})`;
+            } else if (report.reportType === "User" && report.reportedUser) {
+              reportedItemImage = report.reportedUser.avatarUrl || "/images/user-placeholder.jpg";
+              reportedItemTitle = report.reportedUser.fullName;
+            }
+
             return (
               <>
                 <TableCell className="text-greyscale-100">
@@ -230,6 +248,19 @@ export default function ReportManagement() {
                 </TableCell>
                 <TableCell className="text-greyscale-0">
                   {getReportTypeLabel(report.reportType)}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-greyscale-700 bg-greyscale-800">
+                      <Image
+                        src={reportedItemImage}
+                        alt={reportedItemTitle}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="text-sm text-greyscale-0">{reportedItemTitle}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-greyscale-100">
                   <div className="space-y-1">

@@ -144,10 +144,6 @@ export default function SystemHeader() {
     }));
   }, [locale, matchedEntry, normalizedPath, searchParams, t]);
 
-  const handleMarkAllAsRead = () => {
-    console.log("Mark all notifications as read");
-  };
-
   return (
     <header className="sticky top-0 z-30 border-b border-greyscale-700 bg-greyscale-900 px-4 py-4 backdrop-blur md:px-6">
       <div className="flex items-center justify-between gap-4">
@@ -184,10 +180,7 @@ export default function SystemHeader() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
-          <NotificationDropdown
-            hasNotifications={true}
-            onMarkAllAsRead={handleMarkAllAsRead}
-          />
+          <NotificationDropdown hasNotifications={true} />
           <LanguageSwitcher />
           <UserDropdown user={user} />
         </div>

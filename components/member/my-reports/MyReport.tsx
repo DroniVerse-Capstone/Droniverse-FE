@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import EmptyState from "@/components/common/EmptyState";
 import { TableCustom } from "@/components/common/TableCustom";
@@ -38,6 +39,7 @@ export default function MyReport() {
   const headers = [
     "STT",
     "Loại khiếu nại",
+    "Nội dung bị khiếu nại",
     "Nội dung",
     "Phản hồi",
     "Người phản hồi",
@@ -46,7 +48,7 @@ export default function MyReport() {
 
   const getReportTypeLabel = (value: string) => {
     if (value === "Club") return locale === "vi" ? "Câu lạc bộ" : "Club";
-    if (value === "CourseVersion") return locale === "vi" ? "Phiên bản khóa học" : "Course version";
+    if (value === "CourseVersion") return locale === "vi" ? "Khóa học" : "Course";
     if (value === "User") return locale === "vi" ? "Người dùng" : "User";
     return value;
   };
@@ -132,6 +134,22 @@ export default function MyReport() {
             const responserName = report.responserUser?.fullName || "—";
             const responserEmail = report.responserUser?.email || "";
 
+            // Get reported item image and title based on report type
+            let reportedItemImage = "";
+            let reportedItemTitle = "";
+
+            if (report.reportType === "Club" && report.reportedClub) {
+              reportedItemImage = report.reportedClub.imageUrl || "/images/club-placeholder.jpg";
+              reportedItemTitle = locale === "vi" ? report.reportedClub.nameVN : report.reportedClub.nameEN || report.reportedClub.nameVN;
+            } else if (report.reportType === "CourseVersion" && report.reportedCourseVersion) {
+              reportedItemImage = report.reportedCourseVersion.imageUrl || "/images/course-placeholder.jpg";
+              const courseTitle = locale === "vi" ? report.reportedCourseVersion.titleVN : report.reportedCourseVersion.titleEN || report.reportedCourseVersion.titleVN;
+              reportedItemTitle = `${courseTitle}`;
+            } else if (report.reportType === "User" && report.reportedUser) {
+              reportedItemImage = report.reportedUser.avatarUrl || "/images/user-placeholder.jpg";
+              reportedItemTitle = report.reportedUser.fullName;
+            }
+
             return (
               <>
                 <TableCell className="text-greyscale-100">
@@ -139,6 +157,19 @@ export default function MyReport() {
                 </TableCell>
                 <TableCell className="text-greyscale-0">
                   {getReportTypeLabel(report.reportType)}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-greyscale-700 bg-greyscale-800">
+                      <Image
+                        src={reportedItemImage}
+                        alt={reportedItemTitle}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="text-sm text-greyscale-0">{reportedItemTitle}</span>
+                  </div>
                 </TableCell>
                 <TableCell className="max-w-120 whitespace-pre-wrap text-greyscale-50">
                   {content}

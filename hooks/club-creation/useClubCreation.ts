@@ -13,13 +13,13 @@ import {
   getMyClubCreationRequestsResponseSchema,
   clubCreationRequestDetailResponseSchema,
   UpdateClubCreationRequestResponse,
-  UpdateClubCreationRequest,
   updateClubCreationRequestResponseSchema,
   UpdateClubCreationRequestStatusResponse,
   UpdateClubCreationRequestStatus,
   updateClubCreationRequestStatusResponseSchema,
   GetAllClubCreationRequestsData,
   getAllClubCreationRequestsResponseSchema,
+  UpdateClubCreationRequestData,
 } from "@/validations/club-creation/club-creation";
 
 type ClubCreationRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCEL";
@@ -130,7 +130,7 @@ export const useUpdateClubCreationRequestInformation = () => {
   return useMutation<
     UpdateClubCreationRequestResponse,
     AxiosError<ApiError>,
-    { id: string; data: UpdateClubCreationRequest }
+    { id: string; data: UpdateClubCreationRequestData }
   >({
     mutationFn: async ({ id, data }) => {
       const response = await apiClient.put(

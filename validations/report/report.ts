@@ -9,10 +9,28 @@ export const reportUserSchema = z.object({
 	avatarUrl: z.string().url().nullable(),
 });
 
+export const reportedClubSchema = z.object({
+	clubID: z.string().uuid(),
+	nameVN: z.string(),
+	nameEN: z.string(),
+	imageUrl: z.string().url().nullable(),
+});
+
+export const reportedCourseVersionSchema = z.object({
+	courseVersionID: z.string().uuid(),
+	titleVN: z.string(),
+	titleEN: z.string(),
+	version: z.number().int().positive(),
+	imageUrl: z.string().url().nullable(),
+});
+
 export const reportSchema = z.object({
 	reportID: z.string().uuid(),
 	reportType: reportTypeSchema,
 	referenceID: z.string().uuid(),
+	reportedUser: reportUserSchema.nullable(),
+	reportedClub: reportedClubSchema.nullable(),
+	reportedCourseVersion: reportedCourseVersionSchema.nullable(),
 	userID: z.string().uuid(),
 	user: reportUserSchema,
 	contentVN: z.string(),
