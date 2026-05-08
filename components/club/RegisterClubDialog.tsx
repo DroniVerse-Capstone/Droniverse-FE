@@ -29,7 +29,12 @@ import {
   useUpdateClubCreationRequestInformation,
 } from "@/hooks/club-creation/useClubCreation";
 import { MediaType } from "@/validations/media/media";
-import { clubCreationRequestSchema } from "@/validations/club-creation/club-creation";
+import {
+  clubCreationRequestSchema,
+  updateClubCreationRequestDataSchema,
+  type ClubCreationRequest,
+  type UpdateClubCreationRequestData,
+} from "@/validations/club-creation/club-creation";
 import { useTranslations } from "@/providers/i18n-provider";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -64,6 +69,7 @@ export default function RegisterClubDialog({
   const [mediaId, setMediaId] = React.useState("");
   const [memberLimit, setMemberLimit] = React.useState(10);
   const [clubImageUrl, setClubImageUrl] = React.useState("");
+  const [clubImageMediaId, setClubImageMediaId] = React.useState("");
   const [clubMediaUrl, setClubMediaUrl] = React.useState("");
 
   const createMutation = useClubCreation();
@@ -103,6 +109,7 @@ export default function RegisterClubDialog({
     setMediaId("");
     setMemberLimit(10);
     setClubImageUrl("");
+    setClubImageMediaId("");
     setClubMediaUrl("");
     setClubRequirement("");
   };
@@ -120,6 +127,7 @@ export default function RegisterClubDialog({
     setMediaId(detail.media?.mediaID ?? "");
     setMemberLimit(detail.limitParticipant);
     setClubImageUrl(detail.imageUrl ?? "");
+    setClubImageMediaId("");
     setClubMediaUrl(detail.media?.url ?? "");
     setClubRequirement(detail.clubRequirement ?? "");
   }, [open, mode, detail]);
@@ -127,7 +135,8 @@ export default function RegisterClubDialog({
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const handleSubmit = () => {
-    const payload = {
+    // Prepare common fields
+    const commonPayload = {
       droneID: droneId.trim(),
       clubPolicyVN: clubPolicyVN.trim(),
       clubPolicyEN: clubPolicyEN.trim(),
@@ -136,11 +145,28 @@ export default function RegisterClubDialog({
       nameEN: clubNameEn.trim(),
       description: clubDescription.trim(),
       limitParticipant: memberLimit,
-      image: clubImageUrl.trim(),
       clubRequirement: clubRequirement.trim(),
     };
 
-    const result = clubCreationRequestSchema.safeParse(payload);
+    let result;
+    let payloadToSend;
+
+    if (mode === "edit") {
+      // For update, use imageMedia field
+      payloadToSend = {
+        ...commonPayload,
+        imageMedia: clubImageMediaId.trim() || null,
+      };
+      result = updateClubCreationRequestDataSchema.safeParse(payloadToSend);
+    } else {
+      // For create, use image field (prefer mediaID, fallback to URL)
+      payloadToSend = {
+        ...commonPayload,
+        image: clubImageMediaId.trim() || clubImageUrl.trim(),
+      };
+      result = clubCreationRequestSchema.safeParse(payloadToSend);
+    }
+
     if (!result.success) {
       toast.error(t("validation"));
       return;
@@ -150,7 +176,7 @@ export default function RegisterClubDialog({
       if (!requestId) return;
 
       updateMutation.mutate(
-        { id: requestId, data: result.data },
+        { id: requestId, data: result.data as UpdateClubCreationRequestData },
         {
           onSuccess: (res) => {
             toast.success(res.message);
@@ -166,7 +192,7 @@ export default function RegisterClubDialog({
       return;
     }
 
-    createMutation.mutate(result.data, {
+    createMutation.mutate(result.data as ClubCreationRequest, {
       onSuccess: (res) => {
         toast.success(res.message);
         resetForm();
@@ -237,6 +263,15 @@ export default function RegisterClubDialog({
                   label={t("fields.coverImage")}
                   value={clubImageUrl}
                   onChange={setClubImageUrl}
+                  onUploaded={(data) => {
+                    if (data) {
+                      setClubImageMediaId(data.mediaID);
+                      setClubImageUrl(data.url);
+                    } else {
+                      setClubImageMediaId("");
+                      setClubImageUrl("");
+                    }
+                  }}
                 />
 
                 <DroneDropdown

@@ -15,11 +15,9 @@ import {
 import {
   filterNavItemsByRole,
   primaryItems,
-  secondaryItems,
   type NavItem,
 } from "./SystemSidebar.data";
 import { getRoleName } from "@/lib/auth/cookies";
-import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -267,11 +265,6 @@ export default function SystemSidebar() {
     [roleName],
   );
 
-  const visibleSecondaryItems = React.useMemo(
-    () => filterNavItemsByRole(secondaryItems, roleName),
-    [roleName],
-  );
-
   React.useEffect(() => {
     setOpenMenus((current) => {
       const nextState = { ...current };
@@ -381,8 +374,6 @@ export default function SystemSidebar() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
           <div className="space-y-6 px-1">
             {renderSection("primary", visiblePrimaryItems)}
-            <Separator className="bg-greyscale-700" />
-            {renderSection("secondary", visibleSecondaryItems)}
           </div>
         </div>
       </aside>

@@ -9,6 +9,7 @@ import {
   FolderKanban,
   Grid2x2,
   Home,
+  MessageSquareWarning,
   Plane,
   Receipt,
   Route,
@@ -117,15 +118,9 @@ export const primaryItems: NavItem[] = [
       { title: "category.subitems.drone", href: "/drone-category", icon: Settings },
     ],
   },
-];
-
-export const secondaryItems: NavItem[] = [
   {
-    title: "settings.title",
-    icon: Settings,
-  },
-  {
-    title: "help.title",
-    icon: CircleHelp,
+    title: "reports.title",
+    icon: MessageSquareWarning,
+    href: "/reports-management",
   },
 ];

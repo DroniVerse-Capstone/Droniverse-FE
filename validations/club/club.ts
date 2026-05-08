@@ -130,7 +130,7 @@ export const updateClubParamsSchema = z.object({
 export const updateClubRequestSchema = z.object({
   nameVN: z.string().trim().min(1),
   nameEN: z.string().trim().min(1),
-  imageUrl: z.string().nullable().optional(),
+  imageMedia: z.string().nullable().optional(),
   limitParticipation: z.number().int().nonnegative(),
   clubPolicyVN: z.string().trim().min(1),
   clubPolicyEN: z.string().trim().min(1),
