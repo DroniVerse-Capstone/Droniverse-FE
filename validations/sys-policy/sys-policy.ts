@@ -23,6 +23,7 @@ export const systemPolicyItemSchema = z.object({
 export const getSystemPoliciesQuerySchema = z.object({
 	currentPage: z.number().int().positive().default(1),
 	pageSize: z.number().int().positive().default(10),
+	type: systemPolicyTypeSchema.optional(),
 });
 
 export const getSystemPoliciesDataSchema = z.object({
