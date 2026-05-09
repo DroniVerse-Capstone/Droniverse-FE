@@ -8,6 +8,7 @@ const STEPS = [
     title: "Kết nối WiFi",
     description: "Kết nối máy tính với mạng WiFi của Drone để bắt đầu cấu hình.",
     instruction: "WiFi: DRONE_SYSTEM",
+    password: "drone123",
     note: "Lưu ý: Việc mạng WiFi báo không có internet là hoàn toàn bình thường."
   },
   {
@@ -162,8 +163,11 @@ export default function DroneOnboarding({ onComplete }: { onComplete: () => void
               <div className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-1">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Hướng dẫn</span>
                 <span className="text-base font-mono font-bold text-[#2dd4bf]">{(step as any).instruction}</span>
+                {(step as any).password && (
+                  <span className="text-sm font-mono font-bold text-white/90 mt-1">Mật khẩu: <span className="text-[#db4139]">{(step as any).password}</span></span>
+                )}
                 {(step as any).note && (
-                  <span className="text-[10px] italic text-[#db4139]/80 mt-1 text-center">{(step as any).note}</span>
+                  <span className="text-[10px] italic text-[#db4139]/80 mt-2 text-center">{(step as any).note}</span>
                 )}
               </div>
             )}
