@@ -406,6 +406,7 @@
       "finance": "Financial Report",
       "learning": "Learning Analytics",
       "orders": "Transaction Logs",
+      "community": "Community",
       "operations": "System Operations"
     },
     "kpi": {
@@ -416,7 +417,8 @@
       "thisMonth": "{amount} this month",
       "transactionsThisMonth": "{count} transactions this month",
       "competitionsDeploying": "{count} competitions deploying",
-      "comparedToLastPeriod": "compared to last period"
+      "comparedToLastPeriod": "compared to last period",
+      "avgLabel": "Average per period"
     },
     "revenueTrend": {
       "title": "Revenue Trends",
@@ -451,8 +453,15 @@
         "awaiting": "Awaiting Results",
         "completed": "Completed",
         "draft": "Draft",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "invalid": "Invalid"
       },
+      "advancedFilter": "Advanced Filter",
+      "startDateFrom": "Start Date From",
+      "startDateTo": "Start Date To",
+      "endDateFrom": "End Date From",
+      "endDateTo": "End Date To",
+      "resetFilters": "Reset",
       "showCount": "Show {count}",
       "table": {
         "id": "ID",
@@ -564,7 +573,7 @@
         "empty": "No transactions found",
         "page": "Page {current} of {total} · {records} transactions",
         "order": "Order",
-        "user": "Student",
+        "user": "Member",
         "product": "Course",
         "amount": "Amount",
         "status": "Status",
@@ -573,10 +582,48 @@
         "pagination": "Showing {start} to {end} of {total} orders"
       }
     },
+    "community": {
+      "title": "Community Management",
+      "subtitle": "Detailed wallet balances and spending for Club Managers & Club Members",
+      "clubManagers": "Club Managers",
+      "users": "Club Members",
+      "walletBalance": "Wallet Balance",
+      "totalSpent": "Total Spent",
+      "viewOrders": "View Orders",
+      "viewTransactions": "View Transactions",
+      "noData": "No data available",
+      "orderDetail": {
+        "title": "Order Details",
+        "course": "Course",
+        "club": "Club",
+        "time": "Purchase Time",
+        "amount": "Amount",
+        "status": "Status",
+        "statusValue": {
+          "success": "Success",
+          "pending": "Pending"
+        }
+      },
+      "transactionDetail": {
+        "title": "Transaction History Details",
+        "type": "Type",
+        "amount": "Amount",
+        "date": "Date",
+        "content": "Description",
+        "typeValue": {
+          "COMMISSION": "Commission",
+          "WITHDRAW": "Withdrawal",
+          "WITHDRAWAL": "Withdrawal",
+          "DEPOSIT": "Deposit",
+          "PURCHASE": "Course Purchase",
+          "REFUND": "Refund"
+        }
+      }
+    },
     "opsOverview": {
       "totalUsers": "Total Users",
       "newUsers": "New Users",
-      "memberCount": "Total Students",
+      "memberCount": "Total Members",
       "clubOwnerCount": "Club Owners",
       "pendingApprovals": "Pending Approvals",
       "timelineFilter": "Timeline Filter",
@@ -588,54 +635,56 @@
   },
   "ClubManagerDashboard": {
     "kpi": {
-        "totalRevenue": "Total Revenue",
-        "revenueThisMonth": "Revenue This Month",
-        "totalTransactions": "Total Transactions",
-        "transactionsThisMonth": "{count} transactions this month",
-        "avgRevenuePerTran": "Avg Revenue / Tran",
-        "avgLabel": "Average per transaction",
-        "comparedToLastPeriod": "compared to last period",
-        "totalLabel": "Total"
-      },
-      "revenueTrend": {
-        "title": "Revenue Trend",
-        "subtitle": "Club revenue analysis over time",
-        "fromDate": "From Date",
-        "toDate": "To Date",
-        "revenue": "Revenue",
-        "chartType": {
-          "area": "Area",
-          "bar": "Bar"
-        }
-      },
-      "competitionActivity": {
-        "title": "Competitions",
-        "statusFilter": "All Statuses",
-        "ongoing": "Ongoing",
-        "awaiting": "Awaiting",
-        "completed": "Completed",
-        "draft": "Draft",
-        "cancelled": "Cancelled",
-        "showCount": "Show {count}"
-      },
-      "topCourses": {
-        "title": "Top Courses",
-        "subtitle": "Highest revenue courses",
-        "topCount": "Top {count}",
-        "footerLabel": "courses",
-        "empty": "No course data found",
-        "errorTitle": "Failed to load courses"
-      },
-      "vipStudents": {
-        "title": "VIP Students",
-        "subtitle": "Top contributors by revenue",
-        "empty": "No buyer data found",
-        "transactions": "{count} transactions",
-        "footerLabel": "{count} students",
-        "summaryLabel": "total club revenue"
+      "totalRevenue": "Total Revenue",
+      "revenueThisMonth": "Revenue This Month",
+      "totalTransactions": "Total Transactions",
+      "transactionsThisMonth": "{count} transactions this month",
+      "avgRevenuePerTran": "Avg Revenue / Tran",
+      "avgLabel": "Average per period",
+      "comparedToLastPeriod": "compared to last period",
+      "totalLabel": "Total"
+    },
+    "revenueTrend": {
+      "title": "Revenue Trend",
+      "subtitle": "Club revenue analysis over time",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "revenue": "Revenue",
+      "chartType": {
+        "area": "Area",
+        "bar": "Bar"
       }
     },
-    "ErrorPage": {
+    "competitionActivity": {
+      "title": "Competitions",
+      "statusFilter": "All Statuses",
+      "ongoing": "Ongoing",
+      "awaiting": "Awaiting",
+      "completed": "Completed",
+      "draft": "Draft",
+      "cancelled": "Cancelled",
+      "advancedFilter": "Advanced Filter",
+      "resetFilters": "Reset",
+      "showCount": "Show {count}"
+    },
+    "topCourses": {
+      "title": "Top Courses",
+      "subtitle": "Highest revenue courses",
+      "topCount": "Top {count}",
+      "footerLabel": "courses",
+      "empty": "No course data found",
+      "errorTitle": "Failed to load courses"
+    },
+    "vipStudents": {
+      "title": "VIP Students",
+      "subtitle": "Top contributors by revenue",
+      "empty": "No buyer data found",
+      "transactions": "{count} transactions",
+      "footerLabel": "{count} students",
+      "summaryLabel": "total club revenue"
+    }
+  },
+  "ErrorPage": {
     "title": "Oops! Page Not Found",
     "description": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable",
     "cta": "Go Back"

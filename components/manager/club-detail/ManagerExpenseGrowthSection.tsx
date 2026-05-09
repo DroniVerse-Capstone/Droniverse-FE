@@ -85,7 +85,6 @@ export default function ManagerExpenseGrowthSection({
     if (!growthChartData) return [];
     const dateLocale = locale === "en" ? enUS : vi;
 
-    // Check if we have multiple points in the same month
     const monthCounts = new Map();
     growthChartData.forEach((item) => {
       const monthStr = format(new Date(item.month), "yyyy-MM");
@@ -99,8 +98,8 @@ export default function ManagerExpenseGrowthSection({
       const name = hasHighGranularity
         ? format(date, locale === "en" ? "MMM d" : "d/M", { locale: dateLocale })
         : growthChartData.length > 12
-        ? format(date, "MM/yy", { locale: dateLocale })
-        : format(date, "MMM", { locale: dateLocale });
+          ? format(date, "MM/yy", { locale: dateLocale })
+          : format(date, "MMM", { locale: dateLocale });
 
       return {
         name,
@@ -110,12 +109,7 @@ export default function ManagerExpenseGrowthSection({
     });
   }, [growthChartData, locale]);
 
-  const avg = useMemo(() => {
-    if (!chartData.length) return 0;
-    return chartData.reduce((s, d) => s + d.value, 0) / chartData.length;
-  }, [chartData]);
 
-  // Smart tick interval for long ranges
   const tickInterval = useMemo(() => {
     if (chartData.length > 20) return 3;
     if (chartData.length > 12) return 2;
@@ -139,8 +133,8 @@ export default function ManagerExpenseGrowthSection({
               ? "No data in selected range"
               : "Không có dữ liệu trong khoảng thời gian này"
             : locale === "en"
-            ? `No data in last ${months} months`
-            : `Không có dữ liệu trong ${months} tháng qua`}
+              ? `No data in last ${months} months`
+              : `Không có dữ liệu trong ${months} tháng qua`}
         </p>
       </div>
     );
@@ -148,7 +142,6 @@ export default function ManagerExpenseGrowthSection({
 
   return (
     <div className="space-y-5">
-      {/* Stats Row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div>
@@ -157,16 +150,8 @@ export default function ManagerExpenseGrowthSection({
             </p>
             <p className="text-xl font-bold text-white mt-0.5">{fmtVND(totalValue, locale)}</p>
           </div>
-          <div className="h-8 w-px bg-white/[0.06]" />
-          <div>
-            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider font-semibold">
-              {t("kpi.avgLabel")}
-            </p>
-            <p className="text-xl font-bold text-white mt-0.5">{fmtVND(avg, locale)}</p>
-          </div>
         </div>
 
-        {/* Mode Toggle & Growth */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-[#1e2130] border border-white/[0.07] rounded-xl p-1">
             <button

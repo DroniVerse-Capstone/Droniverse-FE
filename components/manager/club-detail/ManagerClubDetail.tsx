@@ -19,9 +19,9 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
-import { RefreshCcw, Calendar, Clock } from "lucide-react";
+import { RefreshCcw, Calendar, Clock, Filter, X, History } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "@/providers/i18n-provider";
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth } from "date-fns";
 
@@ -34,6 +34,9 @@ export default function ManagerClubDetail() {
   const [fromDateGrowth, setFromDateGrowth] = useState<string>("");
   const [toDateGrowth, setToDateGrowth] = useState<string>("");
   const [displayStatus, setDisplayStatus] = useState<string>("ALL");
+  const [startDateFrom, setStartDateFrom] = useState<string>("");
+  const [endDateTo, setEndDateTo] = useState<string>("");
+  const [showAdvancedCompFilters, setShowAdvancedCompFilters] = useState(false);
   const t = useTranslations("ClubManagerDashboard");
   const locale = useLocale();
   const [mounted, setMounted] = useState(false);
@@ -58,11 +61,18 @@ export default function ManagerClubDetail() {
   const byCourseQuery = useGetClubExpenseByCourse(clubId, { top: selectedTop });
   const growthQuery = useGetClubExpenseGrowth(clubId, {
     months: monthsGrowth === "custom" ? undefined : monthsGrowth,
-    fromDate: monthsGrowth === "custom" ? fromDateGrowth : undefined,
-    toDate: monthsGrowth === "custom" ? toDateGrowth : undefined,
+    fromDate: monthsGrowth === "custom" && fromDateGrowth ? new Date(`${fromDateGrowth}T00:00:00`).toISOString().split(".")[0] + "Z" : undefined,
+    toDate: monthsGrowth === "custom" && toDateGrowth ? new Date(`${toDateGrowth}T23:59:59`).toISOString().split(".")[0] + "Z" : undefined,
   });
   const compQueryParams = useMemo(() => {
-    const params: any = { top: topComps };
+    const startISO = startDateFrom ? new Date(`${startDateFrom}T00:00:00`).toISOString().split(".")[0] + "Z" : undefined;
+    const endISO = endDateTo ? new Date(`${endDateTo}T23:59:59`).toISOString().split(".")[0] + "Z" : undefined;
+
+    const params: any = { 
+      top: topComps,
+      startDateFrom: startISO,
+      startDateTo: endISO,
+    };
     switch (displayStatus) {
       case "ONGOING":
         params.competitionStatus = "PUBLISHED";
@@ -83,7 +93,7 @@ export default function ManagerClubDetail() {
         break;
     }
     return params;
-  }, [topComps, displayStatus]);
+  }, [topComps, displayStatus, startDateFrom, endDateTo]);
 
   const competitionQuery = useGetClubCompetitionStats(clubId, compQueryParams);
   const topBuyersQuery = useGetClubTopBuyers(clubId, 10);
@@ -254,7 +264,13 @@ export default function ManagerClubDetail() {
                               <Calendar size={12} />
                               <span>{locale === "en" ? "From Date" : "Từ ngày"}</span>
                             </div>
-                            <div className="relative group/date">
+                            <div 
+                              className="relative group/date"
+                              onClick={(e) => {
+                                const input = e.currentTarget.querySelector("input");
+                                if (input && "showPicker" in input) input.showPicker();
+                              }}
+                            >
                               <input
                                 type="date"
                                 value={fromDateGrowth}
@@ -282,7 +298,13 @@ export default function ManagerClubDetail() {
                               <Calendar size={12} />
                               <span>{locale === "en" ? "To Date" : "Đến ngày"}</span>
                             </div>
-                            <div className="relative group/date">
+                            <div 
+                              className="relative group/date"
+                              onClick={(e) => {
+                                const input = e.currentTarget.querySelector("input");
+                                if (input && "showPicker" in input) input.showPicker();
+                              }}
+                            >
                               <input
                                 type="date"
                                 value={toDateGrowth}
@@ -332,18 +354,27 @@ export default function ManagerClubDetail() {
                               label: locale === "en" ? "This Month" : "Tháng này",
                               range: [startOfMonth(new Date()), new Date()],
                             },
-                          ].map((q) => (
-                            <button
-                              key={q.label}
-                              onClick={() => {
-                                setFromDateGrowth(format(q.range[0], "yyyy-MM-dd"));
-                                setToDateGrowth(format(q.range[1], "yyyy-MM-dd"));
-                              }}
-                              className="px-3 py-1.5 text-[10px] font-medium bg-white/[0.04] border border-white/[0.06] text-[#8a9099] rounded-lg hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all active:scale-95"
-                            >
-                              {q.label}
-                            </button>
-                          ))}
+                          ].map((q) => {
+                            const isSelected = fromDateGrowth === format(q.range[0], "yyyy-MM-dd") &&
+                              toDateGrowth === format(q.range[1], "yyyy-MM-dd");
+                            return (
+                              <button
+                                key={q.label}
+                                onClick={() => {
+                                  setFromDateGrowth(format(q.range[0], "yyyy-MM-dd"));
+                                  setToDateGrowth(format(q.range[1], "yyyy-MM-dd"));
+                                }}
+                                className={cn(
+                                  "px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all active:scale-95 border",
+                                  isSelected
+                                    ? "bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20"
+                                    : "bg-white/[0.04] border-white/[0.06] text-[#8a9099] hover:bg-white/[0.08] hover:text-white"
+                                )}
+                              >
+                                {q.label}
+                              </button>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     )}
@@ -380,6 +411,18 @@ export default function ManagerClubDetail() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowAdvancedCompFilters(!showAdvancedCompFilters)}
+                          className={cn(
+                            "px-4 py-2 text-[11px] font-bold rounded-xl border transition-all flex items-center gap-2",
+                            showAdvancedCompFilters
+                              ? "bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-500/20"
+                              : "bg-white/[0.03] border-white/[0.08] text-[#5a5f6a] hover:bg-white/[0.06] hover:text-white"
+                          )}
+                        >
+                          <Filter size={14} />
+                          {t("competitionActivity.advancedFilter")}
+                        </button>
                         <select
                           value={displayStatus}
                           onChange={(e) => setDisplayStatus(e.target.value)}
@@ -405,6 +448,87 @@ export default function ManagerClubDetail() {
                         </select>
                       </div>
                     </div>
+
+                    <AnimatePresence>
+                      {showAdvancedCompFilters && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden mb-6"
+                        >
+                          <div className="p-5 bg-white/[0.02] border border-white/[0.08] rounded-xl grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                            <div className="space-y-2.5">
+                              <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <Calendar size={12} />
+                                {locale === "en" ? "From Date" : "Từ ngày"}
+                              </label>
+                              <div 
+                                className="relative group/date"
+                                onClick={(e) => {
+                                  const input = e.currentTarget.querySelector("input");
+                                  if (input && "showPicker" in input) input.showPicker();
+                                }}
+                              >
+                                <input
+                                  type="date"
+                                  value={startDateFrom}
+                                  onChange={(e) => setStartDateFrom(e.target.value)}
+                                  className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
+                                />
+                                <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                                  <span className={startDateFrom ? "text-white font-medium" : "text-[#5a6070]"}>
+                                    {startDateFrom ? format(new Date(startDateFrom), "dd/MM/yyyy") : "DD/MM/YYYY"}
+                                  </span>
+                                  <Calendar size={14} className="text-[#5a6070] group-hover/date:text-blue-400 transition-colors" />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2.5">
+                              <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                <Calendar size={12} />
+                                {locale === "en" ? "To Date" : "Đến ngày"}
+                              </label>
+                              <div className="flex gap-3">
+                                <div 
+                                  className="relative group/date flex-1"
+                                  onClick={(e) => {
+                                    const input = e.currentTarget.querySelector("input");
+                                    if (input && "showPicker" in input) input.showPicker();
+                                  }}
+                                >
+                                  <input
+                                    type="date"
+                                    value={endDateTo}
+                                    onChange={(e) => setEndDateTo(e.target.value)}
+                                    className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
+                                  />
+                                  <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                                    <span className={endDateTo ? "text-white font-medium" : "text-[#5a6070]"}>
+                                      {endDateTo ? format(new Date(endDateTo), "dd/MM/yyyy") : "DD/MM/YYYY"}
+                                    </span>
+                                    <Calendar size={14} className="text-[#5a6070] group-hover/date:text-blue-400 transition-colors" />
+                                  </div>
+                                </div>
+                                {(startDateFrom || endDateTo) && (
+                                  <button
+                                    onClick={() => {
+                                      setStartDateFrom("");
+                                      setEndDateTo("");
+                                    }}
+                                    className="w-12 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white transition-all active:scale-95 flex items-center justify-center shrink-0"
+                                    title={t("competitionActivity.resetFilters")}
+                                  >
+                                    <X size={18} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     <ManagerClubCompetitionStatsSection
                       data={competitionQuery.data}
                       isLoading={competitionQuery.isLoading}
