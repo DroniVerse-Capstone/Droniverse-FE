@@ -391,7 +391,7 @@
     "help": {
       "title": "Yêu cầu hỗ trợ"
     },
-    "reports":{
+    "reports": {
       "title": "Khiếu nại"
     }
   },
@@ -402,6 +402,7 @@
       "finance": "Báo cáo Tài chính",
       "learning": "Phân tích học tập",
       "orders": "Nhật ký Giao dịch",
+      "community": "Cộng đồng",
       "operations": "Vận hành hệ thống"
     },
     "kpi": {
@@ -412,7 +413,8 @@
       "thisMonth": "{amount} tháng này",
       "transactionsThisMonth": "{count} giao dịch tháng này",
       "competitionsDeploying": "{count} cuộc thi đang triển khai",
-      "comparedToLastPeriod": "so với kỳ trước"
+      "comparedToLastPeriod": "so với kỳ trước",
+      "avgLabel": "Trung bình mỗi kỳ"
     },
     "revenueTrend": {
       "title": "Xu hướng doanh thu",
@@ -447,8 +449,15 @@
         "awaiting": "Chờ công bố",
         "completed": "Đã hoàn tất",
         "draft": "Bản nháp",
-        "cancelled": "Đã hủy"
+        "cancelled": "Đã hủy",
+        "invalid": "Không hợp lệ"
       },
+      "advancedFilter": "Bộ lọc nâng cao",
+      "startDateFrom": "Bắt đầu từ",
+      "startDateTo": "Bắt đầu đến",
+      "endDateFrom": "Kết thúc từ",
+      "endDateTo": "Kết thúc đến",
+      "resetFilters": "Đặt lại",
       "showCount": "Hiện {count}",
       "table": {
         "id": "ID",
@@ -569,6 +578,44 @@
         "pagination": "Hiển thị từ {start} đến {end} trong tổng số {total} đơn hàng"
       }
     },
+    "community": {
+      "title": "Quản lý Cộng đồng",
+      "subtitle": "Chi tiết số dư ví và chi tiêu của Quản lý Câu lạc bộ & Học viên",
+      "clubManagers": "Quản lý Câu lạc bộ",
+      "users": "Học viên",
+      "walletBalance": "Số dư ví",
+      "totalSpent": "Tổng chi tiêu",
+      "viewOrders": "Xem đơn hàng",
+      "viewTransactions": "Xem giao dịch",
+      "noData": "Không có dữ liệu",
+      "orderDetail": {
+        "title": "Chi tiết lịch sử đơn hàng",
+        "course": "Khóa học",
+        "club": "Câu lạc bộ",
+        "time": "Thời gian mua",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "statusValue": {
+          "success": "Thành công",
+          "pending": "Chờ xử lý"
+        }
+      },
+      "transactionDetail": {
+        "title": "Chi tiết lịch sử giao dịch",
+        "type": "Loại giao dịch",
+        "amount": "Số tiền",
+        "date": "Ngày thực hiện",
+        "content": "Nội dung",
+        "typeValue": {
+          "COMMISSION": "Hoa hồng",
+          "WITHDRAW": "Rút tiền",
+          "WITHDRAWAL": "Rút tiền",
+          "DEPOSIT": "Nạp tiền",
+          "PURCHASE": "Mua khóa học",
+          "REFUND": "Hoàn tiền"
+        }
+      }
+    },
     "opsOverview": {
       "totalUsers": "Tổng người dùng",
       "newUsers": "Người dùng mới",
@@ -589,7 +636,7 @@
       "totalTransactions": "Tổng giao dịch",
       "transactionsThisMonth": "{count} giao dịch tháng này",
       "avgRevenuePerTran": "Doanh thu TB / giao dịch",
-      "avgLabel": "Trung bình mỗi giao dịch",
+      "avgLabel": "Trung bình mỗi kỳ",
       "comparedToLastPeriod": "so với kỳ trước",
       "totalLabel": "Tổng cộng"
     },
@@ -612,6 +659,8 @@
       "completed": "Đã hoàn tất",
       "draft": "Bản nháp",
       "cancelled": "Đã hủy",
+      "advancedFilter": "Bộ lọc nâng cao",
+      "resetFilters": "Đặt lại",
       "showCount": "Hiện {count}"
     },
     "topCourses": {

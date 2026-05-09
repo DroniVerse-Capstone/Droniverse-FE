@@ -69,31 +69,31 @@ function ChartTooltip({ active, payload, label }: TTProps) {
 
 export default function AdminRevenueGrowthSection({ data, isLoading, months, isCustom, fromDate, toDate }: Props) {
   const t = useTranslations("SystemDashboard.revenueTrend");
+  const tKpi = useTranslations("SystemDashboard.kpi");
   const locale = useLocale();
   const [mode, setMode] = useState<"area" | "bar">("area");
 
   const chartData = useMemo(() => {
     if (!data?.revenueGrowth) return [];
     const dateLocale = locale === "en" ? enUS : vi;
-    
-    // Check if we have multiple points in the same month
+
     const monthCounts = new Map();
     data.revenueGrowth.forEach(item => {
       const monthStr = format(new Date(item.month), "yyyy-MM");
       monthCounts.set(monthStr, (monthCounts.get(monthStr) || 0) + 1);
     });
-    
+
     const hasHighGranularity = Array.from(monthCounts.values()).some(count => count > 1);
 
     return data.revenueGrowth.map((item, idx) => {
       const date = new Date(item.month);
       // If high granularity (e.g. daily/weekly), show day/month
-      const name = hasHighGranularity 
+      const name = hasHighGranularity
         ? format(date, locale === "en" ? "MMM d" : "d/M", { locale: dateLocale })
-        : (data.revenueGrowth.length > 12 
-            ? format(date, "MM/yy", { locale: dateLocale }) 
-            : format(date, "MMM", { locale: dateLocale }));
-        
+        : (data.revenueGrowth.length > 12
+          ? format(date, "MM/yy", { locale: dateLocale })
+          : format(date, "MMM", { locale: dateLocale }));
+
       return {
         name,
         fullName: format(date, locale === "en" ? "MMMM d, yyyy" : "d MMMM yyyy", { locale: dateLocale }),
@@ -103,10 +103,6 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
     });
   }, [data, locale]);
 
-  const avg = useMemo(() => {
-    if (!chartData.length) return 0;
-    return chartData.reduce((s, d) => s + d.revenue, 0) / chartData.length;
-  }, [chartData]);
 
   if (isLoading) {
     return <Skeleton className="h-[260px] w-full rounded-xl bg-white/[0.03]" />;
@@ -116,7 +112,7 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
     return (
       <div className="h-[260px] flex items-center justify-center">
         <p className="text-[12px] text-[#5a5f6a]">
-          {isCustom 
+          {isCustom
             ? (locale === "en" ? "No data in selected range" : "Không có dữ liệu trong khoảng thời gian này")
             : t("empty", { count: months })
           }
@@ -127,20 +123,31 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
 
   return (
     <div>
-      {/* Toggle */}
-      <div className="flex items-center gap-1 mb-4 bg-[#1e2130] border border-white/[0.06] rounded-xl p-1 w-fit">
-        {(["area", "bar"] as const).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            className={cn(
-              "px-3 py-1.5 text-[10px] font-medium rounded-lg transition-all",
-              mode === m ? "bg-blue-500 text-white" : "text-[#7a8090] hover:text-[#a0a8b8]"
-            )}
-          >
-            {t(`chartType.${m}` as any)}
-          </button>
-        ))}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-8">
+          <div>
+            <p className="text-[10px] text-[#6a7080] uppercase tracking-wider font-semibold">
+              {tKpi("totalRevenue")}
+            </p>
+            <p className="text-xl font-bold text-white mt-0.5">{formatVND(data?.totalValue ?? 0, locale)}</p>
+          </div>
+        </div>
+
+        {/* Toggle */}
+        <div className="flex items-center gap-1 bg-[#1e2130] border border-white/[0.06] rounded-xl p-1 w-fit">
+          {(["area", "bar"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={cn(
+                "px-3 py-1.5 text-[10px] font-medium rounded-lg transition-all",
+                mode === m ? "bg-blue-500 text-white shadow-sm" : "text-[#7a8090] hover:text-[#a0a8b8]"
+              )}
+            >
+              {t(`chartType.${m}` as any)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Chart */}
@@ -155,12 +162,12 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.05)" />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: "#5a6070", fontSize: 10 }} 
-                dy={10} 
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#5a6070", fontSize: 10 }}
+                dy={10}
                 interval={months > 12 ? (months > 24 ? 4 : 2) : 0}
               />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} tickFormatter={(v) => {
@@ -170,7 +177,6 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
                 return v;
               }} width={55} />
               <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(59,130,246,0.3)", strokeWidth: 1 }} />
-              <ReferenceLine y={avg} stroke="rgba(255,255,255,0.07)" strokeDasharray="4 3" label={undefined} />
               <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2.5} fill="url(#gArea)" dot={false}
                 activeDot={{ r: 5, fill: "#3b82f6", strokeWidth: 2, stroke: "#111318" }} animationDuration={1500} />
             </AreaChart>
@@ -185,12 +191,12 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.05)" />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: "#5a6070", fontSize: 10 }} 
-                dy={10} 
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#5a6070", fontSize: 10 }}
+                dy={10}
                 interval={months > 12 ? (months > 24 ? 4 : 2) : 0}
               />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: "#5a6070", fontSize: 10 }} tickFormatter={(v) => {
@@ -215,7 +221,7 @@ export default function AdminRevenueGrowthSection({ data, isLoading, months, isC
           {(data?.growthRate ?? 0) >= 0 ? "+" : ""}{data?.growthRate ?? 0}%
         </span>
         <span className="text-[11px] text-[#6a7080]">
-          {isCustom 
+          {isCustom
             ? (locale === "en" ? "growth in selected period" : "tăng trưởng trong giai đoạn chọn")
             : t("growthSummary", { count: months })
           }

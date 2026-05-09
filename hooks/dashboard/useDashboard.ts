@@ -43,6 +43,14 @@ import {
 	AdminSystemSummary,
 	getAdminSystemSummaryParamsSchema,
 	getAdminSystemSummaryResponseSchema,
+	AdminDetailClubManagersData,
+	getAdminDetailClubManagersResponseSchema,
+	AdminDetailUsersData,
+	getAdminDetailUsersResponseSchema,
+	AdminDetailUserOrder,
+	getAdminDetailUserOrdersResponseSchema,
+	AdminDetailUserTransaction,
+	getAdminDetailUserTransactionsResponseSchema,
 } from "@/validations/dashboard/dashboard"
 
 export const useGetClubRevenueOverview = (clubId?: string) => {
@@ -369,5 +377,61 @@ export const useGetAdminSystemSummary = (identityFilterTimeLine?: string) => {
 			const parsed = getAdminSystemSummaryResponseSchema.parse(response.data)
 			return parsed.data
 		},
+	})
+}
+
+export const useGetAdminDetailClubManagers = (params: { pageIndex: number, pageSize: number }) => {
+	return useQuery<AdminDetailClubManagersData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-club-managers", params],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/detail-dashboards/club-managers", {
+				params: {
+					page: params.pageIndex,
+					pageSize: params.pageSize,
+				}
+			})
+			const parsed = getAdminDetailClubManagersResponseSchema.parse(response.data)
+			return parsed.data
+		}
+	})
+}
+
+export const useGetAdminDetailUsers = (params: { pageIndex: number, pageSize: number }) => {
+	return useQuery<AdminDetailUsersData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-users", params],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/detail-dashboards/users", {
+				params: {
+					page: params.pageIndex,
+					pageSize: params.pageSize,
+				}
+			})
+			const parsed = getAdminDetailUsersResponseSchema.parse(response.data)
+			return parsed.data
+		}
+	})
+}
+
+export const useGetAdminDetailUserOrders = (userId?: string) => {
+	return useQuery<AdminDetailUserOrder[], AxiosError<ApiError>>({
+		queryKey: ["admin-detail-user-orders", userId],
+		enabled: !!userId,
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/detail-dashboards/users/${userId}/orders`)
+			const parsed = getAdminDetailUserOrdersResponseSchema.parse(response.data)
+			return parsed.data
+		}
+	})
+}
+
+export const useGetAdminDetailUserTransactions = (userId?: string) => {
+	return useQuery<AdminDetailUserTransaction[], AxiosError<ApiError>>({
+		queryKey: ["admin-detail-user-transactions", userId],
+		enabled: !!userId,
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/detail-dashboards/users/${userId}/transactions`)
+			const parsed = getAdminDetailUserTransactionsResponseSchema.parse(response.data)
+			return parsed.data
+		}
 	})
 }
