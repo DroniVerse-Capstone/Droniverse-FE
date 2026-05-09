@@ -4,7 +4,7 @@ import { AxiosError } from "axios"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import toast from "react-hot-toast"
 
-import { useUploadTempClubImage } from "@/hooks/club/useClub"
+import { useUploadTempMedia } from "@/hooks/media/useMedia"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "@/providers/i18n-provider"
 
@@ -97,7 +97,7 @@ export default function QuillEditor({
 	formats,
 }: QuillEditorProps) {
 	const t = useTranslations("ClubImageUpload")
-	const uploadImageMutation = useUploadTempClubImage()
+	const uploadImageMutation = useUploadTempMedia()
 
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const quillRef = useRef<QuillLikeEditor | null>(null)
@@ -149,11 +149,11 @@ export default function QuillEditor({
 				}
 
 				try {
-					const data = await mutateAsyncRef.current(file)
+					const data = await mutateAsyncRef.current({ file, mediaType: "IMAGE" })
 					const range = editor.getSelection(true)
 					const index = range?.index ?? editor.getLength()
 
-					editor.insertEmbed(index, "image", data.url, "user")
+					editor.insertEmbed(index, "image", data.data.url, "user")
 					editor.setSelection(index + 1, 0)
 				} catch (uploadError) {
 					const axiosError = uploadError as AxiosError<{ message?: string }>
