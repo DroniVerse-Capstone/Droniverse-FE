@@ -16,6 +16,7 @@ type UseGetSystemPoliciesOptions = Omit<
 > & {
 	currentPage?: number;
 	pageSize?: number;
+	type?: GetSystemPoliciesQuery["type"];
 };
 
 export const useGetSystemPolicies = (
@@ -28,12 +29,14 @@ export const useGetSystemPolicies = (
 			"system-policies",
 			parsedOptions.currentPage,
 			parsedOptions.pageSize,
+			parsedOptions.type,
 		],
 		queryFn: async () => {
 			const response = await apiClient.get("/identity/system-policies", {
 				params: {
 					CurrentPage: parsedOptions.currentPage,
 					PageSize: parsedOptions.pageSize,
+					...(parsedOptions.type && { Type: parsedOptions.type }),
 				},
 			});
 
