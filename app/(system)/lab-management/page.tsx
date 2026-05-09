@@ -243,7 +243,7 @@ export default function LabManagement() {
       <div className="w-full mx-auto flex flex-col gap-6 lg:gap-8 pb-10 shadow-inner">
 
         {/* Header - Glassmorphism Darker Style */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border border-white/5 p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border border-white/10 p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none" />
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 relative z-10 w-full justify-between">
@@ -708,7 +708,7 @@ export default function LabManagement() {
                   <article
                     key={lab.labID}
                     onClick={() => handleEdit(lab.labID)}
-                    className="group flex flex-col bg-[#141418]/80 border border-white/5 rounded overflow-hidden cursor-pointer transition-all duration-400 hover:border-primary-300/30 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#1a1a20]/90 relative"
+                    className="group flex flex-col bg-[#141418]/80 border border-white/10 rounded overflow-hidden cursor-pointer transition-all duration-500 hover:border-primary-300/40 hover:-translate-y-2 hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:bg-[#1a1a20]/95 relative"
                   >
                     {/* Subtle Glow Behind the Card */}
                     <div className="absolute -inset-1 bg-gradient-to-br from-primary-300/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 pointer-events-none" />
@@ -744,7 +744,7 @@ export default function LabManagement() {
                     </div>
 
                     {/* Info Panel */}
-                    <div className="p-4 flex flex-col gap-3 flex-1 z-10 bg-[#141418]/50">
+                    <div className="p-4 flex flex-col gap-3 flex-1 z-10 bg-[#141418]/40">
                       <div className="flex justify-between items-start gap-4">
                         <h3 className="text-[14px] sm:text-[15px] font-bold text-white tracking-tight leading-snug line-clamp-2 h-10 overflow-hidden drop-shadow-sm">
                           {name}

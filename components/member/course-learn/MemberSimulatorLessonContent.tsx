@@ -77,7 +77,7 @@ export default function MemberSimulatorLessonContent({
   const handleOpenSimulator = () => {
     const currentUrl = `${pathname}${lessonId ? `?lessonId=${lessonId}` : ""}`;
     let route = getSimulatorRoute(webSimulator!.code, webSimulator!.webSimulatorID, currentUrl, webSimulator!.type);
-    
+
     // Đảm bảo lessonId và enrollmentId luôn ở cấp cao nhất của URL tham số
     const appendParam = (url: string, key: string, value: string) => {
       if (!value) return url;
@@ -87,7 +87,7 @@ export default function MemberSimulatorLessonContent({
 
     route = appendParam(route, "lessonId", lessonId || "");
     route = appendParam(route, "enrollmentId", enrollmentId || "");
-    
+
     router.push(route);
   };
 
@@ -138,7 +138,7 @@ export default function MemberSimulatorLessonContent({
                   Điểm số
                 </p>
                 <p className="mt-2 text-xl font-semibold text-greyscale-0">
-                  {userSimulator.score}/100
+                  {userSimulator.score}
                 </p>
               </div>
             )}
