@@ -123,7 +123,7 @@ export default function MemberCourseCheckout() {
   if (!clubId || !courseId) {
     return (
       <div className="px-6 py-4">
-        <EmptyState title="Không xác định được khóa học hoặc câu lạc bộ hiện tại." />
+        <EmptyState title={locale === "vi" ? "Không xác định được khóa học hoặc câu lạc bộ hiện tại." : "Unable to identify the current course or club."} />
       </div>
     );
   }
@@ -143,7 +143,7 @@ export default function MemberCourseCheckout() {
           title={
             error?.response?.data?.message ||
             error?.message ||
-            "Không tải được thông tin checkout"
+            locale === "vi" ? "Không tải được thông tin checkout" : "Unable to load checkout information"
           }
         />
       </div>
@@ -158,7 +158,7 @@ export default function MemberCourseCheckout() {
           variant="outline"
           onClick={() => router.push(`/member/${clubSlug}/${courseSlug}`)}
         >
-          Quay lại
+          {locale === "vi" ? "Quay lại" : "Back"}
         </Button>
       </div>
 
@@ -180,21 +180,21 @@ export default function MemberCourseCheckout() {
         <aside className="xl:sticky xl:top-6 xl:self-start">
           <div className="rounded border border-greyscale-700 bg-greyscale-900/75 p-5">
             <h3 className="text-lg font-semibold text-greyscale-0">
-              Thông tin thanh toán
+              {locale === "vi" ? "Thông tin thanh toán" : "Payment Information"}
             </h3>
 
             {!hasProduct ? (
               <div className="mt-4 rounded border border-greyscale-700 bg-greyscale-900/60 p-4">
                 <EmptyState
-                  title="Không có sản phẩm nào được liên kết với khóa học này."
-                  description="Không thể checkout vì khóa học này chưa được cấu hình giá bán."
+                  title={locale === "vi" ? "Không có sản phẩm nào được liên kết với khóa học này." : "No products are linked to this course."}
+                  description={locale === "vi" ? "Không thể checkout vì khóa học này chưa được cấu hình giá bán." : "Cannot checkout because this course has not been configured with a price."}
                 />
               </div>
             ) : (
               <div className="mt-4 space-y-4">
                 <div className="rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
                   <p className="mb-2 text-sm font-medium text-greyscale-25">
-                    Phương thức thanh toán
+                    {locale === "vi" ? "Phương thức thanh toán" : "Payment Method"}
                   </p>
                   <div className="flex w-full items-center justify-between rounded border border-primary/40 bg-primary/10 px-3 py-2 text-left">
                     <div className="flex items-center gap-2">
@@ -213,29 +213,21 @@ export default function MemberCourseCheckout() {
                     <span className="h-2.5 w-2.5 rounded-full bg-primary" />
                   </div>
                 </div>
-
-                <div className="rounded border border-greyscale-700 bg-greyscale-900/70 p-3">
-                  <p className="text-sm font-medium text-greyscale-25">Số lượng mã</p>
-                  <p className="mt-2 inline-flex rounded bg-greyscale-800 px-3 py-1 text-sm font-semibold text-greyscale-0">
-                    1
-                  </p>
-                </div>
-
                 <div className="grid grid-cols-1 gap-2 rounded border border-greyscale-700 bg-greyscale-900/80 p-4 text-sm text-greyscale-100">
                   <div className="flex items-center justify-between">
-                    <span>Đơn giá</span>
+                    <span>{locale === "vi" ? "Đơn giá" : "Unit Price"}</span>
                     <span className="font-semibold text-greyscale-0">
                       {formatPrice(unitPrice, currency)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Số lượng</span>
+                    <span>{locale === "vi" ? "Số lượng" : "Quantity"}</span>
                     <span className="font-semibold text-greyscale-0">1</span>
                   </div>
                   <div className="my-1 h-px bg-greyscale-700" />
                   <div className="flex items-center justify-between text-base">
                     <span className="font-semibold text-greyscale-0">
-                      Tổng tiền
+                      {locale === "vi" ? "Tổng tiền" : "Total Amount"}
                     </span>
                     <span className="font-bold text-primary">
                       {formatPrice(total, currency)}
@@ -254,7 +246,7 @@ export default function MemberCourseCheckout() {
               disabled={!hasProduct || isProcessingPayment}
               onClick={handleCheckout}
             >
-              {isProcessingPayment ? "Đang chuyển tới cổng thanh toán..." : "Thanh toán"}
+              {isProcessingPayment ? (locale === "vi" ? "Đang chuyển tới cổng thanh toán..." : "Processing payment...") : (locale === "vi" ? "Thanh toán" : "Checkout")}
             </Button>
           </div>
         </aside>

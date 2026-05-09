@@ -195,7 +195,7 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Donut */}
         {pieData.length > 0 && (
-          <div className="bg-[#1e2130] rounded-xl p-4 border border-white/[0.07]">
+          <div className="bg-[#1e2130] rounded p-4 border border-white/[0.07]">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] text-[#6a7080] uppercase tracking-widest font-bold flex items-center gap-1.5">
                 <Star size={10} className="text-blue-400" />
@@ -237,7 +237,7 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
 
         {/* Bar */}
         {barData.length > 0 && (
-          <div className="bg-[#1e2130] rounded-xl p-4 border border-white/[0.07]">
+          <div className="bg-[#1e2130] rounded p-4 border border-white/[0.07]">
             <p className="text-[10px] text-[#6a7080] uppercase tracking-widest mb-3 font-bold flex items-center gap-1.5">
               <TrendingUp size={10} className="text-blue-400" />
               Top thí sinh
@@ -262,7 +262,7 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
 
       {/* Table */}
       {data?.topByParticipants && data.topByParticipants.length > 0 && (
-        <div className="bg-[#1e2130] rounded-xl border border-white/[0.07] overflow-hidden">
+        <div className="bg-[#1e2130] rounded border border-white/[0.07] overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="text-[9px] text-[#5a6070] uppercase tracking-widest font-bold border-b border-white/[0.05]">

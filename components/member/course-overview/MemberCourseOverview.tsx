@@ -30,12 +30,14 @@ import {
   IoBookOutline,
   IoChevronBackOutline,
   IoHelpCircleOutline,
+  IoArrowUpOutline,
   IoTimeOutline,
   IoTimerOutline,
 } from "react-icons/io5";
 import { TbDrone } from "react-icons/tb";
 import ReactStars from "react-rating-stars-component";
 import { CiEdit } from "react-icons/ci";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const UUID_SUFFIX_REGEX =
   /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -88,9 +90,27 @@ export default function MemberCourseOverview() {
   const updateCourseVersionFeedbackMutation = useUpdateCourseVersionFeedback();
   const [activateDialogOpen, setActivateDialogOpen] = React.useState(false);
   const [activateCode, setActivateCode] = React.useState("");
-  const [editingFeedbackId, setEditingFeedbackId] = React.useState<string | null>(null);
+  const [editingFeedbackId, setEditingFeedbackId] = React.useState<
+    string | null
+  >(null);
   const [editRating, setEditRating] = React.useState(5);
   const [editContent, setEditContent] = React.useState("");
+  const [showScrollToTop, setShowScrollToTop] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollToTop(window.scrollY > 300);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollToTop = React.useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const handleGoLearn = React.useCallback(async () => {
     if (!clubSlug || !courseId || !clubId || !data?.courseVersionID) {
@@ -203,7 +223,9 @@ export default function MemberCourseOverview() {
   );
 
   const handleStartEditFeedback = (feedbackId: string) => {
-    const currentFeedback = feedbacks.find((feedback) => feedback.feedbackID === feedbackId);
+    const currentFeedback = feedbacks.find(
+      (feedback) => feedback.feedbackID === feedbackId,
+    );
     if (!currentFeedback) return;
 
     setEditingFeedbackId(feedbackId);
@@ -236,8 +258,8 @@ export default function MemberCourseOverview() {
       handleCancelEditFeedback();
     } catch (saveError) {
       const message =
-        (saveError as { response?: { data?: { message?: string } } })
-          ?.response?.data?.message ||
+        (saveError as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ||
         (saveError as { message?: string })?.message ||
         "Không thể cập nhật phản hồi.";
       toast.error(message);
@@ -256,7 +278,7 @@ export default function MemberCourseOverview() {
             window.location.href = `/member/${clubSlug}/courses`;
           }}
         >
-          Quay lại
+           {locale === "vi" ? "Quay lại" : "Back"}
         </Button>
       </div>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -275,7 +297,7 @@ export default function MemberCourseOverview() {
 
           <section className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900/70">
             <h3 className="text-2xl font-semibold text-greyscale-0 p-4 pb-0">
-              Giới thiệu khóa học
+              {locale === "vi" ? "Giới thiệu khóa học" : "Course Introduction"}
             </h3>
             <div
               className="dv-quill-render ql-editor min-h-40"
@@ -285,7 +307,7 @@ export default function MemberCourseOverview() {
 
           <section className="space-y-2 rounded border border-greyscale-700 bg-greyscale-900/70 p-4">
             <h3 className="text-2xl font-semibold text-greyscale-0">
-              Chứng chỉ sau khóa học
+              {locale === "vi" ? "Chứng chỉ sau khóa học" : "Certificate after course"}
             </h3>
 
             {data.certificateImageUrl ? (
@@ -300,8 +322,8 @@ export default function MemberCourseOverview() {
             ) : (
               <div className="mt-3 rounded border border-greyscale-700 bg-greyscale-900/60 p-4">
                 <EmptyState
-                  title="Chưa có ảnh chứng chỉ"
-                  description="Khóa học này hiện chưa cấu hình ảnh chứng chỉ."
+                  title={locale === "vi" ? "Chưa có ảnh chứng chỉ" : "No certificate image yet"}
+                  description={locale === "vi" ? "Khóa học này hiện chưa cấu hình ảnh chứng chỉ." : "This course does not have a certificate image configured."}
                 />
               </div>
             )}
@@ -327,7 +349,9 @@ export default function MemberCourseOverview() {
             {feedbacks.length === 0 ? (
               <div className="rounded border border-greyscale-700 bg-greyscale-900/60 p-4">
                 <EmptyState
-                  title={locale === "vi" ? "Chưa có đánh giá" : "No feedback yet"}
+                  title={
+                    locale === "vi" ? "Chưa có đánh giá" : "No feedback yet"
+                  }
                   description={
                     locale === "vi"
                       ? "Khóa học này hiện chưa có phản hồi nào."
@@ -389,7 +413,9 @@ export default function MemberCourseOverview() {
                             </div>
                           </div>
 
-                          <p className="mt-2 text-sm text-greyscale-50">{feedback.content}</p>
+                          <p className="mt-2 text-sm text-greyscale-50">
+                            {feedback.content}
+                          </p>
                         </div>
                       </div>
 
@@ -407,7 +433,9 @@ export default function MemberCourseOverview() {
                               type="button"
                               variant="outline"
                               icon={<CiEdit />}
-                              onClick={() => handleStartEditFeedback(feedback.feedbackID)}
+                              onClick={() =>
+                                handleStartEditFeedback(feedback.feedbackID)
+                              }
                             >
                               {locale === "vi" ? "Sửa" : "Edit"}
                             </Button>
@@ -430,7 +458,9 @@ export default function MemberCourseOverview() {
 
                           <Textarea
                             value={editContent}
-                            onChange={(event) => setEditContent(event.target.value)}
+                            onChange={(event) =>
+                              setEditContent(event.target.value)
+                            }
                             className="min-h-28 bg-greyscale-950/80 text-greyscale-0"
                           />
 
@@ -444,7 +474,9 @@ export default function MemberCourseOverview() {
                             </Button>
                             <Button
                               type="button"
-                              onClick={() => void handleSaveFeedback(feedback.feedbackID)}
+                              onClick={() =>
+                                void handleSaveFeedback(feedback.feedbackID)
+                              }
                               disabled={
                                 updateCourseVersionFeedbackMutation.isPending ||
                                 editContent.trim().length === 0
@@ -480,31 +512,31 @@ export default function MemberCourseOverview() {
             <div className="my-4 h-px bg-greyscale-600" />
 
             <h2 className="mb-3 text-2xl font-semibold text-greyscale-0">
-              Thông tin khóa học
+              {locale === "vi" ? "Thông tin khóa học" : "Course Information"}
             </h2>
 
             <ul className="space-y-3 text-sm text-greyscale-25">
               <li className="flex items-center gap-3">
                 <IoTimeOutline size={20} className="text-secondary" />
-                {data.estimatedDuration} phút học
+                {data.estimatedDuration} {locale === "vi" ? "phút học" : "minutes of study"}
               </li>
               <li className="flex items-center gap-3">
                 <IoBookOutline size={20} className="text-secondary" />
-                {data.totalTheory} bài đọc
+                {data.totalTheory} {locale === "vi" ? "bài đọc" : "theory lessons"}
               </li>
               <li className="flex items-center gap-3">
                 <TbDrone size={20} className="text-secondary" />
-                {data.totalLab} bài lab
+                {data.totalLab} {locale === "vi" ? "bài lab" : "lab sessions"}
               </li>
               <li className="flex items-center gap-3">
                 <IoHelpCircleOutline size={20} className="text-secondary" />
-                {data.totalQuiz} bài kiểm tra
+                {data.totalQuiz} {locale === "vi" ? "bài kiểm tra" : "quizzes"}
               </li>
             </ul>
 
             <div className="my-4 h-px bg-greyscale-600" />
 
-            {data.isEligibleByLevel ? (
+            {data.isEligibleByLevel && data.isPrerequisitesCompleted ? (
               <div className="w-full flex items-center gap-2">
                 {data.isUnlock ? (
                   <Button
@@ -514,8 +546,12 @@ export default function MemberCourseOverview() {
                     disabled={createEnrollmentMutation.isPending}
                   >
                     {createEnrollmentMutation.isPending
-                      ? "Đang chuẩn bị vào học..."
-                      : "Vào học ngay"}
+                      ? locale === "vi"
+                        ? "Đang chuẩn bị vào học..."
+                        : "Preparing to enter course..."
+                      : locale === "vi"
+                        ? "Vào học ngay"
+                        : "Enter Course"}
                   </Button>
                 ) : (
                   <>
@@ -533,7 +569,7 @@ export default function MemberCourseOverview() {
                         );
                       }}
                     >
-                      Mua ngay
+                      {locale === "vi" ? "Mua ngay" : "Buy Now"}
                     </Button>
 
                     <Button
@@ -541,7 +577,7 @@ export default function MemberCourseOverview() {
                       className="w-full"
                       onClick={() => setActivateDialogOpen(true)}
                     >
-                      Kích hoạt
+                      {locale === "vi" ? "Kích hoạt" : "Activate"}
                     </Button>
                   </>
                 )}
@@ -549,8 +585,31 @@ export default function MemberCourseOverview() {
             ) : (
               <div className="w-full">
                 <Button className="w-full" disabled>
-                  Bạn chưa đủ điều kiện
+                  {locale === "vi" ? "Bạn chưa đủ điều kiện" : "You are not eligible"}
                 </Button>
+                <div className="mt-3 space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    {data.isEligibleByLevel ? (
+                      <FaCheckCircle className="text-green-500" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500" />
+                    )}
+                    <span className="text-greyscale-0">
+                      {locale === "vi" ? "Điều kiện cấp độ" : "Level Requirements"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {data.isPrerequisitesCompleted ? (
+                      <FaCheckCircle className="text-green-500" />
+                    ) : (
+                      <FaTimesCircle className="text-red-500" />
+                    )}
+                    <span className="text-greyscale-0">
+                      {locale === "vi" ? "Học phần tiên quyết" : "Prerequisite Lessons"}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -568,9 +627,11 @@ export default function MemberCourseOverview() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Kích hoạt khóa học</DialogTitle>
+            <DialogTitle>{locale === "vi" ? "Kích hoạt khóa học" : "Activate Course"}</DialogTitle>
             <DialogDescription>
-              Nhập mã kích hoạt để mở quyền truy cập khóa học.
+              {locale === "vi"
+                ? "Nhập mã kích hoạt để mở quyền truy cập khóa học."
+                : "Enter the activation code to unlock the course."}
             </DialogDescription>
           </DialogHeader>
 
@@ -579,7 +640,7 @@ export default function MemberCourseOverview() {
               htmlFor="member-activate-code"
               className="text-sm font-medium text-greyscale-25"
             >
-              Mã kích hoạt
+              {locale === "vi" ? "Mã kích hoạt" : "Activation Code"}
             </label>
             <Input
               id="member-activate-code"
@@ -596,7 +657,7 @@ export default function MemberCourseOverview() {
               onClick={() => setActivateDialogOpen(false)}
               disabled={enterCourseCodeMutation.isPending}
             >
-              Hủy
+              {locale === "vi" ? "Hủy" : "Cancel"}
             </Button>
             <Button
               onClick={handleActivateCode}
@@ -606,12 +667,27 @@ export default function MemberCourseOverview() {
               }
             >
               {enterCourseCodeMutation.isPending
-                ? "Đang kích hoạt..."
-                : "Xác nhận"}
+                ? locale === "vi"
+                  ? "Đang kích hoạt..."
+                  : "Activating..."
+                : locale === "vi"
+                  ? "Xác nhận"
+                  : "Confirm"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showScrollToTop ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full border-greyscale-600 bg-greyscale-950/95 p-0 shadow-lg shadow-black/30 backdrop-blur-md"
+          icon={<IoArrowUpOutline size={24} />}
+          onClick={handleScrollToTop}
+          aria-label="Scroll to top"
+        />
+      ) : null}
     </div>
   );
 }

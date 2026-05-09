@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { NotificationItem } from "@/validations/notification/notification";
+import { useLocale } from "@/providers/i18n-provider";
 
 interface NotificationDropdownProps {
   hasNotifications?: boolean;
@@ -31,6 +32,7 @@ export default function NotificationDropdown({
   hasNotifications = true,
 }: NotificationDropdownProps) {
   const router = useRouter();
+  const locale = useLocale();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = !!user;
 
@@ -60,7 +62,7 @@ export default function NotificationDropdown({
     const diffHours = Math.round(diffMinutes / 60);
     const diffDays = Math.round(diffHours / 24);
 
-    const formatter = new Intl.RelativeTimeFormat("vi", { numeric: "auto" });
+    const formatter = new Intl.RelativeTimeFormat(locale === "vi" ? "vi" : "en", { numeric: "auto" });
 
     if (Math.abs(diffMinutes) < 60) {
       return formatter.format(diffMinutes, "minute");
@@ -123,9 +125,9 @@ export default function NotificationDropdown({
         <div className="border-b border-greyscale-700 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <h3 className="font-semibold text-greyscale-0">
-              Thông báo
+              {locale === "vi" ? "Thông báo" : "Notifications"}
               {unreadCount > 0 && (
-                <span className="ml-2 text-xs text-primary-200">({unreadCount} mới)</span>
+                <span className="ml-2 text-xs text-primary-200">({unreadCount} {locale === "vi" ? "mới" : "new"})</span>
               )}
             </h3>
             {unreadCount > 0 && (
@@ -139,7 +141,7 @@ export default function NotificationDropdown({
                     : "text-primary-200 hover:text-primary-300",
                 )}
               >
-                Đánh dấu đã đọc
+                {locale === "vi" ? "Đánh dấu đã đọc" : "Mark all as read"}
               </button>
             )}
           </div>
@@ -147,7 +149,7 @@ export default function NotificationDropdown({
 
         {notificationsQuery.isLoading || unreadCountQuery.isLoading ? (
           <div className="px-4 py-8 text-center text-sm text-greyscale-400">
-            Đang tải thông báo...
+            {locale === "vi" ? "Đang tải thông báo..." : "Loading notifications..."}
           </div>
         ) : notifications.length > 0 ? (
           <div className="py-1">
@@ -202,12 +204,16 @@ export default function NotificationDropdown({
         ) : notificationsQuery.isError || unreadCountQuery.isError ? (
           <div className="px-4 py-8 text-center">
             <FiBell className="mx-auto mb-2 text-4xl text-greyscale-500" />
-            <p className="text-sm text-greyscale-400">Không thể tải thông báo</p>
+            <p className="text-sm text-greyscale-400">
+              {locale === "vi" ? "Không thể tải thông báo" : "Cannot load notifications"}
+            </p>
           </div>
         ) : (
           <div className="py-8 text-center">
             <FiBell className="mx-auto mb-2 text-4xl text-greyscale-500" />
-            <p className="text-sm text-greyscale-400">Không có thông báo mới</p>
+            <p className="text-sm text-greyscale-400">
+              {locale === "vi" ? "Không có thông báo mới" : "No new notifications"}
+            </p>
           </div>
         )}
 
@@ -220,7 +226,7 @@ export default function NotificationDropdown({
                 className="w-full text-primary-200 hover:bg-greyscale-700 hover:text-primary-300"
                 onClick={() => router.push("/notifications")}
               >
-                Xem tất cả
+                {locale === "vi" ? "Xem tất cả" : "View all"}
               </Button>
             </div>
           </>

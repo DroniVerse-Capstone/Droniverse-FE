@@ -264,7 +264,9 @@ export default function ClubInfo({ clubId }: ClubInfoProps) {
           <DialogHeader>
             <DialogTitle>{t("out")}</DialogTitle>
             <DialogDescription>
-              Bạn có chắc chắn muốn rời khỏi câu lạc bộ này không?
+               {locale === "vi"
+                ? "Bạn có chắc chắn muốn rời khỏi câu lạc bộ này không?"
+                : "Are you sure you want to leave this club?"}
             </DialogDescription>
           </DialogHeader>
 
@@ -274,7 +276,7 @@ export default function ClubInfo({ clubId }: ClubInfoProps) {
               onClick={() => setLeaveDialogOpen(false)}
               disabled={leaveClubMutation.isPending}
             >
-              Hủy
+              {locale === "vi" ? "Hủy" : "Cancel"}
             </Button>
             <Button
               onClick={async () => {
@@ -285,7 +287,9 @@ export default function ClubInfo({ clubId }: ClubInfoProps) {
                     clubId,
                   });
                   toast.success(
-                    response.message || "Đã rời câu lạc bộ thành công.",
+                    locale === "vi"
+                      ? response.message || "Đã rời câu lạc bộ thành công."
+                      : response.message || "Successfully left the club."
                   );
                   setLeaveDialogOpen(false);
                   router.push("/member");
@@ -303,7 +307,11 @@ export default function ClubInfo({ clubId }: ClubInfoProps) {
               }}
               disabled={leaveClubMutation.isPending}
             >
-              {leaveClubMutation.isPending ? "Đang rời..." : "Xác nhận"}
+              {leaveClubMutation.isPending ? (
+                locale === "vi" ? "Đang rời..." : "Leaving..."
+              ) : (
+                locale === "vi" ? "Xác nhận" : "Confirm"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

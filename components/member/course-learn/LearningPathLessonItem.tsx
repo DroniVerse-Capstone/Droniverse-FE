@@ -7,6 +7,7 @@ import { MdOutlineTimer } from "react-icons/md";
 import LessonTypeIcon from "@/components/course/LessonTypeIcon";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "@/validations/learning/user-learning";
+import { useLocale } from "@/providers/i18n-provider";
 
 type LearningPathLessonItemProps = {
   lesson: Lesson;
@@ -19,6 +20,7 @@ export default function LearningPathLessonItem({
   isActive,
   onSelectLesson,
 }: LearningPathLessonItemProps) {
+  const locale = useLocale();
   return (
     <button
       type="button"
@@ -36,11 +38,11 @@ export default function LearningPathLessonItem({
           <LessonTypeIcon type={lesson.type} />
           <div className="min-w-0 space-y-1">
             <p className="line-clamp-1 text-sm font-medium text-greyscale-0">
-              {lesson.titleVN}
+              {locale === "vi" ? lesson.titleVN : lesson.titleEN}
             </p>
             <div className="flex items-center gap-1 text-xs text-greyscale-50">
               <MdOutlineTimer className="text-greyscale-50" />
-              <p>{lesson.duration} phút</p>
+              <p>{lesson.duration} {locale === "vi" ? "phút" : "mins"}</p>
             </div>
           </div>
         </div>

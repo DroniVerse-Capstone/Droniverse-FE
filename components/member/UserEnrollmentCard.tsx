@@ -5,6 +5,7 @@ import { PiCertificateBold } from "react-icons/pi";
 import { Progress } from "@/components/ui/progress";
 import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { UserEnrollment } from "@/validations/enrollment/user-enrollment";
+import { useLocale } from "@/providers/i18n-provider";
 
 type UserEnrollmentCardProps = {
   enrollment: UserEnrollment;
@@ -16,6 +17,7 @@ export default function UserEnrollmentCard({
   onClick,
 }: UserEnrollmentCardProps) {
   const isCompleted = enrollment.enrollStatus === "COMPLETED";
+  const locale = useLocale();
 
   return (
     <article
@@ -34,7 +36,7 @@ export default function UserEnrollmentCard({
       <div className="relative mb-3 h-42 overflow-hidden rounded border border-greyscale-700">
         <Image
           src={enrollment.imageUrl || "/images/club-placeholder.jpg"}
-          alt={enrollment.courseNameVN}
+          alt={locale === "vi" ? enrollment.courseNameVN : enrollment.courseNameEN}
           fill
           className="object-cover"
         />
@@ -44,12 +46,12 @@ export default function UserEnrollmentCard({
         <div className="flex flex-wrap items-center gap-2">
           <CourseLevelBadge level={enrollment.level} />
           <span className="inline-flex rounded px-2 py-1 text-xs font-medium bg-tertiary/15 text-tertiary border-2 border-tertiary">
-            {enrollment.estimatedDuration} phút
+            {locale === "vi" ? `${enrollment.estimatedDuration} phút` : `${enrollment.estimatedDuration} mins`}
           </span>
         </div>
 
         <h3 className="min-h-12 line-clamp-2 text-base leading-6 font-semibold text-greyscale-0">
-          {enrollment.courseNameVN}
+          {locale === "vi" ? enrollment.courseNameVN : enrollment.courseNameEN}
         </h3>
 
         <div className="space-y-2 border-t border-greyscale-700 pt-2">
@@ -62,14 +64,16 @@ export default function UserEnrollmentCard({
               >
                 <PiCertificateBold size={18} />
                 <span className="font-semibold text-sm">
-                  Bạn đã hoàn thành khóa học
+                  {locale === "vi" ? "Bạn đã hoàn thành khóa học" : "You have completed the course"}
                 </span>
               </div>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-greyscale-50">Tiến độ</span>
+                <span className="text-sm text-greyscale-50">
+                  {locale === "vi" ? "Tiến độ" : "Progress"}
+                </span>
                 <span className="text-sm font-semibold text-greyscale-0">
                   {Math.round(enrollment.progress)}%
                 </span>

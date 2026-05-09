@@ -865,7 +865,7 @@ export default function LabManagement() {
 
                     {/* Subtle Accent */}
                     <div className="h-[2px] w-0 bg-primary-300 group-hover:w-full transition-all duration-700 ease-out absolute bottom-0 left-0" />
-                    <div className="absolute inset-0 border-[2px] border-primary-300/0 group-hover:border-primary-300/20 rounded transition-colors duration-500 pointer-events-none" />
+                    <div className="absolute inset-0 border border-primary-300/0 group-hover:border-primary-300/20 rounded transition-colors duration-500 pointer-events-none" />
                   </article>
                 )
               })}
