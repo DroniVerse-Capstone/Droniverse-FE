@@ -42,7 +42,7 @@ function CompetitionTag({ status, phase }: { status: string; phase: string | nul
       </span>
     );
   }
-  
+
   if (status === "PUBLISHED") {
     if (phase === "FINISHED") {
       return (
@@ -54,7 +54,7 @@ function CompetitionTag({ status, phase }: { status: string; phase: string | nul
     }
     const p = PHASE[phase || ""] || { label: "Đang công khai", color: "#3b82f6" };
     return (
-      <span 
+      <span
         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold"
         style={{ backgroundColor: `${p.color}15`, color: p.color, border: `1px solid ${p.color}30` }}
       >
@@ -90,14 +90,14 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
   const pieData = useMemo(() => {
     if (!data?.overview || !data?.topByParticipants) return [];
     const { publishedCompetitions, completedCompetitions, draftCompetitions, cancelledCompetitions, invalidCompetitions } = data.overview;
-    
+
     const publishedInList = data.topByParticipants.filter(c => c.competitionStatus === "PUBLISHED");
     const awaitingInList = publishedInList.filter(c => c.competitionPhase === "FINISHED").length;
-    
-    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions 
-      ? awaitingInList 
-      : publishedInList.length > 0 
-        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions) 
+
+    const awaitingValue = publishedInList.length > 0 && publishedInList.length === publishedCompetitions
+      ? awaitingInList
+      : publishedInList.length > 0
+        ? Math.round((awaitingInList / publishedInList.length) * publishedCompetitions)
         : 0;
     const ongoingValue = publishedCompetitions - awaitingValue;
 
@@ -183,7 +183,7 @@ export default function ManagerClubCompetitionStatsSection({ data, isLoading }: 
             className={cn("rounded-xl p-4 border transition-all hover:scale-[1.02]", item.bg, item.borderColor)}
           >
             <div className="flex items-center justify-center gap-1.5 mb-2">
-              <item.icon size={12} className={item.color} />
+              {/* <item.icon size={12} className={item.color} /> */}
               <p className="text-[9px] text-[#6a7080] uppercase tracking-widest font-bold">{item.label}</p>
             </div>
             <p className={cn("text-xl font-bold text-center", item.color)}>{item.value}</p>

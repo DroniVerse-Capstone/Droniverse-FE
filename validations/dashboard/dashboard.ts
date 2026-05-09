@@ -516,3 +516,129 @@ export const getAdminSystemSummaryResponseSchema = z.object({
 export type AdminSystemSummary = z.infer<typeof adminSystemSummarySchema>
 export type GetAdminSystemSummaryResponse = z.infer<typeof getAdminSystemSummaryResponseSchema>
 export type GetAdminSystemSummaryParams = z.infer<typeof getAdminSystemSummaryParamsSchema>
+
+// --- DETAIL DASHBOARD (PHASE 4) ---
+
+export const adminDetailClubManagerSchema = z.object({
+	userId: z.string().uuid(),
+	fullName: z.string(),
+	email: z.string(),
+	avatarUrl: z.string().nullable(),
+	walletBalance: z.number().nonnegative(),
+})
+
+export const getAdminDetailClubManagersResponseSchema = z.object({
+	data: z.object({
+		data: z.array(adminDetailClubManagerSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const adminDetailUserSchema = z.object({
+	userId: z.string().uuid(),
+	fullName: z.string(),
+	email: z.string(),
+	avatarUrl: z.string().nullable(),
+	totalSpent: z.number().nonnegative(),
+})
+
+export const getAdminDetailUsersResponseSchema = z.object({
+	data: z.object({
+		data: z.array(adminDetailUserSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const adminDetailUserOrderSchema = z.object({
+	courseVersion: z.object({
+		courseVersionID: z.string().uuid(),
+		courseID: z.string().uuid(),
+		titleVN: z.string(),
+		titleEN: z.string(),
+		version: z.number(),
+		imageUrl: z.string().nullable(),
+	}),
+	club: z.object({
+		clubID: z.string().uuid(),
+		nameVN: z.string(),
+		nameEN: z.string(),
+		imageUrl: z.string().nullable(),
+	}),
+	time: z.string(),
+	amount: z.number().nonnegative(),
+	status: z.string(),
+})
+
+export const getAdminDetailUserOrdersResponseSchema = z.object({
+	data: z.array(adminDetailUserOrderSchema),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export const adminDetailUserTransactionSchema = z.object({
+	transactionID: z.string().uuid(),
+	wallet: z.object({
+		walletID: z.string().uuid(),
+		ownerID: z.string().uuid(),
+		ownerName: z.string(),
+		bankNumber: z.string().nullable(),
+		bank: z.string().nullable(),
+		balance: z.number(),
+		createdAt: z.string(),
+		updatedAt: z.string(),
+	}),
+	amount: z.number(),
+	type: z.string(),
+	club: z.object({
+		clubID: z.string().uuid(),
+		nameVN: z.string(),
+		nameEN: z.string(),
+		imageUrl: z.string().nullable(),
+	}).nullable(),
+	referenceID: z.string().uuid().nullable(),
+	createdAt: z.string(),
+	order: z.object({
+		orderID: z.string().uuid(),
+		type: z.string(),
+		totalAmount: z.number(),
+		status: z.string(),
+		createAt: z.string(),
+		item: z.object({
+			productID: z.string().uuid(),
+			productNameVN: z.string(),
+			productNameEN: z.string(),
+			type: z.string(),
+			quantity: z.number(),
+		}).nullable(),
+	}).nullable(),
+	withdrawRequest: z.object({
+		withdrawID: z.string().uuid(),
+		amount: z.number(),
+		status: z.string(),
+		createdAt: z.string(),
+		note: z.string().nullable(),
+	}).nullable(),
+})
+
+export const getAdminDetailUserTransactionsResponseSchema = z.object({
+	data: z.array(adminDetailUserTransactionSchema),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminDetailClubManager = z.infer<typeof adminDetailClubManagerSchema>
+export type AdminDetailClubManagersData = z.infer<typeof getAdminDetailClubManagersResponseSchema>["data"]
+export type AdminDetailUser = z.infer<typeof adminDetailUserSchema>
+export type AdminDetailUsersData = z.infer<typeof getAdminDetailUsersResponseSchema>["data"]
+export type AdminDetailUserOrder = z.infer<typeof adminDetailUserOrderSchema>
+export type AdminDetailUserTransaction = z.infer<typeof adminDetailUserTransactionSchema>
