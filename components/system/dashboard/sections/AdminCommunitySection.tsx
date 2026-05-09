@@ -12,18 +12,23 @@ import {
   UserCheck,
   Calendar,
   ExternalLink,
-  X
+  X,
+  Hexagon
 } from "lucide-react";
 import {
   useGetAdminDetailClubManagers,
   useGetAdminDetailUsers,
   useGetAdminDetailUserOrders,
-  useGetAdminDetailUserTransactions
+  useGetAdminDetailUserTransactions,
+  useGetAdminDetailCourses,
+  useGetAdminDetailClubsOverview
 } from "@/hooks/dashboard/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import Image from "next/image";
+import AdminCommunityCoursesSection from "./AdminCommunityCoursesSection";
+import AdminCommunityClubsSection from "./AdminCommunityClubsSection";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +55,7 @@ const formatVND = (v: number, locale: string) => {
 export default function AdminCommunitySection() {
   const t = useTranslations("SystemDashboard.community");
   const locale = useLocale();
-  const [subTab, setSubTab] = useState<"clubManagers" | "users">("clubManagers");
+  const [subTab, setSubTab] = useState<"clubManagers" | "users" | "courses" | "clubs">("clubManagers");
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
@@ -71,9 +76,11 @@ export default function AdminCommunitySection() {
 
   const { data: userOrders, isLoading: isOrdersLoading } = useGetAdminDetailUserOrders(selectedUser?.id);
   const { data: userTransactions, isLoading: isTransactionsLoading } = useGetAdminDetailUserTransactions(selectedUser?.id);
+  const { data: coursesData, isLoading: isCoursesLoading } = useGetAdminDetailCourses({ pageIndex: page, pageSize });
+  const { data: clubsOverviewData, isLoading: isClubsOverviewLoading } = useGetAdminDetailClubsOverview({ pageIndex: page, pageSize });
 
-  const isLoading = subTab === "clubManagers" ? isClubManagersLoading : isUsersLoading;
-  const currentData = subTab === "clubManagers" ? clubManagersData : usersData;
+  const isLoading = subTab === "clubManagers" ? isClubManagersLoading : subTab === "users" ? isUsersLoading : subTab === "courses" ? isCoursesLoading : isClubsOverviewLoading;
+  const currentData = subTab === "clubManagers" ? clubManagersData : subTab === "users" ? usersData : subTab === "courses" ? coursesData : clubsOverviewData;
 
   const handlePageChange = (p: number) => {
     setPage(p);
@@ -94,16 +101,16 @@ export default function AdminCommunitySection() {
       {/* HEADER & TOGGLE */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">{t("title")}</h2>
+          <h2 className="text-xl font-bold text-white">{locale === "en" ? "Data Analysis" : "Phân tích Dữ liệu"}</h2>
           <div className="flex items-center gap-3 mt-1">
-            <p className="text-[11px] text-[#6a7080]">{t("subtitle")}</p>
+            <p className="text-[11px] text-[#6a7080]">{locale === "en" ? "Detailed oversight of courses, managers & members" : "Giám sát chi tiết các khóa học, quản lý & học viên"}</p>
             {currentData && (
               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-md">
                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight">
                   {locale === "en"
-                    ? `Total: ${currentData.totalRecords} ${subTab === "clubManagers" ? "managers" : "members"}`
-                    : `Hiện có ${currentData.totalRecords} ${subTab === "clubManagers" ? "quản lý CLB" : "học viên"}`
+                    ? `Total: ${currentData.totalRecords} ${subTab === "clubManagers" ? "managers" : subTab === "users" ? "members" : subTab === "courses" ? "courses" : "clubs"}`
+                    : `Hiện có ${currentData.totalRecords} ${subTab === "clubManagers" ? "quản lý CLB" : subTab === "users" ? "học viên" : subTab === "courses" ? "khóa học" : "câu lạc bộ"}`
                   }
                 </span>
               </div>
@@ -112,12 +119,12 @@ export default function AdminCommunitySection() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-[#1e2130] border border-white/[0.07] rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-[#1e2130] border border-white/[0.07] rounded-xl p-1 overflow-hidden">
             <button
               onClick={() => { setSubTab("clubManagers"); setPage(1); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all",
-                subTab === "clubManagers" ? "bg-blue-500 text-white shadow-lg" : "text-[#6a7080] hover:text-[#a0a8b8]"
+                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap",
+                subTab === "clubManagers" ? "bg-blue-500 text-white shadow-lg" : "text-greyscale-500 hover:text-white"
               )}
             >
               <UserCheck size={14} />
@@ -126,125 +133,172 @@ export default function AdminCommunitySection() {
             <button
               onClick={() => { setSubTab("users"); setPage(1); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all",
-                subTab === "users" ? "bg-purple-500 text-white shadow-lg" : "text-[#6a7080] hover:text-[#a0a8b8]"
+                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap",
+                subTab === "users" ? "bg-purple-500 text-white shadow-lg" : "text-greyscale-500 hover:text-white"
               )}
             >
               <Users size={14} />
               <span>{t("users")}</span>
+            </button>
+            <button
+              onClick={() => { setSubTab("courses"); setPage(1); }}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap",
+                subTab === "courses" ? "bg-emerald-500 text-white shadow-lg" : "text-greyscale-500 hover:text-white"
+              )}
+            >
+              <ShoppingBag size={14} />
+              <span>{locale === "en" ? "Courses" : "Khóa học"}</span>
+            </button>
+            <button
+              onClick={() => { setSubTab("clubs"); setPage(1); }}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 text-[11px] font-bold rounded-lg transition-all whitespace-nowrap",
+                subTab === "clubs" ? "bg-amber-500 text-white shadow-lg" : "text-greyscale-500 hover:text-white"
+              )}
+            >
+              <Hexagon size={14} />
+              <span>{locale === "en" ? "Clubs" : "Câu lạc bộ"}</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* CONTENT GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-[#181b22] border border-white/[0.07] rounded-2xl p-5 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="w-12 h-12 rounded-xl bg-white/[0.06]" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24 bg-white/[0.06]" />
-                    <Skeleton className="h-3 w-32 bg-white/[0.06]" />
+      {(subTab === "clubManagers" || subTab === "users") && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-[#181b22] border border-white/[0.07] rounded-2xl p-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-12 h-12 rounded-xl bg-white/[0.06]" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24 bg-white/[0.06]" />
+                      <Skeleton className="h-3 w-32 bg-white/[0.06]" />
+                    </div>
                   </div>
+                  <Skeleton className="h-12 w-full rounded-xl bg-white/[0.06]" />
                 </div>
-                <Skeleton className="h-12 w-full rounded-xl bg-white/[0.06]" />
-              </div>
-            ))
-          ) : (
-            currentData?.data.map((item: any, idx: number) => (
-              <motion.div
-                key={item.userId}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] hover:bg-[#1c2029] rounded-2xl p-5 transition-all duration-300 relative overflow-hidden"
-              >
-                {/* BG GLOW */}
-                <div className={cn(
-                  "absolute -top-12 -right-12 w-24 h-24 blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-500",
-                  subTab === "clubManagers" ? "bg-blue-500" : "bg-purple-500"
-                )} />
+              ))
+            ) : (
+              currentData?.data.map((item: any, idx: number) => (
+                <motion.div
+                  key={item.userId}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] hover:bg-[#1c2029] rounded-2xl p-5 transition-all duration-300 relative overflow-hidden"
+                >
+                  {/* BG GLOW */}
+                  <div className={cn(
+                    "absolute -top-12 -right-12 w-24 h-24 blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-500",
+                    subTab === "clubManagers" ? "bg-blue-500" : "bg-purple-500"
+                  )} />
 
-                <div className="flex items-center gap-4 mb-5 relative z-10">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#242835] border border-white/[0.05]">
-                      {item.avatarUrl ? (
-                        <Image
-                          src={item.avatarUrl}
-                          alt={item.fullName}
-                          width={48}
-                          height={48}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/20">
-                          <Users size={20} />
-                        </div>
+                  <div className="flex items-center gap-4 mb-5 relative z-10">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#242835] border border-white/[0.05]">
+                        {item.avatarUrl ? (
+                          <Image
+                            src={item.avatarUrl}
+                            alt={item.fullName}
+                            width={48}
+                            height={48}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/20">
+                            <Users size={20} />
+                          </div>
+                        )}
+                      </div>
+                      <div className={cn(
+                        "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#181b22] flex items-center justify-center",
+                        subTab === "clubManagers" ? "bg-blue-500" : "bg-purple-500"
+                      )}>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[13px] font-bold text-white truncate group-hover:text-white transition-colors">
+                        {item.fullName}
+                      </h4>
+                      <p className="text-[11px] text-[#5a6070] truncate">{item.email}</p>
+                      {subTab === "clubManagers" && (item as any).clubNameVN && (
+                        <p className="text-[10px] font-medium text-amber-500/80 line-clamp-2 leading-tight mt-0.5">
+                          {locale === "en" ? (item as any).clubNameEN : (item as any).clubNameVN}
+                        </p>
                       )}
                     </div>
-                    <div className={cn(
-                      "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[#181b22] flex items-center justify-center",
-                      subTab === "clubManagers" ? "bg-blue-500" : "bg-purple-500"
-                    )}>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    </div>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[13px] font-bold text-white truncate group-hover:text-white transition-colors">
-                      {item.fullName}
-                    </h4>
-                    <p className="text-[11px] text-[#5a6070] truncate">{item.email}</p>
-                  </div>
-                </div>
-
-                <div className="bg-[#111318]/50 rounded-xl p-3 border border-white/[0.03] mb-4 group-hover:bg-[#111318]/80 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "p-1.5 rounded-lg",
-                        subTab === "clubManagers" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
-                      )}>
-                        {subTab === "clubManagers" ? <Wallet size={12} /> : <ShoppingBag size={12} />}
+                  <div className="bg-[#111318]/50 rounded-xl p-3 border border-white/[0.03] mb-4 group-hover:bg-[#111318]/80 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "p-1.5 rounded-lg",
+                          subTab === "clubManagers" ? "bg-blue-500/10 text-blue-400" : "bg-purple-500/10 text-purple-400"
+                        )}>
+                          {subTab === "clubManagers" ? <Wallet size={12} /> : <ShoppingBag size={12} />}
+                        </div>
+                        <span className="text-[10px] text-[#5a6070] font-medium uppercase tracking-wider">
+                          {subTab === "clubManagers" ? t("walletBalance") : t("totalSpent")}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-[#5a6070] font-medium uppercase tracking-wider">
-                        {subTab === "clubManagers" ? t("walletBalance") : t("totalSpent")}
+                      <span className="text-[13px] font-bold text-white">
+                        {formatVND(subTab === "clubManagers" ? (item as any).walletBalance : (item as any).totalSpent, locale)}
                       </span>
                     </div>
-                    <span className="text-[13px] font-bold text-white">
-                      {formatVND(subTab === "clubManagers" ? (item as any).walletBalance : (item as any).totalSpent, locale)}
-                    </span>
                   </div>
-                </div>
 
-                <div className="flex gap-2">
-                  {subTab === "users" && (
-                    <button
-                      onClick={() => openOrderModal(item.userId, item.fullName)}
-                      className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
-                    >
-                      <ShoppingBag size={14} className="text-purple-400" />
-                      {t("viewOrders")}
-                    </button>
-                  )}
-                  {subTab === "clubManagers" && (
-                    <button
-                      onClick={() => openTransactionModal(item.userId, item.fullName)}
-                      className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
-                    >
-                      <Wallet size={14} className="text-blue-400" />
-                      {t("viewTransactions")}
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
-      </div>
+                  <div className="flex gap-2">
+                    {subTab === "users" && (
+                      <button
+                        onClick={() => openOrderModal(item.userId, item.fullName)}
+                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                      >
+                        <ShoppingBag size={14} className="text-purple-400" />
+                        {t("viewOrders")}
+                      </button>
+                    )}
+                    {subTab === "clubManagers" && (
+                      <button
+                        onClick={() => openTransactionModal(item.userId, item.fullName)}
+                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                      >
+                        <Wallet size={14} className="text-blue-400" />
+                        {t("viewTransactions")}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {subTab === "courses" && (
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AdminCommunityCoursesSection page={page} pageSize={pageSize} />
+        </motion.div>
+      )}
+
+      {subTab === "clubs" && (
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AdminCommunityClubsSection page={page} pageSize={pageSize} />
+        </motion.div>
+      )}
 
       {/* PAGINATION */}
       {currentData && currentData.totalPages > 1 && (
@@ -264,9 +318,11 @@ export default function AdminCommunitySection() {
                 onClick={() => handlePageChange(i + 1)}
                 className={cn(
                   "w-7 h-7 text-[11px] font-bold rounded-lg transition-all",
-                  page === i + 1
-                    ? (subTab === "clubManagers" ? "bg-blue-500 text-white" : "bg-purple-500 text-white")
-                    : "text-[#5a6070] hover:text-[#a0a8b8]"
+                  page !== i + 1 && "text-[#5a6070] hover:text-[#a0a8b8]",
+                  page === i + 1 && subTab === "clubManagers" && "bg-blue-500 text-white",
+                  page === i + 1 && subTab === "users" && "bg-purple-500 text-white",
+                  page === i + 1 && subTab === "courses" && "bg-emerald-500 text-white",
+                  page === i + 1 && subTab === "clubs" && "bg-amber-500 text-white"
                 )}
               >
                 {i + 1}
@@ -284,7 +340,7 @@ export default function AdminCommunitySection() {
         </div>
       )}
 
-      {!isLoading && currentData?.data.length === 0 && (
+      {currentData && !isLoading && currentData?.data.length === 0 && (
         <div className="bg-[#181b22] border border-dashed border-white/[0.07] rounded-3xl py-20 flex flex-col items-center justify-center text-center">
           <div className="w-16 h-16 rounded-2xl bg-white/[0.02] flex items-center justify-center mb-4">
             <Users size={32} className="text-[#3a4050]" />
