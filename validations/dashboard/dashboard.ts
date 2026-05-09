@@ -525,8 +525,8 @@ export const adminDetailClubManagerSchema = z.object({
 	email: z.string(),
 	avatarUrl: z.string().nullable(),
 	walletBalance: z.number().nonnegative(),
-	clubNameVN: z.string().optional(),
-	clubNameEN: z.string().optional(),
+	clubNameVN: z.string().nullish(),
+	clubNameEN: z.string().nullish(),
 })
 
 export const getAdminDetailClubManagersResponseSchema = z.object({
