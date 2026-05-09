@@ -51,6 +51,20 @@ import {
 	getAdminDetailUserOrdersResponseSchema,
 	AdminDetailUserTransaction,
 	getAdminDetailUserTransactionsResponseSchema,
+	AdminDetailCourse,
+	AdminDetailCoursesData,
+	getAdminDetailCoursesResponseSchema,
+	AdminDetailCourseClub,
+	AdminDetailCourseClubsData,
+	getAdminDetailCourseClubsResponseSchema,
+	CourseFeedback,
+	getCourseFeedbacksResponseSchema,
+	AdminDetailClubOverview,
+	AdminDetailClubsOverviewData,
+	getAdminDetailClubsOverviewResponseSchema,
+	AdminClubTransaction,
+	AdminClubTransactionsData,
+	getAdminDetailClubTransactionsResponseSchema,
 } from "@/validations/dashboard/dashboard"
 
 export const useGetClubRevenueOverview = (clubId?: string) => {
@@ -435,3 +449,83 @@ export const useGetAdminDetailUserTransactions = (userId?: string) => {
 		}
 	})
 }
+
+export const useGetAdminDetailCourses = (params: { pageIndex: number, pageSize: number }) => {
+	return useQuery<AdminDetailCoursesData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-courses", params],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/detail-dashboards/courses", {
+				params: {
+					page: params.pageIndex,
+					pageSize: params.pageSize,
+				}
+			})
+			const parsed = getAdminDetailCoursesResponseSchema.parse(response.data)
+			return parsed.data
+		}
+	})
+}
+
+export const useGetAdminDetailCourseClubs = (
+	courseId: string | null,
+	params: { pageIndex: number; pageSize: number }
+) => {
+	return useQuery<AdminDetailCourseClubsData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-course-clubs", courseId, params],
+		queryFn: async () => {
+			const response = await apiClient.get(
+				`/community/detail-dashboards/courses/${courseId}/clubs`,
+				{
+					params: {
+						page: params.pageIndex,
+						pageSize: params.pageSize,
+					}
+				}
+			)
+			const parsed = getAdminDetailCourseClubsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		enabled: !!courseId,
+	})
+}
+
+export const useGetCourseFeedbacks = (courseId: string | null) => {
+	return useQuery<CourseFeedback[], AxiosError<ApiError>>({
+		queryKey: ["course-feedbacks", courseId],
+		queryFn: async () => {
+			const response = await apiClient.get(`/academy/feedbacks/courses/${courseId}`)
+			const parsed = getCourseFeedbacksResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		enabled: !!courseId,
+	})
+}
+
+export const useGetAdminDetailClubsOverview = (params: { pageIndex: number; pageSize: number }) => {
+	return useQuery<AdminDetailClubsOverviewData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-clubs-overview", params],
+		queryFn: async () => {
+			const response = await apiClient.get("/community/detail-dashboards/clubs", {
+				params: {
+					page: params.pageIndex,
+					pageSize: params.pageSize,
+				}
+			})
+			const parsed = getAdminDetailClubsOverviewResponseSchema.parse(response.data)
+			return parsed.data
+		},
+	})
+}
+
+export const useGetAdminDetailClubTransactions = (clubId: string, params: { page: number; pageSize: number; courseId?: string }) => {
+	return useQuery<AdminClubTransactionsData, AxiosError<ApiError>>({
+		queryKey: ["admin-detail-club-transactions", clubId, params],
+		queryFn: async () => {
+			const response = await apiClient.get(`/community/detail-dashboards/clubs/${clubId}/transactions`, { params })
+			const parsed = getAdminDetailClubTransactionsResponseSchema.parse(response.data)
+			return parsed.data
+		},
+		enabled: !!clubId,
+	})
+}
+

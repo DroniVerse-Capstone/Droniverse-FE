@@ -525,6 +525,8 @@ export const adminDetailClubManagerSchema = z.object({
 	email: z.string(),
 	avatarUrl: z.string().nullable(),
 	walletBalance: z.number().nonnegative(),
+	clubNameVN: z.string().optional(),
+	clubNameEN: z.string().optional(),
 })
 
 export const getAdminDetailClubManagersResponseSchema = z.object({
@@ -642,3 +644,134 @@ export type AdminDetailUser = z.infer<typeof adminDetailUserSchema>
 export type AdminDetailUsersData = z.infer<typeof getAdminDetailUsersResponseSchema>["data"]
 export type AdminDetailUserOrder = z.infer<typeof adminDetailUserOrderSchema>
 export type AdminDetailUserTransaction = z.infer<typeof adminDetailUserTransactionSchema>
+
+export const adminDetailCourseSchema = z.object({
+	totalRevenue: z.number().nonnegative(),
+	courseId: z.string().uuid(),
+	currentVersionId: z.string().uuid(),
+	titleVN: z.string(),
+	titleEN: z.string(),
+	imageUrl: z.string().nullable(),
+	isPublished: z.boolean(),
+	totalLearners: z.number().int().nonnegative(),
+	averageRating: z.number(),
+})
+
+export const getAdminDetailCoursesResponseSchema = z.object({
+	data: z.object({
+		data: z.array(adminDetailCourseSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminDetailCourse = z.infer<typeof adminDetailCourseSchema>
+export type AdminDetailCoursesData = z.infer<typeof getAdminDetailCoursesResponseSchema>["data"]
+
+export const adminDetailCourseClubSchema = z.object({
+	clubId: z.string().uuid(),
+	clubNameVN: z.string(),
+	clubNameEN: z.string(),
+	imageUrl: z.string().nullable(),
+	totalLearners: z.number().int().nonnegative(),
+	totalRevenue: z.number().nonnegative(),
+})
+
+export const getAdminDetailCourseClubsResponseSchema = z.object({
+	data: z.object({
+		data: z.array(adminDetailCourseClubSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+	isSuccess: z.boolean(),
+	message: z.string(),
+})
+
+export type AdminDetailCourseClub = z.infer<typeof adminDetailCourseClubSchema>
+export type AdminDetailCourseClubsData = z.infer<typeof getAdminDetailCourseClubsResponseSchema>["data"]
+
+export const courseFeedbackUserSchema = z.object({
+	userId: z.string().uuid(),
+	fullName: z.string(),
+	email: z.string(),
+	avatarUrl: z.string().nullable(),
+})
+
+export const courseFeedbackSchema = z.object({
+	feedbackID: z.string().uuid(),
+	user: courseFeedbackUserSchema,
+	rating: z.number(),
+	content: z.string(),
+	createAt: z.string(),
+})
+
+export const getCourseFeedbacksResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+	data: z.array(courseFeedbackSchema),
+})
+
+export type CourseFeedback = z.infer<typeof courseFeedbackSchema>
+
+export const adminDetailClubOverviewSchema = z.object({
+	clubId: z.string().uuid(),
+	clubNameVN: z.string(),
+	clubNameEN: z.string(),
+	imageUrl: z.string().nullable(),
+	totalMembers: z.number().int().nonnegative(),
+	totalRevenue: z.number().nonnegative(),
+	status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "ARCHIVED"]),
+})
+
+export const getAdminDetailClubsOverviewResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+	data: z.object({
+		data: z.array(adminDetailClubOverviewSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	}),
+})
+
+export type AdminDetailClubOverview = z.infer<typeof adminDetailClubOverviewSchema>
+export type AdminDetailClubsOverviewData = z.infer<typeof getAdminDetailClubsOverviewResponseSchema>["data"]
+
+export const adminClubTransactionUserSchema = z.object({
+	userId: z.string().uuid(),
+	fullName: z.string(),
+	email: z.string(),
+	avatarUrl: z.string().nullable(),
+})
+
+export const adminClubTransactionSchema = z.object({
+	user: adminClubTransactionUserSchema,
+	courseId: z.string().uuid(),
+	courseNameVN: z.string(),
+	courseNameEN: z.string(),
+	courseImageUrl: z.string().nullable(),
+	amount: z.number().nonnegative(),
+	transactionDate: z.string(),
+})
+
+export const getAdminDetailClubTransactionsResponseSchema = z.object({
+	isSuccess: z.boolean(),
+	message: z.string(),
+	data: z.object({
+		data: z.array(adminClubTransactionSchema),
+		totalRecords: z.number().int().nonnegative(),
+		pageIndex: z.number().int().nonnegative(),
+		pageSize: z.number().int().nonnegative(),
+		totalPages: z.number().int().nonnegative(),
+	})
+})
+
+export type AdminClubTransaction = z.infer<typeof adminClubTransactionSchema>
+export type AdminClubTransactionsData = z.infer<typeof getAdminDetailClubTransactionsResponseSchema>["data"]
