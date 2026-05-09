@@ -61,6 +61,7 @@ export const clubCourseOverviewSchema = z.object({
 	certificateImageUrl: z.string().nullable(),
 	isUnlock: z.boolean(),
 	isEligibleByLevel: z.boolean(),
+	isPrerequisitesCompleted: z.boolean(),
 	lastUpdatedBy: clubCourseOverviewUserSchema.nullable(),
 	lastUpdatedAt: z.string().nullable(),
 	miniProduct: clubCourseOverviewMiniProductSchema.nullable(),

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetUserEnrollments } from "@/hooks/enrollment/useUserEnrollment";
-import { useTranslations } from "@/providers/i18n-provider";
+import { useLocale, useTranslations } from "@/providers/i18n-provider";
 import { CourseLevel, EnrollmentStatus } from "@/validations/enrollment/user-enrollment";
 import InlineFilterRow, {
   InlineFilterOption,
@@ -22,6 +22,7 @@ const UUID_SUFFIX_REGEX =
 
 export default function MemberMyCourse() {
   const t = useTranslations("ManagerCourse");
+  const locale = useLocale();
   const router = useRouter();
   const params = useParams<{ clubSlug?: string }>();
   const clubSlug = params?.clubSlug;
@@ -43,8 +44,8 @@ export default function MemberMyCourse() {
   const [currentPage, setCurrentPage] = React.useState(1);
 
   const statusOptions: InlineFilterOption<EnrollmentStatus>[] = [
-    { value: "ACTIVE", label: "Đang học" },
-    { value: "COMPLETED", label: "Hoàn thành" },
+    { value: "ACTIVE", label: locale === "vi" ? "Đang học" : "In Progress" },
+    { value: "COMPLETED", label: locale === "vi" ? "Hoàn thành" : "Completed" },
   ];
 
   const { data, isLoading, isError, error, isFetching } = useGetUserEnrollments(
@@ -102,7 +103,7 @@ export default function MemberMyCourse() {
             </div>
             
             <InlineFilterRow
-              label="Trạng thái"
+              label={locale === "vi" ? "Trạng thái" : "Status"}
               selectedValue={selectedStatus}
               options={statusOptions}
               onChange={updateStatus}

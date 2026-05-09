@@ -337,9 +337,9 @@
       "title": "Tổng quan"
     },
     "clubs": {
-      "title": "Clubs",
+      "title": "Câu lạc bộ",
       "subitems": {
-        "club": "Quản lý club",
+        "club": "Quản lý câu lạc bộ",
         "request": "Yêu cầu đăng ký"
       }
     },

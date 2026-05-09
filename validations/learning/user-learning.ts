@@ -267,7 +267,7 @@ export const submitUserQuizDataSchema = z.object({
 	score: z.number().min(0),
 	isPassed: z.boolean(),
 	bestScore: z.number().min(0),
-	completion: completeUserLessonDataSchema,
+	completion: completeUserLessonDataSchema.nullable(),
 })
 
 export const submitUserQuizResponseSchema = z.object({

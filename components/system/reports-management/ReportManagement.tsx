@@ -26,9 +26,9 @@ import type { Report } from "@/validations/report/report";
 const PAGE_SIZE = 10;
 
 const REPORT_TYPE_OPTIONS = [
-  { label: "Tất cả", value: undefined },
-  { label: "Club", value: "Club" },
-  { label: "CourseVersion", value: "CourseVersion" },
+  { labelEN: "All", labelVN: "Tất cả", value: undefined },
+  { labelEN: "Club", labelVN: "Câu lạc bộ", value: "Club" },
+  { labelEN: "CourseVersion", labelVN: "Khóa học", value: "CourseVersion" },
 ] as const;
 
 type ReportTypeValue = (typeof REPORT_TYPE_OPTIONS)[number]["value"];
@@ -159,23 +159,26 @@ export default function ReportManagement() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {REPORT_TYPE_OPTIONS.map((option) => (
-            <button
-              key={option.label}
-              type="button"
-              onClick={() => {
-                setCurrentPage(1);
-                setReportType(option.value);
-              }}
-              className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
-                reportType === option.value
-                  ? "bg-primary text-greyscale-0"
-                  : "bg-greyscale-700 text-greyscale-100 hover:bg-greyscale-600"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+          {REPORT_TYPE_OPTIONS.map((option) => {
+            const displayLabel = locale === "vi" ? option.labelVN : option.labelEN;
+            return (
+              <button
+                key={`${option.labelEN}-${option.labelVN}`}
+                type="button"
+                onClick={() => {
+                  setCurrentPage(1);
+                  setReportType(option.value);
+                }}
+                className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                  reportType === option.value
+                    ? "bg-primary text-greyscale-0"
+                    : "bg-greyscale-700 text-greyscale-100 hover:bg-greyscale-600"
+                }`}
+              >
+                {displayLabel}
+              </button>
+            );
+          })}
         </div>
       </header>
 

@@ -14,6 +14,7 @@ import {
 } from "@/hooks/notification/useNotification";
 import { cn } from "@/lib/utils";
 import { NotificationItem } from "@/validations/notification/notification";
+import { useLocale } from "@/providers/i18n-provider";
 
 const PAGE_SIZE = 10;
 
@@ -51,6 +52,7 @@ function getStatusLabel(status: NotificationItem["status"]) {
 }
 
 export default function Notification() {
+  const locale = useLocale();
   const router = useRouter();
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -100,10 +102,12 @@ export default function Notification() {
 
             <div>
               <h1 className="mt-1 text-2xl font-semibold text-greyscale-0 md:text-3xl">
-                Thông báo của bạn
+                {locale === "vi" ? "Thông báo của bạn" : "Your Notifications"}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-greyscale-300">
-                Xem các thông báo mới nhất, đánh dấu đã đọc từng mục hoặc xử lý tất cả cùng lúc.
+                {locale === "vi"
+                  ? "Xem các thông báo mới nhất, đánh dấu đã đọc từng mục hoặc xử lý tất cả cùng lúc."
+                  : "View the latest notifications, mark each as read, or process them all at once."}
               </p>
             </div>
           </div>
@@ -122,7 +126,7 @@ export default function Notification() {
               ) : (
                 <CheckCheck className="mr-2 h-4 w-4" />
               )}
-              Đánh dấu tất cả đã đọc
+              {locale === "vi" ? "Đánh dấu tất cả đã đọc" : "Mark all as read"}
             </Button>
           </div>
         </div>
@@ -132,7 +136,7 @@ export default function Notification() {
             <div className="flex min-h-80 items-center justify-center py-16 text-greyscale-300">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-5 w-5 animate-spin text-primary-200" />
-                Đang tải thông báo...
+                {locale === "vi" ? "Đang tải thông báo..." : "Loading notifications..."}
               </div>
             </div>
           </div>
@@ -141,13 +145,15 @@ export default function Notification() {
             <div className="flex min-h-80 flex-col items-center justify-center py-16 text-center">
               <Bell className="mb-4 h-12 w-12 text-greyscale-500" />
               <h2 className="text-lg font-medium text-greyscale-0">
-                Không thể tải thông báo
+                {locale === "vi" ? "Không thể tải thông báo" : "Cannot load notifications"}
               </h2>
               <p className="mt-2 max-w-md text-sm text-greyscale-400">
-                Hệ thống không thể lấy dữ liệu thông báo lúc này. Vui lòng thử lại sau.
+                {locale === "vi"
+                  ? "Hệ thống không thể lấy dữ liệu thông báo lúc này. Vui lòng thử lại sau."
+                  : "The system cannot fetch notification data at the moment. Please try again later."}
               </p>
               <Button className="mt-6" onClick={() => notificationsQuery.refetch()}>
-                Thử lại
+                {locale === "vi" ? "Thử lại" : "Try again"}
               </Button>
             </div>
           </div>
@@ -156,13 +162,15 @@ export default function Notification() {
             <div className="flex min-h-80 flex-col items-center justify-center py-16 text-center">
               <Bell className="mb-4 h-12 w-12 text-greyscale-500" />
               <h2 className="text-lg font-medium text-greyscale-0">
-                Không có thông báo
+                {locale === "vi" ? "Không có thông báo" : "No notifications"}
               </h2>
               <p className="mt-2 max-w-md text-sm text-greyscale-400">
-                Bạn chưa có thông báo nào ở trang hiện tại.
+                {locale === "vi"
+                  ? "Bạn chưa có thông báo nào ở trang hiện tại."
+                  : "You don't have any notifications at the moment."}
               </p>
               <Button className="mt-6" variant="outline" onClick={() => router.back()}>
-                Quay lại
+                {locale === "vi" ? "Quay lại" : "Go back"}
               </Button>
             </div>
           </div>
@@ -206,7 +214,7 @@ export default function Notification() {
                       disabled={isRead || markNotificationAsReadMutation.isPending}
                       className="shrink-0"
                     >
-                      {isRead ? "Đã đọc" : "Đánh dấu đã đọc"}
+                      {isRead ? (locale === "vi" ? "Đã đọc" : "Read") : (locale === "vi" ? "Đánh dấu đã đọc" : "Mark as read")}
                     </Button>
 
                   </div>
@@ -228,7 +236,7 @@ export default function Notification() {
 
             <div className="flex flex-col items-center gap-4 rounded border border-greyscale-700 bg-greyscale-800/70 px-5 py-5 md:flex-row md:justify-between">
               <div className="text-sm text-greyscale-300">
-                Đang xem trang <span className="font-medium text-greyscale-0">{pageIndex}</span> trên <span className="font-medium text-greyscale-0">{totalPages || 1}</span>.
+                 { locale === "vi" ? "Đang xem trang" : "Viewing page" } <span className="font-medium text-greyscale-0">{pageIndex}</span> { locale === "vi" ? "trên" : "of" } <span className="font-medium text-greyscale-0">{totalPages || 1}</span>.
               </div>
               <AppPagination
                 currentPage={pageIndex}

@@ -66,7 +66,7 @@ function FilterSelect({ label, value, options, onChange }: {
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
-          className="appearance-none bg-[#1e2130] border border-white/[0.07] rounded-xl px-3 pr-8 py-2 text-[11px] text-white outline-none focus:border-blue-500/50 transition-all w-full cursor-pointer"
+          className="appearance-none bg-[#1e2130] border border-white/[0.07] rounded px-3 pr-8 py-2 text-[11px] text-white outline-none focus:border-blue-500/50 transition-all w-full cursor-pointer"
         >
           {options.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -150,7 +150,7 @@ export default function AdminOrderStatisticsSection({
       </div>
 
       {/* Table Card */}
-      <div className="bg-[#181b22] rounded-2xl border border-white/[0.07] overflow-hidden">
+      <div className="bg-[#181b22] rounded border border-white/[0.07] overflow-hidden">
 
         {/* Table Header */}
         <div className="p-5 border-b border-white/[0.07]">
@@ -187,7 +187,7 @@ export default function AdminOrderStatisticsSection({
                 <select
                   value={filters.pageSize || 10}
                   onChange={e => { onFilterChange({ ...filters, pageSize: Number(e.target.value), currentPage: 1 }); onPageChange(1); }}
-                  className="appearance-none bg-[#1e2130] border border-white/[0.07] rounded-xl px-3 pr-8 py-2 text-[11px] text-white outline-none focus:border-blue-500/50 transition-all w-full cursor-pointer"
+                  className="appearance-none bg-[#1e2130] border border-white/[0.07] rounded px-3 pr-8 py-2 text-[11px] text-white outline-none focus:border-blue-500/50 transition-all w-full cursor-pointer"
                 >
                   {[5, 10, 20].map(n => <option key={n} value={n}>{t("table.perPageOption", { n })}</option>)}
                 </select>

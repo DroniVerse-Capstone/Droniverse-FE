@@ -59,7 +59,7 @@ function KpiCard({ label, value, sub, subLabel, trend, diff, isLoading, delay, l
       initial={{ opacity: 0, y: 12 }}
       animate={m ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.35, delay: delay * 0.07 }}
-      className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+      className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
     >
       <p className="text-[11px] text-[#7a8090] font-medium mb-3 uppercase tracking-wide">{label}</p>
       {isLoading ? (
@@ -332,7 +332,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.05 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -383,7 +383,7 @@ export default function SystemManagerDashBoard() {
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col gap-6 mb-8 p-6 bg-white/[0.02] border border-white/[0.08] rounded-2xl backdrop-blur-md shadow-xl relative overflow-hidden"
+                      className="flex flex-col gap-6 mb-8 p-6 bg-white/[0.02] border border-white/[0.08] rounded backdrop-blur-md shadow-xl relative overflow-hidden"
                     >
                       <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/40" />
 
@@ -407,7 +407,7 @@ export default function SystemManagerDashBoard() {
                               onChange={(e) => setFromDateGrowth(e.target.value)}
                               className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
                             />
-                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
                               <span className={fromDateGrowth ? "text-white font-medium" : "text-[#5a6070]"}>
                                 {fromDateGrowth ? format(new Date(fromDateGrowth), "dd/MM/yyyy") : "DD/MM/YYYY"}
                               </span>
@@ -438,7 +438,7 @@ export default function SystemManagerDashBoard() {
                               onChange={(e) => setToDateGrowth(e.target.value)}
                               className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
                             />
-                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                            <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
                               <span className={toDateGrowth ? "text-white font-medium" : "text-[#5a6070]"}>
                                 {toDateGrowth ? format(new Date(toDateGrowth), "dd/MM/yyyy") : "DD/MM/YYYY"}
                               </span>
@@ -514,7 +514,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.1 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -574,7 +574,7 @@ export default function SystemManagerDashBoard() {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden mb-6"
                       >
-                        <div className="p-5 bg-white/[0.02] border border-white/[0.08] rounded-xl grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div className="p-5 bg-white/[0.02] border border-white/[0.08] rounded grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                           <div className="space-y-2.5">
                             <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                               <Calendar size={12} />
@@ -593,7 +593,7 @@ export default function SystemManagerDashBoard() {
                                 onChange={(e) => setStartDateFrom(e.target.value)}
                                 className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
                               />
-                              <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                              <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
                                 <span className={startDateFrom ? "text-white font-medium" : "text-[#5a6070]"}>
                                   {startDateFrom ? format(new Date(startDateFrom), "dd/MM/yyyy") : "DD/MM/YYYY"}
                                 </span>
@@ -621,7 +621,7 @@ export default function SystemManagerDashBoard() {
                                   onChange={(e) => setEndDateTo(e.target.value)}
                                   className="absolute inset-0 opacity-0 cursor-pointer z-20 w-full h-full [color-scheme:dark]"
                                 />
-                                <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded-xl px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
+                                <div className="bg-[#111318] border border-white/[0.1] group-hover/date:border-blue-500/30 group-hover/date:bg-[#161922] text-[12px] text-white rounded px-4 py-3 flex justify-between items-center transition-all w-full shadow-inner relative z-10">
                                   <span className={endDateTo ? "text-white font-medium" : "text-[#5a6070]"}>
                                     {endDateTo ? format(new Date(endDateTo), "dd/MM/yyyy") : "DD/MM/YYYY"}
                                   </span>
@@ -658,7 +658,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.07 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <h3 className="text-[13px] font-bold text-white mb-0.5">{t("topCourses.title")}</h3>
                   <p className="text-[11px] text-[#6a7080] mb-5">{t("topCourses.subtitle")}</p>
@@ -670,7 +670,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.12 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <div className="flex items-center justify-between mb-0.5">
                     <h3 className="text-[13px] font-bold text-white">{t("vipStudents.title")}</h3>
@@ -697,7 +697,7 @@ export default function SystemManagerDashBoard() {
               initial={{ opacity: 0, y: 12 }}
               animate={mounted ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.35, delay: 0.15 }}
-              className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+              className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -765,7 +765,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.05 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div>
@@ -783,7 +783,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.15 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <div>
                     <h3 className="text-[13px] font-bold text-white">{t("learningStatistics.courseStats.title")}</h3>
@@ -799,7 +799,7 @@ export default function SystemManagerDashBoard() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.35, delay: 0.1 }}
-                  className="bg-[#181b22] rounded-2xl p-6 border border-white/[0.07]"
+                  className="bg-[#181b22] rounded p-6 border border-white/[0.07]"
                 >
                   <h3 className="text-[13px] font-bold text-white mb-0.5">{t("learningStatistics.topClubs.title")}</h3>
                   <p className="text-[11px] text-[#6a7080] mb-6">{t("learningStatistics.topClubs.subtitle")}</p>
@@ -865,7 +865,7 @@ export default function SystemManagerDashBoard() {
             </div>
 
             {/* Timeline Filter */}
-            <div className="flex items-center justify-between bg-[#181b22] p-4 rounded-2xl border border-white/[0.07]">
+            <div className="flex items-center justify-between bg-[#181b22] p-4 rounded border border-white/[0.07]">
               <div className="flex items-center gap-2">
                 <BarChart3 className="text-emerald-400" size={18} />
                 <h3 className="text-[13px] font-bold text-white">{t("opsOverview.timelineFilter")}</h3>

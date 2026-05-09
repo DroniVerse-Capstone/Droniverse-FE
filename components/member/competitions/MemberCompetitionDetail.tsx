@@ -119,7 +119,7 @@ export default function MemberCompetitionDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-greyscale-950">
+      <div className="flex h-screen items-center justify-center bg-greyscale-900">
         <Spinner className="h-10 w-10 text-primary" />
       </div>
     );
@@ -131,7 +131,7 @@ export default function MemberCompetitionDetail() {
 
   if (!competition || isUnauthorized) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-greyscale-950 p-6 text-center">
+      <div className="flex h-screen flex-col items-center justify-center bg-greyscale-900 p-6 text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 mb-6">
           <MdLock size={40} />
         </div>
@@ -155,7 +155,7 @@ export default function MemberCompetitionDetail() {
   const isRegistered = competition.isRegistered;
 
   return (
-    <div className="min-h-screen bg-greyscale-950 text-greyscale-50 pb-20 animate-in fade-in duration-700">
+    <div className="min-h-screen bg-greyscale-900 text-greyscale-50 pb-20 animate-in fade-in duration-700">
       {/* Header / Hero */}
       <div className="relative border-b border-greyscale-800 bg-greyscale-900/50 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">

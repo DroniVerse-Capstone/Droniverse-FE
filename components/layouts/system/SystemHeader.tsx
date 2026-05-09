@@ -180,7 +180,7 @@ export default function SystemHeader() {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 md:gap-3">
-          <NotificationDropdown hasNotifications={true} />
+          {/* <NotificationDropdown hasNotifications={true} /> */}
           <LanguageSwitcher />
           <UserDropdown user={user} />
         </div>

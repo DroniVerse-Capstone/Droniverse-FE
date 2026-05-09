@@ -19,12 +19,14 @@ import CourseLevelBadge from "@/components/course/CourseLevelBadge";
 import { GoHistory } from "react-icons/go";
 import { PiCertificate } from "react-icons/pi";
 import { MdOutlineReport } from "react-icons/md";
+import { useLocale } from "@/providers/i18n-provider";
 
 interface UserDropdownProps {
   user: User | null;
 }
 
 export default function UserDropdown({ user }: UserDropdownProps) {
+  const locale = useLocale();
   const router = useRouter();
   const params = useParams<{ clubSlug: string }>();
   const clubSlug = params?.clubSlug;
@@ -96,7 +98,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
         >
           <FiUser className="mr-2" />
-          Hồ sơ
+          {locale === "vi" ? "Hồ sơ" : "Profile"}
         </DropdownMenuItem>
 
         {user?.roleName === "CLUB_MEMBER" && (
@@ -105,7 +107,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <GoHistory className="mr-2" />
-            Lịch sử thanh toán
+            {locale === "vi" ? "Lịch sử thanh toán" : "Payment History"}
           </DropdownMenuItem>
         )}
 
@@ -115,7 +117,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <PiCertificate className="mr-2" />
-            Chứng chỉ của bạn
+            {locale === "vi" ? "Chứng chỉ của bạn" : "Your Certificates"}
           </DropdownMenuItem>
         )}
 
@@ -125,7 +127,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <FiCreditCard className="mr-2" />
-            Ví
+            {locale === "vi" ? "Ví" : "Wallet"}
           </DropdownMenuItem>
         )}
 
@@ -137,7 +139,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <FiAward className="mr-2" />
-            Giải thưởng
+            {locale === "vi" ? "Giải thưởng" : "Prizes"}
           </DropdownMenuItem>
         )}
 
@@ -147,7 +149,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
             className="cursor-pointer text-greyscale-100 hover:text-greyscale-0 hover:bg-greyscale-700 focus:bg-greyscale-700"
           >
             <MdOutlineReport className="mr-2" />
-            Lịch sử khiếu nại
+            {locale === "vi" ? "Lịch sử khiếu nại" : "Report History"}
           </DropdownMenuItem>
         )}
 
@@ -159,7 +161,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-400/10 focus:bg-red-400/10"
         >
           <FiLogOut className="mr-2" />
-          {logout.isPending ? <Spinner /> : "Đăng xuất"}
+          {logout.isPending ? <Spinner /> : locale === "vi" ? "Đăng xuất" : "Logout"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

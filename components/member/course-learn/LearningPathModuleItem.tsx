@@ -11,6 +11,7 @@ import LearningPathLessonItem from "@/components/member/course-learn/LearningPat
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { Lesson, Module } from "@/validations/learning/user-learning";
+import { useLocale } from "@/providers/i18n-provider";
 
 type LearningPathModuleItemProps = {
   module: Module;
@@ -27,6 +28,7 @@ export default function LearningPathModuleItem({
   onToggle,
   onSelectLesson,
 }: LearningPathModuleItemProps) {
+  const locale = useLocale();
   return (
     <div className="overflow-hidden rounded border border-greyscale-700 bg-greyscale-900">
       <button
@@ -38,13 +40,13 @@ export default function LearningPathModuleItem({
         <div className="flex w-full items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="flex items-center gap-2 line-clamp-2 text-base font-medium text-greyscale-0">
-              {module.titleVN}
+              {locale === "vi" ? module.titleVN : module.titleEN}
               {module.isCompleted ? (
                 <IoCheckmarkCircle className="h-4 w-4 shrink-0 text-green-400" />
               ) : null}
             </p>
             <p className="mt-1 text-xs text-greyscale-100">
-              {module.totalLessons} bài • {module.duration} phút
+              {locale === "vi" ? `${module.totalLessons} bài` : `${module.totalLessons} lessons`} • {locale === "vi" ? `${module.duration} phút` : `${module.duration} mins`}
             </p>
           </div>
 

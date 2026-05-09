@@ -54,7 +54,7 @@ export default function AdminCommunityCoursesSection({ page, pageSize }: AdminCo
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={locale === "en" ? "Search courses..." : "Tìm khóa học..."}
-          className="w-full bg-[#181b22] border border-white/[0.05] rounded-2xl py-3 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-blue-500/50 transition-all"
+          className="w-full bg-[#181b22] border border-white/[0.05] rounded py-3 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-blue-500/50 transition-all"
         />
       </div>
 
@@ -80,7 +80,7 @@ export default function AdminCommunityCoursesSection({ page, pageSize }: AdminCo
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, delay: idx * 0.03 }}
-              className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] rounded-[32px] p-5 transition-all duration-300 flex flex-col"
+              className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] rounded p-5 transition-all duration-300 flex flex-col"
             >
               {/* HEADER: CIRCULAR THUMBNAIL & TITLE */}
               <div className="flex items-center gap-4 mb-5">
@@ -139,7 +139,7 @@ export default function AdminCommunityCoursesSection({ page, pageSize }: AdminCo
               {/* BUTTON → opens modal */}
               <button
                 onClick={() => setSelectedCourse(course)}
-                className="w-full bg-[#1c2029] hover:bg-[#242835] border border-white/[0.05] text-[12px] font-bold text-white py-3.5 rounded-3xl transition-all flex items-center justify-center gap-2 group/btn active:scale-95"
+                className="w-full bg-[#1c2029] hover:bg-[#242835] border border-white/[0.05] text-[12px] font-bold text-white py-3.5 rounded transition-all flex items-center justify-center gap-2 group/btn active:scale-95"
               >
                 <BookOpen size={16} className="text-[#3b82f6]" />
                 {locale === "en" ? "View Analytics" : "Xem báo cáo"}

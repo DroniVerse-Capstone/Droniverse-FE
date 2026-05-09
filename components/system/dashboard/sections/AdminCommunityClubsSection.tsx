@@ -48,7 +48,7 @@ export default function AdminCommunityClubsSection({ page, pageSize }: AdminComm
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={locale === "en" ? "Search clubs..." : "Tìm câu lạc bộ..."}
-          className="w-full bg-[#181b22] border border-white/[0.05] rounded-2xl py-3 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-blue-500/50 transition-all"
+          className="w-full bg-[#181b22] border border-white/[0.05] rounded py-3 pl-11 pr-4 text-[13px] text-white focus:outline-none focus:border-blue-500/50 transition-all"
         />
       </div>
 
@@ -75,7 +75,7 @@ export default function AdminCommunityClubsSection({ page, pageSize }: AdminComm
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2, delay: idx * 0.03 }}
-              className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] rounded-[32px] p-5 transition-all duration-300 flex flex-col"
+              className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] rounded p-5 transition-all duration-300 flex flex-col"
             >
               {/* HEADER */}
               <div className="flex items-center gap-4 mb-5">
@@ -143,7 +143,7 @@ export default function AdminCommunityClubsSection({ page, pageSize }: AdminComm
               {/* BUTTON */}
               <button 
                 onClick={() => setSelectedClub(club)}
-                className="w-full bg-[#1c2029] hover:bg-[#242835] border border-white/[0.05] text-[12px] font-bold text-white py-3.5 rounded-3xl transition-all flex items-center justify-center gap-2 group/btn active:scale-95 mt-auto"
+                className="w-full bg-[#1c2029] hover:bg-[#242835] border border-white/[0.05] text-[12px] font-bold text-white py-3.5 rounded transition-all flex items-center justify-center gap-2 group/btn active:scale-95 mt-auto"
               >
                 <Hexagon size={14} className="text-blue-400" />
                 {locale === "en" ? "View Transactions" : "Xem giao dịch"}
