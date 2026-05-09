@@ -254,8 +254,8 @@ export default function SystemManagerDashBoard() {
               activeTab === "community" ? "text-emerald-400" : "text-[#5a6070] hover:text-[#a0a8b8]"
             )}
           >
-            <Users size={16} />
-            <span>{t("tabs.community")}</span>
+            <BarChart3 size={16} />
+            <span>{locale === "en" ? "Detailed Statistics" : "Thống kê chi tiết"}</span>
             {activeTab === "community" && (
               <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-full" />
             )}
