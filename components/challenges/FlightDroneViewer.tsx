@@ -52,10 +52,10 @@ function CameraController({ mode, droneRef, altitude }: { mode: CameraMode, dron
     switch (mode) {
       case "FOLLOW": {
         const baseDistance = 6 + zoomOffset;
-        const zoomFactor = Math.min(1.0, altitude / 100); 
+        const zoomFactor = Math.min(1.0, altitude / 100);
         const distance = baseDistance + (zoomFactor * 12);
         const height = (2.8 + zoomOffset * 0.4) + (zoomFactor * 6);
-        
+
         const angle = droneRot.y;
 
         targetPos.set(
@@ -498,14 +498,14 @@ function CityFireEnvironment() {
   // Cố định dữ liệu map để không bị nhảy khi render
   const buildings = useMemo(() => {
     const b = [];
-    
+
     // 1. ĐẢM BẢO CÓ TÒA NHÀ TẠI CÁC ĐIỂM CHÁY (Hạ thấp độ cao)
     const missionPoints = [
       { x: -40, z: -120, h: 60, color: "#111827" },
       { x: 55, z: -300, h: 80, color: "#0f172a" },
       { x: -65, z: -500, h: 70, color: "#1e293b" }
     ];
-    
+
     missionPoints.forEach((p, i) => {
       b.push({
         id: `mission-${i}`,
@@ -567,28 +567,48 @@ function CityFireEnvironment() {
       {/* ── MẶT ĐẤT & VỈA HÈ ── */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
         <planeGeometry args={[2000, 2000]} />
-        <meshStandardMaterial color="#020617" roughness={0.9} />
+        <meshStandardMaterial color="#010413" roughness={0.9} />
       </mesh>
 
-      {/* Đường nhựa chính */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+      {/* Đường nhựa chính - Nâng lên để tránh Z-fighting */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.06, 0]}>
         <planeGeometry args={[22, 2000]} />
-        <meshStandardMaterial color="#111827" roughness={0.4} metalness={0.2} />
+        <meshStandardMaterial
+          color="#0f172a"
+          roughness={0.5}
+          metalness={0.2}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-1}
+        />
       </mesh>
 
       {/* Vỉa hè (Sidewalks) */}
       {[-13.5, 13.5].map(x => (
-        <mesh key={x} rotation={[-Math.PI / 2, 0, 0]} position={[x, -0.04, 0]}>
+        <mesh key={x} rotation={[-Math.PI / 2, 0, 0]} position={[x, -0.05, 0]}>
           <planeGeometry args={[5, 2000]} />
-          <meshStandardMaterial color="#334155" roughness={0.8} />
+          <meshStandardMaterial
+            color="#334155"
+            roughness={0.8}
+            polygonOffset
+            polygonOffsetFactor={-2}
+            polygonOffsetUnits={-2}
+          />
         </mesh>
       ))}
 
-      {/* Vạch kẻ đường */}
+      {/* Vạch kẻ đường - Nâng cao nhất trong các lớp mặt đất */}
       {Array.from({ length: 60 }).map((_, i) => (
-        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.03, (i - 30) * 40]}>
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.04, (i - 30) * 40]}>
           <planeGeometry args={[0.8, 12]} />
-          <meshBasicMaterial color="#fbbf24" transparent opacity={0.5} />
+          <meshBasicMaterial
+            color="#fbbf24"
+            transparent
+            opacity={0.65}
+            polygonOffset
+            polygonOffsetFactor={-3}
+            polygonOffsetUnits={-3}
+          />
         </mesh>
       ))}
 
@@ -665,9 +685,16 @@ function IndustrialEnvironment() {
 
       {/* ── GROUND RUNWAY MARKINGS ── */}
       {[0, -40, -80, -120, -160].map((sz, i) => (
-        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, sz]}>
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.04, sz]}>
           <planeGeometry args={[1.5, 20]} />
-          <meshBasicMaterial color="#f59e0b" transparent opacity={0.6} />
+          <meshBasicMaterial
+            color="#f59e0b"
+            transparent
+            opacity={0.6}
+            polygonOffset
+            polygonOffsetFactor={-2}
+            polygonOffsetUnits={-2}
+          />
         </mesh>
       ))}
 
@@ -944,7 +971,7 @@ export function FlightDroneViewer({
           />
 
           <ContactShadows
-            position={[physicsRef.current.positionX * 0.5, -0.04, physicsRef.current.positionZ * 0.5]}
+            position={[physicsRef.current.positionX * 0.5, -0.02, physicsRef.current.positionZ * 0.5]}
             opacity={0.65}
             scale={6}
             blur={3}
