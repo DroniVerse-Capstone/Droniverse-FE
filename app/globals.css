@@ -105,6 +105,8 @@
   --radius-2xl: 32px;
   --radius: 8px;
   /* Default radius */
+  --color-white: #ffffff;
+  --color-black: #000000;
 }
 
 /* Blockly UX tweaks - Handled in blocklyCustom.css */
