@@ -73,7 +73,7 @@ export default function MemberCompetitions() {
             <MdEmojiEvents className="text-primary" />
             CUỘC THI CÂU LẠC BỘ
           </h2>
-          <p className="text-greyscale-400 font-medium max-w-xl">
+          <p className="text-greyscale-200 font-medium max-w-xl">
             Thử thách bản thân qua các giải đấu kịch tính và ghi danh vào bảng vàng để nhận những phần thưởng xứng đáng.
           </p>
         </div>

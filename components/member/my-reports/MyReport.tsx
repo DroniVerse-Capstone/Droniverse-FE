@@ -12,13 +12,14 @@ import { useGetMyReports } from "@/hooks/report/useReport";
 import { useLocale } from "@/providers/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { IoMdArrowBack } from "react-icons/io";
+import { PolarLabelContextProvider } from "recharts/types/component/Label";
 
 const PAGE_SIZE = 10;
 
 const reportTypeOptions = [
-  { label: "Tất cả", value: undefined },
-  { label: "Club", value: "Club" },
-  { label: "CourseVersion", value: "CourseVersion" },
+  { labelEN: "All", labelVN: "Tất cả", value: undefined },
+  { labelEN: "Club", labelVN: "Câu lạc bộ", value: "Club" },
+  { labelEN: "CourseVersion", labelVN: "Khóa học", value: "CourseVersion" },
 ] as const;
 
 export default function MyReport() {
@@ -37,13 +38,13 @@ export default function MyReport() {
   const totalPages = data?.totalPages ?? 1;
 
   const headers = [
-    "STT",
-    "Loại khiếu nại",
-    "Nội dung bị khiếu nại",
-    "Nội dung",
-    "Phản hồi",
-    "Người phản hồi",
-    "Trạng thái",
+    locale === "vi" ? "STT" : "No.",
+    locale === "vi" ? "Loại khiếu nại" : "Report Type",
+    locale === "vi" ? "Nội dung bị khiếu nại" : "Reported Item",
+    locale === "vi" ? "Nội dung" : "Content",
+    locale === "vi" ? "Phản hồi" : "Response",
+    locale === "vi" ? "Người phản hồi" : "Responder",
+    locale === "vi" ? "Trạng thái" : "Status",
   ];
 
   const getReportTypeLabel = (value: string) => {
@@ -76,28 +77,33 @@ export default function MyReport() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
           <Button icon={<IoMdArrowBack />} variant="outline"  onClick={() => router.back()}>
-            Quay lại
+            {locale === "vi" ? "Quay lại" : "Back"}
           </Button>
-          <h1 className="text-3xl font-bold text-greyscale-0">Lịch sử khiếu nại</h1>
+          <h1 className="text-3xl font-bold text-greyscale-0">
+            {locale === "vi" ? "Lịch sử khiếu nại" : "Report History"}
+          </h1>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {reportTypeOptions.map((option) => (
-            <button
-              key={option.label}
-              onClick={() => {
-                setCurrentPage(1);
-                setReportType(option.value);
-              }}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                reportType === option.value
-                  ? "bg-primary text-greyscale-0"
-                  : "bg-greyscale-700 text-greyscale-100 hover:bg-greyscale-600"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+          {reportTypeOptions.map((option) => {
+            const displayLabel = locale === "vi" ? option.labelVN : option.labelEN;
+            return (
+              <button
+                key={`${option.labelEN}-${option.labelVN}`}
+                onClick={() => {
+                  setCurrentPage(1);
+                  setReportType(option.value);
+                }}
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                  reportType === option.value
+                    ? "bg-primary text-greyscale-0"
+                    : "bg-greyscale-700 text-greyscale-100 hover:bg-greyscale-600"
+                }`}
+              >
+                {displayLabel}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -107,15 +113,19 @@ export default function MyReport() {
         </div>
       ) : isError ? (
         <p className="text-sm text-error">
-          {error.response?.data?.message || error.message || "Không tải được danh sách report."}
+          {error.response?.data?.message || error.message || (locale === "vi" ? "Không tải được danh sách report." : "Failed to load report list.")}
         </p>
       ) : reports.length === 0 ? (
         <EmptyState
-          title="Chưa có report nào"
+          title={locale === "vi" ? "Chưa có report nào" : "No reports available"}
           description={
             reportType
-              ? `Không có report nào với loại ${getReportTypeLabel(reportType)}`
-              : "Các report bạn tạo sẽ xuất hiện tại đây."
+              ? locale === "vi"
+                ? `Không có report nào với loại ${getReportTypeLabel(reportType)}`
+                : `No reports available with type ${getReportTypeLabel(reportType)}`
+              : locale === "vi"
+                ? "Các report bạn tạo sẽ xuất hiện tại đây."
+                : "Your created reports will appear here."
           }
         />
       ) : (
@@ -175,7 +185,7 @@ export default function MyReport() {
                   {content}
                 </TableCell>
                 <TableCell className="max-w-120 whitespace-pre-wrap text-greyscale-50">
-                  {response || "Chưa có phản hồi"}
+                  {response || (locale === "vi" ? "Chưa có phản hồi" : "No response yet")}
                 </TableCell>
                 <TableCell className="text-greyscale-100">
                   <div className="space-y-1">
@@ -195,7 +205,9 @@ export default function MyReport() {
       )}
 
       {isFetching && !isLoading ? (
-        <p className="text-xs text-greyscale-400">Đang cập nhật danh sách...</p>
+        <p className="text-xs text-greyscale-400">
+          {locale === "vi" ? "Đang cập nhật danh sách..." : "Updating list..."}
+        </p>
       ) : null}
     </div>
   );

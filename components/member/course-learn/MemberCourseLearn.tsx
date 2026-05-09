@@ -141,7 +141,7 @@ export default function MemberCourseLearn() {
               variant="outline"
               onClick={handleExitLearning}
             >
-              Thoát khỏi chế độ học
+              {locale === "vi" ? "Thoát khỏi chế độ học" : "Exit Learning Mode"}
             </Button>
             <div className="flex items-center gap-3">
               <ReportCourseDialog
@@ -211,10 +211,12 @@ export default function MemberCourseLearn() {
                     </div>
                     <div className="space-y-1">
                       <h2 className="text-xl font-bold text-greyscale-0">
-                        Khóa học đã hoàn thành!
+                        {locale === "vi" ? "Khóa học đã hoàn thành!" : "Course Completed!"}
                       </h2>
                       <p className="text-greyscale-300 text-sm">
-                        Bạn đã đạt được chứng chỉ cho lộ trình học này.
+                        {locale === "vi"
+                          ? "Bạn đã đạt được chứng chỉ cho lộ trình học này."
+                          : "You have earned the certificate for this learning path."}
                       </p>
                     </div>
                   </div>
@@ -226,7 +228,7 @@ export default function MemberCourseLearn() {
                       rel="noreferrer"
                       className="flex h-11 items-center justify-center gap-2 rounded bg-greyscale-800 border border-greyscale-700 px-6 text-sm font-bold text-white transition-all hover:bg-greyscale-700 shadow-md"
                     >
-                      Xem trực tuyến
+                      {locale === "vi" ? "Xem trực tuyến" : "View Online"}
                     </a>
                     <Button
                       variant="secondary"
@@ -243,7 +245,7 @@ export default function MemberCourseLearn() {
                       }
                       className="flex h-11 items-center justify-center gap-2 rounded px-6 text-sm font-bold text-white transition-all shadow-md shadow-secondary/20"
                     >
-                      {isDownloading ? "Đang tải..." : "Tải về máy"}
+                      {isDownloading ? (locale === "vi" ? "Đang tải..." : "Downloading...") : (locale === "vi" ? "Tải về máy" : "Download")}
                     </Button>
                   </div>
                 </div>{" "}

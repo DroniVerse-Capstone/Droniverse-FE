@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import type { Lesson } from "@/validations/learning/user-learning";
 import { MdOutlinePlayLesson } from "react-icons/md";
 import { PiCertificateBold, PiPathBold } from "react-icons/pi";
+import { useLocale } from "@/providers/i18n-provider";
 
 type LearningPathSideBarProps = {
   selectedLessonId?: string | null;
@@ -26,7 +27,7 @@ export default function LearningPathSideBar({
 }: LearningPathSideBarProps) {
   const params = useParams<{ enrollmentId?: string }>();
   const enrollmentId = params?.enrollmentId;
-
+  const locale = useLocale();
   const { data, isLoading, isError, error, refetch, isFetching } =
     useGetUserLearningPath(enrollmentId);
 
@@ -121,7 +122,7 @@ export default function LearningPathSideBar({
         {isOpen ? (
           <span className="flex items-center gap-2 text-sm text-greyscale-0 font-medium">
             <PiPathBold size={18} className="text-primary" />
-            Lộ trình học
+            {locale === "vi" ? "Lộ trình học" : "Learning Path"}
           </span>
         ) : null}
         <Button
@@ -154,9 +155,9 @@ export default function LearningPathSideBar({
                 title={
                   error?.response?.data?.message ||
                   error?.message ||
-                  "Không tải được learning path"
+                  locale === "vi" ? "Không tải được learning path" : "Unable to load learning path"
                 }
-                actionLabel="Thử lại"
+                actionLabel={locale === "vi" ? "Thử lại" : "Try Again"}
                 onAction={() => {
                   refetch();
                 }}
@@ -168,17 +169,17 @@ export default function LearningPathSideBar({
             <>
               <div className="rounded border border-greyscale-700 bg-greyscale-900/80 p-3">
                 <h2 className="line-clamp-2 text-lg font-semibold text-greyscale-0">
-                  {data.titleVN}
+                  {locale === "vi" ? data.titleVN : data.titleEN}
                 </h2>
                 <div className="mt-2 flex items-center gap-2 text-sm text-greyscale-50">
                   <span className="inline-flex items-center gap-1">
                     <MdOutlinePlayLesson size={18} className="text-primary" />
-                    {data.totalLessons} bài học
+                    {data.totalLessons} {locale === "vi" ? "bài học" : "lessons"}
                   </span>
                   <span>•</span>
                   <span className="inline-flex items-center gap-1">
                     <IoTimeOutline size={18} className="text-primary" />
-                    {data.duration} phút
+                    {data.duration} {locale === "vi" ? "phút" : "mins"}
                   </span>
                 </div>
                 <Progress value={progressValue} className="mt-3 h-1.5" />
@@ -203,7 +204,9 @@ export default function LearningPathSideBar({
                     )}
                   >
                     <PiCertificateBold className="h-5 w-5 text-white" />
-                    <span className="text-sm font-black tracking-tight uppercase">Xem chứng chỉ</span>
+                    <span className="text-sm font-black tracking-tight uppercase">
+                      {locale === "vi" ? "Xem chứng chỉ" : "View Certificate"}
+                    </span>
                   </button>
                 )}
 

@@ -55,13 +55,13 @@ export default function ManagerClubInfo({ clubId }: ManagerClubInfoProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={mounted ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4 }}
-      className="bg-[#181b22] border border-white/[0.07] rounded-2xl p-6"
+      className="bg-[#181b22] border border-white/[0.07] rounded p-6"
     >
       <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center">
         {/* Club Info */}
         <div className="flex items-center gap-5 flex-1">
           {/* Club Avatar */}
-          <div className="h-20 w-20 rounded-2xl overflow-hidden border border-white/[0.07] shrink-0">
+          <div className="h-20 w-20 rounded overflow-hidden border border-white/[0.07] shrink-0">
             <Image
               src={club.imageUrl || "/images/club-placeholder.jpg"}
               alt={clubName}

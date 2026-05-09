@@ -188,7 +188,7 @@ export default function AdminCommunitySection() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] hover:bg-[#1c2029] rounded-2xl p-5 transition-all duration-300 relative overflow-hidden"
+                  className="group bg-[#181b22] border border-white/[0.07] hover:border-white/[0.15] hover:bg-[#1c2029] rounded p-5 transition-all duration-300 relative overflow-hidden"
                 >
                   {/* BG GLOW */}
                   <div className={cn(
@@ -234,7 +234,7 @@ export default function AdminCommunitySection() {
                     </div>
                   </div>
 
-                  <div className="bg-[#111318]/50 rounded-xl p-3 border border-white/[0.03] mb-4 group-hover:bg-[#111318]/80 transition-colors">
+                  <div className="bg-[#111318]/50 rounded p-3 border border-white/[0.03] mb-4 group-hover:bg-[#111318]/80 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className={cn(
@@ -257,7 +257,7 @@ export default function AdminCommunitySection() {
                     {subTab === "users" && (
                       <button
                         onClick={() => openOrderModal(item.userId, item.fullName)}
-                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
                       >
                         <ShoppingBag size={14} className="text-purple-400" />
                         {t("viewOrders")}
@@ -266,7 +266,7 @@ export default function AdminCommunitySection() {
                     {subTab === "clubManagers" && (
                       <button
                         onClick={() => openTransactionModal(item.userId, item.fullName)}
-                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                        className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-white py-2.5 rounded transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
                       >
                         <Wallet size={14} className="text-blue-400" />
                         {t("viewTransactions")}
@@ -373,7 +373,7 @@ export default function AdminCommunitySection() {
           </DialogHeader>
 
           <div className="p-6">
-            <div className="bg-[#181b22] border border-white/[0.07] rounded-2xl overflow-hidden flex flex-col max-h-[60vh]">
+            <div className="bg-[#181b22] border border-white/[0.07] rounded overflow-hidden flex flex-col max-h-[60vh]">
               <div className="overflow-y-auto custom-scrollbar">
                 <Table>
                   <TableHeader className="bg-white/[0.02] sticky top-0 z-10">
@@ -476,7 +476,7 @@ export default function AdminCommunitySection() {
           </DialogHeader>
 
           <div className="p-6">
-            <div className="bg-[#181b22] border border-white/[0.07] rounded-2xl overflow-hidden flex flex-col max-h-[60vh]">
+            <div className="bg-[#181b22] border border-white/[0.07] rounded overflow-hidden flex flex-col max-h-[60vh]">
               <div className="overflow-y-auto custom-scrollbar">
                 <Table>
                   <TableHeader className="bg-white/[0.02] sticky top-0 z-10">

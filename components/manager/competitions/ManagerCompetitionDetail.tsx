@@ -77,7 +77,7 @@ export default function ManagerCompetitionDetail() {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center bg-greyscale-950">
+            <div className="flex min-h-[60vh] items-center justify-center bg-greyscale-900">
                 <Spinner className="h-8 w-8 text-primary" />
             </div>
         );
@@ -85,7 +85,7 @@ export default function ManagerCompetitionDetail() {
 
     if (isError || !competition) {
         return (
-            <div className="px-6 py-8 bg-greyscale-950 min-h-screen">
+            <div className="px-6 py-8 bg-greyscale-900 min-h-screen">
                 <EmptyState
                     title={error?.response?.data?.message || error?.message || tc("errors.loadCompetitions")}
                 />
@@ -96,9 +96,9 @@ export default function ManagerCompetitionDetail() {
     const title = locale === "en" ? competition.nameEN || competition.nameVN : competition.nameVN || competition.nameEN;
 
     return (
-        <div className="min-h-screen bg-greyscale-950 text-greyscale-50 flex flex-col">
+        <div className="min-h-screen bg-greyscale-900 text-greyscale-50 flex flex-col">
             {/* Top Header/Navigation */}
-            <header className="sticky top-0 z-20 border-b border-greyscale-800 bg-greyscale-950/80 backdrop-blur-md px-6 py-4">
+            <header className="sticky top-0 z-20 border-b border-greyscale-800 bg-greyscale-900/80 backdrop-blur-md px-6 py-4">
                 <div className="flex items-center justify-between gap-4 max-w-(--breakpoint-2xl) mx-auto w-full">
                     <div className="flex items-center gap-4">
                         <Button
