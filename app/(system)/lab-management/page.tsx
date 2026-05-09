@@ -243,14 +243,14 @@ export default function LabManagement() {
       <div className="w-full mx-auto flex flex-col gap-6 lg:gap-8 pb-10 shadow-inner">
 
         {/* Header - Glassmorphism Darker Style */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded bg-[#09090b]/60 backdrop-blur-2xl border border-greyscale-700/50 p-5 lg:p-6 shadow-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none" />
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 relative z-10 w-full justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
               <div className="relative shrink-0">
                 <div className="absolute -inset-2 bg-primary-300/10 rounded blur-xl opacity-0 hover:opacity-100 transition-opacity" />
-                <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-[#141418] border border-white/5 rounded shadow-inner flex items-center justify-center overflow-hidden">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-[#141418] border border-greyscale-700/50 rounded shadow-inner flex items-center justify-center overflow-hidden">
                   <FaTerminal className="text-primary-300 text-lg sm:text-2xl drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
                 </div>
               </div>
@@ -285,11 +285,11 @@ export default function LabManagement() {
               if (e.target === e.currentTarget) setShowCreateModal(false);
             }}
           >
-            <div className="bg-[#121216] border border-white/10 rounded w-full max-w-[calc(100%-1rem)] md:max-w-2xl lg:max-w-4xl max-h-[95vh] sm:max-h-[90vh] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+            <div className="bg-[#121216] border border-greyscale-700 rounded w-full max-w-[calc(100%-1rem)] md:max-w-2xl lg:max-w-4xl max-h-[95vh] sm:max-h-[90vh] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-primary-300/5 to-transparent pointer-events-none" />
 
               {/* Fixed Header */}
-              <div className="relative z-20 px-4 sm:px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+              <div className="relative z-20 px-4 sm:px-6 py-4 border-b border-greyscale-700/50 flex items-center justify-between shrink-0">
                 <div className="flex flex-col gap-1">
                   <h3 className="text-sm sm:text-base font-black uppercase tracking-widest flex items-center gap-2 text-white">
                     <span className="w-2 h-2 rounded-full bg-primary-300 shadow-[0_0_10px_var(--primary-300,rgba(239,68,68,0.8))]"></span>
@@ -301,7 +301,7 @@ export default function LabManagement() {
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-greyscale-400 hover:text-white transition-all border border-white/5 shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-greyscale-800/50 hover:bg-greyscale-700/50 text-greyscale-400 hover:text-white transition-all border border-greyscale-700/50 shrink-0"
                 >
                   <FaTimesCircle className="text-base" />
                 </button>
@@ -398,10 +398,10 @@ export default function LabManagement() {
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.level")}</label>
                             <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabLevel} onValueChange={(val: any) => setNewLabLevel(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
+                              <SelectTrigger className="w-full bg-black/40 border-greyscale-700/50 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.level")} />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
+                              <SelectContent className="bg-[#141418] border-greyscale-700 z-[120]">
                                 <SelectItem value="EASY" className="text-xs font-bold">{t("level.easy")}</SelectItem>
                                 <SelectItem value="MEDIUM" className="text-xs font-bold">{t("level.medium")}</SelectItem>
                                 <SelectItem value="HARD" className="text-xs font-bold">{t("level.hard")}</SelectItem>
@@ -411,10 +411,10 @@ export default function LabManagement() {
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.type")}</label>
                             <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabType} onValueChange={(val: any) => setNewLabType(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-white/5 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
+                              <SelectTrigger className="w-full bg-black/40 border-greyscale-700/50 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.type")} />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
+                              <SelectContent className="bg-[#141418] border-greyscale-700 z-[120]">
                                 <SelectItem value="LEARNING" className="text-xs font-bold">{t("type.learning")}</SelectItem>
                                 <SelectItem value="COMPETITION" className="text-xs font-bold">{t("type.competition")}</SelectItem>
                               </SelectContent>
@@ -460,7 +460,7 @@ export default function LabManagement() {
                               )}>
                                 <SelectValue placeholder={t("form.status")} />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
+                              <SelectContent className="bg-[#141418] border-greyscale-700 z-[120]">
                                 {originalLabStatus === "DRAFT" ? (
                                   <>
                                     <SelectItem value="DRAFT" className="text-xs text-amber-500 font-bold">{t("table.status.draft")}</SelectItem>
@@ -532,11 +532,11 @@ export default function LabManagement() {
                 </div>
 
                 {/* Fixed Footer */}
-                <div className="relative z-20 px-4 sm:px-6 py-4 border-t border-white/5 bg-black/20 flex flex-col-reverse sm:flex-row justify-end items-center gap-3 shrink-0">
+                <div className="relative z-20 px-4 sm:px-6 py-4 border-t border-greyscale-700/50 bg-black/20 flex flex-col-reverse sm:flex-row justify-end items-center gap-3 shrink-0">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="w-full sm:w-auto px-5 h-10 rounded text-greyscale-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white/5 border border-transparent hover:border-white/10"
+                    className="w-full sm:w-auto px-5 h-10 rounded text-greyscale-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all hover:bg-greyscale-800/50 border border-transparent hover:border-greyscale-700/50"
                   >
                     {originalLabStatus === "ACTIVE" && editingLabId ? tCommon("buttons.close") : tCommon("buttons.cancel")}
                   </button>
@@ -616,7 +616,7 @@ export default function LabManagement() {
                   </span>
                 </div>
                 <div className={cn(
-                  "w-10 h-10 sm:w-12 sm:h-12 rounded flex items-center justify-center text-lg transition-all duration-500 group-hover:scale-110 border border-white/5 shadow-inner relative overflow-hidden",
+                  "w-10 h-10 sm:w-12 sm:h-12 rounded flex items-center justify-center text-lg transition-all duration-500 group-hover:scale-110 border border-greyscale-700/50 shadow-inner relative overflow-hidden",
                   `text-${stat.color}`,
                   stat.glow
                 )}>
@@ -629,7 +629,7 @@ export default function LabManagement() {
         </section>
 
         {/* Main Content Area */}
-        <section className="flex flex-col rounded bg-[#09090b]/60 backdrop-blur-3xl border border-white/5 p-6 lg:p-8 gap-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden min-h-[500px]">
+        <section className="flex flex-col rounded bg-[#09090b]/60 backdrop-blur-3xl border border-greyscale-700/50 p-6 lg:p-8 gap-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] relative overflow-hidden min-h-[500px]">
 
           <div className="flex flex-col xl:flex-row xl:items-center justify-between z-10 gap-6">
             <h2 className="text-sm font-black uppercase tracking-widest text-greyscale-300 flex items-center gap-3 shrink-0">
@@ -646,11 +646,11 @@ export default function LabManagement() {
                   placeholder={t("searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-11 bg-black/40 border border-white/5 rounded pl-11 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-greyscale-600 shadow-inner"
+                  className="w-full h-11 bg-black/40 border border-greyscale-700/50 rounded pl-11 pr-4 text-sm text-white focus:outline-none focus:border-white/20 transition-all placeholder:text-greyscale-600 shadow-inner"
                 />
               </div>
 
-              <div className="flex p-1 bg-black/40 border border-white/5 rounded w-full lg:w-auto shrink-0 shadow-inner h-11 items-center overflow-x-auto no-scrollbar">
+              <div className="flex p-1 bg-black/40 border border-greyscale-700/50 rounded w-full lg:w-auto shrink-0 shadow-inner h-11 items-center overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => setStatusFilter("all")}
                   className={cn("flex-1 lg:flex-none px-4 py-1.5 rounded text-[10px] sm:text-xs font-bold transition-all h-full whitespace-nowrap", statusFilter === 'all' ? "bg-primary-300/20 text-primary-300 shadow-sm" : "text-greyscale-500 hover:text-greyscale-300")}
@@ -687,7 +687,7 @@ export default function LabManagement() {
             </div>
           ) : labs.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full text-center opacity-50 z-10 transition-all duration-500">
-              <div className="w-24 h-24 border border-dashed border-white/10 rounded flex items-center justify-center mb-6 bg-white/[0.01]">
+              <div className="w-24 h-24 border border-dashed border-greyscale-700 rounded flex items-center justify-center mb-6 bg-greyscale-800/20">
                 {labs.length === 0 ? <FaVial className="text-4xl text-white drop-shadow-lg" /> : <FaSearch className="text-4xl text-white drop-shadow-lg" />}
               </div>
               <h3 className="text-2xl font-black uppercase tracking-widest italic text-white drop-shadow-md">
@@ -708,12 +708,12 @@ export default function LabManagement() {
                   <article
                     key={lab.labID}
                     onClick={() => handleEdit(lab.labID)}
-                    className="group flex flex-col bg-[#141418]/80 border border-white/5 rounded overflow-hidden cursor-pointer transition-all duration-500 hover:border-primary-300/40 hover:-translate-y-2 hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#1a1a20]/95 relative"
+                    className="group flex flex-col bg-[#141418]/80 border border-greyscale-700 rounded overflow-hidden cursor-pointer transition-all duration-500 hover:border-primary-300/40 hover:-translate-y-2 hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#1a1a20]/95 relative"
                   >
                     {/* Subtle Glow Behind the Card */}
                     <div className="absolute -inset-1 bg-gradient-to-br from-primary-300/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 pointer-events-none" />
                     {/* Thumbnail Container */}
-                    <div className="aspect-[4/3] bg-[#09090b] relative overflow-hidden shrink-0 z-10 border-b border-white/5">
+                    <div className="aspect-[4/3] bg-[#09090b] relative overflow-hidden shrink-0 z-10 border-b border-greyscale-700/50">
                       {lab.thumbnail ? (
                         <img src={lab.thumbnail} alt={name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
                       ) : (
@@ -797,7 +797,7 @@ export default function LabManagement() {
                             "flex-1 h-9 px-3 rounded text-white text-[9px] sm:text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 border shadow-sm shrink-0 uppercase tracking-wider",
                             currentStatus === "ACTIVE"
                               ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
-                              : "bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10"
+                              : "bg-greyscale-800/50 border-greyscale-700/50 hover:bg-greyscale-700/50 hover:border-greyscale-700"
                           )}
                           aria-label={t("table.actions.editInfo")}
                         >
@@ -874,12 +874,12 @@ export default function LabManagement() {
 
           {/* Pagination Container */}
           {totalPages > 1 && totalRecords > 0 && !loading && (
-            <div className="mt-8 pt-6 border-t border-white/5 flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6 z-10 w-full shrink-0">
+            <div className="mt-8 pt-6 border-t border-greyscale-700/50 flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6 z-10 w-full shrink-0">
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full lg:w-auto">
                 <div className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-greyscale-500 sm:text-greyscale-400 whitespace-nowrap text-center sm:text-left">
                   <span className="hidden xs:inline">Console</span> <span className="text-white ml-1 sm:ml-2">{t("pagination.page")} <span className="text-primary-300 text-[11px] sm:text-[12px]">{currentPage}</span> / {totalPages}</span>
                 </div>
-                <div className="h-1 sm:h-1.5 w-full sm:w-40 bg-white/5 rounded overflow-hidden shrink-0 shadow-inner hidden xs:block">
+                <div className="h-1 sm:h-1.5 w-full sm:w-40 bg-greyscale-800 rounded overflow-hidden shrink-0 shadow-inner hidden xs:block">
                   <div className="h-full bg-primary-300 transition-all duration-500 shadow-[0_0_12px_var(--primary-300,rgba(239,68,68,0.6))]" style={{ width: `${(currentPage / totalPages) * 100}%` }} />
                 </div>
               </div>
@@ -888,13 +888,13 @@ export default function LabManagement() {
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-greyscale-800/50 border border-greyscale-700/50 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-greyscale-800/80 hover:border-greyscale-700 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
                   aria-label={tCommon("pagination.previous")}
                 >
                   <FaChevronLeft size={10} className="sm:size-3" />
                 </button>
 
-                <div className="flex items-center gap-1 sm:gap-1.5 px-2.2 sm:px-3 py-1.5 sm:py-2 bg-white/[0.02] rounded border border-white/5 shadow-sm backdrop-blur-md overflow-x-auto no-scrollbar max-w-[60vw] sm:max-w-none">
+                <div className="flex items-center gap-1.5 sm:gap-1.5 px-2.2 sm:px-3 py-1.5 sm:py-2 bg-greyscale-800/50 rounded border border-greyscale-700/50 shadow-sm backdrop-blur-md overflow-x-auto no-scrollbar max-w-[60vw] sm:max-w-none">
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <button
                       key={i}
@@ -903,7 +903,7 @@ export default function LabManagement() {
                         "w-7 h-7 sm:w-10 sm:h-10 rounded text-[10px] sm:text-sm font-black transition-all flex items-center justify-center outline-none shrink-0 relative overflow-hidden",
                         currentPage === i + 1
                           ? "bg-primary-300 text-white shadow-[0_4px_15px_var(--primary-300,rgba(239,68,68,0.3))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]"
-                          : "text-greyscale-400 hover:text-white hover:bg-white/5"
+                          : "text-greyscale-400 hover:text-white hover:bg-greyscale-700/50"
                       )}
                     >
                       {currentPage === i + 1 && <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />}
@@ -915,7 +915,7 @@ export default function LabManagement() {
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-white/[0.02] border border-white/5 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5 hover:border-white/10 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded bg-greyscale-800/50 border border-greyscale-700/50 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-greyscale-800/80 hover:border-greyscale-700 transition-all flex items-center justify-center outline-none shrink-0 shadow-sm disabled:shadow-none"
                   aria-label={tCommon("pagination.next")}
                 >
                   <FaChevronRight size={10} className="sm:size-3" />
