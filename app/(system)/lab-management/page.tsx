@@ -398,10 +398,10 @@ export default function LabManagement() {
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.level")}</label>
                             <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabLevel} onValueChange={(val: any) => setNewLabLevel(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-greyscale-700/50 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
+                              <SelectTrigger className="w-full bg-black/40 border-white/10 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.level")} />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141418] border-greyscale-700 z-[120]">
+                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
                                 <SelectItem value="EASY" className="text-xs font-bold">{t("level.easy")}</SelectItem>
                                 <SelectItem value="MEDIUM" className="text-xs font-bold">{t("level.medium")}</SelectItem>
                                 <SelectItem value="HARD" className="text-xs font-bold">{t("level.hard")}</SelectItem>
@@ -411,10 +411,10 @@ export default function LabManagement() {
                           <div className="flex flex-col gap-1.5">
                             <label className="text-[10px] font-black text-greyscale-400 uppercase tracking-widest pl-1">{t("form.type")}</label>
                             <Select disabled={originalLabStatus === "ACTIVE" && !!editingLabId} value={newLabType} onValueChange={(val: any) => setNewLabType(val)}>
-                              <SelectTrigger className="w-full bg-black/40 border-greyscale-700/50 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
+                              <SelectTrigger className="w-full bg-black/40 border-white/10 rounded h-9 text-xs text-white focus:ring-0 focus:border-primary-300/50 transition-all font-bold shadow-inner border disabled:opacity-50 disabled:cursor-not-allowed">
                                 <SelectValue placeholder={t("form.type")} />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141418] border-greyscale-700 z-[120]">
+                              <SelectContent className="bg-[#141418] border-white/10 z-[120]">
                                 <SelectItem value="LEARNING" className="text-xs font-bold">{t("type.learning")}</SelectItem>
                                 <SelectItem value="COMPETITION" className="text-xs font-bold">{t("type.competition")}</SelectItem>
                               </SelectContent>
@@ -687,7 +687,7 @@ export default function LabManagement() {
             </div>
           ) : labs.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[400px] w-full text-center opacity-50 z-10 transition-all duration-500">
-              <div className="w-24 h-24 border border-dashed border-greyscale-700 rounded flex items-center justify-center mb-6 bg-greyscale-800/20">
+              <div className="w-24 h-24 border border-dashed border-white/10 rounded flex items-center justify-center mb-6 bg-greyscale-800/20">
                 {labs.length === 0 ? <FaVial className="text-4xl text-white drop-shadow-lg" /> : <FaSearch className="text-4xl text-white drop-shadow-lg" />}
               </div>
               <h3 className="text-2xl font-black uppercase tracking-widest italic text-white drop-shadow-md">
@@ -708,12 +708,12 @@ export default function LabManagement() {
                   <article
                     key={lab.labID}
                     onClick={() => handleEdit(lab.labID)}
-                    className="group flex flex-col bg-[#141418]/80 border border-greyscale-700 rounded overflow-hidden cursor-pointer transition-all duration-500 hover:border-primary-300/40 hover:-translate-y-2 hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#1a1a20]/95 relative"
+                    className="group flex flex-col bg-[#141418]/80 border border-white/10 rounded overflow-hidden cursor-pointer transition-all duration-500 hover:border-primary-300/40 hover:-translate-y-2 hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)] hover:bg-[#1a1a20]/95 relative"
                   >
                     {/* Subtle Glow Behind the Card */}
                     <div className="absolute -inset-1 bg-gradient-to-br from-primary-300/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 pointer-events-none" />
                     {/* Thumbnail Container */}
-                    <div className="aspect-[4/3] bg-[#09090b] relative overflow-hidden shrink-0 z-10 border-b border-greyscale-700/50">
+                    <div className="aspect-[4/3] bg-[#09090b] relative overflow-hidden shrink-0 z-10 border-b border-white/5">
                       {lab.thumbnail ? (
                         <img src={lab.thumbnail} alt={name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100" />
                       ) : (
@@ -797,7 +797,7 @@ export default function LabManagement() {
                             "flex-1 h-9 px-3 rounded text-white text-[9px] sm:text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 border shadow-sm shrink-0 uppercase tracking-wider",
                             currentStatus === "ACTIVE"
                               ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
-                              : "bg-greyscale-800/50 border-greyscale-700/50 hover:bg-greyscale-700/50 hover:border-greyscale-700"
+                              : "bg-greyscale-800/50 border-white/10 hover:bg-greyscale-700/50 hover:border-white/20"
                           )}
                           aria-label={t("table.actions.editInfo")}
                         >
