@@ -272,7 +272,7 @@ export default function MemberCompetitionOverviewTab({
                                                     ? level.name
                                                     : level.name.toLowerCase().includes("beginner") ? "Sơ Cấp"
                                                         : level.name.toLowerCase().includes("intermediate") ? "Trung Cấp"
-                                                            : level.name.toLowerCase().includes("advanced") ? "Cao Cấp"
+                                                            : level.name.toLowerCase().includes("advanced") ? "Nâng Cao"
                                                                 : level.name.toLowerCase().includes("master") ? "Thành Thạo"
                                                                     : level.name
                                                 }

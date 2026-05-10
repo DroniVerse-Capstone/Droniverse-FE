@@ -26,11 +26,11 @@ export default function CompetitionConditionsTab({
 }: CompetitionConditionsTabProps) {
     const locale = useLocale();
     const t = useTranslations("ManagerCompetitions.detailPage.tabs");
-    
+
     const LEVEL_NAME_MAP: Record<string, Record<string, string>> = {
         "Beginner": { vi: "Sơ Cấp", en: "Beginner" },
         "Intermediate": { vi: "Trung Cấp", en: "Intermediate" },
-        "Advanced": { vi: "Cao Cấp", en: "Advanced" },
+        "Advanced": { vi: "Nâng Cao", en: "Advanced" },
         "Master": { vi: "Thành Thạo", en: "Master" }
     };
 
@@ -126,7 +126,7 @@ export default function CompetitionConditionsTab({
                             {t("conditions")}
                         </h2>
                         <p className="text-sm text-greyscale-400">
-                            {locale === "en" 
+                            {locale === "en"
                                 ? `Candidates must achieve the following levels for the drone ${droneName} to be eligible for participation.`
                                 : `Thí sinh cần đạt các cấp độ sau đây của drone ${droneName} để đủ điều kiện tham gia.`}
                         </p>
@@ -215,7 +215,7 @@ export default function CompetitionConditionsTab({
             <div className="flex items-start gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
                 <MdOutlineInfo className="text-primary shrink-0 mt-0.5" size={20} />
                 <p className="text-sm text-greyscale-300 leading-relaxed">
-                    <strong>{locale === "en" ? "Note" : "Lưu ý"}:</strong> {locale === "en" 
+                    <strong>{locale === "en" ? "Note" : "Lưu ý"}:</strong> {locale === "en"
                         ? "The system will automatically check the highest level certificate the candidate has achieved for this drone at the time of registration. Candidates must achieve at least Level 1 of the corresponding drone to participate."
                         : "Hệ thống sẽ tự động kiểm tra chứng chỉ Level cao nhất mà thí sinh đã đạt được đối với drone này tại thời điểm đăng ký. Thí sinh phải đạt ít nhất Level 1 của drone tương ứng để tham gia."}
                 </p>

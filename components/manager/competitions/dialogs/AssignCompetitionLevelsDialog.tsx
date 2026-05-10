@@ -39,7 +39,7 @@ export default function AssignCompetitionLevelsDialog({
     const LEVEL_NAME_MAP: Record<string, Record<string, string>> = {
         "Beginner": { vi: "Sơ Cấp", en: "Beginner" },
         "Intermediate": { vi: "Trung Cấp", en: "Intermediate" },
-        "Advanced": { vi: "Cao Cấp", en: "Advanced" },
+        "Advanced": { vi: "Nâng Cao", en: "Advanced" },
         "Master": { vi: "Thành Thạo", en: "Master" }
     };
 
@@ -79,11 +79,11 @@ export default function AssignCompetitionLevelsDialog({
 
         try {
             const promises = [];
-            
+
             if (addedIds.length > 0) {
                 promises.push(assignLevels({ competitionId, levelIds: addedIds }));
             }
-            
+
             if (removedIds.length > 0) {
                 promises.push(deleteLevels({ competitionId, levelIds: removedIds }));
             }
@@ -106,8 +106,8 @@ export default function AssignCompetitionLevelsDialog({
                         {locale === "en" ? "Configure Participation Levels" : "Thiết lập điều kiện Cấp độ"}
                     </DialogTitle>
                     <DialogDescription className="text-greyscale-400 text-sm">
-                        {locale === "en" 
-                            ? "Select the mandatory levels that candidates must achieve to participate in the competition." 
+                        {locale === "en"
+                            ? "Select the mandatory levels that candidates must achieve to participate in the competition."
                             : "Chọn các cấp độ mà thí sinh bắt buộc phải đạt được để tham gia cuộc thi."}
                     </DialogDescription>
                 </DialogHeader>
@@ -131,34 +131,34 @@ export default function AssignCompetitionLevelsDialog({
                                 .map((level) => (
                                     <div
                                         key={level.levelId}
-                                    onClick={() => toggleLevel(level.levelId)}
-                                    className={`relative flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedIds.includes(level.levelId)
-                                        ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
-                                        : "bg-greyscale-950 border-greyscale-800 hover:border-greyscale-600"
-                                        }`}
-                                >
-                                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center font-black text-xl shadow-inner border transition-colors ${selectedIds.includes(level.levelId)
-                                        ? "bg-primary/20 border-primary/30 text-primary"
-                                        : "bg-greyscale-800/50 border-greyscale-700/50 text-greyscale-400"
-                                        }`}>
-                                        {level.levelNumber}
+                                        onClick={() => toggleLevel(level.levelId)}
+                                        className={`relative flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedIds.includes(level.levelId)
+                                            ? "bg-primary/5 border-primary/50 shadow-lg shadow-primary/5"
+                                            : "bg-greyscale-950 border-greyscale-800 hover:border-greyscale-600"
+                                            }`}
+                                    >
+                                        <div className={`h-12 w-12 rounded-lg flex items-center justify-center font-black text-xl shadow-inner border transition-colors ${selectedIds.includes(level.levelId)
+                                            ? "bg-primary/20 border-primary/30 text-primary"
+                                            : "bg-greyscale-800/50 border-greyscale-700/50 text-greyscale-400"
+                                            }`}>
+                                            {level.levelNumber}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-black text-greyscale-50 truncate">
+                                                {getLocalizedLevelName(level.name)}
+                                            </p>
+                                            <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedIds.includes(level.levelId) ? 'text-primary/70' : 'text-greyscale-500'}`}>
+                                                {locale === "en" ? "Required Level" : "Yêu cầu Cấp độ"}
+                                            </p>
+                                        </div>
+                                        <div className={`h-6 w-6 rounded-full border flex items-center justify-center transition-all ${selectedIds.includes(level.levelId)
+                                            ? "bg-primary border-primary text-greyscale-950"
+                                            : "border-greyscale-700 bg-transparent"
+                                            }`}>
+                                            {selectedIds.includes(level.levelId) && <MdCheck size={16} />}
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-black text-greyscale-50 truncate">
-                                            {getLocalizedLevelName(level.name)}
-                                        </p>
-                                        <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedIds.includes(level.levelId) ? 'text-primary/70' : 'text-greyscale-500'}`}>
-                                            {locale === "en" ? "Required Level" : "Yêu cầu Cấp độ"}
-                                        </p>
-                                    </div>
-                                    <div className={`h-6 w-6 rounded-full border flex items-center justify-center transition-all ${selectedIds.includes(level.levelId)
-                                        ? "bg-primary border-primary text-greyscale-950"
-                                        : "border-greyscale-700 bg-transparent"
-                                        }`}>
-                                        {selectedIds.includes(level.levelId) && <MdCheck size={16} />}
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     )}
                 </div>
