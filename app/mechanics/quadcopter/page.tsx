@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 const TABS = [
   { id: "parts", label: "Khám phá linh kiện" },
   { id: "physics-basics", label: "Vật lý cơ bản" },
-  { id: "mechanics", label: "Cơ chế điều khiển" },
+  // { id: "mechanics", label: "Cơ chế điều khiển" },
   // { id: "physlab", label: "Physics Lab" },
 ];
 
